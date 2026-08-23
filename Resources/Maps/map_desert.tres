@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="MapDefinition" format=3 uid="uid://bnukpomjbbgb8"]
+
+[ext_resource type="Script" uid="uid://piev1mq2t3rq" path="res://Scripts/World/map_definition.gd" id="1_map"]
+[ext_resource type="Texture2D" uid="uid://lge1grfjl63m" path="res://Assets/UI/DesertIcon.PNG" id="2_title"]
+[ext_resource type="Script" uid="uid://bbrwbccihyx2g" path="res://Scripts/World/day_stage.gd" id="3_stage"]
+[ext_resource type="Resource" uid="uid://domat5rntqjl8" path="res://Resources/Maps/Desert/Day/1_dawn.tres" id="4_dawn"]
+[ext_resource type="Resource" uid="uid://uemu4jhkwitp" path="res://Resources/Maps/Desert/Day/2_morning.tres" id="5_morning"]
+[ext_resource type="Resource" uid="uid://cnuyxui2xi2l2" path="res://Resources/Maps/Desert/Day/3_noon.tres" id="6_noon"]
+[ext_resource type="Resource" uid="uid://ca55yqe362fua" path="res://Resources/Maps/Desert/Day/4_evening.tres" id="7_evening"]
+[ext_resource type="Resource" uid="uid://cfmgehurcr1w7" path="res://Resources/Maps/Desert/Day/5_twilight.tres" id="8_twilight"]
+[ext_resource type="Resource" uid="uid://b6e8yk4ey3ttt" path="res://Resources/Maps/Desert/Day/6_night.tres" id="9_night"]
+[ext_resource type="Script" uid="uid://c6wrwwhvdce4o" path="res://Scripts/World/map_region.gd" id="10_region"]
+[ext_resource type="Resource" uid="uid://cnlq0v14y5to1" path="res://Resources/Maps/Desert/Regions/region_a.tres" id="11_ra"]
+[ext_resource type="Resource" uid="uid://8v5pie2b1dv" path="res://Resources/Maps/Desert/Regions/region_b.tres" id="12_rb"]
+[ext_resource type="Resource" uid="uid://lmhfkluhfbiy" path="res://Resources/Maps/Desert/Regions/region_c.tres" id="13_rc"]
+[ext_resource type="Resource" uid="uid://ce1g1co5oj5rn" path="res://Resources/Maps/Desert/Regions/region_d.tres" id="14_rd"]
+[ext_resource type="Resource" uid="uid://beta4ksww85q4" path="res://Resources/Maps/Desert/Regions/region_e.tres" id="15_re"]
+[ext_resource type="Texture2D" uid="uid://b4cfwhh3koa3" path="res://Assets/Maps/Desert/desert_regions.png" id="16_regionmap"]
+
+[resource]
+script = ExtResource("1_map")
+map_id = &"desert"
+display_name = "DESERT"
+title_texture = ExtResource("2_title")
+unlocked = true
+regions = Array[ExtResource("10_region")]([ExtResource("11_ra"), ExtResource("12_rb"), ExtResource("13_rc"), ExtResource("14_rd"), ExtResource("15_re")])
+entry_region_id = &"A"
+region_map_texture = ExtResource("16_regionmap")
+arrival_combat_chance = 0.4
+day_stages = Array[ExtResource("3_stage")]([ExtResource("4_dawn"), ExtResource("5_morning"), ExtResource("6_noon"), ExtResource("7_evening"), ExtResource("8_twilight"), ExtResource("9_night")])

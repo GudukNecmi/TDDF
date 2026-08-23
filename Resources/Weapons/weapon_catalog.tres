@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WeaponCatalog" format=3 uid="uid://dwylkh854xmip"]
+
+[ext_resource type="Script" uid="uid://dkiwb1m6g216p" path="res://Scripts/Weapons/weapon_catalog.gd" id="1_6mbpk"]
+[ext_resource type="Script" uid="uid://bw3nojerhwjfg" path="res://Scripts/Weapons/weapon_definition.gd" id="2_lmknb"]
+[ext_resource type="Resource" uid="uid://b62udqu1fwbtg" path="res://Resources/Weapons/weapon_shotgun.tres" id="3_b76qp"]
+[ext_resource type="Resource" uid="uid://dii3hooveyix8" path="res://Resources/Weapons/weapon_lever_action.tres" id="4_meypq"]
+[ext_resource type="Resource" uid="uid://bjwumcdbu862r" path="res://Resources/Weapons/weapon_revolver.tres" id="5_lmknb"]
+
+[resource]
+script = ExtResource("1_6mbpk")
+weapons = Array[ExtResource("2_lmknb")]([ExtResource("3_b76qp"), ExtResource("4_meypq"), ExtResource("5_lmknb")])

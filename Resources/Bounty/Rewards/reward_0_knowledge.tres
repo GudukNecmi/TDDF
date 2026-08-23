@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="BountyRewardTier" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Bounty/bounty_reward_tier.gd" id="1_tier"]
+
+[resource]
+script = ExtResource("1_tier")
+knowledge_count = 0
+min_reward = 1500
+max_reward = 2000

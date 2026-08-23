@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://dii3hooveyix8"]
+
+[ext_resource type="Resource" uid="uid://bmvv4uadff8iq" path="res://Resources/Ammo/ammo_rifle_round.tres" id="1_gxo73"]
+[ext_resource type="PackedScene" uid="uid://jmnenfygn40k" path="res://Scenes/Weapons/LeverActionRifle.tscn" id="2_dc12d"]
+[ext_resource type="Script" uid="uid://bw3nojerhwjfg" path="res://Scripts/Weapons/weapon_definition.gd" id="3_ybbws"]
+
+[resource]
+script = ExtResource("3_ybbws")
+weapon_id = &"lever_action"
+display_name = "LEVER ACTION RIFLE"
+description = "ONE ROUND, ONE KILL.  CIRCLE THE MOUSE TO WORK THE LEVER."
+scene = ExtResource("2_dc12d")
+ammo_type = ExtResource("1_gxo73")

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AmmoType" format=3 uid="uid://cwqsj28dqr25j"]
+
+[ext_resource type="Script" uid="uid://b5a24ah3t7neu" path="res://Scripts/Weapons/ammo_type.gd" id="1_tso83"]
+
+[resource]
+script = ExtResource("1_tso83")
+id = &"shell"
+display_name = "Shell"
+display_name_plural = "Shells"
+max_ammo = 40
+starting_ammo = 40

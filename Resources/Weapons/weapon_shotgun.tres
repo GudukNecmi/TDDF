@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://b62udqu1fwbtg"]
+
+[ext_resource type="Resource" uid="uid://cwqsj28dqr25j" path="res://Resources/Ammo/ammo_shell.tres" id="1_wjoky"]
+[ext_resource type="PackedScene" uid="uid://b2vcwi7dm7w5e" path="res://Scenes/Weapons/Shotgun.tscn" id="2_8lrrd"]
+[ext_resource type="Script" uid="uid://bw3nojerhwjfg" path="res://Scripts/Weapons/weapon_definition.gd" id="3_a8pc1"]
+
+[resource]
+script = ExtResource("3_a8pc1")
+weapon_id = &"shotgun"
+display_name = "SHOTGUN"
+description = "SIX PELLETS, CLOSE WORK.  SPACE WORKS THE PUMP."
+scene = ExtResource("2_8lrrd")
+ammo_type = ExtResource("1_wjoky")

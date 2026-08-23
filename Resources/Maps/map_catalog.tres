@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="MapCatalog" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/map_catalog.gd" id="1_catalog"]
+[ext_resource type="Script" path="res://Scripts/World/map_definition.gd" id="2_mapdef"]
+[ext_resource type="Resource" path="res://Resources/Maps/map_desert.tres" id="3_desert"]
+[ext_resource type="Resource" path="res://Resources/Maps/map_forest.tres" id="4_forest"]
+[ext_resource type="Resource" path="res://Resources/Maps/map_town.tres" id="5_town"]
+[ext_resource type="Resource" path="res://Resources/Maps/map_saloon.tres" id="6_saloon"]
+[ext_resource type="Resource" path="res://Resources/Maps/map_camp.tres" id="7_camp"]
+
+[resource]
+script = ExtResource("1_catalog")
+maps = Array[ExtResource("2_mapdef")]([ExtResource("3_desert"), ExtResource("4_forest"), ExtResource("5_town"), ExtResource("6_saloon"), ExtResource("7_camp")])

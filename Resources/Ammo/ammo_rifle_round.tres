@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AmmoType" format=3 uid="uid://bmvv4uadff8iq"]
+
+[ext_resource type="Script" uid="uid://b5a24ah3t7neu" path="res://Scripts/Weapons/ammo_type.gd" id="1_05njn"]
+
+[resource]
+script = ExtResource("1_05njn")
+id = &"rifle_round"
+display_name = "Rifle Round"
+display_name_plural = "Rifle Rounds"
+max_ammo = 45
+starting_ammo = 45
+purchase_bundle = 7
+purchase_cost = 20

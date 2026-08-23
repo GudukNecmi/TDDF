@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="MusicState" format=3 uid="uid://dkasuygayr2de"]
+
+[ext_resource type="Script" uid="uid://c6ylwt4xp2d23" path="res://Scripts/Common/music_state.gd" id="1_state"]
+[ext_resource type="AudioStream" uid="uid://dhfluo2nbtccm" path="res://Sound/Music/Trouble/Trouble.WAV" id="2_track"]
+
+[resource]
+script = ExtResource("1_state")
+state_id = &"trouble"
+stream = ExtResource("2_track")

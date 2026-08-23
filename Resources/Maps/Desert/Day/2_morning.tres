@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="DayStage" format=3 uid="uid://uemu4jhkwitp"]
+
+[ext_resource type="Script" uid="uid://jbqgmet8idv" path="res://Scripts/World/scatter_layer.gd" id="1_s7a25"]
+[ext_resource type="Script" uid="uid://bbrwbccihyx2g" path="res://Scripts/World/day_stage.gd" id="1_stage"]
+[ext_resource type="Texture2D" uid="uid://d0x0sis3511p" path="res://Assets/UI/Time/Morning.PNG" id="2_icon"]
+
+[resource]
+script = ExtResource("1_stage")
+stage_name = &"morning"
+display_name = "MORNING"
+ambient_colour = Color(1, 0.8, 0.36078432, 1)
+icon = ExtResource("2_icon")
+icon_colour = Color(1, 0.8, 0.36, 1)
+clock_start_minutes = 420
+clock_end_minutes = 659

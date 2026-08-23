@@ -1,0 +1,35 @@
+[gd_resource type="AnimationLibrary" format=3 uid="uid://hr15jfxlr4on"]
+
+[sub_resource type="Animation" id="Animation_enemy1_idle"]
+resource_name = "idle"
+length = 1.2
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visual:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.4, 0.8, 1.2),
+"transitions": PackedFloat32Array(-2, -2, -2, -2),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.06, 0.94), Vector2(0.96, 1.05), Vector2(1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("HeadAim:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.4, 0.8, 1.2),
+"transitions": PackedFloat32Array(-2, -2, -2, -2),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(0.962, 1.058), Vector2(1.036, 0.968), Vector2(1, 1)]
+}
+
+[resource]
+_data = {
+&"idle": SubResource("Animation_enemy1_idle")
+}

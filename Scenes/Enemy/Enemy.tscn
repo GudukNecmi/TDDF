@@ -1,0 +1,277 @@
+[gd_scene format=3 uid="uid://cpvswf25xhxh"]
+
+[ext_resource type="Script" uid="uid://u2nlp810u5e" path="res://Scripts/Enemy/enemy.gd" id="1_3l8kd"]
+[ext_resource type="Script" uid="uid://cu628lbmgnglh" path="res://Scripts/Common/look_at_target.gd" id="2_3jkxs"]
+[ext_resource type="Script" uid="uid://br15pyfwinym7" path="res://Scripts/Common/soft_follow.gd" id="4_seemo"]
+[ext_resource type="Script" uid="uid://cmhjjned50sj" path="res://Scripts/Common/health.gd" id="7_hn56f"]
+[ext_resource type="Script" uid="uid://br8oyhkkml7bq" path="res://Scripts/Common/hitbox.gd" id="8_jg6oh"]
+[ext_resource type="AnimationLibrary" uid="uid://hr15jfxlr4on" path="res://Resources/enemy1_idle.tres" id="9_huj2y"]
+[ext_resource type="Script" uid="uid://bjb8au3p6myu8" path="res://Scripts/Common/squash_idle.gd" id="10_js6tk"]
+[ext_resource type="Script" uid="uid://x6q1gkh6qvqr" path="res://Scripts/Common/knife_slash.gd" id="11_hn56f"]
+[ext_resource type="Script" uid="uid://dfrcyrkkcdsia" path="res://Scripts/Common/hit_reaction.gd" id="12_hitreact"]
+[ext_resource type="Shader" uid="uid://bdokp0457hj52" path="res://Shaders/hit_flash.gdshader" id="13_flash"]
+[ext_resource type="Script" uid="uid://bhiaxi33sa8dp" path="res://Scripts/World/blood_emitter.gd" id="14_blood"]
+[ext_resource type="PackedScene" uid="uid://b6uem6u8qvq5n" path="res://Scenes/Effects/BloodSplash.tscn" id="15_bsplash"]
+[ext_resource type="Script" uid="uid://cnxml6aexd8a2" path="res://Scripts/Common/death_fade.gd" id="16_dfade"]
+[ext_resource type="Script" uid="uid://bguc2fnrtoqgi" path="res://Scripts/Common/leg_animator.gd" id="17_leganim"]
+[ext_resource type="Script" uid="uid://bf4cqcpyew7bx" path="res://Scripts/Enemy/enemy1_appearance.gd" id="18_look"]
+[ext_resource type="Texture2D" uid="uid://d0o6weem78rer" path="res://Assets/Enemies/Enemy1/Leftside Leg.PNG" id="19_lleg"]
+[ext_resource type="Texture2D" uid="uid://cl75fs8h281o2" path="res://Assets/Enemies/Enemy1/Rightside Leg.PNG" id="20_rleg"]
+[ext_resource type="Texture2D" uid="uid://cc0d1dxjdxc0u" path="res://Assets/Enemies/Enemy1/Body1.PNG" id="21_b1"]
+[ext_resource type="Texture2D" uid="uid://d3owlhjcycpnl" path="res://Assets/Enemies/Enemy1/Body2.PNG" id="22_b2"]
+[ext_resource type="Texture2D" uid="uid://bw50fj851dw1d" path="res://Assets/Enemies/Enemy1/Body3.PNG" id="23_b3"]
+[ext_resource type="Texture2D" uid="uid://bfih5y8up3rej" path="res://Assets/Enemies/Enemy1/Body4.PNG" id="24_b4"]
+[ext_resource type="Texture2D" uid="uid://brgxvwi0aqaqg" path="res://Assets/Enemies/Enemy1/Body5.PNG" id="25_b5"]
+[ext_resource type="Texture2D" uid="uid://dsobn3kfxbtq1" path="res://Assets/Enemies/Enemy1/Face1.PNG" id="26_f1"]
+[ext_resource type="Texture2D" uid="uid://db5bstfmqbesa" path="res://Assets/Enemies/Enemy1/Face2.PNG" id="27_f2"]
+[ext_resource type="Texture2D" uid="uid://bfxjvxah0ejgg" path="res://Assets/Enemies/Enemy1/Face3.PNG" id="28_f3"]
+[ext_resource type="Texture2D" uid="uid://wk3bdw37jyv2" path="res://Assets/Enemies/Enemy1/Face4.PNG" id="29_f4"]
+[ext_resource type="Texture2D" uid="uid://cscam2xjca2gc" path="res://Assets/Enemies/Enemy1/Face5.PNG" id="30_f5"]
+[ext_resource type="Texture2D" uid="uid://ehbawibwdu4b" path="res://Assets/Enemies/Enemy1/Face6.PNG" id="31_f6"]
+[ext_resource type="Texture2D" uid="uid://qkj3y6dld5aq" path="res://Assets/Enemies/Enemy1/Face7.PNG" id="32_f7"]
+[ext_resource type="Texture2D" uid="uid://caubjnckwd5le" path="res://Assets/Enemies/Enemy1/Face8.PNG" id="33_f8"]
+[ext_resource type="Texture2D" uid="uid://cys1thw4n36bm" path="res://Assets/Enemies/Enemy1/Knife1.PNG" id="34_k1"]
+[ext_resource type="Texture2D" uid="uid://dxivw5vagspc5" path="res://Assets/Enemies/Enemy1/Knife2.PNG" id="35_k2"]
+[ext_resource type="Texture2D" uid="uid://bhmyqu66kimo3" path="res://Assets/Enemies/Enemy1/Knife3.PNG" id="36_k3"]
+[ext_resource type="Texture2D" uid="uid://8odgpbruq0j4" path="res://Assets/Enemies/Enemy1/Knife4.PNG" id="37_k4"]
+[ext_resource type="Texture2D" uid="uid://dv0244xrvehdq" path="res://Assets/Enemies/Enemy1/Knife5.PNG" id="38_k5"]
+[ext_resource type="Texture2D" uid="uid://pso4kp37b5ym" path="res://Assets/Enemies/Enemy1/Knife6.PNG" id="39_k6"]
+[ext_resource type="Texture2D" uid="uid://4fy84ghxru2q" path="res://Assets/Enemies/Enemy1/Knife7.PNG" id="40_k7"]
+[ext_resource type="Texture2D" uid="uid://xmrbbmvij1bu" path="res://Assets/Enemies/Enemy1/Knife8.PNG" id="41_k8"]
+[ext_resource type="Texture2D" uid="uid://br1rgfovaqinn" path="res://Assets/Enemies/Enemy1/Knife9.PNG" id="42_k9"]
+[ext_resource type="Texture2D" uid="uid://fmf60wvha6t6" path="res://Assets/Enemies/Enemy1/Knife10.PNG" id="43_k10"]
+[ext_resource type="Texture2D" uid="uid://0stgx3sdcc1y" path="res://Assets/Enemies/Enemy1/DeadEyes.PNG" id="44_deadeyes"]
+[ext_resource type="Script" uid="uid://b22cwy4t73gk1" path="res://Scripts/Enemy/enemy_defeat.gd" id="45_defeat"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/DeathSmoke.tscn" id="46_smoke"]
+[ext_resource type="Script" uid="uid://bxqda7netn50a" path="res://Scripts/Enemy/enemy_head_pop.gd" id="47_headpop"]
+[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="48_shadow"]
+[ext_resource type="Script" uid="uid://vv4h8bxhjp6j" path="res://Scripts/Common/footprint_emitter.gd" id="49_prints"]
+[ext_resource type="Script" uid="uid://4mdt53ojmh0t" path="res://Scripts/Enemy/enemy_escape.gd" id="50_escape"]
+[ext_resource type="Script" uid="uid://0vh4rx50p0aa" path="res://Scripts/Enemy/enemy_attack_audio.gd" id="51_0vlx4"]
+[ext_resource type="Script" uid="uid://bye0ghhbrdd1e" path="res://Scripts/Enemy/enemy_surrender.gd" id="51_surrender"]
+[ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="52_prompt"]
+[ext_resource type="AudioStream" uid="uid://brc38ff0ltw0q" path="res://Sound/Efect/Atack/Enemy1/Enemy1 Atack (1).mp3" id="52_t2g6m"]
+[ext_resource type="Script" uid="uid://cg3b8ju44h25q" path="res://Scripts/Enemy/surrender_knowledge.gd" id="53_knowledge"]
+[ext_resource type="AudioStream" uid="uid://c7dt0m5dhv2tr" path="res://Sound/Efect/Atack/Enemy1/Enemy1 Atack (2).mp3" id="53_nhyut"]
+[ext_resource type="AudioStream" uid="uid://jev36fsdt74r" path="res://Sound/Efect/Atack/Enemy1/Enemy1 Atack (3).mp3" id="54_krql2"]
+[ext_resource type="AudioStream" uid="uid://bx1mhd0w3ut1" path="res://Sound/Efect/Atack/Enemy1/Enemy1 Atack (4).mp3" id="55_iydd2"]
+[ext_resource type="AudioStream" uid="uid://d2cumjkutqf3y" path="res://Sound/Efect/Atack/Enemy1/BladeSwoosh.WAV" id="56_0g2yw"]
+[ext_resource type="AudioStream" uid="uid://c6tws6jm4s5jw" path="res://Sound/Efect/Boss/Atack (1).mp3" id="57_cs1vk"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="58_mmefb"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Pickups/KnifePickup.tscn" id="59_knifepick"]
+[ext_resource type="Resource" path="res://Resources/Break/knife_drop_break.tres" id="60_knifebreak"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_02vxf"]
+radius = 18.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_flash"]
+shader = ExtResource("13_flash")
+shader_parameter/flash = 0.0
+shader_parameter/flash_color = Color(1, 1, 1, 1)
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(1, 0, 0, 1)
+shader_parameter/tint = 0.0
+shader_parameter/tint_color = Color(1, 0, 0, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e37so"]
+size = Vector2(28, 23.6)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kvc4n"]
+radius = 24.0
+
+[node name="Enemy" type="CharacterBody2D" unique_id=1835476807 groups=["enemies"]]
+collision_layer = 8
+collision_mask = 9
+motion_mode = 1
+script = ExtResource("1_3l8kd")
+
+[node name="Appearance" type="Node" parent="." unique_id=921246072]
+script = ExtResource("18_look")
+head_textures = Array[Texture2D]([ExtResource("26_f1"), ExtResource("27_f2"), ExtResource("28_f3"), ExtResource("29_f4"), ExtResource("30_f5"), ExtResource("31_f6"), ExtResource("32_f7"), ExtResource("33_f8")])
+body_textures = Array[Texture2D]([ExtResource("21_b1"), ExtResource("22_b2"), ExtResource("23_b3"), ExtResource("24_b4"), ExtResource("25_b5")])
+knife_textures = Array[Texture2D]([ExtResource("34_k1"), ExtResource("35_k2"), ExtResource("36_k3"), ExtResource("37_k4"), ExtResource("38_k5"), ExtResource("39_k6"), ExtResource("40_k7"), ExtResource("41_k8"), ExtResource("42_k9"), ExtResource("43_k10")])
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=697630273]
+position = Vector2(0, -18)
+shape = SubResource("CircleShape2D_02vxf")
+
+[node name="Shadow" type="Sprite2D" parent="." unique_id=872273377 groups=["prop_shadow"]]
+script = ExtResource("48_shadow")
+shadow_scale = Vector2(28, 10)
+shadow_offset = Vector2(0, -2)
+
+[node name="Visual" type="Node2D" parent="." unique_id=1763882585]
+
+[node name="Legs" type="Node2D" parent="Visual" unique_id=1719568627]
+
+[node name="LeftLeg" type="Sprite2D" parent="Visual/Legs" unique_id=1590229067]
+material = SubResource("ShaderMaterial_flash")
+position = Vector2(-11.074, -11.639)
+scale = Vector2(0.113, 0.113)
+texture = ExtResource("19_lleg")
+centered = false
+offset = Vector2(-396, -746)
+
+[node name="RightLeg" type="Sprite2D" parent="Visual/Legs" unique_id=1682039213]
+material = SubResource("ShaderMaterial_flash")
+position = Vector2(10.396, -11.526)
+scale = Vector2(0.113, 0.113)
+texture = ExtResource("20_rleg")
+centered = false
+offset = Vector2(-586, -747)
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=655528857]
+material = SubResource("ShaderMaterial_flash")
+scale = Vector2(0.113, 0.113)
+texture = ExtResource("21_b1")
+centered = false
+offset = Vector2(-494, -849)
+
+[node name="Health" type="Node" parent="." unique_id=217153631]
+script = ExtResource("7_hn56f")
+max_health = 300.0
+free_owner_on_death = false
+
+[node name="HitReaction" type="Node" parent="." unique_id=103555181]
+script = ExtResource("12_hitreact")
+flash_paths = Array[NodePath]([NodePath("../Visual/Body"), NodePath("../Visual/Legs/LeftLeg"), NodePath("../Visual/Legs/RightLeg"), NodePath("../HeadAim/Head"), NodePath("../KnifeAim/KnifeHand/Knife")])
+
+[node name="BloodEmitter" type="Node" parent="." unique_id=682558179]
+script = ExtResource("14_blood")
+burst_scene = ExtResource("15_bsplash")
+
+[node name="Defeat" type="Node" parent="." unique_id=761970983]
+script = ExtResource("45_defeat")
+smoke_scene = ExtResource("46_smoke")
+
+[node name="HeadPop" type="Node" parent="." unique_id=52284064]
+script = ExtResource("47_headpop")
+knife_intact_chance = 0.4
+knife_pickup_scene = ExtResource("59_knifepick")
+knife_break = ExtResource("60_knifebreak")
+
+[node name="Escape" type="Node" parent="." unique_id=52284065]
+script = ExtResource("50_escape")
+
+[node name="Surrender" type="Node" parent="." unique_id=52284066]
+script = ExtResource("51_surrender")
+
+[node name="SurrenderKnowledge" type="Node" parent="." unique_id=52284069]
+script = ExtResource("53_knowledge")
+
+[node name="Prompt" type="Node2D" parent="." unique_id=52284067]
+top_level = true
+script = ExtResource("52_prompt")
+
+[node name="Label" type="Label" parent="Prompt" unique_id=52284068]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DeathFade" type="Node" parent="." unique_id=1073785485]
+script = ExtResource("16_dfade")
+sprite_paths = Array[NodePath]([NodePath("../Visual/Body"), NodePath("../Visual/Legs/LeftLeg"), NodePath("../Visual/Legs/RightLeg"), NodePath("../Shadow")])
+death_tint = Color(0.86, 0.74, 0.72, 1)
+hold_time = 0.7
+fade_time = 1.2
+
+[node name="BodyHitbox" type="Area2D" parent="." unique_id=380865002]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("8_jg6oh")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BodyHitbox" unique_id=942495684]
+position = Vector2(0, -11.8)
+shape = SubResource("RectangleShape2D_e37so")
+
+[node name="HeadHitbox" type="Area2D" parent="." unique_id=1277074504]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("8_jg6oh")
+damage_multiplier = 1.5
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HeadHitbox" unique_id=888211722]
+position = Vector2(-3.4, -47.6)
+shape = SubResource("CircleShape2D_kvc4n")
+
+[node name="SquashPlayer" type="AnimationPlayer" parent="." unique_id=1616600192]
+callback_mode_process = 0
+libraries/ = ExtResource("9_huj2y")
+script = ExtResource("10_js6tk")
+
+[node name="LegAnimator" type="Node" parent="." unique_id=870282205]
+script = ExtResource("17_leganim")
+left_leg_path = NodePath("../Visual/Legs/LeftLeg")
+right_leg_path = NodePath("../Visual/Legs/RightLeg")
+walk_reference_speed = 90.0
+walk_cycles_per_second = 2.0
+
+[node name="FootprintEmitter" type="Node" parent="." unique_id=1858664084]
+script = ExtResource("49_prints")
+foot_paths = Array[NodePath]([NodePath("../Visual/Legs/LeftLeg"), NodePath("../Visual/Legs/RightLeg")])
+step_distance = 24.0
+minimum_speed = 12.0
+print_scale = 0.95
+
+[node name="HeadAim" type="Node2D" parent="." unique_id=1302274548]
+position = Vector2(-3.39, -47.573)
+script = ExtResource("2_3jkxs")
+mode = 1
+flip_node_path = NodePath("Head")
+
+[node name="Head" type="Sprite2D" parent="HeadAim" unique_id=149588232]
+material = SubResource("ShaderMaterial_flash")
+scale = Vector2(0.113, 0.113)
+texture = ExtResource("26_f1")
+centered = false
+offset = Vector2(-464, -428)
+script = ExtResource("4_seemo")
+
+[node name="DeadEyes" type="Sprite2D" parent="HeadAim/Head" unique_id=1941201213]
+visible = false
+position = Vector2(7, 24)
+texture = ExtResource("44_deadeyes")
+
+[node name="KnifeAim" type="Node2D" parent="." unique_id=1722761260]
+position = Vector2(0, -30)
+script = ExtResource("2_3jkxs")
+rest_angle_degrees = -158.4
+
+[node name="KnifeSlash" type="Node" parent="KnifeAim" unique_id=722967573]
+script = ExtResource("11_hn56f")
+blade_angle_degrees = -158.4
+
+[node name="KnifeHand" type="Node2D" parent="KnifeAim" unique_id=1866786117]
+
+[node name="Knife" type="Sprite2D" parent="KnifeAim/KnifeHand" unique_id=655104611]
+material = SubResource("ShaderMaterial_flash")
+position = Vector2(-22.3, -8.8)
+scale = Vector2(0.113, 0.113)
+texture = ExtResource("34_k1")
+centered = false
+offset = Vector2(-207, -604)
+script = ExtResource("4_seemo")
+lag = 0.03
+max_offset = 4.0
+
+[node name="AttackAudio" type="Node" parent="." unique_id=1641374723]
+script = ExtResource("51_0vlx4")
+attack_sounds = Array[AudioStream]([ExtResource("52_t2g6m"), ExtResource("53_nhyut"), ExtResource("54_krql2"), ExtResource("55_iydd2")])
+swoosh_sounds = Array[AudioStream]([ExtResource("56_0g2yw")])
+attack_volume_db = -6.0
+swoosh_volume_db = -4.0
+boss_attack_sounds = Array[AudioStream]([ExtResource("57_cs1vk")])
+
+[node name="SoundBank" type="Node" parent="AttackAudio" unique_id=975132685]
+script = ExtResource("58_mmefb")
+voice_count = 3
+bus = &"Game"
+pitch_variation = 0.06

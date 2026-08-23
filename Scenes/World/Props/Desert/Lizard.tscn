@@ -1,0 +1,68 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/lizard.gd" id="1_lizard"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/2- Props/Lizard/Lizzard.PNG" id="2_alive"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/2- Props/Lizard/LizzardCırt.PNG" id="3_squished"]
+[ext_resource type="Script" path="res://Scripts/Common/sound_bank.gd" id="4_bank"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Props/LizardSquish.WAV" id="5_squish"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 5.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_cover"]
+radius = 220.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_stomp"]
+radius = 10.0
+
+[node name="Lizard" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 0
+motion_mode = 1
+script = ExtResource("1_lizard")
+speed_fraction = 0.7
+fallback_speed = 154.0
+turn_speed = 14.0
+cover_required = 3
+hide_depth = 7.0
+hide_arrive_distance = 6.0
+hide_timeout = 4.0
+offscreen_lifetime = 2.0
+alive_texture = ExtResource("2_alive")
+squished_texture = ExtResource("3_squished")
+squished_lifetime = 0.0
+art_rotation_offset_degrees = 90.0
+
+[node name="Art" type="Sprite2D" parent="."]
+scale = Vector2(0.27, 0.27)
+texture = ExtResource("2_alive")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+
+[node name="Cover" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 64
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Cover"]
+shape = SubResource("CircleShape2D_cover")
+
+[node name="Stomp" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Stomp"]
+shape = SubResource("CircleShape2D_stomp")
+
+[node name="Screen" type="VisibleOnScreenNotifier2D" parent="."]
+rect = Rect2(-18, -18, 36, 36)
+
+[node name="Sounds" type="Node" parent="."]
+script = ExtResource("4_bank")
+sounds = {
+&"squish": ExtResource("5_squish")
+}
+voice_count = 2
+pitch_variation = 0.08

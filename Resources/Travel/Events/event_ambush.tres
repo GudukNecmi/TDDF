@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TravelEvent" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/travel_event.gd" id="1_event"]
+
+[resource]
+script = ExtResource("1_event")
+event_id = &"ambush"
+display_name = "AMBUSH"
+description = "THEY WERE WAITING ON THE TRAIL"
+result_text = "AMBUSH!"
+result_colour = Color(0.82, 0.1, 0.1, 1)
+weight = 25.0
+enemy_count = 6
+offers_choice = false
+uses_ambush_wave = true

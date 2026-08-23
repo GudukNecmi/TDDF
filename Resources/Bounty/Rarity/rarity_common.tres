@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BountyRarity" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Bounty/bounty_rarity.gd" id="1_rarity"]
+
+[resource]
+script = ExtResource("1_rarity")
+knowledge_count = 3
+display_name = "COMMON"
+weight = 40.0
+first_slot = 1
+last_slot = 2
+outline_colour = Color(0.35, 0.85, 0.4, 1)
+outline_strength = 1.0

@@ -1,0 +1,125 @@
+[gd_scene format=3 uid="uid://jmnenfygn40k"]
+
+[ext_resource type="Script" uid="uid://bpiupauvng27e" path="res://Scripts/Weapons/lever_action_rifle.gd" id="1_iodws"]
+[ext_resource type="Texture2D" uid="uid://d3prwpd5samo" path="res://Assets/Guns/Lever Action Rifle/Hammer.PNG" id="2_icay0"]
+[ext_resource type="Texture2D" uid="uid://nu04382nqkjv" path="res://Assets/Guns/Lever Action Rifle/Default.PNG" id="3_xhqm1"]
+[ext_resource type="PackedScene" uid="uid://d1spvscna0at0" path="res://Scenes/Projectile/RifleBullet.tscn" id="4_o8tjy"]
+[ext_resource type="Texture2D" uid="uid://i7hyh67swyns" path="res://Assets/Guns/Lever Action Rifle/Lever.PNG" id="5_08l22"]
+[ext_resource type="Texture2D" uid="uid://bxjajp0j63coj" path="res://Assets/Guns/Lever Action Rifle/BlastEfect1.PNG" id="6_vb341"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="7_lhhlo"]
+[ext_resource type="AudioStream" uid="uid://b3x6jvho0u6pt" path="res://Sound/Efect/Guns/Lever Action Rifle/LeverActionBlast.WAV" id="8_bcj48"]
+[ext_resource type="AudioStream" uid="uid://dced0q6l8op0l" path="res://Sound/Efect/Guns/Lever Action Rifle/LeverRotate.WAV" id="9_uoq53"]
+[ext_resource type="AudioStream" uid="uid://dxjgr317f0u2b" path="res://Sound/Efect/Guns/Lever Action Rifle/LeverActionReady.WAV" id="10_8dwwm"]
+[ext_resource type="AudioStream" uid="uid://ccnoqusy5b3jy" path="res://Sound/Efect/Guns/Shotgun/DryFire.WAV" id="11_ad2to"]
+[ext_resource type="Script" uid="uid://cf5ktwcbkiffv" path="res://Scripts/Weapons/lever_action_feedback.gd" id="12_b3v3j"]
+[ext_resource type="PackedScene" uid="uid://ggxxbbjac857" path="res://Scenes/Effects/LeverRound.tscn" id="13_p1s1t"]
+[ext_resource type="Script" uid="uid://cpux70tukitfn" path="res://Scripts/Common/held_item_flip.gd" id="14_q02p1"]
+[ext_resource type="Script" uid="uid://jbauvq2aroyh" path="res://Scripts/Weapons/weapon_ammo.gd" id="15_2j0kn"]
+[ext_resource type="Resource" uid="uid://bmvv4uadff8iq" path="res://Resources/Ammo/ammo_rifle_round.tres" id="16_88d8y"]
+[ext_resource type="Script" uid="uid://cduxfulgrb0yq" path="res://Scripts/Common/mouse_orbit.gd" id="17_vt4ld"]
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_camera.gd" id="18_camera"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_bufk1"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_dhlq0"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_itaod"]
+gradient = SubResource("Gradient_dhlq0")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="LeverActionRifle" type="Node2D" unique_id=1499900095]
+z_index = 1
+scale = Vector2(0.2, 0.2)
+script = ExtResource("1_iodws")
+aim_muzzle_path = NodePath("MuzzleRig/Muzzle")
+default_texture = ExtResource("3_xhqm1")
+hammer_texture = ExtResource("2_icay0")
+hammer_time = 0.1
+lever_down_degrees = -45.0
+projectile_scene = ExtResource("4_o8tjy")
+
+[node name="Art" type="Node2D" parent="." unique_id=1603137882]
+
+[node name="Body" type="Sprite2D" parent="Art" unique_id=1784870813]
+position = Vector2(-185, -64)
+scale = Vector2(0.65, 0.65)
+texture = ExtResource("3_xhqm1")
+centered = false
+flip_h = true
+
+[node name="LeverPivot" type="Node2D" parent="Art" unique_id=805779420]
+position = Vector2(40, 10)
+
+[node name="Lever" type="Sprite2D" parent="Art/LeverPivot" unique_id=1385752958]
+position = Vector2(-225, -74)
+scale = Vector2(0.65, 0.65)
+texture = ExtResource("5_08l22")
+centered = false
+flip_h = true
+
+[node name="MuzzleRig" type="Node2D" parent="." unique_id=112341137]
+
+[node name="Muzzle" type="Marker2D" parent="MuzzleRig" unique_id=1915767960]
+position = Vector2(263, -33)
+
+[node name="Blast" type="Sprite2D" parent="MuzzleRig/Muzzle" unique_id=476547775]
+visible = false
+modulate = Color(1, 1, 1, 0)
+material = SubResource("CanvasItemMaterial_bufk1")
+position = Vector2(48, 0)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("6_vb341")
+offset = Vector2(1, -10)
+flip_h = true
+
+[node name="MuzzleLight" type="PointLight2D" parent="MuzzleRig" unique_id=10732204]
+position = Vector2(300, -33)
+scale = Vector2(0.2, 0.2)
+color = Color(1, 0.89, 0.62, 1)
+energy = 0.0
+range_z_min = -300
+range_z_max = 300
+texture = SubResource("GradientTexture2D_itaod")
+texture_scale = 3.75
+
+[node name="Sounds" type="Node" parent="." unique_id=1782757113]
+script = ExtResource("7_lhhlo")
+sounds = {
+&"blast": ExtResource("8_bcj48"),
+&"dry_fire": ExtResource("11_ad2to"),
+&"lever_ready": ExtResource("10_8dwwm"),
+&"lever_rotate": ExtResource("9_uoq53")
+}
+pitch_variation = 0.03
+
+[node name="Feedback" type="Node" parent="." unique_id=2007082983]
+script = ExtResource("12_b3v3j")
+round_scene = ExtResource("13_p1s1t")
+
+[node name="ArtFlip" type="Node" parent="." unique_id=215264019]
+script = ExtResource("14_q02p1")
+art_paths = Array[NodePath]([NodePath("../Art"), NodePath("../MuzzleRig")])
+
+[node name="Ammo" type="Node" parent="." unique_id=1089168459]
+script = ExtResource("15_2j0kn")
+ammo_type = ExtResource("16_88d8y")
+
+[node name="Orbit" type="Node" parent="." unique_id=1344457226]
+script = ExtResource("17_vt4ld")
+
+[node name="Camera" type="Node" parent="."]
+script = ExtResource("18_camera")
+offset_fraction = 0.2
+offset_curve = 2.4
+offset_deadzone = 0.12
+offset_smoothing = 4.5
+zoom_multiplier = 1.0
+zoom_smoothing = 3.0
+respects_holster = true

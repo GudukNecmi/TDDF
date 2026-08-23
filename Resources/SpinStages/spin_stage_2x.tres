@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="SpinStage" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/spin_stage.gd" id="1_stage"]
+
+[resource]
+script = ExtResource("1_stage")
+hold_time = 0.6
+damage_multiplier = 2.0
+spin_speed_multiplier = 2.0
+shake_strength = 7.0
+shake_duration = 0.14
+audio_pitch = 1.5
+audio_pitch_time = 0.1
+label = "2x"
+label_scale = 1.0

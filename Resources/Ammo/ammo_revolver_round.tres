@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AmmoType" format=3 uid="uid://q6h0onksryq4"]
+
+[ext_resource type="Script" uid="uid://b5a24ah3t7neu" path="res://Scripts/Weapons/ammo_type.gd" id="1_gonlb"]
+
+[resource]
+script = ExtResource("1_gonlb")
+id = &"revolver_round"
+display_name = "Revolver Round"
+display_name_plural = "Revolver Rounds"
+max_ammo = 30
+starting_ammo = 30
+purchase_bundle = 6
+purchase_cost = 12

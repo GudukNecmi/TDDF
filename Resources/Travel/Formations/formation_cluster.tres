@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="TravelFormation" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Enemy/travel_formation.gd" id="1_formation"]
+
+[resource]
+script = ExtResource("1_formation")
+formation_name = &"cluster"
+weight = 0.9
+share = 1.0
+rows = 3
+row_depth = 95.0
+row_stagger = 0.5
+width_scale = 0.42
+depth_scale = 1.0
+curvature = 0.0
+centre_gap = 0.0
+jitter = Vector2(45, 45)

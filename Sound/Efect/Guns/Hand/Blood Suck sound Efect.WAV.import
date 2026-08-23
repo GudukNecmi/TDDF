@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bnds3hkgg357v"
+path="res://.godot/imported/Blood Suck sound Efect.WAV-aeacd1b79105d592ab2f84edc2284fbe.sample"
+
+[deps]
+
+source_file="res://Sound/Efect/Guns/Hand/Blood Suck sound Efect.WAV"
+dest_files=["res://.godot/imported/Blood Suck sound Efect.WAV-aeacd1b79105d592ab2f84edc2284fbe.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=2
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -1,0 +1,87 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://cglg45g7le8qo" path="res://Scripts/World/bone_prop.gd" id="1_boneprop"]
+[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="2_shadow"]
+[ext_resource type="Script" uid="uid://bm3ln8gbx37l4" path="res://Scripts/World/prop_sway.gd" id="3_sway"]
+[ext_resource type="Script" uid="uid://da4exs3wtf10i" path="res://Scripts/World/prop_art.gd" id="4_art"]
+[ext_resource type="Script" uid="uid://dtnfb87bh7qke" path="res://Scripts/World/prop_touch.gd" id="5_touch"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/KickedBone.tscn" id="6_kicked"]
+[ext_resource type="Texture2D" uid="uid://tqu0kcd8r731" path="res://Assets/Maps/Desert/2- Props/Bone/IMG_2282.PNG" id="7_ribs1"]
+[ext_resource type="Texture2D" uid="uid://cg1lbih1xufbi" path="res://Assets/Maps/Desert/2- Props/Bone/IMG_2283.PNG" id="8_ribs2"]
+[ext_resource type="Texture2D" uid="uid://dg5avlu6yqyys" path="res://Assets/Maps/Desert/2- Props/Bone/IMG_2284.PNG" id="9_skull1"]
+[ext_resource type="Texture2D" uid="uid://lqp3pmoo7xj2" path="res://Assets/Maps/Desert/2- Props/Bone/IMG_2285.PNG" id="10_skull2"]
+[ext_resource type="Script" path="res://Scripts/World/prop_lizard.gd" id="11_lizard"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Lizard.tscn" id="12_lizardscene"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_touch"]
+radius = 50.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_cover"]
+radius = 24.0
+
+[node name="Bones" type="Node2D" groups=["desert_prop"]]
+script = ExtResource("1_boneprop")
+touch_path = NodePath("Touch")
+sway_path = NodePath("Sway")
+kick_chance = 0.2
+kicked_bone_scene = ExtResource("6_kicked")
+kick_cooldown = 3.0
+hide_on_kick = false
+launch_offset = Vector2(0, -4)
+reference_speed = 220.0
+power_range = Vector2(0.7, 1.35)
+
+[node name="Shadow" type="Sprite2D" parent="."]
+script = ExtResource("2_shadow")
+shadow_scale = Vector2(72, 25)
+shadow_offset = Vector2(4, -4)
+shadow_opacity = 0.3
+
+[node name="Sway" type="Node2D" parent="."]
+script = ExtResource("3_sway")
+idle_degrees = 0.0
+knock_degrees = 4.0
+knock_cycles_per_second = 7.5
+knock_damping = 5.5
+max_degrees = 6.0
+
+[node name="Art" type="Sprite2D" parent="Sway"]
+script = ExtResource("4_art")
+textures = Array[Texture2D]([ExtResource("7_ribs1"), ExtResource("8_ribs2"), ExtResource("9_skull1"), ExtResource("10_skull2")])
+size_mode = 0
+reference_height = 22.0
+mirror_chance = 0.5
+
+[node name="Touch" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+script = ExtResource("5_touch")
+body_group = &"player"
+minimum_speed = 140.0
+retrigger_interval = 0.6
+sway_path = NodePath("../Sway")
+knock_strength = 1.0
+speed_multiplier = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Touch"]
+position = Vector2(0, -18)
+shape = SubResource("CircleShape2D_touch")
+
+[node name="Cover" type="StaticBody2D" parent="."]
+collision_layer = 64
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Cover"]
+position = Vector2(0, -6)
+shape = SubResource("CircleShape2D_cover")
+
+[node name="Lizard" type="Node" parent="."]
+script = ExtResource("11_lizard")
+lizard_scene = ExtResource("12_lizardscene")
+spawn_chance = 0.08
+contact_cooldown = 6.0
+one_roll_per_contact = true
+max_active = 3
+emerge_height = 4.0
+emerge_spread = 6.0

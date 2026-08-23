@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://gac0c2dpftes"]
+
+[ext_resource type="Script" uid="uid://de7aty2gi6jur" path="res://Scripts/Effects/casing.gd" id="1_casing"]
+[ext_resource type="Texture2D" uid="uid://dldo8j666vkau" path="res://Assets/Guns/Shotgun/Shell.PNG" id="2_shellart"]
+
+[node name="Casing" type="Node2D" unique_id=381925343]
+script = ExtResource("1_casing")
+
+[node name="Art" type="Sprite2D" parent="."]
+scale = Vector2(0.16, 0.16)
+texture = ExtResource("2_shellart")

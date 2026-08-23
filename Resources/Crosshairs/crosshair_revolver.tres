@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="CrosshairStyle" format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/crosshair_style.gd" id="1_style"]
+[ext_resource type="Texture2D" path="res://Assets/Guns/Revolver and Coin/RevolverCrossPart Top.PNG" id="2_piece"]
+
+[resource]
+script = ExtResource("1_style")
+weapon_id = &"revolver"
+piece_texture = ExtResource("2_piece")
+piece_size = Vector2(34, 34)
+diagonal = false
+piece_rotation_offset_degrees = 0.0
+rotate_with_arm = true
+closed_spacing = 12.0
+open_spacing = 17.0
+spread_distance = 620.0
+spread_curve = 1.6
+spread_speed = 22.0
+normal_colour = Color(1, 0.66, 0, 1)
+charged_colour = Color(0.95, 0.11, 0.05, 1)
+charge_fade_speed = 6.0
+outline_thickness = 1.0
+outline_colour = Color(0, 0, 0, 0.85)
+ammo_shown = true
+ammo_offset = Vector2(15, 9)
+ammo_font_size = 20
+ammo_colour = Color(1, 0.66, 0, 0.9)
+flash_gain = 2.4
+flash_time = 0.06
+flash_kick = 4.0

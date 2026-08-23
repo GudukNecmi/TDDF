@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="MusicState" load_steps=3 format=3 uid="uid://cgotikmusicbase"]
+
+[ext_resource type="Script" path="res://Scripts/Common/music_state.gd" id="1_state"]
+[ext_resource type="AudioStream" path="res://Sound/Music/The Devil Draws Fast Base Music.WAV" id="2_track"]
+
+[resource]
+script = ExtResource("1_state")
+state_id = &"base"
+stream = ExtResource("2_track")
+volume_db = -6.0
+bus = &"Game"
+loops = true
+always_from_start = false

@@ -1,0 +1,3115 @@
+[gd_scene format=3 uid="uid://b2dpqpb4dn0sq"]
+
+[ext_resource type="Script" uid="uid://mcsh2ohyjj8i" path="res://Scripts/UI/run_timer.gd" id="1_timer"]
+[ext_resource type="Script" uid="uid://fx8hqfmmyxey" path="res://Scripts/UI/run_end_screen.gd" id="2_endscr"]
+[ext_resource type="Shader" uid="uid://c5kbp8xehadhn" path="res://Shaders/pause_blur.gdshader" id="3_blur"]
+[ext_resource type="Script" uid="uid://bitln0qbp2s5x" path="res://Scripts/UI/ammo_counter.gd" id="4_6imo4"]
+[ext_resource type="Script" uid="uid://csf4ecm2jjm8m" path="res://Scripts/UI/revolver_chambers.gd" id="4_6wkvp"]
+[ext_resource type="Script" uid="uid://dl1k63fwlcf42" path="res://Scripts/UI/blood_counter.gd" id="4_bcount"]
+[ext_resource type="Script" uid="uid://b3cmul4uj6bux" path="res://Scripts/UI/screen_flash.gd" id="5_flash"]
+[ext_resource type="Texture2D" uid="uid://bifucevjwj3hm" path="res://Assets/UI/Revolver/ChamberLoaded.PNG" id="5_vtui1"]
+[ext_resource type="Texture2D" uid="uid://cy0ks7dq08aeq" path="res://Assets/UI/Revolver/ChamberEmpty.PNG" id="6_6l81s"]
+[ext_resource type="Texture2D" uid="uid://bgwntnh84wy7d" path="res://Assets/Logo.PNG" id="6_logo"]
+[ext_resource type="Script" uid="uid://crtbm2yaqh2hc" path="res://Scripts/UI/heart_bar.gd" id="7_hearts"]
+[ext_resource type="Texture2D" uid="uid://cjkmutgfnbygx" path="res://Assets/UI/Revolver/CylinderPlate.PNG" id="7_tcleo"]
+[ext_resource type="Texture2D" uid="uid://0ohkmrl7tcof" path="res://Assets/UI/heart_full.PNG" id="8_heartfull"]
+[ext_resource type="Texture2D" uid="uid://15xc2s51huyx" path="res://Assets/UI/heart_empty.PNG" id="9_heartempty"]
+[ext_resource type="Script" uid="uid://on7ifjgrqjmt" path="res://Scripts/UI/blood_screen.gd" id="10_bloodscr"]
+[ext_resource type="Script" uid="uid://msbi4a36tng5" path="res://Scripts/UI/blood_stage.gd" id="11_bloodstage"]
+[ext_resource type="Shader" uid="uid://dakw3o6grlvtx" path="res://Shaders/blood_blur.gdshader" id="12_bloodblur"]
+[ext_resource type="Texture2D" uid="uid://pinb3migapsb" path="res://Assets/Efects/Blood Efects/1b.PNG" id="13_1b"]
+[ext_resource type="Texture2D" uid="uid://ctlffvjii44kn" path="res://Assets/Efects/Blood Efects/1bb.PNG" id="14_1bb"]
+[ext_resource type="Texture2D" uid="uid://dqlbteyjdxmx1" path="res://Assets/Efects/Blood Efects/1bd.PNG" id="15_1bd"]
+[ext_resource type="Texture2D" uid="uid://dg4615gbc4yik" path="res://Assets/Efects/Blood Efects/2b.PNG" id="16_2b"]
+[ext_resource type="Texture2D" uid="uid://bbbdg22qt7o3j" path="res://Assets/Efects/Blood Efects/2bb.PNG" id="17_2bb"]
+[ext_resource type="Texture2D" uid="uid://dtei0vx6gma08" path="res://Assets/Efects/Blood Efects/2bd.PNG" id="18_2bd"]
+[ext_resource type="Texture2D" uid="uid://fl84p4uol6sr" path="res://Assets/Efects/Blood Efects/3b.PNG" id="19_3b"]
+[ext_resource type="Texture2D" uid="uid://i88uegr1moik" path="res://Assets/Efects/Blood Efects/3bb.PNG" id="20_3bb"]
+[ext_resource type="Texture2D" uid="uid://di5mj73qwdpee" path="res://Assets/Efects/Blood Efects/3bd.PNG" id="21_3bd"]
+[ext_resource type="Texture2D" uid="uid://ba22p0jlur35u" path="res://Assets/Efects/Blood Efects/4b.PNG" id="22_4b"]
+[ext_resource type="Texture2D" uid="uid://cdmat3fu6fact" path="res://Assets/Efects/Blood Efects/4bb.PNG" id="23_4bb"]
+[ext_resource type="Texture2D" uid="uid://kq0guvhxp05i" path="res://Assets/Efects/Blood Efects/4bd.PNG" id="24_4bd"]
+[ext_resource type="Script" uid="uid://cc7p5wo8vi02d" path="res://Scripts/UI/upgrade_menu.gd" id="25_upgrade"]
+[ext_resource type="PackedScene" uid="uid://dr4g4vxvl7i4" path="res://Scenes/UI/UpgradeCard.tscn" id="26_card"]
+[ext_resource type="Script" uid="uid://cphkfliloaaid" path="res://Scripts/UI/screen_fade.gd" id="27_fade"]
+[ext_resource type="Script" uid="uid://d2jryqofrlowl" path="res://Scripts/UI/region_label.gd" id="28_round"]
+[ext_resource type="Shader" uid="uid://b0lrmeeeu74d" path="res://Shaders/vignette.gdshader" id="29_vignette"]
+[ext_resource type="Script" uid="uid://4p5puwuuulps" path="res://Scripts/UI/day_stage_display.gd" id="30_daydisp"]
+[ext_resource type="Script" uid="uid://7op5h5bntbxr" path="res://Scripts/UI/round_intro.gd" id="31_intro"]
+[ext_resource type="Script" uid="uid://1m555uu7rxqo" path="res://Scripts/UI/map_select_menu.gd" id="32_mapmenu"]
+[ext_resource type="Script" uid="uid://bv6nhbp5t3gts" path="res://Scripts/UI/crosshair.gd" id="33_cross"]
+[ext_resource type="Script" uid="uid://ce732uc2d3dk3" path="res://Scripts/UI/weapon_select_menu.gd" id="33_iqdwl"]
+[ext_resource type="Resource" path="res://Resources/Maps/map_catalog.tres" id="34_catalog"]
+[ext_resource type="Resource" uid="uid://dwylkh854xmip" path="res://Resources/Weapons/weapon_catalog.tres" id="34_ko136"]
+[ext_resource type="Script" path="res://Scripts/UI/crosshair_style.gd" id="35_crossstyle"]
+[ext_resource type="Resource" path="res://Resources/Crosshairs/crosshair_revolver.tres" id="35_crossrev"]
+[ext_resource type="Resource" path="res://Resources/Crosshairs/crosshair_lever_action.tres" id="35_crosslev"]
+[ext_resource type="Resource" path="res://Resources/Crosshairs/crosshair_shotgun.tres" id="35_crossshot"]
+[ext_resource type="Script" path="res://Scripts/UI/game_cursor.gd" id="35_cursor"]
+[ext_resource type="Script" path="res://Scripts/UI/crosshair_ammo.gd" id="35_crossammo"]
+[ext_resource type="Texture2D" path="res://Assets/Cursor/DefaultCursor.PNG" id="35_cursorart"]
+[ext_resource type="Texture2D" path="res://Assets/Cursor/OnButtonCursor.PNG" id="35_cursorhover"]
+[ext_resource type="Script" uid="uid://b0kr6l6fq3exh" path="res://Scripts/UI/wanted_board_menu.gd" id="36_wantedmenu"]
+[ext_resource type="PackedScene" uid="uid://dton60x7yqk5r" path="res://Scenes/UI/WantedPoster.tscn" id="37_poster"]
+[ext_resource type="Script" uid="uid://b2ncgjkts2ivm" path="res://Scripts/UI/dev_settings_menu.gd" id="38_devmenu"]
+[ext_resource type="Script" uid="uid://gc5nx18355rv" path="res://Scripts/UI/region_select_menu.gd" id="39_regionmenu"]
+[ext_resource type="Script" uid="uid://dytw3fsfkwbxi" path="res://Scripts/UI/bounty_debug_menu.gd" id="47_tcleo"]
+[ext_resource type="Script" uid="uid://cb2rouqydiqpa" path="res://Scripts/UI/time_select_menu.gd" id="48_ybf1h"]
+[ext_resource type="Script" uid="uid://b2c8raljsykxs" path="res://Scripts/UI/camp_menu.gd" id="49_bpxjm"]
+[ext_resource type="Script" uid="uid://bkof0btj2x4h6" path="res://Scripts/UI/camp_prompt.gd" id="50_meeu7"]
+[ext_resource type="Script" uid="uid://droj6fwtdfioy" path="res://Scripts/UI/camp_weapon_menu.gd" id="51_027v8"]
+[ext_resource type="Script" uid="uid://djseg0epjvf6c" path="res://Scripts/UI/camp_map_menu.gd" id="52_7pppj"]
+[ext_resource type="Texture2D" uid="uid://cx3jl3owl2kb6" path="res://Assets/UI/Bounty/bounty_marker.png" id="53_14nxi"]
+[ext_resource type="Script" uid="uid://b4hulu5baw1um" path="res://Scripts/UI/travel_menu.gd" id="53_travelmenu"]
+[ext_resource type="Script" uid="uid://cc4s4vbxno5ch" path="res://Scripts/UI/bounty_list_menu.gd" id="54_ab07m"]
+[ext_resource type="Script" uid="uid://4a5m6svv4fcd" path="res://Scripts/UI/destination_arrow.gd" id="54_travelarrow"]
+[ext_resource type="Script" uid="uid://dpyc40ef5tj4k" path="res://Scripts/UI/travel_loading.gd" id="55_travelload"]
+[ext_resource type="Texture2D" uid="uid://8jxpkwqcq7dd" path="res://Assets/UI/Travel/destination_arrow.png" id="56_arrowart"]
+[ext_resource type="Texture2D" uid="uid://6wa4jknyyth2" path="res://Assets/World/Travel/horse_cart.png" id="57_cartart"]
+[ext_resource type="Resource" path="res://Resources/Travel/horse_packhorse.tres" id="58_packhorse"]
+[ext_resource type="Script" uid="uid://ca5rcjrfdpyj3" path="res://Scripts/UI/travel_event_menu.gd" id="59_traveleventmenu"]
+[ext_resource type="Script" uid="uid://b5cx1fx1ylhm7" path="res://Scripts/UI/knowledge_notice.gd" id="60_knownotice"]
+[ext_resource type="Script" uid="uid://mlfi3vus56r" path="res://Scripts/UI/cash_out_screen.gd" id="61_cashout"]
+[ext_resource type="Script" uid="uid://b251ad8sry8kw" path="res://Scripts/UI/travel_day_menu.gd" id="62_travelday"]
+[ext_resource type="Texture2D" uid="uid://bs2qpp3qoxk6n" path="res://Assets/Main Character/Body.PNG" id="63_walkbody"]
+[ext_resource type="Texture2D" uid="uid://cun045ndqijt3" path="res://Assets/Main Character/Head.PNG" id="64_walkhead"]
+[ext_resource type="Texture2D" uid="uid://ciaw5h61v13on" path="res://Assets/Run Start.png" id="66_clxfm"]
+[ext_resource type="Script" uid="uid://bydqyfu3iolnl" path="res://Scripts/UI/day_transition_dial.gd" id="68_swch0"]
+[ext_resource type="Script" path="res://Scripts/UI/sleep_menu.gd" id="69_sleep"]
+[ext_resource type="Script" path="res://Scripts/UI/spin_multiplier.gd" id="70_spinmult"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
+shader = ExtResource("29_vignette")
+shader_parameter/inner_radius = 0.78
+shader_parameter/outer_radius = 1.32
+shader_parameter/softness = 1.2
+shader_parameter/darkness = 0.6
+shader_parameter/opacity = 0.85
+shader_parameter/vignette_color = Color(0, 0, 0, 1)
+shader_parameter/center = Vector2(0.5, 0.5)
+shader_parameter/aspect_correction = 0.4
+shader_parameter/roundness = 2.0
+shader_parameter/light_bleed = 0.85
+shader_parameter/light_bleed_floor = 0.2
+shader_parameter/light_bleed_ceiling = 0.72
+
+[sub_resource type="Resource" id="BloodStage_1"]
+script = ExtResource("11_bloodstage")
+burst = ExtResource("13_1b")
+spread = ExtResource("14_1bb")
+settle = ExtResource("15_1bd")
+
+[sub_resource type="Resource" id="BloodStage_2"]
+script = ExtResource("11_bloodstage")
+burst = ExtResource("16_2b")
+spread = ExtResource("17_2bb")
+settle = ExtResource("18_2bd")
+
+[sub_resource type="Resource" id="BloodStage_3"]
+script = ExtResource("11_bloodstage")
+burst = ExtResource("19_3b")
+spread = ExtResource("20_3bb")
+settle = ExtResource("21_3bd")
+
+[sub_resource type="Resource" id="BloodStage_4"]
+script = ExtResource("11_bloodstage")
+burst = ExtResource("22_4b")
+spread = ExtResource("23_4bb")
+settle = ExtResource("24_4bd")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bloodblur"]
+shader = ExtResource("12_bloodblur")
+shader_parameter/blur_amount = 0.0
+shader_parameter/alpha = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_blur"]
+shader = ExtResource("3_blur")
+shader_parameter/blur_amount = 3.2
+shader_parameter/dim = 0.72
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+content_margin_left = 28.0
+content_margin_top = 16.0
+content_margin_right = 28.0
+content_margin_bottom = 16.0
+bg_color = Color(0.15, 0.028, 0.032, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.12, 0.11, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
+content_margin_left = 28.0
+content_margin_top = 16.0
+content_margin_right = 28.0
+content_margin_bottom = 16.0
+bg_color = Color(0.34, 0.045, 0.045, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.24, 0.2, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sleep_panel"]
+content_margin_left = 34.0
+content_margin_top = 22.0
+content_margin_right = 34.0
+content_margin_bottom = 22.0
+bg_color = Color(0.09, 0.03, 0.03, 0.9)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.82, 0.1, 0.1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
+content_margin_left = 28.0
+content_margin_top = 16.0
+content_margin_right = 28.0
+content_margin_bottom = 16.0
+bg_color = Color(0.055, 0.02, 0.024, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.42, 0.055, 0.06, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_upgradeblur"]
+shader = ExtResource("3_blur")
+shader_parameter/blur_amount = 2.8
+shader_parameter/dim = 0.66
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_upgrade_panel"]
+content_margin_left = 44.0
+content_margin_top = 32.0
+content_margin_right = 44.0
+content_margin_bottom = 32.0
+bg_color = Color(0.04, 0.016, 0.018, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.42, 0.055, 0.06, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_disabled"]
+content_margin_left = 28.0
+content_margin_top = 16.0
+content_margin_right = 28.0
+content_margin_bottom = 16.0
+bg_color = Color(0.04, 0.03, 0.03, 0.8)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.09, 0.09, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_region_normal"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.055, 0.02, 0.024, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.42, 0.055, 0.06, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_region_hover"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.15, 0.028, 0.032, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.12, 0.11, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_region_selected"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.34, 0.045, 0.045, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.32, 0.26, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_027v8"]
+bg_color = Color(0.1, 0.03, 0.03, 0.18)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.45, 0.12, 0.1, 0.75)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7pppj"]
+bg_color = Color(0.5, 0.14, 0.1, 0.3)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.95, 0.3, 0.2, 0.95)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_14nxi"]
+bg_color = Color(0.72, 0.28, 0.1, 0.4)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(1, 0.5, 0.2, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ab07m"]
+bg_color = Color(0.1, 0.03, 0.03, 0.1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.2, 0.18, 0.4)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_88qt6"]
+bg_color = Color(0.62, 0.12, 0.1, 0.45)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(1, 0.86, 0.42, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="RunHUD" type="CanvasLayer" unique_id=1615544819]
+process_mode = 3
+
+[node name="Vignette" type="ColorRect" parent="." unique_id=957723372]
+material = SubResource("ShaderMaterial_vignette")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TimerLabel" type="Label" parent="." unique_id=307623443]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -140.0
+offset_top = 18.0
+offset_right = 140.0
+offset_bottom = 96.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.85, 0.11, 0.11, 1)
+theme_override_font_sizes/font_size = 54
+text = "60"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("1_timer")
+
+[node name="BloodCounter" type="Label" parent="." unique_id=613273712]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 45.0
+offset_top = -63.0
+offset_right = 345.0
+offset_bottom = -11.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
+text = "BLOOD 0"
+vertical_alignment = 1
+script = ExtResource("4_bcount")
+
+[node name="RevolverChambers" type="Control" parent="." unique_id=1565409643]
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = -78.0
+offset_bottom = -78.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("4_6wkvp")
+loaded_texture = ExtResource("5_vtui1")
+empty_texture = ExtResource("6_6l81s")
+
+[node name="Plate" type="TextureRect" parent="RevolverChambers" unique_id=1663929239]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("7_tcleo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AmmoCounter" type="HBoxContainer" parent="." unique_id=1325950995]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -326.0
+offset_top = -74.0
+offset_right = -26.0
+offset_bottom = -22.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 2
+script = ExtResource("4_6imo4")
+
+[node name="Current" type="Label" parent="AmmoCounter" unique_id=1607392034]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(0.85, 0.11, 0.11, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 34
+text = "60"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Separator" type="Label" parent="AmmoCounter" unique_id=525360839]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 26
+text = "/"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Max" type="Label" parent="AmmoCounter" unique_id=1294353885]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 26
+text = "60"
+vertical_alignment = 1
+
+[node name="SpinMultiplier" type="Label" parent="." unique_id=1783402099]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -124.0
+offset_right = -14.0
+offset_bottom = -76.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.85, 0.11, 0.11, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 40
+horizontal_alignment = 2
+vertical_alignment = 1
+script = ExtResource("70_spinmult")
+charge_group = &"weapon_charge"
+base_scale = 1.0
+pop_scale = 1.3
+grow_speed = 16.0
+fade_speed = 18.0
+
+[node name="RoundBar" type="HBoxContainer" parent="." unique_id=1783402155]
+offset_left = 26.0
+offset_top = 18.0
+offset_right = 400.0
+offset_bottom = 88.0
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="TimeOfDay" type="VBoxContainer" parent="RoundBar" unique_id=1290043382]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="RoundBar/TimeOfDay" unique_id=1553784201]
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="RoundBar/TimeOfDay" unique_id=1919044938]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.44, 0.31, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 17
+text = "DAWN"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RegionLabel" type="Label" parent="RoundBar" unique_id=1136432116]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.11, 0.11, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 34
+text = "DUSTY MESA"
+vertical_alignment = 1
+script = ExtResource("28_round")
+
+[node name="DayStageDisplay" type="Node" parent="." unique_id=1044890166]
+script = ExtResource("30_daydisp")
+icon_rect_paths = Array[NodePath]([NodePath("../RoundBar/TimeOfDay/Icon")])
+icon_button_paths = Array[NodePath]([NodePath("../UpgradeMenu/Panel/Body/Footer/NextRoundButton")])
+name_label_paths = Array[NodePath]([NodePath("../RoundBar/TimeOfDay/Name")])
+
+[node name="HeartBar" type="HBoxContainer" parent="." unique_id=1167495227]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -230.0
+offset_top = 20.0
+offset_right = -24.0
+offset_bottom = 66.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 2
+script = ExtResource("7_hearts")
+full_texture = ExtResource("8_heartfull")
+empty_texture = ExtResource("9_heartempty")
+
+[node name="BloodScreen" type="Control" parent="." unique_id=1249090543]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("10_bloodscr")
+stages = Array[ExtResource("11_bloodstage")]([SubResource("BloodStage_1"), SubResource("BloodStage_2"), SubResource("BloodStage_3"), SubResource("BloodStage_4")])
+
+[node name="Overlay" type="TextureRect" parent="BloodScreen" unique_id=436131722]
+texture_repeat = 1
+material = SubResource("ShaderMaterial_bloodblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="ScreenFlash" type="ColorRect" parent="." unique_id=324831381]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 0.96, 0.78, 0)
+script = ExtResource("5_flash")
+
+[node name="EndScreen" type="Control" parent="." unique_id=1241872912]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_endscr")
+
+[node name="Blur" type="ColorRect" parent="EndScreen" unique_id=453551490]
+material = SubResource("ShaderMaterial_blur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Logo" type="TextureRect" parent="EndScreen" unique_id=665602376]
+layout_mode = 0
+anchor_left = 0.03
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_top = -262.0
+offset_bottom = 262.0
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Menu" type="VBoxContainer" parent="EndScreen" unique_id=995458218]
+layout_mode = 0
+anchor_left = 0.6
+anchor_top = 0.5
+anchor_right = 0.92
+anchor_bottom = 0.5
+offset_top = -152.0
+offset_bottom = 152.0
+grow_vertical = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="Title" type="Label" parent="EndScreen/Menu" unique_id=640471898]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 48
+text = "PAUSED"
+
+[node name="Rule" type="ColorRect" parent="EndScreen/Menu" unique_id=2091203954]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Buttons" type="VBoxContainer" parent="EndScreen/Menu" unique_id=1015003401]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="ContinueButton" type="Button" parent="EndScreen/Menu/Buttons" unique_id=666042234]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.85, 1)
+theme_override_colors/font_focus_color = Color(1, 0.95, 0.93, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.93, 1)
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_hover")
+text = "CONTINUE"
+
+[node name="NextRunButton" type="Button" parent="EndScreen/Menu/Buttons" unique_id=255478968]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "NEXT ROUND"
+
+[node name="ExitButton" type="Button" parent="EndScreen/Menu/Buttons" unique_id=2132168273]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "EXIT"
+
+[node name="UpgradeMenu" type="Control" parent="." unique_id=406669646]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("25_upgrade")
+card_scene = ExtResource("26_card")
+
+[node name="Blur" type="ColorRect" parent="UpgradeMenu" unique_id=825528701]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="UpgradeMenu" unique_id=132368494]
+layout_mode = 0
+anchor_left = 0.04
+anchor_top = 0.08
+anchor_right = 0.96
+anchor_bottom = 0.92
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="UpgradeMenu/Panel" unique_id=182704456]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Header" type="HBoxContainer" parent="UpgradeMenu/Panel/Body" unique_id=2137111166]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="UpgradeMenu/Panel/Body/Header" unique_id=999147932]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 44
+text = "UPGRADES"
+vertical_alignment = 1
+
+[node name="Blood" type="Label" parent="UpgradeMenu/Panel/Body/Header" unique_id=616093144]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 30
+text = "BLOOD 0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="UpgradeMenu/Panel/Body" unique_id=1903497398]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Cards" type="HBoxContainer" parent="UpgradeMenu/Panel/Body" unique_id=623824739]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Footer" type="HBoxContainer" parent="UpgradeMenu/Panel/Body" unique_id=796053799]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 2
+
+[node name="Hint" type="Label" parent="UpgradeMenu/Panel/Body/Footer" unique_id=1525565889]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "EACH CARD COSTS 500 BLOOD"
+vertical_alignment = 1
+
+[node name="RefreshButton" type="Button" parent="UpgradeMenu/Panel/Body/Footer" unique_id=554323890]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "REFRESH"
+
+[node name="NextRoundButton" type="Button" parent="UpgradeMenu/Panel/Body/Footer" unique_id=190260451]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_constants/h_separation = 10
+theme_override_constants/icon_max_width = 34
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "NEXT ROUND"
+
+[node name="RoundIntro" type="Control" parent="." unique_id=1478236094]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("31_intro")
+catalog = ExtResource("34_catalog")
+
+[node name="Card" type="VBoxContainer" parent="RoundIntro" unique_id=845126113]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -330.0
+offset_top = -270.0
+offset_right = 330.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Title" type="TextureRect" parent="RoundIntro/Card" unique_id=1198478135]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TimeRow" type="HBoxContainer" parent="RoundIntro/Card" unique_id=1802739630]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="RoundIntro/Card/TimeRow" unique_id=2129466468]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="RoundIntro/Card/TimeRow" unique_id=1136800345]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.44, 0.31, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 9
+theme_override_font_sizes/font_size = 46
+text = "DAWN"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RegionName" type="Label" parent="RoundIntro/Card" unique_id=1024760318]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.13, 0.12, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 9
+theme_override_font_sizes/font_size = 44
+text = "DUST CAMP"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Clock" type="Label" parent="RoundIntro/Card" unique_id=1611299034]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.87, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 38
+text = "06:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WeaponSelectMenu" type="Control" parent="." unique_id=1257662543]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("33_iqdwl")
+catalog = ExtResource("34_ko136")
+button_normal = SubResource("StyleBoxFlat_button_normal")
+button_hover = SubResource("StyleBoxFlat_button_hover")
+button_pressed = SubResource("StyleBoxFlat_button_pressed")
+button_disabled = SubResource("StyleBoxFlat_button_disabled")
+
+[node name="Blur" type="ColorRect" parent="WeaponSelectMenu" unique_id=224931759]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="WeaponSelectMenu" unique_id=50612276]
+layout_mode = 0
+anchor_left = 0.3
+anchor_top = 0.12
+anchor_right = 0.7
+anchor_bottom = 0.88
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="WeaponSelectMenu/Panel" unique_id=719605629]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Title" type="Label" parent="WeaponSelectMenu/Panel/Body" unique_id=1446735128]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 44
+text = "CHOOSE A WEAPON"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="WeaponSelectMenu/Panel/Body" unique_id=1507686448]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Weapons" type="VBoxContainer" parent="WeaponSelectMenu/Panel/Body" unique_id=1034194336]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Hint" type="Label" parent="WeaponSelectMenu/Panel/Body" unique_id=304380842]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "AMMUNITION IS CARRIED PER WEAPON"
+horizontal_alignment = 1
+
+[node name="MapSelectMenu" type="Control" parent="." unique_id=1930668428 groups=["map_select_menu"]]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("32_mapmenu")
+catalog = ExtResource("34_catalog")
+button_normal = SubResource("StyleBoxFlat_button_normal")
+button_hover = SubResource("StyleBoxFlat_button_hover")
+button_pressed = SubResource("StyleBoxFlat_button_pressed")
+button_disabled = SubResource("StyleBoxFlat_button_disabled")
+
+[node name="Blur" type="ColorRect" parent="MapSelectMenu" unique_id=1103886461]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="MapSelectMenu" unique_id=1341558822]
+layout_mode = 0
+anchor_left = 0.3
+anchor_top = 0.12
+anchor_right = 0.7
+anchor_bottom = 0.88
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="MapSelectMenu/Panel" unique_id=1620577553]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Title" type="Label" parent="MapSelectMenu/Panel/Body" unique_id=1345788639]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 44
+text = "CHOOSE A MAP"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="MapSelectMenu/Panel/Body" unique_id=1017281894]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Maps" type="VBoxContainer" parent="MapSelectMenu/Panel/Body" unique_id=1552430743]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Hint" type="Label" parent="MapSelectMenu/Panel/Body" unique_id=1798404155]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "MORE GROUND OPENS UP LATER"
+horizontal_alignment = 1
+
+[node name="RegionSelectMenu" type="Control" parent="." unique_id=1930668429 groups=["region_select_menu"]]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("39_regionmenu")
+tile_normal = SubResource("StyleBoxFlat_region_normal")
+tile_hover = SubResource("StyleBoxFlat_region_hover")
+tile_pressed = SubResource("StyleBoxFlat_region_selected")
+tile_disabled = SubResource("StyleBoxFlat_button_disabled")
+tile_selected = SubResource("StyleBoxFlat_region_selected")
+
+[node name="Blur" type="ColorRect" parent="RegionSelectMenu" unique_id=1930668430]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="RegionSelectMenu" unique_id=1930668431]
+layout_mode = 0
+anchor_left = 0.2
+anchor_top = 0.14
+anchor_right = 0.8
+anchor_bottom = 0.86
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="RegionSelectMenu/Panel" unique_id=1930668432]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="HBoxContainer" parent="RegionSelectMenu/Panel/Body" unique_id=1930668433]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="RegionSelectMenu/Panel/Body/Header" unique_id=1930668434]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 42
+text = "CHOOSE A REGION"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="RegionSelectMenu/Panel/Body" unique_id=1930668435]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Regions" type="GridContainer" parent="RegionSelectMenu/Panel/Body" unique_id=1930668436]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 3
+
+[node name="Rule2" type="ColorRect" parent="RegionSelectMenu/Panel/Body" unique_id=1930668437]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Footer" type="HBoxContainer" parent="RegionSelectMenu/Panel/Body" unique_id=1930668438]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 2
+
+[node name="Status" type="Label" parent="RegionSelectMenu/Panel/Body/Footer" unique_id=1930668439]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "PICK A REGION TO RIDE INTO"
+vertical_alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="RegionSelectMenu/Panel/Body/Footer" unique_id=1930668440]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+disabled = true
+text = "RIDE OUT"
+
+[node name="WantedBoardMenu" type="Control" parent="." unique_id=1650904040 groups=["wanted_board_menu"]]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("36_wantedmenu")
+poster_scene = ExtResource("37_poster")
+
+[node name="Blur" type="ColorRect" parent="WantedBoardMenu" unique_id=1762676325]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="WantedBoardMenu" unique_id=1316617529]
+layout_mode = 0
+anchor_left = 0.03
+anchor_top = 0.04
+anchor_right = 0.97
+anchor_bottom = 0.96
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="WantedBoardMenu/Panel" unique_id=1686419295]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="WantedBoardMenu/Panel/Body" unique_id=867915851]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="WantedBoardMenu/Panel/Body/Header" unique_id=321280646]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 38
+text = "WANTED BOARD"
+vertical_alignment = 1
+
+[node name="Slots" type="Label" parent="WantedBoardMenu/Panel/Body/Header" unique_id=727306682]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 24
+text = "CONTRACTS  0 / 5"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="WantedBoardMenu/Panel/Body" unique_id=167928263]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Posters" type="HBoxContainer" parent="WantedBoardMenu/Panel/Body" unique_id=644205670]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Hint" type="Label" parent="WantedBoardMenu/Panel/Body" unique_id=1566079512]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "THE LESS THE POSTER KNOWS, THE MORE IT PAYS"
+horizontal_alignment = 1
+
+[node name="DevSettingsMenu" type="Control" parent="." unique_id=1470022581]
+visible = false
+z_index = 150
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("38_devmenu")
+
+[node name="Blur" type="ColorRect" parent="DevSettingsMenu" unique_id=1470022582]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="DevSettingsMenu" unique_id=1470022583]
+layout_mode = 0
+anchor_left = 0.24
+anchor_top = 0.06
+anchor_right = 0.76
+anchor_bottom = 0.94
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="DevSettingsMenu/Panel" unique_id=1470022584]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="DevSettingsMenu/Panel/Body" unique_id=1470022585]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="DevSettingsMenu/Panel/Body/Header" unique_id=1470022586]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 40
+text = "DEVELOPER BALANCE"
+vertical_alignment = 1
+
+[node name="Hint" type="Label" parent="DevSettingsMenu/Panel/Body/Header" unique_id=1470022587]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "P CLOSES  -  ESC CLOSES"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="DevSettingsMenu/Panel/Body" unique_id=1470022588]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Scroll" type="ScrollContainer" parent="DevSettingsMenu/Panel/Body" unique_id=1470022589]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="DevSettingsMenu/Panel/Body/Scroll" unique_id=1470022590]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Rule2" type="ColorRect" parent="DevSettingsMenu/Panel/Body" unique_id=1470022591]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Footer" type="HBoxContainer" parent="DevSettingsMenu/Panel/Body" unique_id=1470022592]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 2
+
+[node name="Status" type="Label" parent="DevSettingsMenu/Panel/Body/Footer" unique_id=1470022593]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1
+
+[node name="SaveButton" type="Button" parent="DevSettingsMenu/Panel/Body/Footer" unique_id=1470022594]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "SAVE"
+
+[node name="DestinationArrow" type="Control" parent="." unique_id=1592448840]
+visible = false
+z_index = 120
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("54_travelarrow")
+
+[node name="Arrow" type="TextureRect" parent="DestinationArrow" unique_id=1592448841]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 0
+offset_right = 72.0
+offset_bottom = 72.0
+pivot_offset = Vector2(36, 36)
+mouse_filter = 2
+texture = ExtResource("56_arrowart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BossArrow" type="Control" parent="." unique_id=1592448910]
+visible = false
+z_index = 120
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("54_travelarrow")
+target_group = &"mini_boss_marker"
+full_opacity_distance = 1600.0
+fade_out_distance = 420.0
+
+[node name="Arrow" type="TextureRect" parent="BossArrow" unique_id=1592448911]
+self_modulate = Color(1, 0.24, 0.22, 1)
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 0
+offset_right = 72.0
+offset_bottom = 72.0
+pivot_offset = Vector2(36, 36)
+mouse_filter = 2
+texture = ExtResource("56_arrowart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CampArrow" type="Control" parent="." unique_id=1374682406]
+visible = false
+z_index = 120
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("54_travelarrow")
+target_group = &"camp_marker"
+full_opacity_distance = 1800.0
+fade_out_distance = 700.0
+
+[node name="Arrow" type="TextureRect" parent="CampArrow" unique_id=1759059052]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 0
+offset_right = 72.0
+offset_bottom = 72.0
+pivot_offset = Vector2(36, 36)
+mouse_filter = 2
+texture = ExtResource("56_arrowart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BossIntroTitle" type="Control" parent="." unique_id=1592448915]
+visible = false
+z_index = 135
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Card" type="VBoxContainer" parent="BossIntroTitle" unique_id=1592448916]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -560.0
+offset_top = -300.0
+offset_right = 560.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 2
+alignment = 2
+
+[node name="Kicker" type="Label" parent="BossIntroTitle/Card" unique_id=1592448917]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 24
+text = "WANTED"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="BossIntroTitle/Card" unique_id=1592448918]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.16, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 14
+theme_override_font_sizes/font_size = 66
+text = "JAMES DICAMPO"
+horizontal_alignment = 1
+autowrap_mode = 2
+visible_characters_behavior = 1
+
+[node name="Strike" type="ColorRect" parent="BossIntroTitle/Card/Name" unique_id=1080432215]
+visible = false
+layout_mode = 0
+offset_right = 240.0
+offset_bottom = 12.0
+mouse_filter = 2
+color = Color(0.05, 0.01, 0.01, 1)
+
+[node name="Line" type="ColorRect" parent="BossIntroTitle/Card/Name/Strike" unique_id=1961136060]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.93, 0.16, 0.14, 1)
+
+[node name="ScreenFade" type="ColorRect" parent="." unique_id=62172087]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
+script = ExtResource("27_fade")
+
+[node name="Crosshair" type="Control" parent="." unique_id=1069229977]
+z_index = 200
+mouse_filter = 2
+script = ExtResource("33_cross")
+styles = Array[ExtResource("35_crossstyle")]([ExtResource("35_crossrev"), ExtResource("35_crosslev"), ExtResource("35_crossshot")])
+fallback_style = ExtResource("35_crossrev")
+crosshair_visible = true
+player_group = &"player"
+charge_group = &"weapon_charge"
+
+[node name="Ammo" type="Label" parent="Crosshair"]
+mouse_filter = 2
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 20
+vertical_alignment = 1
+script = ExtResource("35_crossammo")
+count_methods = Array[StringName]([&"get_loaded_count", &"get_magazine_count"])
+hide_while_stowed = true
+crosshair_path = NodePath("..")
+
+[node name="GameCursor" type="Control" parent="." unique_id=1069229978]
+z_index = 250
+mouse_filter = 2
+script = ExtResource("35_cursor")
+default_texture = ExtResource("35_cursorart")
+hover_texture = ExtResource("35_cursorhover")
+cursor_size = Vector2(46, 46)
+hotspot = Vector2(0.4, 0.27)
+outline_thickness = 1.0
+outline_colour = Color(0, 0, 0, 0.85)
+shown_while_paused = true
+shown_while_unarmed = true
+extra_surface_paths = Array[NodePath]([NodePath("../SleepMenu")])
+hide_system_cursor = true
+crosshair_path = NodePath("../Crosshair")
+
+[node name="BountyDebugMenu" type="Control" parent="." unique_id=1158383090]
+visible = false
+z_index = 160
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("47_tcleo")
+button_normal_style = SubResource("StyleBoxFlat_button_normal")
+button_hover_style = SubResource("StyleBoxFlat_button_hover")
+button_pressed_style = SubResource("StyleBoxFlat_button_pressed")
+
+[node name="Blur" type="ColorRect" parent="BountyDebugMenu" unique_id=2056332781]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="BountyDebugMenu" unique_id=1263594800]
+layout_mode = 0
+anchor_left = 0.12
+anchor_top = 0.06
+anchor_right = 0.88
+anchor_bottom = 0.94
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="BountyDebugMenu/Panel" unique_id=605679408]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="BountyDebugMenu/Panel/Body" unique_id=169208006]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="BountyDebugMenu/Panel/Body/Header" unique_id=275550446]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 40
+text = "BOUNTY KNOWLEDGE"
+vertical_alignment = 1
+
+[node name="Summary" type="Label" parent="BountyDebugMenu/Panel/Body/Header" unique_id=1718858104]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Hint" type="Label" parent="BountyDebugMenu/Panel/Body/Header" unique_id=591892452]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "DEVELOPER ONLY  -  F3 CLOSES  -  ESC CLOSES"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="BountyDebugMenu/Panel/Body" unique_id=1735501331]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Scroll" type="ScrollContainer" parent="BountyDebugMenu/Panel/Body" unique_id=847074089]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="BountyDebugMenu/Panel/Body/Scroll" unique_id=319684306]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="TimeSelectMenu" type="Control" parent="." unique_id=2102537176]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("48_ybf1h")
+tile_normal = SubResource("StyleBoxFlat_region_normal")
+tile_hover = SubResource("StyleBoxFlat_region_hover")
+tile_pressed = SubResource("StyleBoxFlat_region_selected")
+tile_disabled = SubResource("StyleBoxFlat_button_disabled")
+tile_selected = SubResource("StyleBoxFlat_region_selected")
+
+[node name="Blur" type="ColorRect" parent="TimeSelectMenu" unique_id=856550441]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="TimeSelectMenu" unique_id=1924388348]
+layout_mode = 0
+anchor_left = 0.2
+anchor_top = 0.14
+anchor_right = 0.8
+anchor_bottom = 0.86
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="TimeSelectMenu/Panel" unique_id=1121352015]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="HBoxContainer" parent="TimeSelectMenu/Panel/Body" unique_id=1430514364]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="TimeSelectMenu/Panel/Body/Header" unique_id=1332915032]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 42
+text = "CHOOSE A TIME OF DAY"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="TimeSelectMenu/Panel/Body" unique_id=2124204331]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Times" type="GridContainer" parent="TimeSelectMenu/Panel/Body" unique_id=1876500450]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 3
+
+[node name="Rule2" type="ColorRect" parent="TimeSelectMenu/Panel/Body" unique_id=712600980]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Footer" type="HBoxContainer" parent="TimeSelectMenu/Panel/Body" unique_id=710737006]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 2
+
+[node name="Status" type="Label" parent="TimeSelectMenu/Panel/Body/Footer" unique_id=1724093434]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "PICK THE HOUR YOU RIDE OUT AT"
+vertical_alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="TimeSelectMenu/Panel/Body/Footer" unique_id=1356267694]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+disabled = true
+text = "RIDE OUT"
+
+[node name="CampMenu" type="Control" parent="." unique_id=371773926]
+visible = false
+z_index = 140
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("49_bpxjm")
+
+[node name="Blur" type="ColorRect" parent="CampMenu" unique_id=1738334834]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="CampMenu" unique_id=1992442367]
+layout_mode = 0
+anchor_left = 0.15
+anchor_top = 0.05
+anchor_right = 0.85
+anchor_bottom = 0.95
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="CampMenu/Panel" unique_id=1887840719]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="CampMenu/Panel/Body" unique_id=1597155637]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="CampMenu/Panel/Body/Header" unique_id=1146634244]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 34
+text = "CAMP"
+vertical_alignment = 1
+
+[node name="Blood" type="Label" parent="CampMenu/Panel/Body/Header" unique_id=1860149461]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 26
+text = "BLOOD 0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="CampMenu/Panel/Body" unique_id=1981597721]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Status" type="VBoxContainer" parent="CampMenu/Panel/Body" unique_id=2111964340]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Health" type="Label" parent="CampMenu/Panel/Body/Status" unique_id=2059084030]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "HEALTH 3 / 3"
+
+[node name="Ammo" type="Label" parent="CampMenu/Panel/Body/Status" unique_id=829180830]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "SHELLS 0 / 0"
+
+[node name="CampBlood" type="Label" parent="CampMenu/Panel/Body/Status" unique_id=698686471]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "CAMP 0 / 300"
+
+[node name="Destination" type="Label" parent="CampMenu/Panel/Body/Status" unique_id=1638095994]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "REGION -"
+
+[node name="Columns" type="HBoxContainer" parent="CampMenu/Panel/Body" unique_id=124312740]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 22
+
+[node name="Camp" type="VBoxContainer" parent="CampMenu/Panel/Body/Columns" unique_id=1454033310]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.3
+theme_override_constants/separation = 6
+
+[node name="Heading" type="Label" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1667550247]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 22
+text = "CAMP"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1138145676]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="HealButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1856706851]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "HEAL"
+
+[node name="AmmoButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1140317808]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "BUY AMMO"
+
+[node name="DepositButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1249691896]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "STASH BLOOD"
+
+[node name="WeaponButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=2061670148]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "WEAPONS"
+
+[node name="MapButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=478449925]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "REGIONAL MAP"
+
+[node name="ReturnHomeButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=913074280]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "RETURN HOME"
+
+[node name="Divider" type="ColorRect" parent="CampMenu/Panel/Body/Columns" unique_id=1785916984]
+custom_minimum_size = Vector2(2, 0)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Actions" type="VBoxContainer" parent="CampMenu/Panel/Body/Columns" unique_id=1727708487]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Heading" type="Label" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=22889828]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 22
+text = "ACTIONS"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=1187788639]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="SleepButton" type="Button" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=2133315053]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "SLEEP / CAMP"
+
+[node name="TravelButton" type="Button" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=1581212610]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "TRAVEL"
+
+[node name="TroubleButton" type="Button" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=1254531852]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "SEARCH FOR TROUBLE"
+
+[node name="Hint" type="Label" parent="CampMenu/Panel/Body" unique_id=1617321484]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "ESC LEAVES THE WAGON"
+horizontal_alignment = 1
+
+[node name="CashOutScreen" type="Control" parent="." unique_id=470794702 groups=["cash_out_screen"]]
+visible = false
+z_index = 150
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("61_cashout")
+
+[node name="Blur" type="ColorRect" parent="CashOutScreen" unique_id=387967535]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CashOutScreen" unique_id=1005013801]
+layout_mode = 0
+anchor_left = 0.26
+anchor_top = 0.26
+anchor_right = 0.74
+anchor_bottom = 0.74
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="CashOutScreen/Panel" unique_id=1152670250]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="Title" type="Label" parent="CashOutScreen/Panel/Body" unique_id=1570081453]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 42
+text = "THE RECKONING"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="CashOutScreen/Panel/Body" unique_id=1210678706]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Rows" type="VBoxContainer" parent="CashOutScreen/Panel/Body" unique_id=1974976959]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Carried" type="Label" parent="CashOutScreen/Panel/Body/Rows" unique_id=205508620]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 26
+text = "CARRIED  0 BLOOD"
+horizontal_alignment = 1
+
+[node name="Streak" type="Label" parent="CashOutScreen/Panel/Body/Rows" unique_id=341660256]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 26
+text = "STREAK  0  -  PAYS  x1"
+horizontal_alignment = 1
+
+[node name="Earned" type="Label" parent="CashOutScreen/Panel/Body" unique_id=117930166]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 52
+text = "YOU EARNED 0 BLOOD"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Rule2" type="ColorRect" parent="CashOutScreen/Panel/Body" unique_id=981896649]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Footer" type="HBoxContainer" parent="CashOutScreen/Panel/Body" unique_id=121914023]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 2
+
+[node name="Hint" type="Label" parent="CashOutScreen/Panel/Body/Footer" unique_id=1258558516]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "ESC STEPS BACK OUT"
+vertical_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="CashOutScreen/Panel/Body/Footer" unique_id=847766688]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "RIDE IN"
+
+[node name="CampPrompt" type="Control" parent="." unique_id=1159508689]
+visible = false
+z_index = 130
+layout_mode = 3
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -340.0
+offset_top = -150.0
+offset_right = -32.0
+offset_bottom = -84.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("50_meeu7")
+
+[node name="Panel" type="PanelContainer" parent="CampPrompt" unique_id=680359795]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="CampPrompt/Panel" unique_id=810517389]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Label" type="Label" parent="CampPrompt/Panel/Body" unique_id=412307432]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 22
+text = "Hold \"E\" at the wagon"
+horizontal_alignment = 1
+
+[node name="Track" type="ColorRect" parent="CampPrompt/Panel/Body" unique_id=1030282561]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.16, 0.03, 0.03, 1)
+
+[node name="Fill" type="ColorRect" parent="CampPrompt/Panel/Body/Track" unique_id=122557412]
+layout_mode = 0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.82, 0.1, 0.1, 1)
+
+[node name="KnowledgeNotice" type="Control" parent="." unique_id=1159508690]
+visible = false
+z_index = 130
+layout_mode = 3
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -400.0
+offset_top = -246.0
+offset_right = 400.0
+offset_bottom = -168.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("60_knownotice")
+
+[node name="Panel" type="PanelContainer" parent="KnowledgeNotice" unique_id=1159508691]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="KnowledgeNotice/Panel" unique_id=1159508692]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Title" type="Label" parent="KnowledgeNotice/Panel/Body" unique_id=1159508693]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 17
+text = "KNOWLEDGE"
+horizontal_alignment = 1
+
+[node name="Label" type="Label" parent="KnowledgeNotice/Panel/Body" unique_id=1159508694]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 26
+text = "You learned that James Balada appears at Twilight."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CampWeaponMenu" type="Control" parent="." unique_id=518838003]
+visible = false
+z_index = 260
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("51_027v8")
+catalog = ExtResource("34_ko136")
+status_label_path = NodePath("Panel/Body/Hint")
+button_normal = SubResource("StyleBoxFlat_region_normal")
+button_hover = SubResource("StyleBoxFlat_region_hover")
+button_pressed = SubResource("StyleBoxFlat_region_selected")
+button_disabled = SubResource("StyleBoxFlat_button_disabled")
+button_equipped = SubResource("StyleBoxFlat_region_selected")
+
+[node name="Blur" type="ColorRect" parent="CampWeaponMenu" unique_id=2063359712]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CampWeaponMenu" unique_id=574609153]
+layout_mode = 0
+anchor_left = 0.3
+anchor_top = 0.12
+anchor_right = 0.7
+anchor_bottom = 0.88
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="CampWeaponMenu/Panel" unique_id=2007163737]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Title" type="Label" parent="CampWeaponMenu/Panel/Body" unique_id=1447319487]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 44
+text = "WHAT ARE YOU CARRYING"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="CampWeaponMenu/Panel/Body" unique_id=2092704751]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Weapons" type="VBoxContainer" parent="CampWeaponMenu/Panel/Body" unique_id=228192651]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Hint" type="Label" parent="CampWeaponMenu/Panel/Body" unique_id=851076958]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "EACH WEAPON KEEPS ITS OWN ROUNDS  -  ESC GOES BACK"
+horizontal_alignment = 1
+
+[node name="CampMapMenu" type="Control" parent="." unique_id=1424170629]
+visible = false
+z_index = 145
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("52_7pppj")
+region_normal = SubResource("StyleBoxFlat_027v8")
+region_hover = SubResource("StyleBoxFlat_7pppj")
+region_selected = SubResource("StyleBoxFlat_14nxi")
+region_disabled = SubResource("StyleBoxFlat_ab07m")
+region_here = SubResource("StyleBoxFlat_88qt6")
+marker_texture = ExtResource("53_14nxi")
+marker_offset = Vector2(0, -0.46)
+
+[node name="Blur" type="ColorRect" parent="CampMapMenu" unique_id=252647017]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="CampMapMenu" unique_id=205297410]
+layout_mode = 0
+anchor_left = 0.06
+anchor_top = 0.08
+anchor_right = 0.94
+anchor_bottom = 0.92
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="CampMapMenu/Panel" unique_id=1277008161]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="HBoxContainer" parent="CampMapMenu/Panel/Body" unique_id=1578169354]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="CampMapMenu/Panel/Body/Header" unique_id=1959075150]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 40
+text = "THE COUNTRY"
+
+[node name="Rule" type="ColorRect" parent="CampMapMenu/Panel/Body" unique_id=915229042]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Split" type="HBoxContainer" parent="CampMapMenu/Panel/Body" unique_id=1602592486]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="Map" type="Control" parent="CampMapMenu/Panel/Body/Split" unique_id=1272737325]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.4
+
+[node name="Picture" type="TextureRect" parent="CampMapMenu/Panel/Body/Split/Map" unique_id=1289646691]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Bounties" type="VBoxContainer" parent="CampMapMenu/Panel/Body/Split" unique_id=1699687689]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="CampMapMenu/Panel/Body/Split/Bounties" unique_id=326237385]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 26
+text = "CONTRACTS"
+
+[node name="Scroll" type="ScrollContainer" parent="CampMapMenu/Panel/Body/Split/Bounties" unique_id=1502772509]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Rows" type="VBoxContainer" parent="CampMapMenu/Panel/Body/Split/Bounties/Scroll" unique_id=2047856363]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Footer" type="HBoxContainer" parent="CampMapMenu/Panel/Body" unique_id=1000240585]
+layout_mode = 2
+
+[node name="Status" type="Label" parent="CampMapMenu/Panel/Body/Footer" unique_id=346610272]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "ESC GOES BACK TO THE CAMP"
+
+[node name="BountyListMenu" type="Control" parent="." unique_id=1447627697]
+visible = false
+z_index = 135
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("54_ab07m")
+entry_name_font_size = 20
+entry_line_font_size = 14
+button_normal = SubResource("StyleBoxFlat_region_normal")
+button_hover = SubResource("StyleBoxFlat_region_hover")
+button_pressed = SubResource("StyleBoxFlat_region_selected")
+
+[node name="Blur" type="ColorRect" parent="BountyListMenu" unique_id=257864213]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="BountyListMenu" unique_id=522642342]
+layout_mode = 0
+anchor_left = 0.11
+anchor_top = 0.12
+anchor_right = 0.89
+anchor_bottom = 0.88
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="BountyListMenu/Panel" unique_id=208413575]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="BountyListMenu/Panel/Body" unique_id=416394364]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="BountyListMenu/Panel/Body/Header" unique_id=1700498818]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 40
+text = "CONTRACTS"
+vertical_alignment = 1
+
+[node name="Summary" type="Label" parent="BountyListMenu/Panel/Body/Header" unique_id=221015713]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Hint" type="Label" parent="BountyListMenu/Panel/Body/Header" unique_id=1962612353]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "TAB CLOSES  -  ESC CLOSES"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="BountyListMenu/Panel/Body" unique_id=1245704416]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Split" type="HBoxContainer" parent="BountyListMenu/Panel/Body" unique_id=713382908]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="Rows" type="GridContainer" parent="BountyListMenu/Panel/Body/Split" unique_id=615844187]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="Feature" type="VBoxContainer" parent="BountyListMenu/Panel/Body/Split" unique_id=220687873]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="Footer" type="HBoxContainer" parent="BountyListMenu/Panel/Body" unique_id=879142633]
+layout_mode = 2
+
+[node name="Status" type="Label" parent="BountyListMenu/Panel/Body/Footer" unique_id=454708435]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+
+[node name="TravelMenu" type="Control" parent="." unique_id=1592448850 groups=["travel_menu"]]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("53_travelmenu")
+default_horse = ExtResource("58_packhorse")
+tile_normal = SubResource("StyleBoxFlat_region_normal")
+tile_hover = SubResource("StyleBoxFlat_region_hover")
+tile_pressed = SubResource("StyleBoxFlat_region_selected")
+tile_disabled = SubResource("StyleBoxFlat_button_disabled")
+tile_selected = SubResource("StyleBoxFlat_region_selected")
+
+[node name="Blur" type="ColorRect" parent="TravelMenu" unique_id=1592448851]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="TravelMenu" unique_id=1592448852]
+layout_mode = 0
+anchor_left = 0.2
+anchor_top = 0.18
+anchor_right = 0.8
+anchor_bottom = 0.82
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="TravelMenu/Panel" unique_id=1592448853]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="VBoxContainer" parent="TravelMenu/Panel/Body" unique_id=1592448854]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="Title" type="Label" parent="TravelMenu/Panel/Body/Header" unique_id=1592448855]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 42
+text = "RIDE OUT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Horse" type="Label" parent="TravelMenu/Panel/Body/Header" unique_id=1592448856]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.36, 0.34, 1)
+theme_override_font_sizes/font_size = 20
+text = "PACK HORSE"
+horizontal_alignment = 1
+
+[node name="Route" type="Label" parent="TravelMenu/Panel/Body/Header" unique_id=1592448863]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_font_sizes/font_size = 28
+text = "REGION A  ->  REGION B"
+horizontal_alignment = 1
+
+[node name="Now" type="Label" parent="TravelMenu/Panel/Body/Header" unique_id=1592448864]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.36, 0.34, 1)
+theme_override_font_sizes/font_size = 20
+text = "SETTING OUT AT DAWN"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="TravelMenu/Panel/Body" unique_id=1592448857]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Days" type="GridContainer" parent="TravelMenu/Panel/Body" unique_id=1592448858]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 4
+
+[node name="Rule2" type="ColorRect" parent="TravelMenu/Panel/Body" unique_id=1592448859]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Footer" type="HBoxContainer" parent="TravelMenu/Panel/Body" unique_id=1592448860]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 2
+
+[node name="Status" type="Label" parent="TravelMenu/Panel/Body/Footer" unique_id=1592448861]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "PICK HOW LONG THE RIDE SHOULD TAKE"
+vertical_alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="TravelMenu/Panel/Body/Footer" unique_id=1592448862]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+disabled = true
+text = "RIDE OUT"
+
+[node name="CartPrompt" type="Control" parent="." unique_id=1592448870]
+visible = false
+z_index = 130
+layout_mode = 3
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -340.0
+offset_top = -150.0
+offset_right = -32.0
+offset_bottom = -84.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("50_meeu7")
+source_group = &"horse_cart"
+prompt_text = "Hold \"E\" to Travel"
+menu_group = &"travel_menu"
+
+[node name="Panel" type="PanelContainer" parent="CartPrompt" unique_id=1592448871]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="CartPrompt/Panel" unique_id=1592448872]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Label" type="Label" parent="CartPrompt/Panel/Body" unique_id=1592448873]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 22
+text = "Hold \"E\" to Travel"
+horizontal_alignment = 1
+
+[node name="Track" type="ColorRect" parent="CartPrompt/Panel/Body" unique_id=1592448874]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.16, 0.03, 0.03, 1)
+
+[node name="Fill" type="ColorRect" parent="CartPrompt/Panel/Body/Track" unique_id=1592448875]
+layout_mode = 0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.82, 0.1, 0.1, 1)
+
+[node name="TravelEventMenu" type="Control" parent="." unique_id=1592448890 groups=["travel_event_menu"]]
+visible = false
+z_index = 140
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("59_traveleventmenu")
+
+[node name="Panel" type="PanelContainer" parent="TravelEventMenu" unique_id=1592448891]
+layout_mode = 0
+anchor_left = 0.28
+anchor_top = 0.34
+anchor_right = 0.72
+anchor_bottom = 0.66
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="TravelEventMenu/Panel" unique_id=1592448892]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="Title" type="Label" parent="TravelEventMenu/Panel/Body" unique_id=1592448893]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 38
+text = "A GANG ON THE ROAD"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Description" type="Label" parent="TravelEventMenu/Panel/Body" unique_id=1592448894]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.36, 0.34, 1)
+theme_override_font_sizes/font_size = 20
+text = "RIDERS AHEAD."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="TravelEventMenu/Panel/Body" unique_id=1592448895]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="IgnoreButton" type="Button" parent="TravelEventMenu/Panel/Body/Buttons" unique_id=1592448896]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "IGNORE"
+
+[node name="FightButton" type="Button" parent="TravelEventMenu/Panel/Body/Buttons" unique_id=1592448897]
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "FIGHT"
+
+[node name="TravelLoading" type="Control" parent="." unique_id=1592448880 groups=["travel_loading"]]
+process_mode = 3
+visible = false
+z_index = 250
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("55_travelload")
+
+[node name="Backdrop" type="ColorRect" parent="TravelLoading" unique_id=1592448881]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Cart" type="TextureRect" parent="TravelLoading" unique_id=1592448882]
+z_index = 20
+custom_minimum_size = Vector2(420, 262)
+layout_mode = 0
+offset_right = 420.0
+offset_bottom = 262.0
+mouse_filter = 2
+texture = ExtResource("57_cartart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Walker" type="Control" parent="TravelLoading" unique_id=1592448887]
+visible = false
+z_index = 20
+custom_minimum_size = Vector2(230, 230)
+anchors_preset = 0
+offset_right = 230.0
+offset_bottom = 230.0
+mouse_filter = 2
+
+[node name="Body" type="TextureRect" parent="TravelLoading/Walker" unique_id=1592448888]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("63_walkbody")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Head" type="TextureRect" parent="TravelLoading/Walker" unique_id=1592448889]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("64_walkhead")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="VBoxContainer" parent="TravelLoading" unique_id=1592448883]
+z_index = 20
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = -290.0
+offset_right = 420.0
+offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="TravelLoading/Text" unique_id=1592448884]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 46
+text = "RIDING OUT"
+horizontal_alignment = 1
+
+[node name="Days" type="Label" parent="TravelLoading/Text" unique_id=1592448885]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.36, 0.34, 1)
+theme_override_font_sizes/font_size = 24
+text = "4 DAYS ON THE TRAIL"
+horizontal_alignment = 1
+
+[node name="Result" type="Label" parent="TravelLoading/Text" unique_id=1592448886]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 40
+text = "NOTHING HAPPENED."
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="TravelLoading" unique_id=1592448879]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 45.0
+offset_top = -76.0
+offset_right = 745.0
+offset_bottom = -26.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.62, 0.45, 0.42, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 24
+text = "SHIFT to Fast Travel ;)"
+vertical_alignment = 1
+
+[node name="Picture" type="TextureRect" parent="TravelLoading" unique_id=617492800]
+visible = false
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("66_clxfm")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Caption" type="Label" parent="TravelLoading" unique_id=1733551375]
+visible = false
+layout_mode = 0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 72.0
+offset_top = -136.0
+offset_right = 1000.0
+offset_bottom = -64.0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 40
+text = "Maceraya çıkılıyor"
+vertical_alignment = 1
+
+[node name="TravelDayMenu" type="Control" parent="." unique_id=1592448920 groups=["travel_day_menu"]]
+visible = false
+z_index = 255
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("62_travelday")
+
+[node name="Actions" type="VBoxContainer" parent="TravelDayMenu" unique_id=1592448921]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 56.0
+offset_top = -168.0
+offset_right = 516.0
+offset_bottom = 168.0
+grow_vertical = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Heading" type="Label" parent="TravelDayMenu/Actions" unique_id=1592448922]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
+text = "MAKE READY"
+
+[node name="Blood" type="Label" parent="TravelDayMenu/Actions" unique_id=1592448923]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 22
+text = "BLOOD 0"
+
+[node name="HealButton" type="Button" parent="TravelDayMenu/Actions" unique_id=1592448924]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "HEAL"
+
+[node name="AmmoButton" type="Button" parent="TravelDayMenu/Actions" unique_id=1592448925]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "BUY AMMO"
+
+[node name="WeaponButton" type="Button" parent="TravelDayMenu/Actions" unique_id=1592448926]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "WEAPONS"
+
+[node name="ContinueButton" type="Button" parent="TravelDayMenu" unique_id=1592448927]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -516.0
+offset_top = -46.0
+offset_right = -56.0
+offset_bottom = 46.0
+grow_horizontal = 0
+grow_vertical = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 30
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "CONTINUE TRAVEL"
+
+[node name="SleepMenu" type="Control" parent="." groups=["sleep_menu"]]
+visible = false
+z_index = 138
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("69_sleep")
+button_normal = SubResource("StyleBoxFlat_button_normal")
+button_hover = SubResource("StyleBoxFlat_button_hover")
+button_pressed = SubResource("StyleBoxFlat_button_pressed")
+
+[node name="Backdrop" type="ColorRect" parent="SleepMenu"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.035, 0.014, 0.016, 1)
+
+[node name="Ground" type="TextureRect" parent="SleepMenu"]
+texture_repeat = 1
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch_mode = 2
+
+[node name="Sleeper" type="Control" parent="SleepMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -190.0
+offset_top = -260.0
+offset_right = 190.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+rotation = 1.4661
+pivot_offset = Vector2(190, 190)
+mouse_filter = 2
+
+[node name="Body" type="TextureRect" parent="SleepMenu/Sleeper"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("63_walkbody")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Head" type="TextureRect" parent="SleepMenu/Sleeper"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("64_walkhead")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Letters" type="Control" parent="SleepMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Announce" type="Label" parent="SleepMenu"]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -460.0
+offset_top = 120.0
+offset_right = 460.0
+offset_bottom = 210.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 9
+theme_override_font_sizes/font_size = 62
+text = "AMBUSH"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Panel" type="PanelContainer" parent="SleepMenu"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -268.0
+offset_right = 300.0
+offset_bottom = -56.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_sleep_panel")
+
+[node name="Body" type="VBoxContainer" parent="SleepMenu/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Title" type="Label" parent="SleepMenu/Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
+text = "SLEEP"
+horizontal_alignment = 1
+
+[node name="Status" type="Label" parent="SleepMenu/Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 22
+text = "HOW LONG?"
+horizontal_alignment = 1
+
+[node name="Durations" type="HBoxContainer" parent="SleepMenu/Panel/Body"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="WakeButton" type="Button" parent="SleepMenu/Panel/Body"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "WAKE UP"
+
+[node name="DayTransitionDial" type="Control" parent="." unique_id=164945508]
+process_mode = 3
+visible = false
+z_index = 260
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("68_swch0")
+
+[node name="NowFace" type="VBoxContainer" parent="DayTransitionDial" unique_id=3249680]
+custom_minimum_size = Vector2(340, 150)
+layout_mode = 0
+mouse_filter = 2
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="DayTransitionDial/NowFace" unique_id=1384147128]
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="DayTransitionDial/NowFace" unique_id=486831480]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 46
+text = "TWILIGHT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NextFace" type="VBoxContainer" parent="DayTransitionDial" unique_id=1628344676]
+custom_minimum_size = Vector2(340, 150)
+layout_mode = 0
+mouse_filter = 2
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="DayTransitionDial/NextFace" unique_id=1311151605]
+custom_minimum_size = Vector2(0, 92)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="DayTransitionDial/NextFace" unique_id=1717379774]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 46
+text = "NIGHT"
+horizontal_alignment = 1
+vertical_alignment = 1

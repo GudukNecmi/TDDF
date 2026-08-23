@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="MiniBossPhase" load_steps=2 format=3 uid="uid://cgotikbossphase3"]
+
+[ext_resource type="Script" path="res://Scripts/Enemy/mini_boss_phase.gd" id="1_phase"]
+
+[resource]
+script = ExtResource("1_phase")
+phase_name = "Enraged"
+hp_above = 0.0
+group_size = 0
+group_interval = 2.0
+spawn_spacing = 0.1
+speed_multiplier = 1.2
+tint_strength = 0.28
+tint_color = Color(1, 0.16, 0.14, 1)

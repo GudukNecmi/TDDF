@@ -1,0 +1,57 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/throwable_weapon.gd" id="1_throwable"]
+[ext_resource type="Texture2D" uid="uid://cys1thw4n36bm" path="res://Assets/Enemies/Enemy1/Knife1.PNG" id="2_knife"]
+[ext_resource type="PackedScene" path="res://Scenes/Projectile/ThrownKnife.tscn" id="3_flight"]
+[ext_resource type="Script" uid="uid://cpux70tukitfn" path="res://Scripts/Common/held_item_flip.gd" id="4_flip"]
+[ext_resource type="Script" path="res://Scripts/Weapons/throwable_audio.gd" id="5_audio"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="6_bank"]
+[ext_resource type="AudioStream" uid="uid://wpfust36p58h" path="res://Sound/Efect/Guns/Throwable/Knife/KnifeThrow.WAV" id="7_throw"]
+
+[node name="Knife" type="Node2D"]
+z_index = 1
+scale = Vector2(0.2, 0.2)
+script = ExtResource("1_throwable")
+follow_offset = Vector2(0, -25)
+hand_offset = Vector2(32, 0)
+follow_speed = 15.0
+trail_distance = 14.0
+catch_up_speed = 36.0
+projectile_scene = ExtResource("3_flight")
+muzzle_path = NodePath("MuzzleRig/Muzzle")
+art_sprite_path = NodePath("Art/Body")
+return_time = 0.1
+
+[node name="Art" type="Node2D" parent="."]
+
+[node name="Body" type="Sprite2D" parent="Art"]
+rotation = 2.7383
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_knife")
+centered = false
+offset = Vector2(-300, -645)
+
+[node name="MuzzleRig" type="Node2D" parent="."]
+
+[node name="Muzzle" type="Marker2D" parent="MuzzleRig"]
+position = Vector2(147, 0)
+
+[node name="ArtFlip" type="Node" parent="."]
+script = ExtResource("4_flip")
+art_paths = Array[NodePath]([NodePath("../Art"), NodePath("../MuzzleRig")])
+
+[node name="ThrowAudio" type="Node" parent="."]
+script = ExtResource("5_audio")
+source_path = NodePath("..")
+sound_bank_path = NodePath("SoundBank")
+event_signal = &"thrown"
+sound = &"throw"
+origin_path = NodePath("..")
+
+[node name="SoundBank" type="Node" parent="ThrowAudio"]
+script = ExtResource("6_bank")
+sounds = {
+&"throw": ExtResource("7_throw")
+}
+voice_count = 1
+pitch_variation = 0.05

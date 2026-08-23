@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://daomm2y55j15r"]
+
+[ext_resource type="Script" path="res://Scripts/UI/damage_number.gd" id="1_dmgnum"]
+
+[node name="DamageNumber" type="Node2D"]
+top_level = true
+physics_interpolation_mode = 2
+script = ExtResource("1_dmgnum")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -70.0
+offset_top = -26.0
+offset_right = 70.0
+offset_bottom = 26.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.92, 0.83, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 30
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1

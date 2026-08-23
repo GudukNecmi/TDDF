@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="MiniBossTier" load_steps=2 format=3 uid="uid://cgotikbosstier0"]
+
+[ext_resource type="Script" path="res://Scripts/Enemy/mini_boss_tier.gd" id="1_tier"]
+
+[resource]
+script = ExtResource("1_tier")
+knowledge = 0
+scale_multiplier = 2.5
+speed_multiplier = 0.0
+support_count = -1

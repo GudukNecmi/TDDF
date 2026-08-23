@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://clqen2s7h6k1g"
+path="res://.godot/imported/TDDF Arena Music ArenaLoop.WAV-0992ce3733be1d7fbe35090ee82906de.sample"
+
+[deps]
+
+source_file="res://Sound/Music/TDDF Arena Music ArenaLoop.WAV"
+dest_files=["res://.godot/imported/TDDF Arena Music ArenaLoop.WAV-0992ce3733be1d7fbe35090ee82906de.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

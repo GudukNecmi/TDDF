@@ -1,0 +1,64 @@
+[gd_scene format=3 uid="uid://cbase0shop"]
+
+[ext_resource type="Script" path="res://Scripts/World/shop_station.gd" id="1_station"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Buildings/shop_interior.png" id="2_int"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Buildings/shop_exterior.png" id="3_ext"]
+[ext_resource type="Script" path="res://Scripts/World/cutaway_building.gd" id="4_cutaway"]
+[ext_resource type="PackedScene" uid="uid://c23vp1exf46oi" path="res://Scenes/World/Props/Torch.tscn" id="5_torch"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Torches/torch_post.png" id="6_post"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_shopentry"]
+size = Vector2(250, 160)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_shopcounter"]
+size = Vector2(130, 76)
+
+[node name="Shop" type="Node2D"]
+script = ExtResource("1_station")
+shop_id = &"shop"
+display_name = "Shop"
+
+[node name="Art" type="Node2D" parent="."]
+
+[node name="Interior" type="Sprite2D" parent="Art"]
+texture = ExtResource("2_int")
+
+[node name="Exterior" type="Sprite2D" parent="Art"]
+texture = ExtResource("3_ext")
+
+[node name="Torches" type="Node2D" parent="."]
+
+[node name="PostLeft" type="Sprite2D" parent="Torches"]
+position = Vector2(-98, 118)
+texture = ExtResource("6_post")
+
+[node name="PostRight" type="Sprite2D" parent="Torches"]
+position = Vector2(98, 118)
+texture = ExtResource("6_post")
+
+[node name="TorchLeft" parent="Torches" instance=ExtResource("5_torch")]
+position = Vector2(-98, 90)
+
+[node name="TorchRight" parent="Torches" instance=ExtResource("5_torch")]
+position = Vector2(98, 90)
+
+[node name="InteractArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractArea"]
+position = Vector2(0, 104)
+shape = SubResource("RectangleShape2D_shopcounter")
+
+[node name="Building" type="Node2D" parent="."]
+script = ExtResource("4_cutaway")
+exterior_paths = Array[NodePath]([NodePath("../Art/Exterior")])
+interior_paths = Array[NodePath]([NodePath("../Art/Interior")])
+
+[node name="EntryArea" type="Area2D" parent="Building"]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Building/EntryArea"]
+position = Vector2(0, 46)
+shape = SubResource("RectangleShape2D_shopentry")

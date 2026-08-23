@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://cwffyvf6iyorl"]
+
+[ext_resource type="Script" uid="uid://c8ndychdcstey" path="res://Scripts/Weapons/coin.gd" id="1_qnlrs"]
+[ext_resource type="Texture2D" uid="uid://dqx04wdbojwig" path="res://Assets/Guns/Revolver and Coin/Coin.PNG" id="2_xjrnb"]
+[ext_resource type="Texture2D" uid="uid://b46m4qul6b4wc" path="res://Assets/Guns/Revolver and Coin/CoinFlip.PNG" id="3_fajkx"]
+[ext_resource type="Resource" uid="uid://c34o2t24bnuih" path="res://Resources/coin_strike_profile.tres" id="4_xeixn"]
+[ext_resource type="Texture2D" uid="uid://ch7n2pj6mk2ic" path="res://Assets/Guns/Revolver and Coin/Shine.PNG" id="5_2hgfw"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="6_wxhsr"]
+[ext_resource type="AudioStream" uid="uid://bl8chk7sdhx50" path="res://Sound/Efect/Guns/Revolver and Coin/CoinShot.WAV" id="7_23vmw"]
+[ext_resource type="AudioStream" uid="uid://kvb7ocwwonmn" path="res://Sound/Efect/Guns/Revolver and Coin/CoinFlipSoundEfect.WAV" id="8_3dpj8"]
+[ext_resource type="Script" uid="uid://vftr4ljigopq" path="res://Scripts/Weapons/coin_feedback.gd" id="9_2fq7f"]
+[ext_resource type="PackedScene" uid="uid://de78rcqpv7vx1" path="res://Scenes/Effects/CoinHitEffect.tscn" id="10_kwdlr"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_tpgh2"]
+blend_mode = 1
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ferq8"]
+radius = 9.0
+
+[node name="Coin" type="Area2D" unique_id=1415149619]
+collision_layer = 2
+collision_mask = 2
+script = ExtResource("1_qnlrs")
+face_texture = ExtResource("2_xjrnb")
+edge_texture = ExtResource("3_fajkx")
+profile = ExtResource("4_xeixn")
+retire_on_lost_target = true
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1402683276]
+scale = Vector2(0.09375, 0.09375)
+texture = ExtResource("2_xjrnb")
+
+[node name="Shine" type="Sprite2D" parent="." unique_id=1079828515]
+visible = false
+modulate = Color(1, 1, 1, 0)
+material = SubResource("CanvasItemMaterial_tpgh2")
+scale = Vector2(0.14999999, 0.14999999)
+texture = ExtResource("5_2hgfw")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1883229407]
+shape = SubResource("CircleShape2D_ferq8")
+
+[node name="Sounds" type="Node" parent="." unique_id=1676326943]
+script = ExtResource("6_wxhsr")
+sounds = {
+&"coin_shot": ExtResource("7_23vmw")
+}
+
+[node name="FlipSound" type="AudioStreamPlayer2D" parent="." unique_id=997324622]
+stream = ExtResource("8_3dpj8")
+autoplay = true
+
+[node name="Feedback" type="Node" parent="." unique_id=521446704]
+script = ExtResource("9_2fq7f")
+hit_effect_scene = ExtResource("10_kwdlr")

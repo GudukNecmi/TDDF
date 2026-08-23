@@ -1,0 +1,116 @@
+[gd_scene format=3 uid="uid://b2vcwi7dm7w5e"]
+
+[ext_resource type="Script" uid="uid://cx34v72ypuccl" path="res://Scripts/Weapons/shotgun.gd" id="1_bic6o"]
+[ext_resource type="Texture2D" uid="uid://dbf7tbecjvk6g" path="res://Assets/Guns/Shotgun/DefaultShothun.PNG" id="2_default"]
+[ext_resource type="Texture2D" uid="uid://dvly7cqw0tpq4" path="res://Assets/Guns/Shotgun/HalfPumpShotgun.PNG" id="3_halfpump"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="4_sbank"]
+[ext_resource type="AudioStream" uid="uid://ctd0dvk25sbou" path="res://Sound/Efect/Guns/Shotgun/Shotgun Blast.WAV" id="5_blast"]
+[ext_resource type="PackedScene" uid="uid://cvgxortnu487k" path="res://Scenes/Projectile/Projectile.tscn" id="6_247uq"]
+[ext_resource type="AudioStream" uid="uid://jq6tcr6yyj4a" path="res://Sound/Efect/Guns/Shotgun/Shotgun R1.WAV" id="6_pumpr1"]
+[ext_resource type="AudioStream" uid="uid://d2gyf2o18cb46" path="res://Sound/Efect/Guns/Shotgun/Shotgun R2.WAV" id="7_pumpr2"]
+[ext_resource type="Script" uid="uid://ct7o76x8woiju" path="res://Scripts/Weapons/shotgun_feedback.gd" id="8_fdbk"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/MuzzleFlash.tscn" id="9_flash"]
+[ext_resource type="PackedScene" uid="uid://gac0c2dpftes" path="res://Scenes/Effects/Casing.tscn" id="10_casing"]
+[ext_resource type="Script" uid="uid://cpux70tukitfn" path="res://Scripts/Common/held_item_flip.gd" id="11_hflip"]
+[ext_resource type="AudioStream" uid="uid://ccnoqusy5b3jy" path="res://Sound/Efect/Guns/Shotgun/DryFire.WAV" id="11_m8huk"]
+[ext_resource type="Resource" uid="uid://css8bk47bsos8" path="res://Resources/shotgun_pellet_profile.tres" id="12_profile"]
+[ext_resource type="Texture2D" uid="uid://dqkngrib2h7vj" path="res://Assets/Guns/Shotgun/BlastEfect.PNG" id="13_blastart"]
+[ext_resource type="Texture2D" uid="uid://drd073kdinlp2" path="res://Assets/Guns/Shotgun/BlastShotgun.PNG" id="14_firing"]
+[ext_resource type="Texture2D" uid="uid://dkch6ygp4gr83" path="res://Assets/Guns/Shotgun/Pump.PNG" id="15_pumpart"]
+[ext_resource type="Script" uid="uid://jbauvq2aroyh" path="res://Scripts/Weapons/weapon_ammo.gd" id="16_rkdor"]
+[ext_resource type="Resource" uid="uid://cwqsj28dqr25j" path="res://Resources/Ammo/ammo_shell.tres" id="17_m8huk"]
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_camera.gd" id="18_camera"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_blast"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_muzzle"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_muzzle"]
+gradient = SubResource("Gradient_muzzle")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="Shotgun" type="Node2D" unique_id=2059946623]
+z_index = 1
+scale = Vector2(0.2, 0.2)
+script = ExtResource("1_bic6o")
+ready_texture = ExtResource("2_default")
+pumped_texture = ExtResource("3_halfpump")
+firing_texture = ExtResource("14_firing")
+pump_texture = ExtResource("15_pumpart")
+projectile_scene = ExtResource("6_247uq")
+
+[node name="Art" type="Node2D" parent="." unique_id=1619055685]
+
+[node name="Body" type="Sprite2D" parent="Art" unique_id=480444415]
+position = Vector2(-185, -82)
+scale = Vector2(0.65, 0.65)
+texture = ExtResource("2_default")
+centered = false
+flip_h = true
+
+[node name="Pump" type="Sprite2D" parent="Art" unique_id=121693411]
+position = Vector2(-185, -82)
+scale = Vector2(0.65, 0.65)
+texture = ExtResource("15_pumpart")
+centered = false
+flip_h = true
+
+[node name="MuzzleRig" type="Node2D" parent="." unique_id=1801099338]
+
+[node name="Muzzle" type="Marker2D" parent="MuzzleRig" unique_id=1098998790]
+position = Vector2(250, -43)
+
+[node name="Blast" type="Sprite2D" parent="MuzzleRig/Muzzle" unique_id=1689626095]
+visible = false
+modulate = Color(1, 1, 1, 0)
+material = SubResource("CanvasItemMaterial_blast")
+position = Vector2(55, 0)
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("13_blastart")
+offset = Vector2(1, -10)
+flip_h = true
+
+[node name="MuzzleLight" type="PointLight2D" parent="MuzzleRig" unique_id=788371546]
+position = Vector2(300, -43)
+color = Color(1, 0.89, 0.62, 1)
+energy = 0.0
+texture = SubResource("GradientTexture2D_muzzle")
+texture_scale = 9.0
+
+[node name="Sounds" type="Node" parent="." unique_id=1376298008]
+script = ExtResource("4_sbank")
+sounds = {
+&"blast": ExtResource("5_blast"),
+&"dry_fire": ExtResource("11_m8huk"),
+&"pump_back": ExtResource("6_pumpr1"),
+&"pump_forward": ExtResource("7_pumpr2")
+}
+pitch_variation = 0.04
+
+[node name="Feedback" type="Node" parent="." unique_id=618654413]
+script = ExtResource("8_fdbk")
+muzzle_flash_scene = ExtResource("9_flash")
+projectile_profile = ExtResource("12_profile")
+casing_scene = ExtResource("10_casing")
+
+[node name="ArtFlip" type="Node" parent="." unique_id=755051173]
+script = ExtResource("11_hflip")
+art_paths = Array[NodePath]([NodePath("../Art"), NodePath("../MuzzleRig")])
+
+[node name="Ammo" type="Node" parent="." unique_id=2142253148]
+script = ExtResource("16_rkdor")
+ammo_type = ExtResource("17_m8huk")
+
+[node name="Camera" type="Node" parent="."]
+script = ExtResource("18_camera")
+offset_fraction = 0.0
+zoom_multiplier = 1.15
+zoom_smoothing = 3.0
+respects_holster = true

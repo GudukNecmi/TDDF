@@ -1,0 +1,76 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="1_shadow"]
+[ext_resource type="Script" uid="uid://bm3ln8gbx37l4" path="res://Scripts/World/prop_sway.gd" id="2_sway"]
+[ext_resource type="Script" uid="uid://da4exs3wtf10i" path="res://Scripts/World/prop_art.gd" id="3_art"]
+[ext_resource type="Script" uid="uid://dtnfb87bh7qke" path="res://Scripts/World/prop_touch.gd" id="4_touch"]
+[ext_resource type="Texture2D" uid="uid://dslybayx3wynv" path="res://Assets/Maps/Desert/2- Props/Branch/IMG_2279.PNG" id="5_bush1"]
+[ext_resource type="Texture2D" uid="uid://cah343as4dws2" path="res://Assets/Maps/Desert/2- Props/Branch/IMG_2280.PNG" id="6_bush2"]
+[ext_resource type="Texture2D" uid="uid://bflx0olyqobey" path="res://Assets/Maps/Desert/2- Props/Branch/IMG_2281.PNG" id="7_bush3"]
+[ext_resource type="Script" path="res://Scripts/World/prop_lizard.gd" id="8_lizard"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Lizard.tscn" id="9_lizardscene"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_touch"]
+radius = 42.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_cover"]
+radius = 26.0
+
+[node name="Bush" type="Node2D" groups=["desert_prop"]]
+
+[node name="Shadow" type="Sprite2D" parent="."]
+script = ExtResource("1_shadow")
+shadow_scale = Vector2(58, 22)
+shadow_offset = Vector2(6, -3)
+shadow_opacity = 0.32
+
+[node name="Sway" type="Node2D" parent="."]
+script = ExtResource("2_sway")
+idle_degrees = 2.6
+idle_cycles_per_second = 0.34
+idle_speed_variation = 0.35
+knock_degrees = 9.0
+knock_cycles_per_second = 2.4
+knock_damping = 3.0
+max_degrees = 16.0
+
+[node name="Art" type="Sprite2D" parent="Sway"]
+script = ExtResource("3_art")
+textures = Array[Texture2D]([ExtResource("5_bush1"), ExtResource("6_bush2"), ExtResource("7_bush3")])
+size_mode = 0
+reference_height = 26.0
+mirror_chance = 0.5
+
+[node name="Touch" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+script = ExtResource("4_touch")
+body_group = &"player"
+minimum_speed = 0.0
+retrigger_interval = 0.4
+sway_path = NodePath("../Sway")
+knock_strength = 1.0
+speed_multiplier = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Touch"]
+position = Vector2(0, -19)
+shape = SubResource("CircleShape2D_touch")
+
+[node name="Cover" type="StaticBody2D" parent="."]
+collision_layer = 64
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Cover"]
+position = Vector2(0, -8)
+shape = SubResource("CircleShape2D_cover")
+
+[node name="Lizard" type="Node" parent="."]
+script = ExtResource("8_lizard")
+lizard_scene = ExtResource("9_lizardscene")
+spawn_chance = 0.08
+contact_cooldown = 6.0
+one_roll_per_contact = true
+max_active = 3
+emerge_height = 4.0
+emerge_spread = 6.0

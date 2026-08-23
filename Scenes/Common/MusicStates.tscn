@@ -1,0 +1,14 @@
+[gd_scene load_steps=8 format=3 uid="uid://cgotikmusicstates"]
+
+[ext_resource type="Script" path="res://Scripts/Common/music_state_board.gd" id="1_board"]
+[ext_resource type="Script" path="res://Scripts/Common/music_state.gd" id="2_state"]
+[ext_resource type="Resource" path="res://Resources/Music/state_base.tres" id="3_base"]
+[ext_resource type="Resource" path="res://Resources/Music/state_travel.tres" id="4_travel"]
+[ext_resource type="Resource" path="res://Resources/Music/state_camp.tres" id="5_camp"]
+[ext_resource type="Resource" path="res://Resources/Music/state_sleep.tres" id="6_sleep"]
+[ext_resource type="Resource" path="res://Resources/Music/state_trouble.tres" id="7_trouble"]
+
+[node name="MusicStates" type="Node"]
+process_mode = 3
+script = ExtResource("1_board")
+states = Array[ExtResource("2_state")]([ExtResource("3_base"), ExtResource("4_travel"), ExtResource("5_camp"), ExtResource("6_sleep"), ExtResource("7_trouble")])

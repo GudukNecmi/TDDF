@@ -1,0 +1,72 @@
+[gd_resource type="Resource" script_class="MiniBossWardrobe" load_steps=55 format=3 uid="uid://cgotikbosslook1"]
+
+[ext_resource type="Script" path="res://Scripts/Enemy/mini_boss_wardrobe.gd" id="1_wardrobe"]
+[ext_resource type="Texture2D" uid="uid://dcohyvwsbvlrt" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head1.PNG" id="h1"]
+[ext_resource type="Texture2D" uid="uid://b818byixc228a" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head2.PNG" id="h2"]
+[ext_resource type="Texture2D" uid="uid://c4x6mi7ydqdqi" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head3.PNG" id="h3"]
+[ext_resource type="Texture2D" uid="uid://pvsmhuephchn" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head4.PNG" id="h4"]
+[ext_resource type="Texture2D" uid="uid://dswfnmy65upe1" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head5.PNG" id="h5"]
+[ext_resource type="Texture2D" uid="uid://dn4bg84hsdqs5" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head6.PNG" id="h6"]
+[ext_resource type="Texture2D" uid="uid://c7fnd6151bo87" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head7.PNG" id="h7"]
+[ext_resource type="Texture2D" uid="uid://bffyl2k1pify5" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head8.PNG" id="h8"]
+[ext_resource type="Texture2D" uid="uid://cn7qk7doiogmw" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head9.PNG" id="h9"]
+[ext_resource type="Texture2D" uid="uid://ciknqfl4s6ync" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head10.PNG" id="h10"]
+[ext_resource type="Texture2D" uid="uid://dbs7l068jnr0y" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head11.PNG" id="h11"]
+[ext_resource type="Texture2D" uid="uid://i5354weh4vaw" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head12.PNG" id="h12"]
+[ext_resource type="Texture2D" uid="uid://bdv6q8jhsl1rh" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head13.PNG" id="h13"]
+[ext_resource type="Texture2D" uid="uid://dl22l6rpt8ia8" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head14.PNG" id="h14"]
+[ext_resource type="Texture2D" uid="uid://bhgj1jfpynw8v" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head15.PNG" id="h15"]
+[ext_resource type="Texture2D" uid="uid://dsmfw2jio8bj5" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head16.PNG" id="h16"]
+[ext_resource type="Texture2D" uid="uid://5jv3oxs7d8wa" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head17.PNG" id="h17"]
+[ext_resource type="Texture2D" uid="uid://dbx4ricd7jeu4" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head18.PNG" id="h18"]
+[ext_resource type="Texture2D" uid="uid://oihq1s435k2n" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head19.PNG" id="h19"]
+[ext_resource type="Texture2D" uid="uid://1r1gruwolti7" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Head20.PNG" id="h20"]
+[ext_resource type="Texture2D" uid="uid://s4ihnsocq346" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Body (1).PNG" id="b1"]
+[ext_resource type="Texture2D" uid="uid://c7rqfmeawlimi" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Body (2).PNG" id="b2"]
+[ext_resource type="Texture2D" uid="uid://i1l0477qbiw6" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Body (3).PNG" id="b3"]
+[ext_resource type="Texture2D" uid="uid://bvqiicwg6urfl" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Body (4).PNG" id="b4"]
+[ext_resource type="Texture2D" uid="uid://co3tfxgfv54v2" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Body (5).PNG" id="b5"]
+[ext_resource type="Texture2D" uid="uid://doctfu3vg25dp" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Body (6).PNG" id="b6"]
+[ext_resource type="Texture2D" uid="uid://dghx5q45hqrig" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Body (7).PNG" id="b7"]
+[ext_resource type="Texture2D" uid="uid://bfthmaqkvd0uj" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/Body (8).PNG" id="b8"]
+[ext_resource type="Texture2D" uid="uid://bf2vtnedm7m2j" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (1).PNG" id="w1"]
+[ext_resource type="Texture2D" uid="uid://cgdt84ysm6gf6" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (2).PNG" id="w2"]
+[ext_resource type="Texture2D" uid="uid://bqc75rbuj3x0h" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (3).PNG" id="w3"]
+[ext_resource type="Texture2D" uid="uid://blciee3bqaruo" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (4).PNG" id="w4"]
+[ext_resource type="Texture2D" uid="uid://c38jx6a7v32vs" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (5).PNG" id="w5"]
+[ext_resource type="Texture2D" uid="uid://c2vqrbkh4qny2" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (6).PNG" id="w6"]
+[ext_resource type="Texture2D" uid="uid://q8sp3e48tepr" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (7).PNG" id="w7"]
+[ext_resource type="Texture2D" uid="uid://bafdudmu0wcmh" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (8).PNG" id="w8"]
+[ext_resource type="Texture2D" uid="uid://ctmgmorh3b332" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (9).PNG" id="w9"]
+[ext_resource type="Texture2D" uid="uid://c3ho3u57u2jyu" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (10).PNG" id="w10"]
+[ext_resource type="Texture2D" uid="uid://b5xlnovww7obd" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (11).PNG" id="w11"]
+[ext_resource type="Texture2D" uid="uid://7p0lkddegklx" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (12).PNG" id="w12"]
+[ext_resource type="Texture2D" uid="uid://cfuf3kna21mqr" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (13).PNG" id="w13"]
+[ext_resource type="Texture2D" uid="uid://ci8h7v1obo6g1" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (14).PNG" id="w14"]
+[ext_resource type="Texture2D" uid="uid://dfvy0rx1adr2c" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (15).PNG" id="w15"]
+[ext_resource type="Texture2D" uid="uid://bjcx5nye78c1i" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (16).PNG" id="w16"]
+[ext_resource type="Texture2D" uid="uid://bvrn8e2dicvnc" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (17).PNG" id="w17"]
+[ext_resource type="Texture2D" uid="uid://723lxukn167b" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (18).PNG" id="w18"]
+[ext_resource type="Texture2D" uid="uid://dggmxjx2bh41m" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (19).PNG" id="w19"]
+[ext_resource type="Texture2D" uid="uid://c6vq4olb6gb6" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (20).PNG" id="w20"]
+[ext_resource type="Texture2D" uid="uid://cadgivtwnrv0g" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (21).PNG" id="w21"]
+[ext_resource type="Texture2D" uid="uid://dlj1dhs8ff65" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (22).PNG" id="w22"]
+[ext_resource type="Texture2D" uid="uid://bbiuiwlqbd6go" path="res://Assets/Enemies/Bosses/MiniBoss1/Weapons/Knife (23).PNG" id="w23"]
+[ext_resource type="Texture2D" uid="uid://bnrsetpdeckmk" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/LeftLeg.PNG" id="lleg"]
+[ext_resource type="Texture2D" uid="uid://duw5w1phw76gj" path="res://Assets/Enemies/Bosses/MiniBoss1/Body Parts/RightLeg.PNG" id="rleg"]
+
+[resource]
+script = ExtResource("1_wardrobe")
+head_textures = Array[Texture2D]([ExtResource("h1"), ExtResource("h2"), ExtResource("h3"), ExtResource("h4"), ExtResource("h5"), ExtResource("h6"), ExtResource("h7"), ExtResource("h8"), ExtResource("h9"), ExtResource("h10"), ExtResource("h11"), ExtResource("h12"), ExtResource("h13"), ExtResource("h14"), ExtResource("h15"), ExtResource("h16"), ExtResource("h17"), ExtResource("h18"), ExtResource("h19"), ExtResource("h20")])
+body_textures = Array[Texture2D]([ExtResource("b1"), ExtResource("b2"), ExtResource("b3"), ExtResource("b4"), ExtResource("b5"), ExtResource("b6"), ExtResource("b7"), ExtResource("b8")])
+weapon_textures = Array[Texture2D]([ExtResource("w1"), ExtResource("w2"), ExtResource("w3"), ExtResource("w4"), ExtResource("w5"), ExtResource("w6"), ExtResource("w7"), ExtResource("w8"), ExtResource("w9"), ExtResource("w10"), ExtResource("w11"), ExtResource("w12"), ExtResource("w13"), ExtResource("w14"), ExtResource("w15"), ExtResource("w16"), ExtResource("w17"), ExtResource("w18"), ExtResource("w19"), ExtResource("w20"), ExtResource("w21"), ExtResource("w22"), ExtResource("w23")])
+left_leg_texture = ExtResource("lleg")
+right_leg_texture = ExtResource("rleg")
+variation_salt = 0
+head_offset_shift = Vector2(0, 0)
+head_scale_multiplier = 1.0
+body_offset_shift = Vector2(0, 0)
+body_scale_multiplier = 1.0
+weapon_offset_shift = Vector2(-6, -69)
+weapon_scale_multiplier = 0.5
+weapon_art_angle_degrees = -93.0

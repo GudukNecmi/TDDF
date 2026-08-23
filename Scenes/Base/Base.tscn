@@ -1,0 +1,149 @@
+[gd_scene format=3 uid="uid://dkulycnisk441"]
+
+[ext_resource type="Texture2D" uid="uid://byhyjy2d1dsua" path="res://Assets/Base/Environment/base_backdrop.png" id="1_backdrop"]
+[ext_resource type="Texture2D" uid="uid://kdonmk5vx7ia" path="res://Assets/Base/Environment/base_ground.png" id="2_ground"]
+[ext_resource type="PackedScene" uid="uid://rrp8cqrjyfpf" path="res://Scenes/Base/BloodPool.tscn" id="3_pool"]
+[ext_resource type="PackedScene" uid="uid://jw3ssc5jpqs2" path="res://Scenes/Base/TeleportPit.tscn" id="4_pit"]
+[ext_resource type="PackedScene" uid="uid://cbase0tent" path="res://Scenes/Base/Tent.tscn" id="5_tent"]
+[ext_resource type="PackedScene" uid="uid://cbase0shop" path="res://Scenes/Base/Shop.tscn" id="6_shop"]
+[ext_resource type="PackedScene" uid="uid://cbase0saloon" path="res://Scenes/Base/Saloon.tscn" id="7_saloon"]
+[ext_resource type="Script" uid="uid://6qp8d6fls0dj" path="res://Scripts/World/parallax_drift.gd" id="8_drift"]
+[ext_resource type="Script" uid="uid://c3d1ekedl15qm" path="res://Scripts/World/world_zone.gd" id="14_zone"]
+[ext_resource type="PackedScene" uid="uid://j0yu70s2kb2l" path="res://Scenes/Base/WantedBoard.tscn" id="15_wanted"]
+[ext_resource type="PackedScene" uid="uid://j03h4b4k5cvm" path="res://Scenes/Base/WeaponTable.tscn" id="16_weapontable"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_basetop"]
+size = Vector2(2300, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_basebottom"]
+size = Vector2(2300, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_baseleft"]
+size = Vector2(64, 1914)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_baseright"]
+size = Vector2(64, 1914)
+
+[sub_resource type="Gradient" id="Gradient_baseglow"]
+offsets = PackedFloat32Array(0, 0.4, 0.75, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0.16, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_baseglow"]
+gradient = SubResource("Gradient_baseglow")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="Base" type="Node2D" unique_id=1934843748]
+
+[node name="Zone" type="Node2D" parent="." unique_id=179690488]
+script = ExtResource("14_zone")
+zone_id = &"base"
+region = Rect2(-1250, -1300, 2500, 2100)
+ambient_colour = Color(0.042, 0.038, 0.066, 1)
+
+[node name="Ground" type="Node2D" parent="." unique_id=1452709108]
+texture_repeat = 2
+
+[node name="Backdrop" type="Sprite2D" parent="Ground" unique_id=2096247638]
+z_index = -20
+position = Vector2(-1700, -1700)
+texture = ExtResource("1_backdrop")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 3400, 3000)
+
+[node name="Floor" type="Sprite2D" parent="Ground" unique_id=1339522977]
+z_index = -10
+position = Vector2(-1150, -1150)
+texture = ExtResource("2_ground")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 2300, 1850)
+
+[node name="Bounds" type="StaticBody2D" parent="Ground" unique_id=1290691318]
+
+[node name="TopWall" type="CollisionShape2D" parent="Ground/Bounds" unique_id=220147990]
+position = Vector2(0, -1182)
+shape = SubResource("RectangleShape2D_basetop")
+
+[node name="BottomWall" type="CollisionShape2D" parent="Ground/Bounds" unique_id=2010961851]
+position = Vector2(0, 732)
+shape = SubResource("RectangleShape2D_basebottom")
+
+[node name="LeftWall" type="CollisionShape2D" parent="Ground/Bounds" unique_id=1837578034]
+position = Vector2(-1182, -225)
+shape = SubResource("RectangleShape2D_baseleft")
+
+[node name="RightWall" type="CollisionShape2D" parent="Ground/Bounds" unique_id=210637120]
+position = Vector2(1182, -225)
+shape = SubResource("RectangleShape2D_baseright")
+
+[node name="HubLight" type="PointLight2D" parent="." unique_id=731638056]
+position = Vector2(0, -120)
+color = Color(0.62, 0.58, 0.78, 1)
+energy = 0.26
+texture = SubResource("GradientTexture2D_baseglow")
+texture_scale = 3.6
+
+[node name="BloodPool" parent="." unique_id=581720382 instance=ExtResource("3_pool")]
+position = Vector2(2, -322)
+
+[node name="TeleportPit" parent="." unique_id=1609841951 instance=ExtResource("4_pit")]
+position = Vector2(0, 309)
+
+[node name="WeaponTable" parent="." unique_id=940716640 instance=ExtResource("16_weapontable")]
+position = Vector2(11, 631)
+
+[node name="Saloon" parent="." unique_id=647106814 instance=ExtResource("7_saloon")]
+position = Vector2(0, -878)
+
+[node name="WantedBoard" parent="." unique_id=1546677935 instance=ExtResource("15_wanted")]
+position = Vector2(-336, 73)
+
+[node name="Shops" type="Node2D" parent="." unique_id=362860684]
+
+[node name="ShopGunsmith" parent="Shops" unique_id=1088287059 instance=ExtResource("5_tent")]
+position = Vector2(-694, -267)
+shop_id = &"gunsmith"
+display_name = "Gunsmith"
+
+[node name="ShopTrader" parent="Shops" unique_id=134248187 instance=ExtResource("5_tent")]
+position = Vector2(712, -270)
+shop_id = &"trader"
+display_name = "Trader"
+
+[node name="ShopApothecary" parent="Shops" unique_id=480926790 instance=ExtResource("6_shop")]
+position = Vector2(-512, 393)
+shop_id = &"apothecary"
+display_name = "Apothecary"
+
+[node name="ShopUndertaker" parent="Shops" unique_id=1183490993 instance=ExtResource("6_shop")]
+position = Vector2(432, 416)
+shop_id = &"undertaker"
+display_name = "Undertaker"
+
+[node name="Parallax" type="Node2D" parent="." unique_id=597739825]
+
+[node name="PipeLayer" type="Node2D" parent="Parallax" unique_id=1741372212]
+modulate = Color(0.84, 0.85, 0.92, 1)
+z_index = 10
+script = ExtResource("8_drift")
+scroll_scale = Vector2(1.05, 1.05)
+
+[node name="Pipes" type="Node2D" parent="Parallax/PipeLayer" unique_id=607437031]
+texture_repeat = 2
+
+[node name="Flanges" type="Node2D" parent="Parallax/PipeLayer/Pipes" unique_id=735296969]
+
+[node name="ToSaloon" type="Node2D" parent="Parallax/PipeLayer/Pipes" unique_id=1964091060]
+
+[node name="ToGunsmith" type="Node2D" parent="Parallax/PipeLayer/Pipes" unique_id=1724239873]
+
+[node name="ToTrader" type="Node2D" parent="Parallax/PipeLayer/Pipes" unique_id=1553005343]
+
+[node name="ToApothecary" type="Node2D" parent="Parallax/PipeLayer/Pipes" unique_id=311033306]
+
+[node name="ToUndertaker" type="Node2D" parent="Parallax/PipeLayer/Pipes" unique_id=432403532]

@@ -1,0 +1,110 @@
+[gd_scene load_steps=8 format=3 uid="uid://c8sanctum0001"]
+
+[ext_resource type="Script" path="res://Scripts/World/teleport_destination.gd" id="1_dest"]
+[ext_resource type="Texture2D" uid="uid://denojwcju0fg7" path="res://Assets/floor_grid.svg" id="2_floor"]
+[ext_resource type="Texture2D" uid="uid://dudidcl2cqo4l" path="res://Assets/wall.svg" id="3_wall"]
+[ext_resource type="PackedScene" uid="uid://c23vp1exf46oi" path="res://Scenes/World/Props/Torch.tscn" id="4_torch"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_stop"]
+size = Vector2(800, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sbottom"]
+size = Vector2(800, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sleft"]
+size = Vector2(64, 578)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sright"]
+size = Vector2(64, 578)
+
+[node name="Sanctum" type="Node2D"]
+script = ExtResource("1_dest")
+id = &"sanctum"
+bounds = Rect2(-400, -225, 800, 450)
+
+[node name="Backdrop" type="Sprite2D" parent="."]
+texture_repeat = 2
+modulate = Color(0.16, 0.15, 0.2, 1)
+position = Vector2(-960, -540)
+texture = ExtResource("3_wall")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 1920, 1080)
+
+[node name="Floor" type="Sprite2D" parent="."]
+texture_repeat = 2
+modulate = Color(0.78, 0.74, 0.86, 1)
+position = Vector2(-400, -225)
+texture = ExtResource("2_floor")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 800, 450)
+
+[node name="Bounds" type="StaticBody2D" parent="."]
+
+[node name="TopWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(0, -257)
+shape = SubResource("RectangleShape2D_stop")
+
+[node name="BottomWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(0, 257)
+shape = SubResource("RectangleShape2D_sbottom")
+
+[node name="LeftWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(-432, 0)
+shape = SubResource("RectangleShape2D_sleft")
+
+[node name="RightWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(432, 0)
+shape = SubResource("RectangleShape2D_sright")
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="TopWall" type="Sprite2D" parent="Walls"]
+texture_repeat = 2
+position = Vector2(-400, -289)
+texture = ExtResource("3_wall")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 800, 64)
+
+[node name="BottomWall" type="Sprite2D" parent="Walls"]
+texture_repeat = 2
+position = Vector2(-400, 225)
+texture = ExtResource("3_wall")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 800, 64)
+
+[node name="LeftWall" type="Sprite2D" parent="Walls"]
+texture_repeat = 2
+position = Vector2(-464, -289)
+texture = ExtResource("3_wall")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 578)
+
+[node name="RightWall" type="Sprite2D" parent="Walls"]
+texture_repeat = 2
+position = Vector2(400, -289)
+texture = ExtResource("3_wall")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 64, 578)
+
+[node name="Torches" type="Node2D" parent="."]
+
+[node name="TorchLeft" parent="Torches" instance=ExtResource("4_torch")]
+position = Vector2(-372, -100)
+
+[node name="TorchRight" parent="Torches" instance=ExtResource("4_torch")]
+position = Vector2(372, -100)
+
+[node name="TorchTopLeft" parent="Torches" instance=ExtResource("4_torch")]
+position = Vector2(-160, -211)
+
+[node name="TorchTopRight" parent="Torches" instance=ExtResource("4_torch")]
+position = Vector2(160, -211)
+
+[node name="SpawnPoint" type="Marker2D" parent="."]
+position = Vector2(0, 120)

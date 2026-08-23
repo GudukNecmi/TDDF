@@ -1,0 +1,73 @@
+[gd_scene format=3 uid="uid://c5peorm102u6p"]
+
+[ext_resource type="Script" uid="uid://dh7giyvj01dqu" path="res://Scripts/World/horse_cart.gd" id="1_cart"]
+[ext_resource type="Texture2D" uid="uid://6wa4jknyyth2" path="res://Assets/World/Travel/horse_cart.png" id="2_cartart"]
+[ext_resource type="Texture2D" uid="uid://d0n2b1o516imi" path="res://Assets/UI/Travel/destination_x.png" id="3_mark"]
+
+[sub_resource type="Gradient" id="Gradient_cartlight"]
+offsets = PackedFloat32Array(0, 0.4, 0.75, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0.16, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_cartlight"]
+gradient = SubResource("Gradient_cartlight")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cartbody"]
+size = Vector2(233.5, 35)
+
+[node name="HorseCart" type="Node2D" unique_id=1190549035]
+y_sort_enabled = true
+script = ExtResource("1_cart")
+marker_offset = Vector2(0, -190)
+wave_manager_path = NodePath("")
+enemies_path = NodePath("")
+menu_path = NodePath("")
+open_on_ready = true
+require_arena_clear = false
+open_delay = 0.0
+open_region = Rect2(0, 0, 0, 0)
+require_player_in_region = false
+open_time = 0.3
+brightness = 1.0
+light_energy = 1.35
+pulse_scale = 0.0
+pulse_speed = 0.0
+swirl_speed = 0.0
+light_pulse = 0.0
+interaction_radius = 260.0
+hold_seconds = 1.1
+prompt_path = NodePath("")
+
+[node name="Art" type="Node2D" parent="." unique_id=1408471146]
+
+[node name="Cart" type="Sprite2D" parent="Art" unique_id=1846343142]
+texture_filter = 1
+scale = Vector2(0.59, 0.59)
+texture = ExtResource("2_cartart")
+
+[node name="Marker" type="Sprite2D" parent="." unique_id=1252711381]
+visible = false
+z_index = 5
+texture_filter = 1
+position = Vector2(0, -190)
+texture = ExtResource("3_mark")
+
+[node name="Light" type="PointLight2D" parent="." unique_id=1340153292]
+position = Vector2(0, -20)
+scale = Vector2(0.735, 0.735)
+color = Color(1, 0.72, 0.42, 1)
+energy = 0.0
+texture = SubResource("GradientTexture2D_cartlight")
+texture_scale = 0.9
+
+[node name="Solid" type="StaticBody2D" parent="." unique_id=334260468]
+collision_layer = 32
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Solid" unique_id=1563482864]
+position = Vector2(8, 45.5)
+shape = SubResource("RectangleShape2D_cartbody")

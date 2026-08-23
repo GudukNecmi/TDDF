@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://j0yu70s2kb2l"]
+
+[ext_resource type="Script" uid="uid://bvbry2m4omfip" path="res://Scripts/World/wanted_board.gd" id="1_board"]
+[ext_resource type="Texture2D" uid="uid://de750a36qhvvp" path="res://Assets/Base/WantedBoard/wanted_board.png" id="2_art"]
+[ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="5_prompt"]
+
+[node name="WantedBoard" type="Node2D" unique_id=1311710286]
+script = ExtResource("1_board")
+
+[node name="Art" type="Node2D" parent="." unique_id=1960078946]
+
+[node name="Board" type="Sprite2D" parent="Art" unique_id=37458336]
+texture = ExtResource("2_art")
+
+[node name="Torches" type="Node2D" parent="." unique_id=1155946788]
+
+[node name="Prompt" type="Node2D" parent="." unique_id=1084103684]
+top_level = true
+script = ExtResource("5_prompt")
+
+[node name="Label" type="Label" parent="Prompt" unique_id=1443941916]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1

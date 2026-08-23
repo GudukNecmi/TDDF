@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MapRegion" load_steps=3 format=3 uid="uid://lmhfkluhfbiy"]
+
+[ext_resource type="Script" uid="uid://c6wrwwhvdce4o" path="res://Scripts/World/map_region.gd" id="1_region"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/Ghost Town/Ghost Town Background.PNG" id="2_ground"]
+
+[resource]
+script = ExtResource("1_region")
+region_id = &"C"
+display_name = "C"
+description = "GHOST TOWN"
+ground_texture = ExtResource("2_ground")
+ground_tile_size = 0.0
+difficulty = 0.5
+start_position = Vector2(0, 80)
+map_position = Vector2(0.5, 0.52)
+map_size = Vector2(0.222, 0.25)

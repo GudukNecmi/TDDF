@@ -1,0 +1,73 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="1_shadow"]
+[ext_resource type="Script" uid="uid://bm3ln8gbx37l4" path="res://Scripts/World/prop_sway.gd" id="2_sway"]
+[ext_resource type="Script" uid="uid://da4exs3wtf10i" path="res://Scripts/World/prop_art.gd" id="3_art"]
+[ext_resource type="Script" uid="uid://dtnfb87bh7qke" path="res://Scripts/World/prop_touch.gd" id="4_touch"]
+[ext_resource type="Texture2D" uid="uid://dc0yiv48n3sbn" path="res://Assets/Maps/Desert/2- Props/Cactus/IMG_2274.PNG" id="5_cactus1"]
+[ext_resource type="Texture2D" uid="uid://bqvtmc58mmmqw" path="res://Assets/Maps/Desert/2- Props/Cactus/IMG_2275.PNG" id="6_cactus2"]
+[ext_resource type="Texture2D" uid="uid://bn6jpkgl8u2bo" path="res://Assets/Maps/Desert/2- Props/Cactus/IMG_2276.PNG" id="7_cactus3"]
+[ext_resource type="Texture2D" uid="uid://hs2pjbggugn2" path="res://Assets/Maps/Desert/2- Props/Cactus/IMG_2277.PNG" id="8_cactus4"]
+[ext_resource type="Texture2D" uid="uid://bi73ikow8d740" path="res://Assets/Maps/Desert/2- Props/Cactus/IMG_2278.PNG" id="9_cactus5"]
+[ext_resource type="Script" path="res://Scripts/World/prop_lizard.gd" id="10_lizard"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Lizard.tscn" id="11_lizardscene"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_solid"]
+radius = 22.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_touch"]
+radius = 37.0
+
+[node name="Cactus" type="StaticBody2D" groups=["desert_prop"]]
+collision_layer = 96
+collision_mask = 0
+
+[node name="Shadow" type="Sprite2D" parent="."]
+script = ExtResource("1_shadow")
+shadow_scale = Vector2(75, 27)
+shadow_offset = Vector2(7, -4)
+
+[node name="Sway" type="Node2D" parent="."]
+script = ExtResource("2_sway")
+idle_degrees = 0.0
+knock_degrees = 4.5
+knock_cycles_per_second = 1.9
+knock_damping = 3.6
+max_degrees = 9.0
+
+[node name="Art" type="Sprite2D" parent="Sway"]
+script = ExtResource("3_art")
+textures = Array[Texture2D]([ExtResource("5_cactus1"), ExtResource("6_cactus2"), ExtResource("7_cactus3"), ExtResource("8_cactus4"), ExtResource("9_cactus5")])
+size_mode = 0
+reference_height = 78.0
+mirror_chance = 0.5
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -20)
+shape = SubResource("CircleShape2D_solid")
+
+[node name="Touch" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+script = ExtResource("4_touch")
+body_group = &"player"
+minimum_speed = 0.0
+retrigger_interval = 0.55
+sway_path = NodePath("../Sway")
+knock_strength = 1.0
+speed_multiplier = 0.8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Touch"]
+position = Vector2(0, -20)
+shape = SubResource("CircleShape2D_touch")
+
+[node name="Lizard" type="Node" parent="."]
+script = ExtResource("10_lizard")
+lizard_scene = ExtResource("11_lizardscene")
+spawn_chance = 0.08
+contact_cooldown = 6.0
+one_roll_per_contact = true
+max_active = 3
+emerge_height = 6.0
+emerge_spread = 7.0

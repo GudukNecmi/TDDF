@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://bx1mhd0w3ut1"
+path="res://.godot/imported/Enemy1 Atack (4).mp3-97b5a7b6d1c030af07c595749d65842e.mp3str"
+
+[deps]
+
+source_file="res://Sound/Efect/Atack/Enemy1/Enemy1 Atack (4).mp3"
+dest_files=["res://.godot/imported/Enemy1 Atack (4).mp3-97b5a7b6d1c030af07c595749d65842e.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://by3we7bw6p5ns"]
+
+[ext_resource type="Script" uid="uid://dmw8yw8ag1iao" path="res://Scripts/Projectile/projectile.gd" id="1_4imdg"]
+[ext_resource type="Resource" uid="uid://bg6ke0r7vs7e0" path="res://Resources/revolver_bullet_profile.tres" id="2_aebhx"]
+[ext_resource type="Script" uid="uid://c0gaulgomc38u" path="res://Scripts/Effects/projectile_trail.gd" id="3_jf0os"]
+[ext_resource type="Texture2D" uid="uid://b100nh0w0koa8" path="res://Assets/Guns/Lever Action Rifle/HotBullet.PNG" id="4_2nsgj"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_dnims"]
+blend_mode = 1
+
+[sub_resource type="Curve" id="Curve_8y0e0"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_kbf4n"]
+colors = PackedColorArray(1, 0.9, 0.6, 1, 0.85, 0.5, 0.15, 0)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_5klnq"]
+blend_mode = 1
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_cfaa5"]
+radius = 4.0
+
+[node name="RevolverBullet" type="Area2D" unique_id=1264984972 groups=["revolver_shot"]]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_4imdg")
+profile = ExtResource("2_aebhx")
+glow_radius = 2.25
+light_radius = 13.75
+
+[node name="Trail" type="Line2D" parent="." unique_id=1264621361]
+z_index = -1
+material = SubResource("CanvasItemMaterial_dnims")
+width = 1.8
+width_curve = SubResource("Curve_8y0e0")
+default_color = Color(1, 0.84, 0.5, 0.8)
+gradient = SubResource("Gradient_kbf4n")
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+script = ExtResource("3_jf0os")
+trail_length = 70.0
+
+[node name="Glow" type="Sprite2D" parent="." unique_id=1977691869]
+material = SubResource("CanvasItemMaterial_5klnq")
+scale = Vector2(0.08, 0.08)
+texture = ExtResource("4_2nsgj")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=558627318]
+scale = Vector2(0.06, 0.06)
+texture = ExtResource("4_2nsgj")
+
+[node name="Light" type="PointLight2D" parent="." unique_id=1724706688]
+color = Color(1, 0.82, 0.46, 1)
+energy = 0.175
+texture = ExtResource("4_2nsgj")
+texture_scale = 3.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=927247325]
+shape = SubResource("CircleShape2D_cfaa5")

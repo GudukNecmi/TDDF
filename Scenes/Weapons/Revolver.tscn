@@ -1,0 +1,115 @@
+[gd_scene format=3 uid="uid://cvpvthdqu1ii2"]
+
+[ext_resource type="Script" uid="uid://x161m05eceqb" path="res://Scripts/Weapons/revolver.gd" id="1_ps7ev"]
+[ext_resource type="Texture2D" uid="uid://b65axm4ec0tkr" path="res://Assets/Guns/Revolver and Coin/DefaultRevolver.PNG" id="2_wsqlh"]
+[ext_resource type="Texture2D" uid="uid://bwp4ea10boryy" path="res://Assets/Guns/Revolver and Coin/HammerRevolver.PNG" id="3_wj30g"]
+[ext_resource type="PackedScene" uid="uid://by3we7bw6p5ns" path="res://Scenes/Projectile/RevolverBullet.tscn" id="4_gwfvs"]
+[ext_resource type="PackedScene" uid="uid://cwffyvf6iyorl" path="res://Scenes/Weapons/Coin.tscn" id="5_freix"]
+[ext_resource type="Texture2D" uid="uid://bfx17rcru0ksq" path="res://Assets/Guns/Revolver and Coin/BlastEfect.PNG" id="6_ps7ev"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="6_qoprp"]
+[ext_resource type="AudioStream" uid="uid://dd41hx4h0ngfn" path="res://Sound/Efect/Guns/Revolver and Coin/RevolverBlast.WAV" id="8_wsqlh"]
+[ext_resource type="AudioStream" uid="uid://bno2qfdepjk57" path="res://Sound/Efect/Guns/Revolver and Coin/ReloadSound1.WAV" id="9_ual2c"]
+[ext_resource type="AudioStream" uid="uid://dhmgf7ss88bah" path="res://Sound/Efect/Guns/Revolver and Coin/ReloadSound2.WAV" id="10_3xhx8"]
+[ext_resource type="AudioStream" uid="uid://d123ejt7q7vbj" path="res://Sound/Efect/Guns/Revolver and Coin/ReloadSound3.WAV" id="11_l6m5i"]
+[ext_resource type="AudioStream" uid="uid://ccnoqusy5b3jy" path="res://Sound/Efect/Guns/Shotgun/DryFire.WAV" id="12_kua8p"]
+[ext_resource type="Script" uid="uid://rawehutioe7n" path="res://Scripts/Weapons/revolver_feedback.gd" id="13_7vadt"]
+[ext_resource type="Script" uid="uid://cpux70tukitfn" path="res://Scripts/Common/held_item_flip.gd" id="14_qrfoa"]
+[ext_resource type="Script" uid="uid://jbauvq2aroyh" path="res://Scripts/Weapons/weapon_ammo.gd" id="15_qbid6"]
+[ext_resource type="Resource" uid="uid://q6h0onksryq4" path="res://Resources/Ammo/ammo_revolver_round.tres" id="16_fxfkd"]
+[ext_resource type="Script" uid="uid://608f0sq4hgmw" path="res://Scripts/Weapons/revolver_spin.gd" id="17_spin"]
+[ext_resource type="Script" uid="uid://c0dniko07o1qt" path="res://Scripts/Weapons/spin_stage.gd" id="18_stage"]
+[ext_resource type="Resource" path="res://Resources/SpinStages/spin_stage_2x.tres" id="19_stage2"]
+[ext_resource type="Resource" path="res://Resources/SpinStages/spin_stage_3x.tres" id="20_stage3"]
+[ext_resource type="Resource" path="res://Resources/SpinStages/spin_stage_4x.tres" id="21_stage4"]
+[ext_resource type="Script" uid="uid://byfgi11486opa" path="res://Scripts/Common/looping_sound.gd" id="22_loop"]
+[ext_resource type="AudioStream" uid="uid://r45fluvcxfhy" path="res://Sound/Efect/Guns/Revolver and Coin/Revolver Woosh.WAV" id="23_woosh"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_wj30g"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_mrixy"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_27a70"]
+gradient = SubResource("Gradient_mrixy")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="Revolver" type="Node2D" unique_id=927331067]
+z_index = 1
+scale = Vector2(0.2, 0.2)
+script = ExtResource("1_ps7ev")
+default_texture = ExtResource("2_wsqlh")
+hammer_texture = ExtResource("3_wj30g")
+art_scale = 0.5
+projectile_scene = ExtResource("4_gwfvs")
+coin_scene = ExtResource("5_freix")
+hand_offset = Vector2(32, 0)
+aim_muzzle_path = NodePath("MuzzleRig/Muzzle")
+aim_deadzone = 26.0
+
+[node name="Art" type="Node2D" parent="." unique_id=629571592]
+
+[node name="Body" type="Sprite2D" parent="Art" unique_id=660288188]
+position = Vector2(30, -10)
+rotation = 3.1415927
+scale = Vector2(0.5, -0.5)
+texture = ExtResource("2_wsqlh")
+
+[node name="MuzzleRig" type="Node2D" parent="." unique_id=1439189286]
+
+[node name="Muzzle" type="Marker2D" parent="MuzzleRig" unique_id=773594426]
+position = Vector2(141, -61)
+
+[node name="Blast" type="Sprite2D" parent="MuzzleRig/Muzzle" unique_id=1690783213]
+visible = false
+modulate = Color(1, 1, 1, 0)
+material = SubResource("CanvasItemMaterial_wj30g")
+position = Vector2(14, 0)
+scale = Vector2(0.09, 0.09)
+texture = ExtResource("6_ps7ev")
+
+[node name="MuzzleLight" type="PointLight2D" parent="MuzzleRig" unique_id=1287390208]
+position = Vector2(167, -61)
+color = Color(1, 0.9, 0.66, 1)
+energy = 0.0
+texture = SubResource("GradientTexture2D_27a70")
+texture_scale = 6.0
+
+[node name="Sounds" type="Node" parent="." unique_id=2002708389]
+script = ExtResource("6_qoprp")
+sounds = {
+&"blast": ExtResource("8_wsqlh"),
+&"dry_fire": ExtResource("12_kua8p"),
+&"reload_1": ExtResource("9_ual2c"),
+&"reload_2": ExtResource("10_3xhx8"),
+&"reload_3": ExtResource("11_l6m5i")
+}
+voice_count = 8
+
+[node name="Feedback" type="Node" parent="." unique_id=115451769]
+script = ExtResource("13_7vadt")
+
+[node name="ArtFlip" type="Node" parent="." unique_id=828056743]
+script = ExtResource("14_qrfoa")
+art_paths = Array[NodePath]([NodePath("../Art"), NodePath("../MuzzleRig")])
+
+[node name="Ammo" type="Node" parent="." unique_id=1650637365]
+script = ExtResource("15_qbid6")
+ammo_type = ExtResource("16_fxfkd")
+
+[node name="SpinLoop" type="AudioStreamPlayer" parent="." unique_id=1972472549]
+stream = ExtResource("23_woosh")
+volume_db = -80.0
+script = ExtResource("22_loop")
+max_volume_db = -6.0
+fade_in_speed = 40.0
+fade_out_speed = 26.5
+
+[node name="Spin" type="Node" parent="." unique_id=328971668]
+script = ExtResource("17_spin")
+stages = Array[ExtResource("18_stage")]([ExtResource("19_stage2"), ExtResource("20_stage3"), ExtResource("21_stage4")])

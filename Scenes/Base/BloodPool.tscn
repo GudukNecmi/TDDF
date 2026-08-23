@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://cbase0bloodpool"]
+
+[ext_resource type="Script" path="res://Scripts/World/blood_pool.gd" id="1_pool"]
+[ext_resource type="Texture2D" path="res://Assets/Base/BloodPool/pool_basin.png" id="2_basin"]
+[ext_resource type="Texture2D" path="res://Assets/Base/BloodPool/pool_fill_0.png" id="3_f0"]
+[ext_resource type="Texture2D" path="res://Assets/Base/BloodPool/pool_fill_1.png" id="4_f1"]
+[ext_resource type="Texture2D" path="res://Assets/Base/BloodPool/pool_fill_2.png" id="5_f2"]
+[ext_resource type="Texture2D" path="res://Assets/Base/BloodPool/pool_fill_3.png" id="6_f3"]
+[ext_resource type="Texture2D" path="res://Assets/Base/BloodPool/pool_fill_4.png" id="7_f4"]
+[ext_resource type="Script" path="res://Scripts/Player/blood_stream.gd" id="8_stream"]
+[ext_resource type="Script" path="res://Scripts/UI/blood_counter.gd" id="9_counter"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pool"]
+radius = 168.0
+
+[node name="BloodPool" type="Node2D" groups=["blood_pool"]]
+script = ExtResource("1_pool")
+capacity = 0
+display_capacity = 600
+fill_textures = Array[Texture2D]([ExtResource("3_f0"), ExtResource("4_f1"), ExtResource("5_f2"), ExtResource("6_f3"), ExtResource("7_f4")])
+
+[node name="Art" type="Node2D" parent="."]
+
+[node name="Basin" type="Sprite2D" parent="Art"]
+texture = ExtResource("2_basin")
+
+[node name="Fill" type="Sprite2D" parent="Art"]
+texture = ExtResource("3_f0")
+
+[node name="ClickArea" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ClickArea"]
+shape = SubResource("CircleShape2D_pool")
+
+[node name="DepositStream" type="MultiMeshInstance2D" parent="."]
+script = ExtResource("8_stream")
+capacity = 256
+acceleration = 1100.0
+collection_distance = 18.0
+
+[node name="WithdrawStream" type="MultiMeshInstance2D" parent="."]
+script = ExtResource("8_stream")
+capacity = 256
+initial_speed = 140.0
+acceleration = 780.0
+collection_distance = 18.0
+
+[node name="Counter" type="Label" parent="."]
+z_index = 20
+offset_left = -200.0
+offset_top = -288.0
+offset_right = 200.0
+offset_bottom = -228.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.92, 0.16, 0.16, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.02, 0.03, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 46
+text = "POOL 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("9_counter")
+wallet_path = NodePath("/root/BloodBank")
+prefix = "POOL "

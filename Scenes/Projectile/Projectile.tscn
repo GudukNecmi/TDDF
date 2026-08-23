@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://cvgxortnu487k"]
+
+[ext_resource type="Script" uid="uid://dmw8yw8ag1iao" path="res://Scripts/Projectile/projectile.gd" id="1_0sawj"]
+[ext_resource type="Texture2D" uid="uid://b100nh0w0koa8" path="res://Assets/Guns/Lever Action Rifle/HotBullet.PNG" id="2_f0bxn"]
+[ext_resource type="Resource" uid="uid://css8bk47bsos8" path="res://Resources/shotgun_pellet_profile.tres" id="3_profile"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_i3jru"]
+radius = 4.0
+
+[node name="Projectile" type="Area2D" unique_id=1725108232]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_0sawj")
+profile = ExtResource("3_profile")
+
+[node name="Glow" type="Sprite2D" parent="." unique_id=267562284]
+scale = Vector2(0.105, 0.105)
+texture = ExtResource("2_f0bxn")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1108739705]
+scale = Vector2(0.061, 0.061)
+texture = ExtResource("2_f0bxn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=820131865]
+shape = SubResource("CircleShape2D_i3jru")

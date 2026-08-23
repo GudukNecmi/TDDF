@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="DayStage" format=3 uid="uid://domat5rntqjl8"]
+
+[ext_resource type="Script" uid="uid://jbqgmet8idv" path="res://Scripts/World/scatter_layer.gd" id="1_8yd7g"]
+[ext_resource type="Script" uid="uid://bbrwbccihyx2g" path="res://Scripts/World/day_stage.gd" id="1_stage"]
+[ext_resource type="Texture2D" uid="uid://n037jhsrmuy1" path="res://Assets/UI/Time/Dawn.PNG" id="2_icon"]
+
+[resource]
+script = ExtResource("1_stage")
+stage_name = &"dawn"
+display_name = "DAWN"
+ambient_colour = Color(1, 0.4392157, 0.30980393, 1)
+icon = ExtResource("2_icon")
+icon_colour = Color(1, 0.44, 0.31, 1)
+clock_start_minutes = 300
+clock_end_minutes = 419

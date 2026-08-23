@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgotikdestmarker"]
+
+[ext_resource type="Script" path="res://Scripts/World/destination_marker.gd" id="1_marker"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Travel/destination_x.png" id="2_mark"]
+
+[node name="DestinationMarker" type="Node2D"]
+script = ExtResource("1_marker")
+group = &"mini_boss_marker"
+marker_offset = Vector2(0, -150)
+bob_height = 10.0
+bob_speed = 0.8
+only_on_screen = true
+on_screen_inset = 90.0
+
+[node name="Art" type="Sprite2D" parent="."]
+visible = false
+z_index = 6
+texture_filter = 1
+position = Vector2(0, -150)
+texture = ExtResource("2_mark")

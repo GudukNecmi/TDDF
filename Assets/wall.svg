@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Tileable 64x64 wall block, clearly lighter than the floor so the
+       arena boundary reads at a glance. -->
+  <rect width="64" height="64" fill="#464e60"/>
+
+  <!-- Horizontal course seam -->
+  <rect x="0" y="31" width="64" height="2" fill="#3a4152"/>
+
+  <!-- Staggered vertical seams, brick style -->
+  <rect x="32" y="0" width="2" height="31" fill="#3a4152"/>
+  <rect x="0" y="33" width="2" height="31" fill="#3a4152"/>
+
+  <!-- Bevel: light on top/left, dark on bottom/right -->
+  <rect x="0" y="0" width="64" height="2" fill="#5d6780"/>
+  <rect x="0" y="0" width="2" height="64" fill="#545d73"/>
+  <rect x="0" y="62" width="64" height="2" fill="#333949"/>
+  <rect x="62" y="0" width="2" height="64" fill="#333949"/>
+</svg>

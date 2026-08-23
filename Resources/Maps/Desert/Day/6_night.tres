@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="DayStage" format=3 uid="uid://b6e8yk4ey3ttt"]
+
+[ext_resource type="Script" uid="uid://jbqgmet8idv" path="res://Scripts/World/scatter_layer.gd" id="1_6247r"]
+[ext_resource type="Script" uid="uid://bbrwbccihyx2g" path="res://Scripts/World/day_stage.gd" id="1_stage"]
+[ext_resource type="Texture2D" uid="uid://5320fyes1yrb" path="res://Assets/UI/Time/Night.PNG" id="2_icon"]
+
+[resource]
+script = ExtResource("1_stage")
+stage_name = &"night"
+display_name = "NIGHT"
+ambient_colour = Color(0.41272807, 0.27884522, 1, 1)
+icon = ExtResource("2_icon")
+icon_colour = Color(0.72, 0.62, 1, 1)
+clock_start_minutes = 1260
+clock_end_minutes = 299

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="BountyTarget" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Bounty/bounty_target.gd" id="1_target"]
+[ext_resource type="Texture2D" path="res://Assets/UI/WantedBoard/target_4.png" id="2_portrait"]
+
+[resource]
+script = ExtResource("1_target")
+target_id = &"rider"
+display_name = "THE PALE RIDER"
+crime = "CATTLE THEFT AND ARSON"
+portrait = ExtResource("2_portrait")

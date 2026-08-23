@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TroubleRewardTier" load_steps=2 format=3 uid="uid://cgotiktroubletier1"]
+
+[ext_resource type="Script" path="res://Scripts/World/trouble_reward_tier.gd" id="1_tier"]
+
+[resource]
+script = ExtResource("1_tier")
+min_danger = 1
+max_danger = 3
+blood_min = 500
+blood_max = 1500
+item_count = 0

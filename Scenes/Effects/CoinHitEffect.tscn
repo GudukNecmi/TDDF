@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://de78rcqpv7vx1"]
+
+[ext_resource type="Texture2D" uid="uid://bw6ddrpgoji5n" path="res://Assets/Guns/Revolver and Coin/HitEfect.PNG" id="1_mk2wd"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_h5gx5"]
+blend_mode = 1
+
+[node name="CoinHitEffect" type="Node2D" unique_id=304010633]
+
+[node name="Art" type="Sprite2D" parent="." unique_id=676738049]
+material = SubResource("CanvasItemMaterial_h5gx5")
+scale = Vector2(0.22, 0.22)
+texture = ExtResource("1_mk2wd")

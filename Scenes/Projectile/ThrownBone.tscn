@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/thrown_weapon.gd" id="1_thrown"]
+[ext_resource type="Resource" path="res://Resources/Projectiles/bone_throw_profile.tres" id="2_profile"]
+[ext_resource type="Resource" path="res://Resources/Break/bone_throw_break.tres" id="3_break"]
+[ext_resource type="Texture2D" uid="uid://d2m1ngf6xku7" path="res://Assets/Maps/Desert/2- Props/Bone/Bone.PNG" id="4_bone"]
+[ext_resource type="Script" path="res://Scripts/Weapons/throwable_audio.gd" id="5_audio"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="6_bank"]
+[ext_resource type="AudioStream" uid="uid://b1kh5cy5wcnl" path="res://Sound/Efect/Guns/Throwable/Bone/BoneHit.WAV" id="7_hit"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bone"]
+radius = 7.0
+
+[node name="ThrownBone" type="Area2D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_thrown")
+profile = ExtResource("2_profile")
+break_profile = ExtResource("3_break")
+art_path = NodePath("Sprite2D")
+tumble_degrees = 540.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+rotation = 0.3717
+scale = Vector2(0.33, 0.33)
+texture = ExtResource("4_bone")
+centered = false
+offset = Vector2(-102, -197)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_bone")
+
+[node name="HitAudio" type="Node" parent="."]
+script = ExtResource("5_audio")
+source_path = NodePath("..")
+sound_bank_path = NodePath("SoundBank")
+event_signal = &"landed"
+sound = &"hit"
+origin_path = NodePath("..")
+
+[node name="SoundBank" type="Node" parent="HitAudio"]
+script = ExtResource("6_bank")
+sounds = {
+&"hit": ExtResource("7_hit")
+}
+voice_count = 1
+pitch_variation = 0.06

@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://jw3ssc5jpqs2"]
+
+[ext_resource type="Script" uid="uid://b4qrewctfc7pk" path="res://Scripts/World/teleport_destination.gd" id="1_dest"]
+[ext_resource type="Texture2D" uid="uid://dai6sklgss1vm" path="res://Assets/Base/TeleportPit/pit.png" id="2_pit"]
+[ext_resource type="Texture2D" uid="uid://b7vvdndwcdfa1" path="res://Assets/Base/TeleportPit/pit_glow.png" id="3_glow"]
+[ext_resource type="Script" uid="uid://b4r6g3u7ohlf3" path="res://Scripts/World/run_portal.gd" id="4_portal"]
+[ext_resource type="Script" uid="uid://cn6ph4jsqjidn" path="res://Scripts/World/torch_proximity.gd" id="6_prox"]
+[ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="8_prompt"]
+
+[node name="TeleportPit" type="Node2D" unique_id=439058465]
+script = ExtResource("1_dest")
+id = &"base_pit"
+bounds = Rect2(-1150, -1470, 2300, 1850)
+
+[node name="Art" type="Node2D" parent="." unique_id=2044084769]
+
+[node name="Pit" type="Sprite2D" parent="Art" unique_id=1055515925]
+texture = ExtResource("2_pit")
+
+[node name="Glow" type="Sprite2D" parent="Art" unique_id=1817351734]
+modulate = Color(1, 1, 1, 0)
+texture = ExtResource("3_glow")
+
+[node name="SpawnPoint" type="Marker2D" parent="." unique_id=1744728427]
+
+[node name="Portal" type="Node2D" parent="." unique_id=792810113]
+script = ExtResource("4_portal")
+radius = 78.0
+glow_path = NodePath("../Art/Glow")
+
+[node name="Prompt" type="Node2D" parent="Portal" unique_id=476536622]
+top_level = true
+script = ExtResource("8_prompt")
+
+[node name="Label" type="Label" parent="Portal/Prompt" unique_id=1272457421]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "B"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Torches" type="Node2D" parent="." unique_id=1243702497]
+
+[node name="TorchProximity" type="Node" parent="." unique_id=554842013]
+script = ExtResource("6_prox")
+lit_distance = 240.0
+unlit_distance = 560.0

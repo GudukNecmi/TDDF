@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://b3x6jvho0u6pt"
+path="res://.godot/imported/LeverActionBlast.WAV-78481f8ff894510fbb18e8ea50f346ae.sample"
+
+[deps]
+
+source_file="res://Sound/Efect/Guns/Lever Action Rifle/LeverActionBlast.WAV"
+dest_files=["res://.godot/imported/LeverActionBlast.WAV-78481f8ff894510fbb18e8ea50f346ae.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

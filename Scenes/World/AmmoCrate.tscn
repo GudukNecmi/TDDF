@@ -1,0 +1,91 @@
+[gd_scene format=3 uid="uid://c5pehphwyiu8a"]
+
+[ext_resource type="Script" uid="uid://cu6bvb65kr5wt" path="res://Scripts/World/ammo_crate.gd" id="1_crate"]
+[ext_resource type="Texture2D" uid="uid://blbpym18df2s8" path="res://Assets/Base/Pipes/pipe_h.png" id="2_pipeh"]
+[ext_resource type="Texture2D" uid="uid://vul7efrp6mk0" path="res://Assets/Base/Pipes/pipe_flange.png" id="3_flange"]
+[ext_resource type="Texture2D" uid="uid://dldo8j666vkau" path="res://Assets/Guns/Shotgun/Shell.PNG" id="4_shell"]
+[ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="5_prompt"]
+
+[node name="AmmoCrate" type="Node2D" unique_id=1296300122]
+script = ExtResource("1_crate")
+reach_offset = Vector2(0, -40)
+
+[node name="Art" type="Node2D" parent="." unique_id=1868451690]
+scale = Vector2(0.405, 0.405)
+
+[node name="Box" type="Sprite2D" parent="Art" unique_id=1005113485]
+modulate = Color(0.5, 0.34, 0.2, 1)
+position = Vector2(0, -52)
+scale = Vector2(1.15, 2.6)
+texture = ExtResource("2_pipeh")
+
+[node name="SlatTop" type="Sprite2D" parent="Art" unique_id=824231002]
+modulate = Color(0.7, 0.51, 0.31, 1)
+position = Vector2(0, -78)
+scale = Vector2(1.25, 0.28)
+texture = ExtResource("2_pipeh")
+
+[node name="SlatBottom" type="Sprite2D" parent="Art" unique_id=1995789241]
+modulate = Color(0.7, 0.51, 0.31, 1)
+position = Vector2(0, -26)
+scale = Vector2(1.25, 0.28)
+texture = ExtResource("2_pipeh")
+
+[node name="BoltTopLeft" type="Sprite2D" parent="Art" unique_id=1462521494]
+modulate = Color(0.56, 0.55, 0.58, 1)
+position = Vector2(-58, -96)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("3_flange")
+
+[node name="BoltTopRight" type="Sprite2D" parent="Art" unique_id=1847028675]
+modulate = Color(0.56, 0.55, 0.58, 1)
+position = Vector2(58, -96)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("3_flange")
+
+[node name="BoltBottomLeft" type="Sprite2D" parent="Art" unique_id=1914219720]
+modulate = Color(0.56, 0.55, 0.58, 1)
+position = Vector2(-58, -8)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("3_flange")
+
+[node name="BoltBottomRight" type="Sprite2D" parent="Art" unique_id=771858430]
+modulate = Color(0.56, 0.55, 0.58, 1)
+position = Vector2(58, -8)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("3_flange")
+
+[node name="ShellLeft" type="Sprite2D" parent="Art" unique_id=557364615]
+position = Vector2(-34, -114)
+rotation = -0.34
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("4_shell")
+
+[node name="ShellMiddle" type="Sprite2D" parent="Art" unique_id=608339359]
+position = Vector2(2, -122)
+rotation = 0.06
+scale = Vector2(0.45, 0.45)
+texture = ExtResource("4_shell")
+
+[node name="ShellRight" type="Sprite2D" parent="Art" unique_id=2067514916]
+position = Vector2(36, -113)
+rotation = 0.39
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("4_shell")
+
+[node name="Prompt" type="Node2D" parent="." unique_id=9447455]
+top_level = true
+script = ExtResource("5_prompt")
+
+[node name="Label" type="Label" parent="Prompt" unique_id=807329613]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1

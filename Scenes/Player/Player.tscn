@@ -1,0 +1,344 @@
+[gd_scene format=3 uid="uid://b3y0jqba8njg2"]
+
+[ext_resource type="Script" uid="uid://11xdl6hmop81" path="res://Scripts/Player/player.gd" id="1_ft8w5"]
+[ext_resource type="Texture2D" uid="uid://bs2qpp3qoxk6n" path="res://Assets/Main Character/Body.PNG" id="2_ude3g"]
+[ext_resource type="Texture2D" uid="uid://cun045ndqijt3" path="res://Assets/Main Character/Head.PNG" id="3_jmcll"]
+[ext_resource type="Script" uid="uid://br15pyfwinym7" path="res://Scripts/Common/soft_follow.gd" id="4_4wape"]
+[ext_resource type="AnimationLibrary" uid="uid://pc0dc1oeh408" path="res://Resources/character_idle.tres" id="5_4wape"]
+[ext_resource type="Script" uid="uid://bjb8au3p6myu8" path="res://Scripts/Common/squash_idle.gd" id="6_t26db"]
+[ext_resource type="Script" uid="uid://dxtgaeenwcw5e" path="res://Scripts/Common/facing_flip.gd" id="7_t26db"]
+[ext_resource type="Script" uid="uid://yk766h0trvsp" path="res://Scripts/Common/camera_controller.gd" id="8_cam2d"]
+[ext_resource type="Script" uid="uid://b606mau85d8le" path="res://Scripts/Player/blood_magnet.gd" id="9_bmag"]
+[ext_resource type="Script" uid="uid://bh2udphgei50f" path="res://Scripts/Player/collector_hand.gd" id="10_bhand"]
+[ext_resource type="Script" uid="uid://3eke0bgmvwf8" path="res://Scripts/Player/blood_stream.gd" id="11_bstrm"]
+[ext_resource type="Texture2D" uid="uid://bbgp8485yihu4" path="res://Assets/Guns/Hand.PNG" id="12_hand"]
+[ext_resource type="Script" uid="uid://cmhjjned50sj" path="res://Scripts/Common/health.gd" id="13_health"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="14_sbank"]
+[ext_resource type="AudioStream" uid="uid://beykqo1rdhnhl" path="res://Sound/Character/Take damage Sound.WAV" id="15_hurt"]
+[ext_resource type="Script" uid="uid://cd38dk13utgq3" path="res://Scripts/Player/player_damage_feedback.gd" id="16_dmgfb"]
+[ext_resource type="Script" uid="uid://bhiaxi33sa8dp" path="res://Scripts/World/blood_emitter.gd" id="17_bemit"]
+[ext_resource type="Script" uid="uid://byfgi11486opa" path="res://Scripts/Common/looping_sound.gd" id="18_loop"]
+[ext_resource type="AudioStream" uid="uid://cg7inwo4s0t10" path="res://Sound/Efect/Guns/Hand/Hand Sound Loop.WAV" id="19_handlp"]
+[ext_resource type="AudioStream" uid="uid://bnds3hkgg357v" path="res://Sound/Efect/Guns/Hand/Blood Suck sound Efect.WAV" id="20_sucklp"]
+[ext_resource type="Script" uid="uid://bxmgeoqm4plw2" path="res://Scripts/Player/collector_audio.gd" id="21_caudio"]
+[ext_resource type="Script" uid="uid://b30rce1d520sy" path="res://Scripts/Player/teleporter.gd" id="22_tele"]
+[ext_resource type="AudioStream" uid="uid://c0jpjucwyi4y3" path="res://Sound/Efect/Finger Snap/FingerSnap.mp3" id="23_snap"]
+[ext_resource type="Texture2D" uid="uid://du2k8ok1ch0ex" path="res://Assets/Main Character/Left Leg.PNG" id="24_lleg"]
+[ext_resource type="Texture2D" uid="uid://c6sk5ag7araph" path="res://Assets/Main Character/Right Leg.PNG" id="25_rleg"]
+[ext_resource type="Script" uid="uid://bguc2fnrtoqgi" path="res://Scripts/Common/leg_animator.gd" id="26_leganim"]
+[ext_resource type="Script" uid="uid://ckslwmph3ekpy" path="res://Scripts/Player/health_carry.gd" id="26_ui31c"]
+[ext_resource type="Texture2D" uid="uid://bhrv6fkw4h3hx" path="res://Assets/Main Character/Cigar.PNG" id="27_cigar"]
+[ext_resource type="Script" uid="uid://dodrejk0gtgbn" path="res://Scripts/Player/cigarette.gd" id="28_cig"]
+[ext_resource type="Script" uid="uid://cpux70tukitfn" path="res://Scripts/Common/held_item_flip.gd" id="29_hflip"]
+[ext_resource type="Texture2D" uid="uid://b8wa66jww2162" path="res://Assets/Main Character/HandLeft.PNG" id="30_lhand"]
+[ext_resource type="Texture2D" uid="uid://u7dug4ov7gnh" path="res://Assets/Main Character/HandRight.PNG" id="31_rhand"]
+[ext_resource type="Texture2D" uid="uid://0stgx3sdcc1y" path="res://Assets/Enemies/Enemy1/DeadEyes.PNG" id="32_deadeyes"]
+[ext_resource type="Script" uid="uid://s6y0agq005qf" path="res://Scripts/Player/player_loadout.gd" id="33_loadout"]
+[ext_resource type="Script" uid="uid://dsot8t4dq8x21" path="res://Scripts/Player/zone_healer.gd" id="34_zheal"]
+[ext_resource type="Script" uid="uid://cywajyv7gcca7" path="res://Scripts/Player/player_death_sequence.gd" id="35_death"]
+[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="36_shadow"]
+[ext_resource type="Script" uid="uid://vv4h8bxhjp6j" path="res://Scripts/Common/footprint_emitter.gd" id="37_prints"]
+[ext_resource type="Script" uid="uid://4l20fix2ghxf" path="res://Scripts/Player/terrain_slow.gd" id="38_slow"]
+[ext_resource type="Script" uid="uid://cgo3bx4j0dm0x" path="res://Scripts/Common/ambient_light_dimmer.gd" id="39_dimmer"]
+[ext_resource type="Script" uid="uid://ds3nvbup5byic" path="res://Scripts/Player/character_light.gd" id="40_charlight"]
+[ext_resource type="Texture2D" uid="uid://csjgn5fjkuc5d" path="res://Assets/Efects/Blood/BloodPiece.PNG" id="41_bloodpiece"]
+[ext_resource type="Script" path="res://Scripts/Player/player_sleep.gd" id="42_sleep"]
+
+[sub_resource type="Gradient" id="Gradient_smokepuff"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.75, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_smokepuff"]
+gradient = SubResource("Gradient_smokepuff")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Curve" id="Curve_smoke"]
+_data = [Vector2(0, 0.35), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_smoke"]
+offsets = PackedFloat32Array(0, 0.15, 0.55, 1)
+colors = PackedColorArray(0.92, 0.88, 0.82, 0, 0.9, 0.87, 0.84, 1, 0.82, 0.81, 0.82, 0.72, 0.7, 0.7, 0.76, 0)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ude3g"]
+radius = 18.0
+
+[sub_resource type="Gradient" id="Gradient_playerlight"]
+offsets = PackedFloat32Array(0, 0.42, 0.78, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.6, 1, 1, 1, 0.16, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_playerlight"]
+gradient = SubResource("Gradient_playerlight")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="Player" type="CharacterBody2D" unique_id=1731179406 groups=["player"]]
+collision_mask = 33
+motion_mode = 1
+wall_min_slide_angle = 0.0
+script = ExtResource("1_ft8w5")
+speed_modifier_paths = Array[NodePath]([NodePath("DeathSequence"), NodePath("TerrainSlow"), NodePath("PlayerSleep")])
+
+[node name="Shadow" type="Sprite2D" parent="." unique_id=1264007733 groups=["prop_shadow"]]
+script = ExtResource("36_shadow")
+shadow_scale = Vector2(31.2, 12)
+shadow_offset = Vector2(0, -2)
+
+[node name="Visual" type="Node2D" parent="." unique_id=1788891943]
+scale = Vector2(1.2, 1.2)
+
+[node name="Legs" type="Node2D" parent="Visual" unique_id=1716900614]
+
+[node name="LeftLeg" type="Sprite2D" parent="Visual/Legs" unique_id=1386511440]
+position = Vector2(-8.272, -9.416)
+scale = Vector2(0.088, 0.088)
+texture = ExtResource("24_lleg")
+centered = false
+offset = Vector2(-394, -750)
+
+[node name="RightLeg" type="Sprite2D" parent="Visual/Legs" unique_id=443345307]
+position = Vector2(8.36, -9.68)
+scale = Vector2(0.088, 0.088)
+texture = ExtResource("25_rleg")
+centered = false
+offset = Vector2(-583, -747)
+
+[node name="Hands" type="Node2D" parent="Visual" unique_id=1469009316]
+visible = false
+modulate = Color(1, 1, 1, 0)
+
+[node name="LeftHand" type="Node2D" parent="Visual/Hands" unique_id=1940321532]
+position = Vector2(-15, -24)
+
+[node name="Sprite" type="Sprite2D" parent="Visual/Hands/LeftHand" unique_id=2018818945]
+rotation = -2.2078
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("30_lhand")
+offset = Vector2(215, -220)
+
+[node name="RightHand" type="Node2D" parent="Visual/Hands" unique_id=159808223]
+position = Vector2(15, -24)
+
+[node name="Sprite" type="Sprite2D" parent="Visual/Hands/RightHand" unique_id=699121574]
+rotation = 2.2078
+scale = Vector2(-0.055, 0.055)
+texture = ExtResource("31_rhand")
+offset = Vector2(215, -220)
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=780708810]
+scale = Vector2(0.088, 0.088)
+texture = ExtResource("2_ude3g")
+centered = false
+offset = Vector2(-488, -857)
+
+[node name="Head" type="Sprite2D" parent="Visual" unique_id=887144879]
+scale = Vector2(0.088, 0.088)
+texture = ExtResource("3_jmcll")
+centered = false
+offset = Vector2(-488, -857)
+script = ExtResource("4_4wape")
+lag = 0.012
+response = 30.0
+max_offset = 2.0
+offset_scale = Vector2(0.35, 0.8)
+
+[node name="DeadEyes" type="Sprite2D" parent="Visual/Head" unique_id=63283464]
+visible = false
+position = Vector2(-8, -380)
+texture = ExtResource("32_deadeyes")
+
+[node name="Cigarette" type="Node2D" parent="Visual/Head" unique_id=1451928045]
+position = Vector2(87, -362)
+script = ExtResource("28_cig")
+
+[node name="Cigar" type="Sprite2D" parent="Visual/Head/Cigarette" unique_id=2101706610]
+texture = ExtResource("27_cigar")
+centered = false
+offset = Vector2(-575, -495)
+
+[node name="Tip" type="Marker2D" parent="Visual/Head/Cigarette/Cigar" unique_id=1711435696]
+position = Vector2(90, 110)
+
+[node name="Smoke" type="CPUParticles2D" parent="Visual/Head/Cigarette" unique_id=1026514134]
+top_level = true
+amount = 46
+texture = SubResource("GradientTexture2D_smokepuff")
+lifetime = 2.9
+randomness = 0.6
+lifetime_randomness = 0.35
+emission_shape = 1
+emission_sphere_radius = 1.6
+direction = Vector2(0, -1)
+spread = 34.0
+gravity = Vector2(0, -34)
+initial_velocity_min = 15.0
+initial_velocity_max = 27.0
+damping_min = 0.3
+damping_max = 0.8
+scale_amount_min = 0.32
+scale_amount_max = 0.68
+scale_amount_curve = SubResource("Curve_smoke")
+color_ramp = SubResource("Gradient_smoke")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2003829022]
+position = Vector2(0, -18)
+shape = SubResource("CircleShape2D_ude3g")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1755074857]
+position = Vector2(0, -32)
+process_callback = 0
+limit_left = -864
+limit_top = -514
+limit_right = 864
+limit_bottom = 514
+limit_smoothed = true
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+script = ExtResource("8_cam2d")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=528594863]
+callback_mode_process = 0
+libraries/ = ExtResource("5_4wape")
+script = ExtResource("6_t26db")
+
+[node name="FacingFlip" type="Node" parent="." unique_id=1651797662]
+script = ExtResource("7_t26db")
+flip_paths = Array[NodePath]([NodePath("../Visual/Body"), NodePath("../Visual/Head"), NodePath("../Visual/Legs"), NodePath("../Visual/Hands")])
+
+[node name="LegAnimator" type="Node" parent="." unique_id=1906222679]
+script = ExtResource("26_leganim")
+left_leg_path = NodePath("../Visual/Legs/LeftLeg")
+right_leg_path = NodePath("../Visual/Legs/RightLeg")
+
+[node name="HandAnimator" type="Node" parent="." unique_id=1063371342]
+script = ExtResource("26_leganim")
+left_leg_path = NodePath("../Visual/Hands/LeftHand")
+right_leg_path = NodePath("../Visual/Hands/RightHand")
+idle_swing_degrees = 1.1
+idle_lift = 0.3
+idle_cycles_per_second = 0.7
+walk_swing_degrees = 6.5
+walk_lift = 1.0
+
+[node name="CollectorHand" type="Node2D" parent="." unique_id=2041325216]
+visible = false
+scale = Vector2(1.2, 1.2)
+script = ExtResource("10_bhand")
+sprite_path = NodePath("Art/Sprite")
+
+[node name="Art" type="Node2D" parent="CollectorHand" unique_id=1082927169]
+
+[node name="Sprite" type="Sprite2D" parent="CollectorHand/Art" unique_id=57470963]
+rotation = -2.0944
+scale = Vector2(0.09, -0.09)
+texture = ExtResource("12_hand")
+centered = false
+offset = Vector2(-208, -633)
+
+[node name="ArtFlip" type="Node" parent="CollectorHand" unique_id=1346321855]
+script = ExtResource("29_hflip")
+art_paths = Array[NodePath]([NodePath("../Art")])
+
+[node name="BloodStream" type="MultiMeshInstance2D" parent="." unique_id=1559020391]
+top_level = true
+script = ExtResource("11_bstrm")
+capacity = 768
+piece_texture = ExtResource("41_bloodpiece")
+
+[node name="PlayerLight" type="PointLight2D" parent="." unique_id=1980713240]
+position = Vector2(0, -26)
+texture = SubResource("GradientTexture2D_playerlight")
+texture_scale = 0.35
+script = ExtResource("40_charlight")
+
+[node name="AmbientDimmer" type="Node" parent="PlayerLight" unique_id=1461234264]
+script = ExtResource("39_dimmer")
+daylight_energy = 0.35
+
+[node name="Health" type="Node" parent="." unique_id=1973417999 groups=["player_health"]]
+script = ExtResource("13_health")
+max_health = 3.0
+free_owner_on_death = false
+invulnerable_seconds = 2.0
+
+[node name="HealthCarry" type="Node" parent="." unique_id=343167102]
+script = ExtResource("26_ui31c")
+
+[node name="Sounds" type="Node" parent="." unique_id=2056071498]
+script = ExtResource("14_sbank")
+sounds = {
+&"hurt": ExtResource("15_hurt")
+}
+bus = &"Game"
+pitch_variation = 0.05
+
+[node name="DamageFeedback" type="Node" parent="." unique_id=967660334]
+script = ExtResource("16_dmgfb")
+
+[node name="BloodEmitter" type="Node" parent="." unique_id=638727657]
+script = ExtResource("17_bemit")
+blood_value = 0
+damage_blood_value = 6
+
+[node name="HandLoop" type="AudioStreamPlayer" parent="." unique_id=1987201628]
+stream = ExtResource("19_handlp")
+bus = &"Game"
+script = ExtResource("18_loop")
+max_volume_db = -7.0
+fade_in_speed = 3.2
+fade_out_speed = 2.6
+pitch_variation = 0.03
+
+[node name="SuckLoop" type="AudioStreamPlayer" parent="." unique_id=1498700654]
+stream = ExtResource("20_sucklp")
+bus = &"Game"
+script = ExtResource("18_loop")
+max_volume_db = -9.0
+fade_in_speed = 7.0
+fade_out_speed = 3.5
+
+[node name="CollectorAudio" type="Node" parent="." unique_id=689627128]
+script = ExtResource("21_caudio")
+suck_loop_path = NodePath("../SuckLoop")
+
+[node name="Teleporter" type="Node" parent="." unique_id=1309149067]
+script = ExtResource("22_tele")
+destination_id = "base_pit"
+
+[node name="SnapSounds" type="Node" parent="Teleporter" unique_id=1973055928]
+script = ExtResource("14_sbank")
+sounds = {
+&"snap": ExtResource("23_snap")
+}
+voice_count = 2
+bus = &"Snap"
+
+[node name="BloodMagnet" type="Node" parent="." unique_id=288417497]
+script = ExtResource("9_bmag")
+
+[node name="PlayerLoadout" type="Node" parent="." unique_id=1252666106]
+script = ExtResource("33_loadout")
+
+[node name="ZoneHealer" type="Node" parent="." unique_id=219809838]
+script = ExtResource("34_zheal")
+
+[node name="DeathSequence" type="Node" parent="." unique_id=1680541815]
+script = ExtResource("35_death")
+
+[node name="TerrainSlow" type="Node" parent="." unique_id=1580280273 groups=["terrain_slow"]]
+script = ExtResource("38_slow")
+minimum_multiplier = 0.5
+
+[node name="FootprintEmitter" type="Node" parent="." unique_id=1780690128]
+script = ExtResource("37_prints")
+foot_paths = Array[NodePath]([NodePath("../Visual/Legs/LeftLeg"), NodePath("../Visual/Legs/RightLeg")])
+
+[node name="PlayerSleep" type="Node" parent="."]
+script = ExtResource("42_sleep")

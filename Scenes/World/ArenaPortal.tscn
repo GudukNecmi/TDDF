@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://cgotikarenaportal"]
+
+[ext_resource type="Script" path="res://Scripts/World/arena_portal.gd" id="1_portal"]
+[ext_resource type="Texture2D" path="res://Assets/World/Portal/portal_basin.png" id="2_basin"]
+[ext_resource type="Texture2D" path="res://Assets/World/Portal/portal_core.png" id="3_core"]
+[ext_resource type="Texture2D" path="res://Assets/World/Portal/portal_swirl.png" id="4_swirl"]
+[ext_resource type="Script" path="res://Scripts/UI/interaction_prompt.gd" id="5_prompt"]
+
+[sub_resource type="Gradient" id="Gradient_portallight"]
+offsets = PackedFloat32Array(0, 0.35, 0.72, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.62, 1, 1, 1, 0.18, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_portallight"]
+gradient = SubResource("Gradient_portallight")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_portalmotes"]
+offsets = PackedFloat32Array(0, 0.25, 1)
+colors = PackedColorArray(1, 0.72, 0.66, 0, 1, 0.45, 0.4, 0.9, 0.65, 0.05, 0.06, 0)
+
+[node name="ArenaPortal" type="Node2D"]
+script = ExtResource("1_portal")
+portal_scale = 0.22
+brightness = 1.25
+light_energy = 1.5
+interaction_radius = 150.0
+
+[node name="Art" type="Node2D" parent="."]
+
+[node name="Basin" type="Sprite2D" parent="Art"]
+texture = ExtResource("2_basin")
+
+[node name="Core" type="Sprite2D" parent="Art"]
+texture = ExtResource("3_core")
+
+[node name="Swirl" type="Sprite2D" parent="Art"]
+texture = ExtResource("4_swirl")
+
+[node name="Motes" type="CPUParticles2D" parent="Art"]
+amount = 34
+texture = ExtResource("3_core")
+lifetime = 2.4
+randomness = 0.5
+lifetime_randomness = 0.4
+emission_shape = 3
+emission_rect_extents = Vector2(300, 160)
+direction = Vector2(0, -1)
+spread = 24.0
+gravity = Vector2(0, -34)
+initial_velocity_min = 18.0
+initial_velocity_max = 46.0
+scale_amount_min = 0.02
+scale_amount_max = 0.06
+color_ramp = SubResource("Gradient_portalmotes")
+
+[node name="Light" type="PointLight2D" parent="."]
+color = Color(1, 0.32, 0.28, 1)
+energy = 0.0
+texture = SubResource("GradientTexture2D_portallight")
+texture_scale = 0.75
+
+[node name="Prompt" type="Node2D" parent="."]
+top_level = true
+script = ExtResource("5_prompt")
+
+[node name="Label" type="Label" parent="Prompt"]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1

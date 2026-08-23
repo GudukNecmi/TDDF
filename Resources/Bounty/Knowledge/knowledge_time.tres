@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="BountyKnowledgeCategory" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Bounty/bounty_knowledge_category.gd" id="1_category"]
+
+[resource]
+script = ExtResource("1_category")
+category_id = &"time"
+display_name = "TIME"
+unknown_text = "?"
+reveal_message = "You learned that {who} appears at {what}."
+source = 2
+custom_values = Array[StringName]([])

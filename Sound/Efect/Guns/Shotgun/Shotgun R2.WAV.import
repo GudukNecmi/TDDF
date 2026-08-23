@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://d2gyf2o18cb46"
+path="res://.godot/imported/Shotgun R2.WAV-94c241b88dcaee26bcad52e14c5e17e3.sample"
+
+[deps]
+
+source_file="res://Sound/Efect/Guns/Shotgun/Shotgun R2.WAV"
+dest_files=["res://.godot/imported/Shotgun R2.WAV-94c241b88dcaee26bcad52e14c5e17e3.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

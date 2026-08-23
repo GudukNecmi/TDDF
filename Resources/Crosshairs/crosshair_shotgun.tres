@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="CrosshairStyle" format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/crosshair_style.gd" id="1_style"]
+[ext_resource type="Texture2D" path="res://Assets/Guns/Shotgun/Shotgun Cross Part Top_Left.PNG" id="2_piece"]
+
+[resource]
+script = ExtResource("1_style")
+weapon_id = &"shotgun"
+piece_texture = ExtResource("2_piece")
+piece_size = Vector2(30, 30)
+diagonal = true
+piece_rotation_offset_degrees = 90.0
+rotate_with_arm = true
+closed_spacing = 20.0
+open_spacing = 48.0
+spread_distance = 520.0
+spread_curve = 1.2
+spread_speed = 20.0
+normal_colour = Color(0.95, 0.11, 0.05, 1)
+charged_colour = Color(0.95, 0.11, 0.05, 1)
+charge_fade_speed = 6.0
+outline_thickness = 1.0
+outline_colour = Color(0, 0, 0, 0.85)
+ammo_shown = false
+ammo_offset = Vector2(26, 18)
+ammo_font_size = 18
+ammo_colour = Color(0.95, 0.11, 0.05, 0.85)
+flash_gain = 2.2
+flash_time = 0.07
+flash_kick = 6.0

@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://doswnextrckl"]
+
+[ext_resource type="Script" uid="uid://jnecie5quonl" path="res://Scripts/World/reward_chest.gd" id="1_chest"]
+[ext_resource type="Texture2D" uid="uid://chqgr6ovkocp4" path="res://Assets/World/Trouble/reward_chest.png" id="2_closed"]
+[ext_resource type="Texture2D" uid="uid://dsdi25xx8byx0" path="res://Assets/World/Trouble/reward_chest_open.png" id="3_open"]
+[ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="4_prompt"]
+[ext_resource type="PackedScene" uid="uid://c5pehphwyiu8a" path="res://Scenes/World/AmmoCrate.tscn" id="5_item"]
+
+[node name="RewardChest" type="Node2D" unique_id=919454865]
+y_sort_enabled = true
+script = ExtResource("1_chest")
+open_texture = ExtResource("3_open")
+item_scene = ExtResource("5_item")
+
+[node name="Art" type="Node2D" parent="." unique_id=1800238965]
+
+[node name="Chest" type="Sprite2D" parent="Art" unique_id=1205164586]
+texture_filter = 1
+position = Vector2(0, -68)
+scale = Vector2(0.34, 0.34)
+texture = ExtResource("2_closed")
+
+[node name="Prompt" type="Node2D" parent="." unique_id=1795441071]
+top_level = true
+script = ExtResource("4_prompt")
+
+[node name="Label" type="Label" parent="Prompt" unique_id=1588217088]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1

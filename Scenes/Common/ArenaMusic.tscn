@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://b26p3twmafcf7"]
+
+[ext_resource type="AudioStream" uid="uid://clqen2s7h6k1g" path="res://Sound/Music/TDDF Arena Music ArenaLoop.WAV" id="1_loop"]
+[ext_resource type="AudioStream" uid="uid://c66e0wa7olafg" path="res://Resources/arena_opening_into_loop.tres" id="2_opening"]
+[ext_resource type="Script" uid="uid://cyu8xj0iketv8" path="res://Scripts/Common/music_player.gd" id="3_player"]
+
+[node name="ArenaMusic" type="AudioStreamPlayer" unique_id=1564444534]
+process_mode = 3
+stream = ExtResource("1_loop")
+volume_db = -6.0
+bus = &"Game"
+script = ExtResource("3_player")
+opening_stream = ExtResource("2_opening")
+loop_stream = ExtResource("1_loop")
+wave_manager_path = NodePath("")
+remember_across_rounds = false

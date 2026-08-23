@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="MapRegion" load_steps=3 format=3 uid="uid://ce1g1co5oj5rn"]
+
+[ext_resource type="Script" uid="uid://c6wrwwhvdce4o" path="res://Scripts/World/map_region.gd" id="1_region"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/Red River/Red River Background.PNG" id="2_ground"]
+
+[resource]
+script = ExtResource("1_region")
+region_id = &"D"
+display_name = "D"
+description = "RED RIVER"
+ground_texture = ExtResource("2_ground")
+ground_tile_size = 0.0
+difficulty = 0.75
+start_position = Vector2(-1870, 1090)
+map_position = Vector2(0.24, 0.76)
+map_size = Vector2(0.222, 0.25)

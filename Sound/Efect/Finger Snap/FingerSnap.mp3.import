@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://c0jpjucwyi4y3"
+path="res://.godot/imported/FingerSnap.mp3-0e69fdf53fc9e4ea1093a0457d0198ee.mp3str"
+
+[deps]
+
+source_file="res://Sound/Efect/Finger Snap/FingerSnap.mp3"
+dest_files=["res://.godot/imported/FingerSnap.mp3-0e69fdf53fc9e4ea1093a0457d0198ee.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

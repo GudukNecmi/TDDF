@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/thrown_weapon.gd" id="1_thrown"]
+[ext_resource type="Resource" path="res://Resources/Projectiles/knife_throw_profile.tres" id="2_profile"]
+[ext_resource type="Resource" path="res://Resources/Break/knife_throw_break.tres" id="3_break"]
+[ext_resource type="Texture2D" uid="uid://cys1thw4n36bm" path="res://Assets/Enemies/Enemy1/Knife1.PNG" id="4_knife"]
+[ext_resource type="Script" path="res://Scripts/Weapons/throwable_audio.gd" id="5_audio"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="6_bank"]
+[ext_resource type="AudioStream" uid="uid://cer0sc0i072tu" path="res://Sound/Efect/Guns/Throwable/Knife/KnifeHit.WAV" id="7_hit"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_knife"]
+radius = 6.0
+
+[node name="ThrownKnife" type="Area2D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_thrown")
+profile = ExtResource("2_profile")
+break_profile = ExtResource("3_break")
+art_path = NodePath("Sprite2D")
+tumble_degrees = 0.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+rotation = 2.7383
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("4_knife")
+centered = false
+offset = Vector2(-165, -587)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_knife")
+
+[node name="HitAudio" type="Node" parent="."]
+script = ExtResource("5_audio")
+source_path = NodePath("..")
+sound_bank_path = NodePath("SoundBank")
+event_signal = &"landed"
+sound = &"hit"
+origin_path = NodePath("..")
+
+[node name="SoundBank" type="Node" parent="HitAudio"]
+script = ExtResource("6_bank")
+sounds = {
+&"hit": ExtResource("7_hit")
+}
+voice_count = 1
+pitch_variation = 0.06

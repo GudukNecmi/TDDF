@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://cbase0weapontable"]
+
+[ext_resource type="Script" path="res://Scripts/World/weapon_rack.gd" id="1_rack"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Pipes/pipe_h.png" id="2_pipeh"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Pipes/pipe_v.png" id="3_pipev"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Pipes/pipe_flange.png" id="4_flange"]
+[ext_resource type="Texture2D" path="res://Assets/Guns/Lever Action Rifle/Default.PNG" id="5_rifle"]
+[ext_resource type="Texture2D" path="res://Assets/Guns/Revolver and Coin/DefaultRevolver.PNG" id="6_revolver"]
+[ext_resource type="Texture2D" path="res://Assets/Guns/Shotgun/DefaultShothun.PNG" id="7_shotgun"]
+[ext_resource type="Script" path="res://Scripts/UI/interaction_prompt.gd" id="8_prompt"]
+
+[node name="WeaponTable" type="Node2D"]
+script = ExtResource("1_rack")
+interaction_radius = 140.0
+reach_offset = Vector2(0, -20)
+starts_run_after_choosing = false
+prompt_path = NodePath("Prompt")
+
+[node name="Art" type="Node2D" parent="."]
+
+[node name="LegLeft" type="Sprite2D" parent="Art"]
+position = Vector2(-150, -12)
+scale = Vector2(0.5, 0.55)
+texture = ExtResource("3_pipev")
+
+[node name="LegRight" type="Sprite2D" parent="Art"]
+position = Vector2(150, -12)
+scale = Vector2(0.5, 0.55)
+texture = ExtResource("3_pipev")
+
+[node name="FootLeft" type="Sprite2D" parent="Art"]
+position = Vector2(-150, 20)
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("4_flange")
+
+[node name="FootRight" type="Sprite2D" parent="Art"]
+position = Vector2(150, 20)
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("4_flange")
+
+[node name="Top" type="Sprite2D" parent="Art"]
+position = Vector2(0, -62)
+scale = Vector2(3, 1)
+texture = ExtResource("2_pipeh")
+
+[node name="Rifle" type="Sprite2D" parent="Art"]
+position = Vector2(-118, -101)
+rotation = -0.05
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("5_rifle")
+
+[node name="Revolver" type="Sprite2D" parent="Art"]
+position = Vector2(0, -84)
+rotation = 0.09
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("6_revolver")
+
+[node name="Shotgun" type="Sprite2D" parent="Art"]
+position = Vector2(118, -101)
+rotation = 0.04
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("7_shotgun")
+
+[node name="Prompt" type="Node2D" parent="."]
+top_level = true
+script = ExtResource("8_prompt")
+
+[node name="Label" type="Label" parent="Prompt"]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1

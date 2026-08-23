@@ -1,0 +1,31 @@
+[gd_resource type="AudioBusLayout" format=3 uid="uid://d2gydhh7i03dm"]
+
+[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_j3pel"]
+room_size = 0.9
+damping = 0.28
+dry = 0.55
+wet = 0.75
+
+[sub_resource type="AudioEffectDelay" id="AudioEffectDelay_j3pel"]
+tap1_delay_ms = 190.0
+tap1_level_db = -7.0
+tap2_delay_ms = 380.0
+tap2_level_db = -13.0
+
+[resource]
+bus/1/name = &"Game"
+bus/1/solo = false
+bus/1/mute = false
+bus/1/bypass_fx = false
+bus/1/volume_db = 0.0
+bus/1/send = &"Master"
+bus/2/name = &"Snap"
+bus/2/solo = false
+bus/2/mute = false
+bus/2/bypass_fx = false
+bus/2/volume_db = 0.0
+bus/2/send = &"Master"
+bus/2/effect/0/effect = SubResource("AudioEffectReverb_j3pel")
+bus/2/effect/0/enabled = true
+bus/2/effect/1/effect = SubResource("AudioEffectDelay_j3pel")
+bus/2/effect/1/enabled = true

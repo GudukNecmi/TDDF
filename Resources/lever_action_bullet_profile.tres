@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="ProjectileProfile" format=3 uid="uid://b8p75skcjsni1"]
+
+[ext_resource type="Script" uid="uid://b5jv1h7ruv3we" path="res://Scripts/Projectile/projectile_profile.gd" id="1_37a08"]
+
+[resource]
+script = ExtResource("1_37a08")
+effective_range = 3000.0
+max_lifetime = 4.0
+damage_near = 250.0
+damage_far = 250.0
+damage_exponent = 1.0
+speed_near = 2400.0
+speed_far = 2400.0
+speed_exponent = 1.0
+color_near = Color(1, 0.86, 0.35, 1)
+color_far = Color(1, 0.86, 0.35, 1)
+glow_near = 0.225
+glow_far = 0.225
+glow_exponent = 1.0
+light_energy_near = 0.225
+light_energy_far = 0.225
+light_scale_far = 1.0
+light_exponent = 1.0

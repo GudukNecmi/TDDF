@@ -1,0 +1,6 @@
+[gd_resource type="Theme" format=3 uid="uid://c5pendhng7y1a"]
+
+[ext_resource type="FontFile" uid="uid://bjps5475v1vm5" path="res://Fonts/WesternBangBang-Regular.ttf" id="1_westernbangbang"]
+
+[resource]
+default_font = ExtResource("1_westernbangbang")

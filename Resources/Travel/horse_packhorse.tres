@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="Horse" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Run/horse.gd" id="1_horse"]
+
+[resource]
+script = ExtResource("1_horse")
+horse_id = &"pack_horse"
+display_name = "PACK HORSE"
+description = "SLOW, SOUR, AND ALL THERE IS"
+fastest_days = 4
+slowest_days = 4

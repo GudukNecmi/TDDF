@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://cgotikbossmap"]
+
+[ext_resource type="Script" path="res://Scripts/World/boss_encounter_map.gd" id="1_bossmap"]
+[ext_resource type="Script" uid="uid://b05im5xftlqsx" path="res://Scripts/World/tiled_surface.gd" id="2_surface"]
+[ext_resource type="Script" uid="uid://b2drx4oy6thi3" path="res://Scripts/World/region_ground.gd" id="3_ground"]
+[ext_resource type="Texture2D" uid="uid://ba5x4ipvshm41" path="res://Assets/Maps/Desert/1- Ground/DesertFloor.PNG" id="4_floorart"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bosstop"]
+size = Vector2(4928, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bossbottom"]
+size = Vector2(4928, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bossleft"]
+size = Vector2(64, 2828)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bossright"]
+size = Vector2(64, 2828)
+
+[node name="BossEncounterMap" type="Node2D" groups=["boss_encounter_map"]]
+y_sort_enabled = true
+script = ExtResource("1_bossmap")
+id = &"boss_encounter"
+bounds = Rect2(-2400, -1350, 4800, 2700)
+
+[node name="SpawnPoint" type="Marker2D" parent="."]
+position = Vector2(-980, 0)
+
+[node name="BossPoint" type="Marker2D" parent="."]
+position = Vector2(760, 0)
+
+[node name="Floor" type="Polygon2D" parent="."]
+z_index = -13
+texture_filter = 4
+texture_repeat = 2
+position = Vector2(-2400, -1350)
+texture = ExtResource("4_floorart")
+polygon = PackedVector2Array(0, 0, 4800, 0, 4800, 2700, 0, 2700)
+script = ExtResource("2_surface")
+surface_size = Vector2(4800, 2700)
+tile_size = 1000.0
+
+[node name="RegionGround" type="Node" parent="."]
+script = ExtResource("3_ground")
+surface_path = NodePath("../Floor")
+
+[node name="Bounds" type="StaticBody2D" parent="."]
+
+[node name="TopWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(0, -1382)
+shape = SubResource("RectangleShape2D_bosstop")
+
+[node name="BottomWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(0, 1382)
+shape = SubResource("RectangleShape2D_bossbottom")
+
+[node name="LeftWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(-2432, 0)
+shape = SubResource("RectangleShape2D_bossleft")
+
+[node name="RightWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(2432, 0)
+shape = SubResource("RectangleShape2D_bossright")
+
+[node name="Props" type="Node2D" parent="."]
+y_sort_enabled = true

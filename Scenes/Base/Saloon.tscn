@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://cbase0saloon"]
+
+[ext_resource type="Script" path="res://Scripts/World/cutaway_building.gd" id="1_cutaway"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Saloon/saloon_interior.png" id="2_int"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Saloon/saloon_exterior.png" id="3_ext"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Saloon/saloon_sign.png" id="4_sign"]
+[ext_resource type="Script" path="res://Scripts/World/shop_station.gd" id="5_station"]
+[ext_resource type="PackedScene" uid="uid://c23vp1exf46oi" path="res://Scenes/World/Props/Torch.tscn" id="6_torch"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Torches/torch_post.png" id="7_post"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_saloonentry"]
+size = Vector2(760, 300)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_saloonbar"]
+size = Vector2(560, 110)
+
+[node name="Saloon" type="Node2D"]
+script = ExtResource("1_cutaway")
+exterior_paths = Array[NodePath]([NodePath("Art/Exterior"), NodePath("Art/Sign")])
+interior_paths = Array[NodePath]([NodePath("Art/Interior")])
+fade_time = 0.28
+
+[node name="Art" type="Node2D" parent="."]
+
+[node name="Interior" type="Sprite2D" parent="Art"]
+texture = ExtResource("2_int")
+
+[node name="Exterior" type="Sprite2D" parent="Art"]
+texture = ExtResource("3_ext")
+
+[node name="Sign" type="Sprite2D" parent="Art"]
+position = Vector2(-306, 96)
+texture = ExtResource("4_sign")
+
+[node name="Torches" type="Node2D" parent="."]
+
+[node name="PostLeft" type="Sprite2D" parent="Torches"]
+position = Vector2(-150, 218)
+texture = ExtResource("7_post")
+
+[node name="PostRight" type="Sprite2D" parent="Torches"]
+position = Vector2(150, 218)
+texture = ExtResource("7_post")
+
+[node name="TorchLeft" parent="Torches" instance=ExtResource("6_torch")]
+position = Vector2(-150, 190)
+
+[node name="TorchRight" parent="Torches" instance=ExtResource("6_torch")]
+position = Vector2(150, 190)
+
+[node name="EntryArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EntryArea"]
+position = Vector2(0, 62)
+shape = SubResource("RectangleShape2D_saloonentry")
+
+[node name="Bar" type="Node2D" parent="."]
+position = Vector2(0, -80)
+script = ExtResource("5_station")
+shop_id = &"saloon_bar"
+display_name = "Saloon Bar"
+
+[node name="InteractArea" type="Area2D" parent="Bar"]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Bar/InteractArea"]
+position = Vector2(0, 96)
+shape = SubResource("RectangleShape2D_saloonbar")

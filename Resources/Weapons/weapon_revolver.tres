@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" format=3 uid="uid://bjwumcdbu862r"]
+
+[ext_resource type="Resource" uid="uid://q6h0onksryq4" path="res://Resources/Ammo/ammo_revolver_round.tres" id="1_c8ybo"]
+[ext_resource type="PackedScene" uid="uid://cvpvthdqu1ii2" path="res://Scenes/Weapons/Revolver.tscn" id="2_t3evg"]
+[ext_resource type="Script" uid="uid://bw3nojerhwjfg" path="res://Scripts/Weapons/weapon_definition.gd" id="3_x7pi8"]
+
+[resource]
+script = ExtResource("3_x7pi8")
+weapon_id = &"revolver"
+display_name = "REVOLVER & COIN"
+description = "SIX CHAMBERS.  RIGHT CLICK THROWS A COIN - SHOOT IT."
+scene = ExtResource("2_t3evg")
+ammo_type = ExtResource("1_c8ybo")

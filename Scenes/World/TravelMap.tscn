@@ -1,0 +1,134 @@
+[gd_scene load_steps=21 format=3 uid="uid://cgotiktravelmap"]
+
+[ext_resource type="Script" path="res://Scripts/World/travel_map.gd" id="1_travelmap"]
+[ext_resource type="Texture2D" uid="uid://ba5x4ipvshm41" path="res://Assets/Maps/Desert/1- Ground/DesertFloor.PNG" id="2_ground"]
+[ext_resource type="Script" uid="uid://b05im5xftlqsx" path="res://Scripts/World/tiled_surface.gd" id="3_surface"]
+[ext_resource type="Script" uid="uid://dmeyhvk7sc3g4" path="res://Scripts/World/prop_scatter.gd" id="4_scatter"]
+[ext_resource type="Script" uid="uid://jbqgmet8idv" path="res://Scripts/World/scatter_layer.gd" id="5_layer"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Travel/scatter_travel_cacti.tres" id="6_cacti"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Travel/scatter_travel_bushes.tres" id="7_bushes"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Travel/scatter_travel_bones.tres" id="8_bones"]
+[ext_resource type="Script" uid="uid://iovrrf6qlbhk" path="res://Scripts/World/camera_bounds.gd" id="9_bounds"]
+[ext_resource type="PackedScene" uid="uid://cgotikhorsecart" path="res://Scenes/World/HorseCart.tscn" id="10_cart"]
+[ext_resource type="Script" path="res://Scripts/Enemy/travel_wave_director.gd" id="11_waves"]
+[ext_resource type="Script" path="res://Scripts/Enemy/travel_formation.gd" id="12_formation"]
+[ext_resource type="Resource" path="res://Resources/Travel/Formations/formation_wall.tres" id="13_wall"]
+[ext_resource type="Resource" path="res://Resources/Travel/Formations/formation_wedge.tres" id="14_wedge"]
+[ext_resource type="Resource" path="res://Resources/Travel/Formations/formation_cluster.tres" id="15_cluster"]
+[ext_resource type="Resource" path="res://Resources/Travel/Formations/formation_ranks.tres" id="16_ranks"]
+[ext_resource type="Resource" path="res://Resources/Travel/Formations/formation_split.tres" id="17_split"]
+[ext_resource type="Resource" path="res://Resources/Travel/Formations/formation_arc.tres" id="18_arc"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_travel_h"]
+size = Vector2(19728, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_travel_h2"]
+size = Vector2(19728, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_travel_v"]
+size = Vector2(64, 12378)
+
+[node name="TravelMap" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_travelmap")
+playable_region = Rect2(-9800, -6125, 19600, 12250)
+player_spawn_path = NodePath("PlayerSpawn")
+cart_path = NodePath("HorseCart")
+camera_bounds_path = NodePath("CameraBounds")
+wave_director_path = NodePath("TravelWaves")
+
+[node name="Bounds" type="StaticBody2D" parent="."]
+
+[node name="TopWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(0, -6157)
+shape = SubResource("RectangleShape2D_travel_h")
+
+[node name="BottomWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(0, 6157)
+shape = SubResource("RectangleShape2D_travel_h2")
+
+[node name="LeftWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(-9832, 0)
+shape = SubResource("RectangleShape2D_travel_v")
+
+[node name="RightWall" type="CollisionShape2D" parent="Bounds"]
+position = Vector2(9832, 0)
+shape = SubResource("RectangleShape2D_travel_v")
+
+[node name="Floor" type="Polygon2D" parent="."]
+z_index = -13
+texture_filter = 4
+texture_repeat = 2
+position = Vector2(-9800, -6125)
+texture = ExtResource("2_ground")
+texture_scale = Vector2(4, 4)
+polygon = PackedVector2Array(0, 0, 19600, 0, 19600, 12250, 0, 12250)
+script = ExtResource("3_surface")
+surface_size = Vector2(19600, 12250)
+tile_size = 1000.0
+
+[node name="Props" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="PropScatter" type="Node2D" parent="."]
+script = ExtResource("4_scatter")
+region = Rect2(-9760, -6085, 19520, 12170)
+layers = Array[ExtResource("5_layer")]([ExtResource("6_cacti"), ExtResource("7_bushes"), ExtResource("8_bones")])
+container_path = NodePath("../Props")
+clear_centre = Vector2(-8400, 4800)
+clear_radius = 520.0
+keep_clear = Array[Rect2]([Rect2(7700, -5500, 1400, 1400)])
+grid_cell_size = 320.0
+
+[node name="CameraBounds" type="Node2D" parent="."]
+script = ExtResource("9_bounds")
+region = Rect2(-9800, -6125, 19600, 12250)
+apply_on_ready = false
+
+[node name="PlayerSpawn" type="Marker2D" parent="."]
+position = Vector2(-8400, 4800)
+
+[node name="HorseCart" parent="." instance=ExtResource("10_cart")]
+position = Vector2(8400, -4800)
+
+[node name="TravelWaves" type="Node" parent="."]
+script = ExtResource("11_waves")
+enabled = true
+map_path = NodePath("..")
+spawn_distance = 1250.0
+spawn_variance = 240.0
+interception_offset = 0.0
+player_lead_time = 0.4
+min_distance_from_player = 820.0
+min_distance_from_horse = 900.0
+require_off_screen = true
+off_screen_margin = 60.0
+region_inset = 120.0
+base_enemies_per_wave = 11
+max_enemies_per_wave = 34
+enemy_count_scaling = 1.4
+formations = Array[ExtResource("12_formation")]([ExtResource("13_wall"), ExtResource("14_wedge"), ExtResource("15_cluster"), ExtResource("16_ranks"), ExtResource("17_split"), ExtResource("18_arc")])
+base_group_count = 2
+max_group_count = 4
+group_spacing = 640.0
+min_group_size = 3
+formation_width = 980.0
+formation_width_scaling = 0.6
+formation_depth = 320.0
+base_side_groups = 1
+max_side_groups = 3
+side_group_share = 0.3
+side_angle_degrees = Vector2(55, 105)
+side_spawn_distance = 1100.0
+first_wave_delay = 3.0
+wave_interval = 10.0
+min_wave_interval = 5.0
+clear_fraction = 0.3
+spawn_interval = 0.04
+max_active_enemies = 34
+max_active_enemies_at_arrival = 58
+enemy_health_multiplier = 1.6
+enemy_health_multiplier_at_arrival = 2.2
+enemy_damage_multiplier = 1.4
+enemy_damage_multiplier_at_arrival = 1.7
+stop_distance = 0.0

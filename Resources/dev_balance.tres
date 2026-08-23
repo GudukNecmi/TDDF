@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="DevBalance" load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Dev/dev_balance.gd" id="1_balance"]
+[ext_resource type="Script" path="res://Scripts/Dev/dev_weapon_balance.gd" id="2_weapon"]
+[ext_resource type="Resource" uid="uid://cwqsj28dqr25j" path="res://Resources/Ammo/ammo_shell.tres" id="3_shell"]
+[ext_resource type="Resource" uid="uid://css8bk47bsos8" path="res://Resources/shotgun_pellet_profile.tres" id="4_pellet"]
+[ext_resource type="Resource" uid="uid://bmvv4uadff8iq" path="res://Resources/Ammo/ammo_rifle_round.tres" id="5_rifle"]
+[ext_resource type="Resource" uid="uid://b8p75skcjsni1" path="res://Resources/lever_action_bullet_profile.tres" id="6_leverbullet"]
+[ext_resource type="Resource" uid="uid://q6h0onksryq4" path="res://Resources/Ammo/ammo_revolver_round.tres" id="7_revround"]
+[ext_resource type="Resource" uid="uid://bg6ke0r7vs7e0" path="res://Resources/revolver_bullet_profile.tres" id="8_revbullet"]
+
+[sub_resource type="Resource" id="DevWeaponBalance_shotgun"]
+script = ExtResource("2_weapon")
+display_name = "Shotgun"
+ammo_type = ExtResource("3_shell")
+projectile_profile = ExtResource("4_pellet")
+
+[sub_resource type="Resource" id="DevWeaponBalance_lever"]
+script = ExtResource("2_weapon")
+display_name = "Lever Action Rifle"
+ammo_type = ExtResource("5_rifle")
+projectile_profile = ExtResource("6_leverbullet")
+
+[sub_resource type="Resource" id="DevWeaponBalance_revolver"]
+script = ExtResource("2_weapon")
+display_name = "Revolver & Coin"
+ammo_type = ExtResource("7_revround")
+projectile_profile = ExtResource("8_revbullet")
+
+[resource]
+script = ExtResource("1_balance")
+weapons = Array[ExtResource("2_weapon")]([SubResource("DevWeaponBalance_shotgun"), SubResource("DevWeaponBalance_lever"), SubResource("DevWeaponBalance_revolver")])

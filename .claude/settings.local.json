@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__godot-mcp-pro__set_input_action",
+      "mcp__godot-mcp-pro__create_script",
+      "mcp__godot-mcp-pro__create_scene",
+      "mcp__godot-mcp-pro__batch_add_nodes",
+      "mcp__godot-mcp-pro__open_scene",
+      "mcp__godot-mcp-pro__update_property",
+      "mcp__godot-mcp-pro__add_resource",
+      "mcp__godot-mcp-pro__attach_script",
+      "mcp__godot-mcp-pro__create_animation",
+      "mcp__godot-mcp-pro__add_animation_track",
+      "mcp__godot-mcp-pro__set_animation_keyframe",
+      "mcp__godot-mcp-pro__save_scene",
+      "mcp__godot-mcp-pro__add_scene_instance",
+      "mcp__godot-mcp-pro__set_project_setting",
+      "mcp__godot-mcp-pro__validate_script",
+      "mcp__godot-mcp-pro__get_game_screenshot",
+      "mcp__godot-mcp-pro__get_game_node_properties",
+      "mcp__godot-mcp-pro__simulate_action",
+      "mcp__godot-mcp-pro__stop_scene",
+      "mcp__godot-mcp-pro__play_scene",
+      "mcp__godot-mcp-pro__get_editor_errors",
+      "PowerShell(Get-ChildItem -Recurse -Path Scenes, Scripts -File | Where-Object { $_.Extension -ne '.uid' -and $_.Extension -ne '.import' } | ForEach-Object { $_.FullName.Replace\\($PWD.Path + '\\\\', ''\\) })",
+      "mcp__godot-mcp-pro__execute_game_script",
+      "mcp__godot-mcp-pro__execute_editor_script",
+      "mcp__godot-mcp-pro__get_scene_tree",
+      "mcp__godot-mcp-pro__get_output_log"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "godot-mcp-pro"
+  ]
+}

@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://ggxxbbjac857"]
+
+[ext_resource type="Script" uid="uid://de7aty2gi6jur" path="res://Scripts/Effects/casing.gd" id="1_mdygy"]
+[ext_resource type="Texture2D" uid="uid://08bjpy5jujda" path="res://Assets/Guns/Lever Action Rifle/LeveActionShell.PNG" id="2_ma5wj"]
+
+[node name="LeverRound" type="Node2D" unique_id=1753667337]
+script = ExtResource("1_mdygy")
+eject_speed_min = 55.0
+eject_speed_max = 130.0
+lift_min = 90.0
+lift_max = 175.0
+settle_time = 5.0
+
+[node name="Art" type="Sprite2D" parent="." unique_id=900753404]
+scale = Vector2(0.08, 0.08)
+texture = ExtResource("2_ma5wj")

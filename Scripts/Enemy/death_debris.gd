@@ -20,6 +20,18 @@ extends Node2D
 ## why the pieces outlive the body they came from and can still be rolling after
 ## the corpse itself has been freed.
 
+## Emitted every time this piece touches the ground: once as it first arrives, and
+## again on each bounce after that. [param impact_speed] is how hard it came down,
+## in pixels per second, and [param first_touch] is true only for the arrival.
+##
+## [b]Nothing here decides what a landing sounds or looks like.[/b] The piece only
+## says that it happened and where; whoever threw it is what knows whether that is
+## a lump of gore hitting the sand or a knife - see [member Explosion.gore_impact_sounds]
+## - so one signal serves every kind of debris the game throws. It stops for good
+## once the piece has settled, so a piece lying still is silent by construction
+## rather than by a guard at the other end.
+signal landed(at: Vector2, impact_speed: float, first_touch: bool)
+
 ## Downward pull while airborne.
 @export var gravity: float = 1500.0
 ## How much of its speed a bounce keeps. 0 lands dead, 1 never settles.
@@ -54,7 +66,24 @@ var _velocity := Vector2.ZERO
 var _spin: float = 0.0
 var _rest_y: float = 0.0
 var _grounded: bool = false
+## Whether it has ever reached the ground line, so the arrival can be told from the
+## bounces that follow it.
+var _touched_down: bool = false
 var _still_age: float = 0.0
+## Whether it has been thrown yet, so the frame between being placed and being
+## launched does not report a ground line it has not been given.
+var _launched: bool = false
+
+
+## Joined so that anything hanging off this piece stands where the piece stands.
+##
+## [b]It is how a part torn off a body becomes an object in its own right.[/b] A
+## [ShadowCaster] that came along with the artwork asks what it is attached to
+## every time the tree changes under it; while the head was on the body the answer
+## was the body, and now that it is rolling across the sand the answer is this. No
+## code anywhere says "head", and nothing had to be told the separation happened.
+func _ready() -> void:
+	add_to_group(&"shadow_ground_root")
 
 
 ## Throws the piece. [param velocity] is its starting speed in pixels per second
@@ -67,11 +96,35 @@ func launch(velocity: Vector2, drop: float) -> void:
 	_velocity = velocity
 	_rest_y = global_position.y + maxf(drop, 0.0)
 	_grounded = false
+	_touched_down = false
 	_still_age = 0.0
+	_launched = true
 
 
 func is_grounded() -> bool:
 	return _grounded
+
+
+## Where this piece is standing on the arena floor - the line it will land on, not
+## the point it is currently drawn at.
+##
+## The two are different for exactly as long as it is in the air, and keeping them
+## apart is what lets the sun light a bouncing head the same way it lights a man
+## walking: the mark stays on the floor underneath while the artwork travels above
+## it. Read by [ShadowCaster] through
+## [member ShadowCaster.ground_position_method]; any node that answers it qualifies.
+func get_shadow_ground_position() -> Vector2:
+	if not _launched:
+		return global_position
+	return Vector2(global_position.x, maxf(_rest_y, global_position.y))
+
+
+## How far above that floor the piece is drawn right now, in world pixels. Zero
+## once it is down, so its shadow settles under it without a landing callback.
+func get_visual_height() -> float:
+	if not _launched:
+		return 0.0
+	return maxf(_rest_y - global_position.y, 0.0)
 
 
 func _physics_process(delta: float) -> void:
@@ -96,12 +149,18 @@ func _fall(delta: float) -> void:
 	if global_position.y < _rest_y:
 		return
 
+	var came_down := absf(_velocity.y)
+	var first_touch := not _touched_down
+	_touched_down = true
+
 	global_position.y = _rest_y
-	if absf(_velocity.y) < min_bounce_speed:
+	if came_down < min_bounce_speed:
 		_velocity.y = 0.0
 		_grounded = true
+		landed.emit(global_position, came_down, first_touch)
 		return
-	_velocity.y = -absf(_velocity.y) * bounce
+	_velocity.y = -came_down * bounce
+	landed.emit(global_position, came_down, first_touch)
 
 
 ## Down and rolling: it keeps its sideways speed, loses it to friction, and its

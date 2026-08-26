@@ -1,11 +1,11 @@
-[gd_resource type="Resource" script_class="MapDefinition" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="MapDefinition" format=3 uid="uid://cn88dmejvonb7"]
 
-[ext_resource type="Script" path="res://Scripts/World/map_definition.gd" id="1_map"]
+[ext_resource type="Script" uid="uid://piev1mq2t3rq" path="res://Scripts/World/map_definition.gd" id="1_map"]
+[ext_resource type="Script" uid="uid://bbrwbccihyx2g" path="res://Scripts/World/day_stage.gd" id="1_pcvxs"]
+[ext_resource type="Script" uid="uid://c6wrwwhvdce4o" path="res://Scripts/World/map_region.gd" id="2_410ox"]
 
 [resource]
 script = ExtResource("1_map")
 map_id = &"town"
 display_name = "TOWN"
-unlocked = false
-locked_label = "LOCKED"
 arrival_combat_chance = 0.6

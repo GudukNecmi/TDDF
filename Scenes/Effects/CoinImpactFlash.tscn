@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://c5pejrdv2cu7d"]
+
+[ext_resource type="Script" path="res://Scripts/Effects/one_shot_particles.gd" id="1_ospar"]
+
+[sub_resource type="Gradient" id="Gradient_coinspark"]
+offsets = PackedFloat32Array(0, 0.2, 0.6, 1)
+colors = PackedColorArray(1, 0.86, 0.42, 1, 1, 0.46, 0.06, 1, 0.92, 0.11, 0.03, 0.9, 0.5, 0.02, 0.01, 0)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_coinspark"]
+blend_mode = 1
+
+[node name="CoinImpactFlash" type="CPUParticles2D"]
+material = SubResource("CanvasItemMaterial_coinspark")
+z_index = 6
+emitting = false
+amount = 14
+lifetime = 0.16
+one_shot = true
+explosiveness = 1.0
+randomness = 0.4
+lifetime_randomness = 0.3
+script = ExtResource("1_ospar")
+emission_shape = 1
+emission_sphere_radius = 3.0
+spread = 180.0
+gravity = Vector2(0, 260)
+initial_velocity_min = 150.0
+initial_velocity_max = 430.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
+damping_min = 320.0
+damping_max = 780.0
+scale_amount_min = 1.4
+scale_amount_max = 3.2
+color_ramp = SubResource("Gradient_coinspark")

@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="MapRegion" load_steps=5 format=3 uid="uid://beta4ksww85q4"]
+[gd_resource type="Resource" script_class="MapRegion" format=3 uid="uid://beta4ksww85q4"]
 
 [ext_resource type="Script" uid="uid://c6wrwwhvdce4o" path="res://Scripts/World/map_region.gd" id="1_region"]
-[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/The Dead/The Dead Background.PNG" id="2_ground"]
-[ext_resource type="Script" path="res://Scripts/World/scatter_layer.gd" id="3_layer"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/Regions/scatter_the_dead_stakes.tres" id="4_stakes"]
+[ext_resource type="Texture2D" uid="uid://q8fc2ont5wpy" path="res://Assets/Maps/Desert/The Dead/The Dead Background.PNG" id="2_ground"]
+[ext_resource type="Script" uid="uid://jbqgmet8idv" path="res://Scripts/World/scatter_layer.gd" id="3_layer"]
+[ext_resource type="Resource" uid="uid://bplkvt5p5ita7" path="res://Resources/Maps/Desert/Regions/scatter_the_dead_stakes.tres" id="4_stakes"]
 
 [resource]
 script = ExtResource("1_region")
@@ -11,9 +11,9 @@ region_id = &"E"
 display_name = "E"
 description = "THE DEAD"
 ground_texture = ExtResource("2_ground")
-ground_tile_size = 0.0
 scatter_layers = Array[ExtResource("3_layer")]([ExtResource("4_stakes")])
 difficulty = 1.0
+enemy_base_health = 500.0
 start_position = Vector2(1580, 1010)
 map_position = Vector2(0.72, 0.74)
 map_size = Vector2(0.222, 0.25)

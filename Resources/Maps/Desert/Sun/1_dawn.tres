@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SunStage" format=3 uid="uid://dxssoclugc33x"]
+
+[ext_resource type="Script" uid="uid://dcedosoc4shi5" path="res://Scripts/World/Sun/sun_stage.gd" id="1_sun"]
+
+[resource]
+script = ExtResource("1_sun")
+stage_name = &"dawn"
+sun_direction = Vector2(0.86, 0.52)
+light_color = Color(1, 0.4392157, 0.30980393, 1)
+light_energy = 0.75
+ambient_intensity = 0.35
+shadow_color = Color(0.05, 0.025, 0.02, 1)
+shadow_opacity = 0.24
+shadow_softness = 0.28
+shadow_fade = 0.2
+shadow_height_opacity_falloff = 0.35

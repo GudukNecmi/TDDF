@@ -240,6 +240,20 @@ func get_ammo() -> WeaponAmmo:
 	return _ammo
 
 
+## Who this weapon is currently part of - the character carrying it.
+##
+## A weapon in a hand is not a separate object standing on the floor next to
+## somebody: it is part of the figure, and its silhouette belongs in that figure's
+## one shadow rather than beside it. This is the weapon saying so, and it is the
+## whole of what the shadow system needs to know - see
+## [member ShadowCaster.group_owner_method]. A weapon that has been thrown, dropped
+## or left lying in the sand is a [ThrownWeapon] or a pickup and does not answer
+## this at all, so it casts a shadow of its own again without a line of code
+## anywhere knowing what a weapon is.
+func get_shadow_group_owner() -> Node:
+	return _target
+
+
 ## Where the weapon is being held relative to the character, in world pixels - the
 ## hand, turned by the aim.
 ##

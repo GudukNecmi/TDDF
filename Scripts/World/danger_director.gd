@@ -168,6 +168,18 @@ enum State {
 ## is still fighting is ever taken away from the player. Off leaves them there, and
 ## the next Danger opens with the previous one's stragglers still wandering off.
 @export var clears_stragglers: bool = true
+## Whether the desert itself is put back to how it was found before the next Danger
+## opens in it.
+##
+## On. The walk is the player crossing the country to somewhere else, so what they
+## were left standing in - the bodies, the men who gave up, the knives and bones on
+## the ground, the pieces broken off things, the crates, the blood and the tracks -
+## must not be lying in the new place too, and the scenery is laid out again so the
+## next Danger does not read as the last one's map with fresh men on it. It is
+## [WorldReset]'s doing rather than this node's, which is the same clean world a
+## scene rebuild produces reached without one; a world with no reset in it walks on
+## exactly as it did. Off leaves the last Danger's mess standing.
+@export var rebuilds_the_world: bool = true
 
 @export_group("Wording")
 ## The heading over the cart while the player is walking.
@@ -226,6 +238,48 @@ enum State {
 ## moved before there was anything to watch it move on.
 @export var day_dial_path: NodePath = ^"../RunHUD/DayTransitionDial"
 
+## Whether the hour is held back until the reward chest has come down.
+##
+## [b]On, and it is an ordering rather than a delay.[/b] The last Danger of a search
+## ends three things at once - the fight, the ladder and the day - and the chest
+## falling out of the sky is the beat the player is actually watching. Spending the
+## hour first turns the whole world a different colour underneath a box that has not
+## arrived yet, so the hour is held until the chest is standing on the ground and
+## spent then. See [method _settle_the_day].
+##
+## Off spends it the moment the search ends, which is where it used to be spent.
+@export var waits_for_the_chest: bool = true
+## How long the hour will wait on a chest before it is spent anyway, in seconds.
+##
+## Insurance, not timing. A search with nothing authored to pay with, or one whose
+## world is torn down while the box is still in the air, must not be able to keep the
+## clock stopped for the rest of the game. 0 waits for ever.
+@export var chest_wait_timeout: float = 8.0
+
+@export_group("The music")
+## Whether how deep the search has gone drives how fast the soundtrack runs.
+##
+## [b]It is the one track, played faster.[/b] Nothing is restarted, re-cut or handed
+## over: the Danger's own music keeps playing from wherever it had got to and only
+## its speed changes, which is what makes the ladder audible without the player ever
+## hearing a seam. See [method _push_the_music].
+@export var scales_music_speed: bool = true
+## Speed the first Danger runs at. Everything above it is measured from here.
+@export var music_base_speed: float = 1.0
+## What each Danger past the first adds to the speed.
+##
+## [code]speed = music_base_speed + (danger - 1) * music_speed_per_danger[/code], so
+## the tenth Danger runs at 1.9 with the shipped values. It is an exported step
+## rather than a table because "how much faster is the next one" is the whole of the
+## tuning, and a longer ladder must not need a line adding anywhere.
+@export var music_speed_per_danger: float = 0.10
+## How long the change to a new Danger's speed takes, in seconds. Long enough to be
+## heard as the fight winding up rather than as a tape being spooled.
+@export var music_speed_time: float = 3.0
+## How long the soundtrack takes to come back to [member music_base_speed] as the
+## search ends, in seconds.
+@export var music_restore_time: float = 2.0
+
 @export_group("How many")
 ## Enemies in the [i]whole[/i] of Danger 1, in a region of danger 0 - a map's way in.
 ##
@@ -283,7 +337,13 @@ enum State {
 ## branch here.
 @export var region_count_multiplier: float = 2.5
 ## The same, for how much health those enemies have.
-@export var region_health_multiplier: float = 1.8
+##
+## [b]1.0 - a Danger does not make a man tougher, and cannot.[/b] Health is the
+## region's own stated figure now - see [member MapRegion.enemy_base_health] - and
+## [RoundScaling] sets it rather than multiplying it, so this reaches nothing
+## whatever it is set to. It is left as the dial rather than deleted, in step with
+## the count multiplier beside it.
+@export var region_health_multiplier: float = 1.0
 ## The same, for how hard they hit. 1.0 - the default - leaves damage alone, which
 ## is the rule as written: trouble deeper in the map means more of them and tougher
 ## ones.
@@ -300,7 +360,10 @@ enum State {
 ## setting this to 1.0.
 @export var count_growth: float = 1.18
 ## The same, for their health.
-@export var health_growth: float = 1.15
+##
+## [b]1.0, and inert, for the same reason as the region multiplier above.[/b] Going
+## deeper into a search asks for more men, not tougher ones.
+@export var health_growth: float = 1.0
 ## The same, for their damage. 1.0 leaves it alone.
 @export var damage_growth: float = 1.0
 ## Whether the Danger number starts again at 1 each time the player sets out looking
@@ -317,6 +380,37 @@ enum State {
 ## 0 is no ceiling, which is the endless search this had before there was a top of
 ## the ladder.
 @export var final_danger: int = 10
+
+@export_group("Free Run")
+## The last Danger a [b]Free Run[/b] can hold, which is the only thing that makes
+## one endless.
+##
+## 0, and deliberately: a Free Run is the search with the bottom taken out of it,
+## so the ladder is never answered for the player and CONTINUE is asked after every
+## Danger for as long as they keep saying yes. It is a number rather than a flag
+## because a Free Run of exactly fifty is then a value in the inspector rather than
+## a second mode - see [method get_final_danger], which is the one place either
+## ceiling is read.
+##
+## [b]It does not touch [member final_danger].[/b] The story keeps its own top of
+## the ladder whatever this says, because the two are different games and a Free
+## Run must not be able to retune the story by existing.
+@export var free_run_final_danger: int = 0
+## Whether answering CONTINUE on a Free Run fills the player's pouches back up.
+##
+## [b]On, and it is what makes the loop survivable.[/b] There is no camp to buy
+## rounds at out here and no run to end at - the next Danger opens on the spot -
+## so a player who spent their last shell on Danger 9 would meet Danger 10 with an
+## empty gun and nothing they could do about it. Saying yes is what pays for it.
+##
+## Nothing is written here about what a full pouch means: the locker refills every
+## reserve it keeps and the weapon is asked for the state a fight should open in,
+## exactly as setting out from the base does - see [method WorldBoot._resupply] -
+## so a weapon added later is resupplied without this being told about it.
+@export var free_run_refills_ammo: bool = true
+## Where the rounds are kept. Left as the default it is the [code]Ammo[/code]
+## autoload, which is the only locker there is.
+@export var locker_path: NodePath = ^"/root/Ammo"
 
 var _session: Node
 var _state: State = State.IDLE
@@ -381,6 +475,47 @@ func get_state() -> State:
 ## Whether the player is out looking for trouble - walking, fighting or deciding.
 func is_running() -> bool:
 	return _running
+
+
+## Whether this is a Free Run - asked of the session, which is the only thing that
+## knows and the only thing that survives a world being rebuilt.
+func is_free_run() -> bool:
+	if _session == null or not _session.has_method(&"is_free_run"):
+		return false
+	return bool(_session.call(&"is_free_run"))
+
+
+## The last Danger this search can hold: the story's ceiling, or the Free Run's.
+##
+## [b]One place, so there is one ladder.[/b] Everything that has to know where the
+## top is - the question that is not asked, the reward that is paid instead - reads
+## it here rather than reading a property, so a third kind of game is a branch in
+## this function and nothing else.
+func get_final_danger() -> int:
+	return free_run_final_danger if is_free_run() else final_danger
+
+
+## Fills the pouches back up between Dangers on a Free Run, and does nothing at
+## all on a story search - where ammunition is bought at the camp and running dry
+## is the reason to STOP.
+##
+## The order is the resupply's own: the reserve first and the gun after it, so the
+## weapon is made ready out of the count the player is walking on with rather than
+## the one they finished the last fight on.
+func _refill_the_pouches() -> void:
+	if not free_run_refills_ammo or not is_free_run():
+		return
+
+	var locker := get_node_or_null(locker_path) as AmmoLocker
+	if locker != null:
+		locker.refill_all()
+
+	var mount := WeaponMount.get_active(self)
+	if mount == null:
+		return
+	var weapon := mount.get_weapon()
+	if weapon != null:
+		weapon.reload_to_ready()
 
 
 ## Which Danger is being fought, or was last fought. 0 before the first one opens.
@@ -495,6 +630,10 @@ func _walk() -> void:
 	get_tree().paused = true
 	if clears_stragglers:
 		_clear_stragglers()
+	# After the stragglers and before anything is shown, so the whole of the tidying
+	# happens on the one frame the black has already closed over.
+	if rebuilds_the_world:
+		_rebuild_the_world()
 	_show_walk()
 
 	var wait := maxf(transition_time, 0.0)
@@ -560,7 +699,8 @@ func _open_danger() -> void:
 	if fade != null:
 		fade.fade_in(maxf(fade_in_time, 0.0))
 
-	var placed := director.begin_with(get_enemy_count(), opening_count, rout_fraction)
+	var placed := director.begin_with(
+		get_enemy_count(), opening_count, rout_fraction, _danger)
 	if placed <= 0:
 		# Nothing was built. The search stops rather than leaving the player standing
 		# in a cleared world waiting for a fight that will never arrive.
@@ -570,6 +710,9 @@ func _open_danger() -> void:
 		return
 
 	danger_started.emit(_danger, placed)
+	# Wound up to this Danger's speed rather than snapped to it, so answering CONTINUE
+	# is heard as the fight getting worse over the three seconds that follow.
+	_push_the_music()
 	# Raised after the men are placed, so the card is read over a fight that is already
 	# happening rather than over an empty map that then fills up behind it.
 	_play_location_card()
@@ -594,7 +737,8 @@ func _on_danger_cleared() -> void:
 	# Danger to walk to, so the search finishes on the same beat it would have been
 	# asked on, and the reward is owed exactly as a STOP would have owed it.
 	var next: Callable = _ask_what_next
-	if final_danger > 0 and _danger >= final_danger:
+	var top := get_final_danger()
+	if top > 0 and _danger >= top:
 		next = _end_sequence
 
 	# Whose beat this is. An ending being played out over the last man's head owns the
@@ -633,6 +777,7 @@ func _on_answered(carry_on: bool) -> void:
 	if _state != State.DECIDING:
 		return
 	if carry_on:
+		_refill_the_pouches()
 		_walk_on()
 		return
 	_end_sequence()
@@ -655,10 +800,14 @@ func _end_sequence() -> void:
 	_restore_scaling()
 	_drop_player_death()
 	_hide_walk()
-	# Any hour still owed is paid here without a dial to turn: a search that stopped, or
-	# one that cleared the last Danger, never walks anywhere for the change to be shown
-	# over, and clearing a Danger has to cost the same hour either way.
-	_spend_the_day()
+	# Any hour still owed is settled here rather than spent here: a search that stopped,
+	# or one that cleared the last Danger, never walks anywhere for the change to be
+	# shown over, so it waits instead for the chest to come down and land. Clearing a
+	# Danger costs the same hour either way - see [method _settle_the_day].
+	_settle_the_day()
+	# Back to the speed the soundtrack started the search at, over the same track,
+	# because the ladder is over however it ended.
+	_restore_the_music()
 	# Released here as well as when the card finishes, because a search called off
 	# while one is still on screen - a death, the horse being sent for - would
 	# otherwise leave the world walking at three quarters speed.
@@ -673,12 +822,24 @@ func _end_sequence() -> void:
 		search_finished.emit(_cleared, _highest_cleared)
 
 
+## The Danger's fight let go of. The signal is dropped first either way, so a fight
+## emptying behind us can never be read as a Danger the player cleared.
+##
+## [b]A search that ended in a death does not stop the ambush; it leaves it to break.[/b]
+## The ambush has its own answer to the player going down - the men still standing turn
+## and run, see [method AmbushWaveDirector._on_player_died] - and
+## [method AmbushWaveDirector.stop] would take that answer away, because it drops the
+## very death watch that would have played it, leaving a field of men chasing a body
+## that has been carried home. Every other way a search ends still stops it outright,
+## which is what CONTINUE, STOP and the last Danger have always done.
 func _stop_ambush() -> void:
 	var director := _resolve_ambush()
 	if director == null:
 		return
 	if director.cleared.is_connected(_on_danger_cleared):
 		director.cleared.disconnect(_on_danger_cleared)
+	if _died:
+		return
 	director.stop()
 
 
@@ -792,6 +953,18 @@ func _clear_stragglers() -> void:
 		var escape := _find_escape(enemy)
 		if escape != null and escape.is_escaping():
 			enemy.queue_free()
+
+
+## Hands the desert back empty for the next Danger.
+##
+## [b]Nothing about what a clean world is lives here.[/b] The one call is
+## [method WorldReset.reset], which is the same request the road makes when it sets
+## out - see [method TravelDirector._ride] - so there is one answer to "put this
+## world back" in the project and both the search and the ride are asking it.
+func _rebuild_the_world() -> void:
+	var reset := WorldReset.get_active(self)
+	if reset != null:
+		reset.reset()
 
 
 func _find_escape(enemy: Node) -> EnemyEscape:
@@ -963,6 +1136,93 @@ func _spend_the_day() -> void:
 	var stages := _day_owed
 	_day_owed = 0
 	_advance_the_day(stages)
+
+
+## Settles whatever the search still owes the clock: spent now, or held until the
+## reward chest has actually landed.
+##
+## [b]The chest is the beat, so the chest goes first.[/b] Clearing the last Danger
+## finishes the fight, the ladder and the day together, and the day is the one of the
+## three that changes what the whole world looks like. Spent as the search ends it
+## would repaint the desert underneath a box that has not arrived yet; held until the
+## chest is standing on the ground it lands where the player is already looking.
+##
+## [b]It cannot strand the clock.[/b] Three things reach [method _spend_the_day] from
+## here - the chest landing, a search with nothing to pay with, and a timeout - so an
+## hour owed is spent whatever happens to the ending. [method _spend_the_day] is
+## itself idempotent, which is what lets all three ask without any of them having to
+## know whether one of the others got there first.
+func _settle_the_day() -> void:
+	if _day_owed <= 0:
+		return
+	# Nothing is coming: a death pays nothing, a search that cleared nothing owes
+	# nothing to a chest, and a world with no ending authored has none to wait on.
+	if not waits_for_the_chest or _died or _cleared <= 0 or not is_inside_tree():
+		_spend_the_day()
+		return
+
+	var reward := TroubleRewardDirector.get_active(self)
+	if reward == null:
+		_spend_the_day()
+		return
+
+	if not reward.reward_dropped.is_connected(_on_reward_dropped):
+		reward.reward_dropped.connect(_on_reward_dropped, CONNECT_ONE_SHOT)
+
+	if chest_wait_timeout > 0.0:
+		var timer := get_tree().create_timer(chest_wait_timeout, true, false, true)
+		timer.timeout.connect(_spend_the_day)
+
+
+## A chest is on its way down. The hour goes on the clock as it touches the ground -
+## the same frame the camera is shaken - rather than as it leaves the sky.
+func _on_reward_dropped(_blood: int, _items: int) -> void:
+	var reward := TroubleRewardDirector.get_active(self)
+	var chest: RewardChest = null
+	if reward != null:
+		chest = reward.get_chest()
+	if chest == null:
+		_spend_the_day()
+		return
+	if chest.is_landed():
+		_spend_the_day()
+		return
+	chest.landed.connect(_spend_the_day, CONNECT_ONE_SHOT)
+
+
+# --- The music -------------------------------------------------------------------
+
+## How fast the soundtrack runs at the Danger being fought now.
+##
+## [code]base + (danger - 1) * per_danger[/code] - 1.0 at the first, 1.1 at the
+## second, and on up. It is arithmetic rather than a table so a ladder of any length
+## is already answered for.
+func get_music_speed(danger: int = -1) -> float:
+	var level := danger if danger > 0 else maxi(_danger, 1)
+	return music_base_speed + float(level - 1) * music_speed_per_danger
+
+
+## Winds the soundtrack to this Danger's speed.
+##
+## [b]The track is never touched, only its speed.[/b] The change goes through
+## [method MusicDirector.set_pitch], which is the one place in the game playback speed
+## is written, so the Danger's own music keeps playing from exactly where it had got
+## to and a world with no soundtrack simply runs in silence.
+func _push_the_music() -> void:
+	_set_music_speed(get_music_speed(), music_speed_time)
+
+
+func _restore_the_music() -> void:
+	_set_music_speed(music_base_speed, music_restore_time)
+
+
+func _set_music_speed(target: float, seconds: float) -> void:
+	if not scales_music_speed:
+		return
+	var music := MusicDirector.get_active(self)
+	if music == null:
+		return
+	music.set_pitch(target, maxf(seconds, 0.0))
 
 
 ## [param stages] hours, actually spent.

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://Scripts/World/camp.gd" id="1_camp"]
 [ext_resource type="Texture2D" path="res://Assets/World/Travel/horse_cart.png" id="2_cartart"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [sub_resource type="Gradient" id="Gradient_camplight"]
 offsets = PackedFloat32Array(0, 0.4, 0.75, 1)
@@ -43,3 +44,9 @@ color = Color(1, 0.72, 0.42, 1)
 energy = 0.0
 texture = SubResource("GradientTexture2D_camplight")
 texture_scale = 0.9
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("90_shadow")
+shadow_pull = 24.0
+cast_mode = 1
+source_sprite_path = NodePath("../Art/Cart")

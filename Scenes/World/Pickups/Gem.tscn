@@ -1,0 +1,56 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/loot_gem.gd" id="1_gem"]
+[ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="2_prompt"]
+[ext_resource type="Shader" uid="uid://bdokp0457hj52" path="res://Shaders/hit_flash.gdshader" id="3_outline"]
+[ext_resource type="Texture2D" path="res://Assets/Loot/Gems/Gem1.PNG" id="4_gem1"]
+[ext_resource type="Texture2D" path="res://Assets/Loot/Gems/Gem2.PNG" id="5_gem2"]
+[ext_resource type="Texture2D" path="res://Assets/Loot/Gems/Gem3.PNG" id="6_gem3"]
+[ext_resource type="Texture2D" path="res://Assets/Loot/Gems/Gem4.PNG" id="7_gem4"]
+
+[node name="Gem" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_gem")
+faces = Array[Texture2D]([ExtResource("4_gem1"), ExtResource("5_gem2"), ExtResource("6_gem3"), ExtResource("7_gem4")])
+burst_distance = Vector2(70, 165)
+burst_time = 0.5
+burst_height = 110.0
+burst_spin = 1.25
+burst_skid = 0.08
+interaction_radius = 95.0
+body_group = &"player"
+interact_action = &"interact"
+outlines_in_reach = true
+outline_shader = ExtResource("3_outline")
+outline_width = 1.5
+outline_color = Color(1, 0.13, 0.1, 1)
+collect_fade = 0.3
+collect_lift = 26.0
+art_path = NodePath("Art")
+prompt_path = NodePath("Prompt")
+
+[node name="Art" type="Sprite2D" parent="."]
+texture_filter = 1
+position = Vector2(0, -16)
+scale = Vector2(0.62, 0.62)
+texture = ExtResource("4_gem1")
+
+[node name="Prompt" type="Node2D" parent="."]
+top_level = true
+script = ExtResource("2_prompt")
+follow_group = &"player"
+head_offset = Vector2(30, -70)
+prompt_scale = 0.55
+
+[node name="Label" type="Label" parent="Prompt"]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1

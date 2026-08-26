@@ -18,6 +18,7 @@
 [ext_resource type="Resource" uid="uid://bmvv4uadff8iq" path="res://Resources/Ammo/ammo_rifle_round.tres" id="16_88d8y"]
 [ext_resource type="Script" uid="uid://cduxfulgrb0yq" path="res://Scripts/Common/mouse_orbit.gd" id="17_vt4ld"]
 [ext_resource type="Script" path="res://Scripts/Weapons/weapon_camera.gd" id="18_camera"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_bufk1"]
 blend_mode = 1
@@ -102,6 +103,12 @@ pitch_variation = 0.03
 [node name="Feedback" type="Node" parent="." unique_id=2007082983]
 script = ExtResource("12_b3v3j")
 round_scene = ExtResource("13_p1s1t")
+blast_hold = 0.06
+blast_fade = 0.1
+blast_colour = Color(1, 0.95, 0.62, 1)
+blast_glow = 1.4
+muzzle_light_energy = 1.0
+muzzle_light_time = 0.12
 
 [node name="ArtFlip" type="Node" parent="." unique_id=215264019]
 script = ExtResource("14_q02p1")
@@ -123,3 +130,9 @@ offset_smoothing = 4.5
 zoom_multiplier = 1.0
 zoom_smoothing = 3.0
 respects_holster = true
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("90_shadow")
+source_sprite_path = NodePath("../Art/Body")
+height_source = 3
+opacity_multiplier = 0.8

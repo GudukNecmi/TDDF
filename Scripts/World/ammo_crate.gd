@@ -97,9 +97,24 @@ const GROUP := &"ammo_crate"
 
 @export_group("Falling in")
 ## How far above its landing spot the crate starts, in pixels, when it is dropped in.
-## Comfortably more than a screen, so it comes from off the top of the picture rather
-## than fading into the middle of it.
-@export var fall_height: float = 900.0
+## Just off the top of the picture, so it is seen coming rather than appearing.
+@export var fall_height: float = 460.0
+## Whether that height is capped so the crate starts just off the top of what the
+## camera is actually showing.
+##
+## [b]On, and it is what makes the drop readable.[/b] A fixed height taller than the
+## screen means the crate spends most of its fall out of frame and only the last
+## fraction of it is seen, which reads as the box blinking into existence above the
+## ground. Capped against [method CameraController.get_visible_world_rect] it enters
+## from the top edge almost at once and is on screen for the whole way down, at any
+## zoom and whatever the camera is doing.
+##
+## The cap only ever brings the height down, so a crate authored to fall a short way
+## still falls a short way.
+@export var fall_from_screen_edge: bool = true
+## How far above the top edge of the picture it starts, in pixels, when the cap is
+## doing the deciding. A little, so it is already moving as it comes into frame.
+@export var fall_screen_margin: float = 70.0
 ## How long the fall takes, in seconds. Quicker than the reward chest's - this is a
 ## crate, not the prize at the end of a hunt.
 @export var fall_time: float = 0.55
@@ -179,17 +194,21 @@ func is_landed() -> bool:
 ## frame - and it is only the artwork that falls into it. Safe to call on a crate with
 ## no artwork, which simply lands at once.
 func drop_in() -> void:
-	if _taken:
+	# Already on its way down. Asking twice - the arena supply drops every crate in,
+	# and a search that wanted one asks for its own as well - must not restart the fall
+	# from the top, so the first call is the one that counts.
+	if _taken or not _landed:
 		return
 	_landed = false
-	if _art == null or fall_height <= 0.0:
+	var height := _fall_start_height()
+	if _art == null or height <= 0.0:
 		# Nothing to fall. It arrives with the same shake and the same announcement, so a
 		# crate whose artwork is missing is a crate that landed instantly rather than one
 		# that never lands.
 		_land()
 		return
 
-	_art.position = _art_rest - Vector2(0.0, maxf(fall_height, 0.0))
+	_art.position = _art_rest - Vector2(0.0, height)
 
 	if _fall != null and _fall.is_running():
 		_fall.kill()
@@ -201,6 +220,31 @@ func drop_in() -> void:
 	_fall.tween_property(_art, "position", _art_rest, maxf(fall_time, 0.0001)) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	_fall.tween_callback(_land)
+
+
+## How far above its landing point the artwork actually starts.
+##
+## [member fall_height] unless the cap is on and the camera can be asked, in which
+## case it is brought down to whatever puts the crate just off the top edge of the
+## picture - so the fall is seen from the first frame of it instead of the crate
+## dropping in from somewhere the player is not looking.
+func _fall_start_height() -> float:
+	var wanted := maxf(fall_height, 0.0)
+	if not fall_from_screen_edge or wanted <= 0.0:
+		return wanted
+
+	var camera := CameraController.get_active(self)
+	if camera == null:
+		return wanted
+
+	var shown := camera.get_visible_world_rect()
+	# Measured to the artwork's resting place rather than to this node, because it is
+	# the artwork that falls and the two are not the same point.
+	var lands_at := global_position.y + _art_rest.y
+	var above := lands_at - shown.position.y + maxf(fall_screen_margin, 0.0)
+	# Only ever downwards: a crate told to fall a short way still falls a short way,
+	# and a landing point already off the top of the screen is left alone.
+	return wanted if above <= 0.0 else minf(wanted, above)
 
 
 ## It hits: the ground shakes, the crate squashes, bounces once and settles. From the

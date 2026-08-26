@@ -32,6 +32,17 @@ signal zone_cleared(count: int)
 @export var enemy_group: StringName = &"enemies"
 ## Body whose position arms the guard.
 @export var body_group: StringName = &"player"
+## Enemies in this group are left standing wherever they are.
+##
+## [b]It is the one door out of the guard, and it is a developer's door.[/b] The
+## test map is a barred zone - nothing a run spawns may follow the player into it -
+## but the whole point of the place is that a developer can stand men in it and leave
+## them there. So [TestSpawnStation] marks everything it puts down with this group
+## and both halves of the guard step over it.
+##
+## Empty in ordinary play: nothing in a real run ever joins it, so the guard behaves
+## exactly as it did before this existed.
+@export var exempt_group: StringName = &"test_spawned"
 
 @export_group("Clearing")
 ## Whether the player entering a barred zone stops the run's spawning outright.
@@ -86,7 +97,7 @@ func _arm() -> void:
 	if stop_spawning and _manager != null:
 		_manager.stop()
 	if clear_on_entry:
-		_clear(get_tree().get_nodes_in_group(enemy_group))
+		_clear(_guarded(get_tree().get_nodes_in_group(enemy_group)))
 
 
 ## Anything standing inside a barred zone, whoever is watching. This is the part
@@ -102,6 +113,8 @@ func _sweep_barred_zones() -> void:
 		var body := enemy as Node2D
 		if body == null:
 			continue
+		if exempt_group != &"" and enemy.is_in_group(exempt_group):
+			continue
 		for node: Node in zones:
 			var zone := node as WorldZone
 			if zone != null and zone.bars_enemies \
@@ -111,6 +124,20 @@ func _sweep_barred_zones() -> void:
 
 	if not trespassers.is_empty():
 		_clear(trespassers)
+
+
+## [param enemies] with anything the guard may not touch taken out. One filter,
+## applied to both halves, so an exemption cannot hold on the sweep and fail on the
+## crossing.
+func _guarded(enemies: Array) -> Array:
+	if exempt_group == &"":
+		return enemies
+
+	var kept: Array[Node] = []
+	for enemy: Node in enemies:
+		if not enemy.is_in_group(exempt_group):
+			kept.append(enemy)
+	return kept
 
 
 ## Squeezed rather than truncated, so a crowded field clears in the same window a

@@ -26,5 +26,4 @@ unlocked = true
 regions = Array[ExtResource("10_region")]([ExtResource("11_ra"), ExtResource("12_rb"), ExtResource("13_rc"), ExtResource("14_rd"), ExtResource("15_re")])
 entry_region_id = &"A"
 region_map_texture = ExtResource("16_regionmap")
-arrival_combat_chance = 0.4
 day_stages = Array[ExtResource("3_stage")]([ExtResource("4_dawn"), ExtResource("5_morning"), ExtResource("6_noon"), ExtResource("7_evening"), ExtResource("8_twilight"), ExtResource("9_night")])

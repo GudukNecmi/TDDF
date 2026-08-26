@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://ctxjyl7xbxk4k"]
 
-[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="1_shadow"]
 [ext_resource type="Script" uid="uid://da4exs3wtf10i" path="res://Scripts/World/prop_art.gd" id="2_art"]
 [ext_resource type="Script" uid="uid://cuqueuaya768u" path="res://Scripts/World/prop_footing.gd" id="3_footing"]
 [ext_resource type="Texture2D" uid="uid://cqejh3o5vrq2u" path="res://Assets/Maps/Desert/Dust Camp/Tents (1).PNG" id="4_tent1"]
@@ -12,19 +11,16 @@
 [ext_resource type="Texture2D" uid="uid://dl7thcsir3e6r" path="res://Assets/Maps/Desert/Dust Camp/Tents (7).PNG" id="10_tent7"]
 [ext_resource type="Texture2D" uid="uid://d26pxw06vhlkc" path="res://Assets/Maps/Desert/Dust Camp/Tents (8).PNG" id="11_tent8"]
 [ext_resource type="Texture2D" uid="uid://bkaisry6jufsb" path="res://Assets/Maps/Desert/Dust Camp/Tents (9).PNG" id="12_tent9"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="13_shadow"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tentbase"]
 resource_local_to_scene = true
 size = Vector2(386, 60)
 
 [node name="DustCampTent" type="StaticBody2D" unique_id=124925796 groups=["desert_prop", "region_prop"]]
+scale = Vector2(0.8, 0.8)
 collision_layer = 32
 collision_mask = 0
-
-[node name="Shadow" type="Sprite2D" parent="." unique_id=1658060214]
-script = ExtResource("1_shadow")
-shadow_scale = Vector2(520, 96)
-shadow_offset = Vector2(0, -14)
 
 [node name="Art" type="Sprite2D" parent="." unique_id=1787808656]
 texture = ExtResource("4_tent1")
@@ -37,3 +33,9 @@ textures = Array[Texture2D]([ExtResource("4_tent1"), ExtResource("5_tent2"), Ext
 position = Vector2(-6.9999924, -58)
 shape = SubResource("RectangleShape2D_tentbase")
 script = ExtResource("3_footing")
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("13_shadow")
+shadow_pull = 36.0
+cast_mode = 1
+source_sprite_path = NodePath("../Art")

@@ -1,13 +1,9 @@
-[gd_resource type="Resource" script_class="MusicState" load_steps=3 format=3 uid="uid://cgotikmusicsleep"]
+[gd_resource type="Resource" script_class="MusicState" format=3 uid="uid://b26268rof4wcl"]
 
-[ext_resource type="Script" path="res://Scripts/Common/music_state.gd" id="1_state"]
-[ext_resource type="AudioStream" path="res://Sound/Music/Sleep/Sleep.mp3" id="2_track"]
+[ext_resource type="Script" uid="uid://c6ylwt4xp2d23" path="res://Scripts/Common/music_state.gd" id="1_state"]
+[ext_resource type="AudioStream" uid="uid://dujux6ppj8h8k" path="res://Sound/Music/Sleep/Sleep.mp3" id="2_track"]
 
 [resource]
 script = ExtResource("1_state")
 state_id = &"sleep"
 stream = ExtResource("2_track")
-volume_db = -6.0
-bus = &"Game"
-loops = true
-always_from_start = false

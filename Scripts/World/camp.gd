@@ -82,6 +82,11 @@ const CAMP_GROUP := &"camp"
 ## The waggon's own sprite, flipped to face the way it is travelling. Optional.
 @export var cart_sprite_path: NodePath = ^"Art/Cart"
 
+## Group the player's own [Health] is found by, so a search can be called off if they
+## are killed out in it - see [method _on_player_died]. The world's own group, the
+## same one every other system follows the player's death through.
+@export var health_group: StringName = &"player_health"
+
 ## Whether the player is out looking for trouble. Set by [CampMenu].
 var _searching: bool = false
 ## Whether the waggon has to be sent for before it can be used again.
@@ -91,11 +96,21 @@ var _horse_away: bool = false
 ## arrivals.
 var _calling: bool = false
 var _arrival_tween: Tween
+## The player's pool while they are out looking for trouble, so the search can be
+## called off if they are killed in it. Held rather than looked up each time, for the
+## same reason every other system that follows this holds it: the connection has to be
+## droppable again.
+var _player_health: Health
 
 
 func _ready() -> void:
 	super()
 	add_to_group(CAMP_GROUP)
+
+
+## Nothing is left out looking for trouble behind us.
+func _exit_tree() -> void:
+	_drop_player_death()
 
 
 ## The camp the HUD should follow. Null means this world has none - a map with no
@@ -212,13 +227,38 @@ func begin_trouble_search() -> bool:
 	# standing when they call it. See [method call_horse].
 	if hides_while_away:
 		visible = false
+	# Followed from here on, because from here on the player is out in the country
+	# with the waggon gone and can be killed with it still gone.
+	_follow_player_death()
 	trouble_search_started.emit()
 	return true
 
 
-## Calls the search off without the horse having been sent for. What a later system
-## does when a search cannot be run at all; nothing in the game calls it yet.
+## Calls the search off and puts the camp back exactly as it was before it began.
+##
+## [b]It is the whole of the state, not only the flag.[/b] Looking for trouble sends
+## the animal away and takes the waggon off the field with it, and the only thing that
+## ever brought either back was the horse being whistled in - see [method _arrive]. So
+## a search called off rather than finished has to hand back all three: the search
+## itself, the whistle that may already be on its way, and the waggon, which is simply
+## made visible again where it has been standing the whole time rather than being
+## driven anywhere.
+##
+## This is what a death out looking for trouble comes through - see
+## [method _on_player_died] - and it is what any later system that cannot run a search
+## should call. Safe on a camp that is not searching.
 func end_trouble_search() -> void:
+	if not _searching and not _horse_away and not _calling:
+		return
+
+	if _arrival_tween != null and _arrival_tween.is_running():
+		_arrival_tween.kill()
+
+	_calling = false
+	_horse_away = false
+	visible = true
+	_drop_player_death()
+
 	if not _searching:
 		return
 	_searching = false
@@ -352,12 +392,45 @@ func _arrive() -> void:
 	_calling = false
 	_horse_away = false
 	visible = true
+	_drop_player_death()
 
 	if _searching:
 		_searching = false
 		trouble_search_ended.emit()
 
 	horse_arrived.emit()
+
+
+# --- The player going down ------------------------------------------------------
+
+## [b]A death out looking for trouble calls the search off.[/b] Dying is the player's
+## own death sequence and it carries them home to the base - so without this the camp
+## is left believing they are still out there: the waggon invisible, the whole map
+## still answering "press E to whistle" and every camp action refused, in a world the
+## player has been put back on their feet in. [DangerDirector] already ends the fight
+## on the same signal; this is the other half, the state the camp itself owns.
+##
+## It goes through [method end_trouble_search] rather than writing the flags here, so
+## there is one place a search that was never finished is put back.
+func _on_player_died() -> void:
+	end_trouble_search()
+
+
+func _follow_player_death() -> void:
+	_drop_player_death()
+	_player_health = get_tree().get_first_node_in_group(health_group) as Health
+	if _player_health != null and not _player_health.died.is_connected(_on_player_died):
+		_player_health.died.connect(_on_player_died)
+
+
+## Dropped rather than left one-shot, because the player's pool outlives their death -
+## they are revived into the same [Health] - so a connection left behind would still be
+## listening at the search after next.
+func _drop_player_death() -> void:
+	if _player_health != null and is_instance_valid(_player_health) \
+			and _player_health.died.is_connected(_on_player_died):
+		_player_health.died.disconnect(_on_player_died)
+	_player_health = null
 
 
 ## Calling the horse is a tap; making camp is still a hold. The hold belongs to the

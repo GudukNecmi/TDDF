@@ -1,0 +1,164 @@
+[gd_scene format=3 uid="uid://cgotiktestmap"]
+
+[ext_resource type="Script" uid="uid://b4qrewctfc7pk" path="res://Scripts/World/teleport_destination.gd" id="1_dest"]
+[ext_resource type="Script" uid="uid://b05im5xftlqsx" path="res://Scripts/World/tiled_surface.gd" id="2_surface"]
+[ext_resource type="Script" uid="uid://b2drx4oy6thi3" path="res://Scripts/World/region_ground.gd" id="3_ground"]
+[ext_resource type="Texture2D" uid="uid://ba5x4ipvshm41" path="res://Assets/Maps/Desert/1- Ground/DesertFloor.PNG" id="4_floorart"]
+[ext_resource type="Script" uid="uid://c3d1ekedl15qm" path="res://Scripts/World/world_zone.gd" id="5_zone"]
+[ext_resource type="Script" uid="uid://bw2828qkvwxdp" path="res://Scripts/Dev/test_spawn_station.gd" id="6_station"]
+[ext_resource type="Script" uid="uid://d0u882y2h8i2p" path="res://Scripts/Dev/test_placer.gd" id="7_placer"]
+[ext_resource type="PackedScene" uid="uid://82ydqw03lnfu" path="res://Scenes/World/TestMapGate.tscn" id="8_gate"]
+[ext_resource type="PackedScene" uid="uid://j03h4b4k5cvm" path="res://Scenes/Base/WeaponTable.tscn" id="9_weapontable"]
+[ext_resource type="Texture2D" uid="uid://balr63bym4qkq" path="res://Assets/Base/Pipes/pipe_v.png" id="10_pipev"]
+[ext_resource type="Texture2D" uid="uid://blbpym18df2s8" path="res://Assets/Base/Pipes/pipe_h.png" id="11_pipeh"]
+[ext_resource type="Texture2D" uid="uid://vul7efrp6mk0" path="res://Assets/Base/Pipes/pipe_flange.png" id="12_flange"]
+[ext_resource type="Texture2D" uid="uid://fuaw6rf6wfbx" path="res://Assets/Base/Pipes/pipe_valve.png" id="13_valve"]
+[ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="14_prompt"]
+[ext_resource type="PackedScene" uid="uid://cgotikbomber" path="res://Scenes/Enemy/Bomber.tscn" id="15_bomber"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_testtop"]
+size = Vector2(5128, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_testbottom"]
+size = Vector2(5128, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_testleft"]
+size = Vector2(64, 3128)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_testright"]
+size = Vector2(64, 3128)
+
+[node name="TestMap" type="Node2D" unique_id=573676459 groups=["test_map"]]
+y_sort_enabled = true
+script = ExtResource("1_dest")
+id = &"test_map"
+bounds = Rect2(-2500, -1500, 5000, 3000)
+
+[node name="SpawnPoint" type="Marker2D" parent="." unique_id=1976023637]
+position = Vector2(0, 900)
+
+[node name="Zone" type="Node2D" parent="." unique_id=1714627406]
+script = ExtResource("5_zone")
+zone_id = &"test_map"
+region = Rect2(-2500, -1500, 5000, 3000)
+ambient_colour = Color(0.86, 0.84, 0.9, 1)
+ambient_follows_day_cycle = false
+camera_zoom_multiplier = 1.0
+holster_weapons = false
+heals_player = false
+
+[node name="Floor" type="Polygon2D" parent="." unique_id=464726949]
+z_index = -13
+texture_filter = 4
+texture_repeat = 2
+position = Vector2(-2500, -1500)
+texture = ExtResource("4_floorart")
+texture_scale = Vector2(4, 4)
+polygon = PackedVector2Array(0, 0, 5000, 0, 5000, 3000, 0, 3000)
+script = ExtResource("2_surface")
+surface_size = Vector2(5000, 3000)
+tile_size = 1000.0
+
+[node name="RegionGround" type="Node" parent="." unique_id=1311137499]
+script = ExtResource("3_ground")
+
+[node name="Bounds" type="StaticBody2D" parent="." unique_id=495204142]
+
+[node name="TopWall" type="CollisionShape2D" parent="Bounds" unique_id=1146115974]
+position = Vector2(0, -1532)
+shape = SubResource("RectangleShape2D_testtop")
+
+[node name="BottomWall" type="CollisionShape2D" parent="Bounds" unique_id=719309322]
+position = Vector2(0, 1532)
+shape = SubResource("RectangleShape2D_testbottom")
+
+[node name="LeftWall" type="CollisionShape2D" parent="Bounds" unique_id=423446442]
+position = Vector2(-2532, 0)
+shape = SubResource("RectangleShape2D_testleft")
+
+[node name="RightWall" type="CollisionShape2D" parent="Bounds" unique_id=89860249]
+position = Vector2(2532, 0)
+shape = SubResource("RectangleShape2D_testright")
+
+[node name="Spawned" type="Node2D" parent="." unique_id=900211220]
+y_sort_enabled = true
+
+[node name="Props" type="Node2D" parent="." unique_id=1529092896]
+y_sort_enabled = true
+
+[node name="SpawnStation" type="Node2D" parent="." unique_id=386822305]
+position = Vector2(-560, 1180)
+script = ExtResource("6_station")
+extra_enemy_scenes = Array[PackedScene]([ExtResource("15_bomber")])
+container_path = NodePath("../Spawned")
+
+[node name="Art" type="Node2D" parent="SpawnStation" unique_id=1541479066]
+
+[node name="LegLeft" type="Sprite2D" parent="SpawnStation/Art" unique_id=653411999]
+position = Vector2(-130, -12)
+scale = Vector2(0.5, 0.55)
+texture = ExtResource("10_pipev")
+
+[node name="LegRight" type="Sprite2D" parent="SpawnStation/Art" unique_id=1263167180]
+position = Vector2(130, -12)
+scale = Vector2(0.5, 0.55)
+texture = ExtResource("10_pipev")
+
+[node name="FootLeft" type="Sprite2D" parent="SpawnStation/Art" unique_id=121951984]
+position = Vector2(-130, 20)
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("12_flange")
+
+[node name="FootRight" type="Sprite2D" parent="SpawnStation/Art" unique_id=375208510]
+position = Vector2(130, 20)
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("12_flange")
+
+[node name="Top" type="Sprite2D" parent="SpawnStation/Art" unique_id=281471918]
+position = Vector2(0, -62)
+scale = Vector2(2.6, 1)
+texture = ExtResource("11_pipeh")
+
+[node name="Screen" type="Sprite2D" parent="SpawnStation/Art" unique_id=2131967046]
+modulate = Color(0.62, 0.16, 0.16, 1)
+position = Vector2(0, -128)
+scale = Vector2(2.2, 1.5)
+texture = ExtResource("11_pipeh")
+
+[node name="ValveLeft" type="Sprite2D" parent="SpawnStation/Art" unique_id=846816405]
+position = Vector2(-96, -96)
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("13_valve")
+
+[node name="ValveRight" type="Sprite2D" parent="SpawnStation/Art" unique_id=1586782215]
+position = Vector2(96, -96)
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("13_valve")
+
+[node name="Prompt" type="Node2D" parent="SpawnStation" unique_id=1763811148]
+top_level = true
+script = ExtResource("14_prompt")
+
+[node name="Label" type="Label" parent="SpawnStation/Prompt" unique_id=1824294216]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WeaponTable" parent="." unique_id=744111963 instance=ExtResource("9_weapontable")]
+position = Vector2(560, 1180)
+
+[node name="ReturnGate" parent="." unique_id=92522839 instance=ExtResource("8_gate")]
+position = Vector2(0, 1220)
+destination_id = &"base_pit"
+
+[node name="Placer" type="Node2D" parent="." unique_id=1891015367]
+z_index = 100
+script = ExtResource("7_placer")

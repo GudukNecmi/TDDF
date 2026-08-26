@@ -142,6 +142,11 @@ var _container: Node
 var _all_points: PointGrid
 var _layer_points: PointGrid
 var _count: int = 0
+## Everything this scatter has put down, so a re-roll takes away exactly what it
+## placed and nothing else. The container is shared with whatever else the map
+## parents into it - a region's own extras, a prop dropped in by hand - and those
+## are none of this node's business to remove.
+var _placed: Array[Node] = []
 
 
 func _ready() -> void:
@@ -152,9 +157,53 @@ func _ready() -> void:
 	if _container == null:
 		_container = self
 
+	_lay_out()
+
+
+## Takes away what this scatter put down and strews the map again.
+##
+## [b]The map is re-rolled, never re-authored.[/b] The layers are read afresh - the
+## map's shared ones, the region's own and the hour's - so a new arrangement is the
+## same scenery in a different place, and the region's prop pool, the ground under
+## it and everything written down about the run are untouched. It is what a world
+## that has to look like somewhere else without the scene being rebuilt asks for;
+## see [WorldReset].
+##
+## [param around] is a point in global space kept clear of scenery instead of
+## [member clear_centre] - normally where the player is standing, since a re-roll is
+## made with them already out in the desert rather than at the spot a round begins.
+## [constant Vector2.INF] leaves the authored clearing alone.
+##
+## Returns how many props were actually placed.
+func rescatter(around := Vector2.INF) -> int:
+	if not enabled:
+		return 0
+	if _container == null:
+		_container = get_node_or_null(container_path)
+		if _container == null:
+			_container = self
+
+	for prop: Node in _placed:
+		if is_instance_valid(prop):
+			prop.queue_free()
+	_placed.clear()
+
+	var kept := clear_centre
+	if around != Vector2.INF:
+		clear_centre = to_local(around)
+	_lay_out()
+	clear_centre = kept
+	return _count
+
+
+## One pass of the arrangement, from an empty map. The seed is rolled here rather
+## than at load, so a re-roll is a different desert while a pinned
+## [member random_seed] still lays out the same one every time.
+func _lay_out() -> void:
 	_all_points = PointGrid.new(grid_cell_size)
 	_layer_points = PointGrid.new(grid_cell_size)
 	_rng.seed = random_seed if random_seed != 0 else randi()
+	_count = 0
 
 	for layer: ScatterLayer in _all_layers():
 		_place_layer(layer)
@@ -294,6 +343,7 @@ func _spawn(layer: ScatterLayer, point: Vector2) -> void:
 	# rather than something every layer would have to be told about.
 	PropScale.apply_to(prop, self)
 	_container.add_child(prop)
+	_placed.append(prop)
 
 
 func _is_fixed_scale(layer: ScatterLayer) -> bool:

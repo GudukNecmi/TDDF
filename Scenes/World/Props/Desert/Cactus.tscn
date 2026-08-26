@@ -1,6 +1,5 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="1_shadow"]
 [ext_resource type="Script" uid="uid://bm3ln8gbx37l4" path="res://Scripts/World/prop_sway.gd" id="2_sway"]
 [ext_resource type="Script" uid="uid://da4exs3wtf10i" path="res://Scripts/World/prop_art.gd" id="3_art"]
 [ext_resource type="Script" uid="uid://dtnfb87bh7qke" path="res://Scripts/World/prop_touch.gd" id="4_touch"]
@@ -11,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://bi73ikow8d740" path="res://Assets/Maps/Desert/2- Props/Cactus/IMG_2278.PNG" id="9_cactus5"]
 [ext_resource type="Script" path="res://Scripts/World/prop_lizard.gd" id="10_lizard"]
 [ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Lizard.tscn" id="11_lizardscene"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_solid"]
 radius = 22.0
@@ -21,11 +21,6 @@ radius = 37.0
 [node name="Cactus" type="StaticBody2D" groups=["desert_prop"]]
 collision_layer = 96
 collision_mask = 0
-
-[node name="Shadow" type="Sprite2D" parent="."]
-script = ExtResource("1_shadow")
-shadow_scale = Vector2(75, 27)
-shadow_offset = Vector2(7, -4)
 
 [node name="Sway" type="Node2D" parent="."]
 script = ExtResource("2_sway")
@@ -71,3 +66,9 @@ one_roll_per_contact = true
 max_active = 3
 emerge_height = 6.0
 emerge_spread = 7.0
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("90_shadow")
+shadow_pull = 24.0
+cast_mode = 1
+source_sprite_path = NodePath("../Sway/Art")

@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bcddvibxia3je"
+path="res://.godot/imported/BomberScream3.WAV-0c4d63e8e4e0eaec8d82a3891ae417db.sample"
+
+[deps]
+
+source_file="res://Sound/Efect/Atack/Suicide Bomber/BomberScream3.WAV"
+dest_files=["res://.godot/imported/BomberScream3.WAV-0c4d63e8e4e0eaec8d82a3891ae417db.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

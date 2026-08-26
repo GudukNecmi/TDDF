@@ -201,6 +201,23 @@ func is_cancelled() -> bool:
 	return _cancelled
 
 
+## Lets this enemy retreat again after its retreat had been called off.
+##
+## [b]It exists for exactly one man: one who gave up and is now getting back to his
+## feet.[/b] Surrendering calls the retreat off for good - see [method cancel] and
+## [method EnemySurrender._stop_escaping] - because a man on the floor must not be
+## quietly removed the moment the camera loses sight of him. But he does not lie
+## there forever: he is talked to, or he is left alone long enough, and then he
+## stands up and runs. That ending is the ordinary retreat, so the refusal has to be
+## liftable rather than permanent.
+##
+## Nothing else is undone. A retreat that had actually begun before it was called
+## off is not resumed by this - it is [method escape] that starts one, and this only
+## stops that call being refused.
+func reinstate() -> void:
+	_cancelled = false
+
+
 func _begin() -> void:
 	if _cancelled or not is_inside_tree():
 		return

@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dh7giyvj01dqu" path="res://Scripts/World/horse_cart.gd" id="1_cart"]
 [ext_resource type="Texture2D" uid="uid://6wa4jknyyth2" path="res://Assets/World/Travel/horse_cart.png" id="2_cartart"]
 [ext_resource type="Texture2D" uid="uid://d0n2b1o516imi" path="res://Assets/UI/Travel/destination_x.png" id="3_mark"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [sub_resource type="Gradient" id="Gradient_cartlight"]
 offsets = PackedFloat32Array(0, 0.4, 0.75, 1)
@@ -71,3 +72,9 @@ collision_mask = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Solid" unique_id=1563482864]
 position = Vector2(8, 45.5)
 shape = SubResource("RectangleShape2D_cartbody")
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("90_shadow")
+shadow_pull = 16.0
+cast_mode = 1
+source_sprite_path = NodePath("../Art/Cart")

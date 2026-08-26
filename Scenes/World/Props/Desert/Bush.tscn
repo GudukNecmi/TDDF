@@ -1,6 +1,5 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="1_shadow"]
 [ext_resource type="Script" uid="uid://bm3ln8gbx37l4" path="res://Scripts/World/prop_sway.gd" id="2_sway"]
 [ext_resource type="Script" uid="uid://da4exs3wtf10i" path="res://Scripts/World/prop_art.gd" id="3_art"]
 [ext_resource type="Script" uid="uid://dtnfb87bh7qke" path="res://Scripts/World/prop_touch.gd" id="4_touch"]
@@ -9,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://bflx0olyqobey" path="res://Assets/Maps/Desert/2- Props/Branch/IMG_2281.PNG" id="7_bush3"]
 [ext_resource type="Script" path="res://Scripts/World/prop_lizard.gd" id="8_lizard"]
 [ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Lizard.tscn" id="9_lizardscene"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_touch"]
 radius = 42.0
@@ -17,12 +17,6 @@ radius = 42.0
 radius = 26.0
 
 [node name="Bush" type="Node2D" groups=["desert_prop"]]
-
-[node name="Shadow" type="Sprite2D" parent="."]
-script = ExtResource("1_shadow")
-shadow_scale = Vector2(58, 22)
-shadow_offset = Vector2(6, -3)
-shadow_opacity = 0.32
 
 [node name="Sway" type="Node2D" parent="."]
 script = ExtResource("2_sway")
@@ -74,3 +68,9 @@ one_roll_per_contact = true
 max_active = 3
 emerge_height = 4.0
 emerge_spread = 6.0
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("90_shadow")
+shadow_pull = 12.0
+cast_mode = 1
+source_sprite_path = NodePath("../Sway/Art")

@@ -1,10 +1,9 @@
-[gd_resource type="AudioStreamPlaylist" load_steps=3 format=3 uid="uid://cgotikarenaopening"]
+[gd_resource type="AudioStreamPlaylist" format=3 uid="uid://c66e0wa7olafg"]
 
 [ext_resource type="AudioStream" uid="uid://bbf3of2aq072s" path="res://Sound/Music/TDDF Arena Opening.WAV" id="1_open"]
 [ext_resource type="AudioStream" uid="uid://clqen2s7h6k1g" path="res://Sound/Music/TDDF Arena Music ArenaLoop.WAV" id="2_loop"]
 
 [resource]
-shuffle = false
 loop = false
 fade_time = 0.0
 stream_count = 2

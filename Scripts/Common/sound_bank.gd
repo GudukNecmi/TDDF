@@ -160,7 +160,22 @@ func play_detached(sound_name: StringName, volume_db_offset: float = 0.0) -> Aud
 func play_detached_at(
 		sound_name: StringName, at: Vector2, volume_db_offset: float = 0.0
 ) -> AudioStreamPlayer2D:
-	var stream := sounds.get(sound_name) as AudioStream
+	return play_detached_stream_at(sounds.get(sound_name) as AudioStream, at, volume_db_offset)
+
+
+## Plays [param stream] itself at a place in the world, on a voice of its own.
+##
+## [b]It is to [method play_detached_at] what [method play_stream] is to
+## [method play].[/b] The pooling is not involved either way; what is shared is the
+## bus, the level and every one of the bank's [code]Positional[/code] fields, so a
+## caller whose sounds are an authored list - one recording of a dozen picked per
+## impact - places them in the world exactly as a named sound is placed, without
+## inventing a dictionary key for each one.
+##
+## A null stream is ignored, so an unfilled array can never crash a caller.
+func play_detached_stream_at(
+		stream: AudioStream, at: Vector2, volume_db_offset: float = 0.0
+) -> AudioStreamPlayer2D:
 	var container := _detached_container(stream)
 	if container == null:
 		return null

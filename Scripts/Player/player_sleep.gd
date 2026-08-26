@@ -153,14 +153,27 @@ func lie_down() -> bool:
 
 ## Stands them back up and hands everything back. Safe on a player who is already
 ## awake, which is what makes it callable from every way a night can end.
-func get_up() -> bool:
+##
+## [param rises] is how a night that ended in a death is closed. [b]Dying is the one
+## ending the sleeper does not get up from.[/b] [PlayerDeathSequence] takes the body
+## over on the same frame - the same [code]Visual[/code] node, turned onto its side by
+## a tween of its own - so standing it up as well is two tweens writing one transform,
+## a man who picks himself up off the ground while dead, and [PlayerLoadout] drawing
+## the weapon back out over a corpse. False therefore lets the night go without
+## touching the body, the keys or the gun: the sleep state is cleared, the letters are
+## taken away, and everything about how a dead man looks and what he may press is left
+## to the sequence that owns him. Every other ending passes true and is unchanged.
+func get_up(rises: bool = true) -> bool:
 	if not _asleep:
 		return false
 
 	_asleep = false
 	set_process(false)
-	_block_input(false)
 	_forget_letters()
+	if not rises:
+		return true
+
+	_block_input(false)
 	_play_rise()
 	return true
 

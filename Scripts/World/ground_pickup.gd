@@ -71,6 +71,25 @@ signal taken(weapon: CarriedWeapon)
 ## reasons to exist.
 @export var frees_host: bool = true
 
+@export_group("The edge")
+## Whether the item is outlined while the player is standing close enough to take
+## it.
+##
+## [b]It is the whole of what the prompt used to say in words.[/b] The hint by the
+## player's head is a bare E, so which of the things on the ground that E is offering
+## has to be answered by the thing itself - and an outline that appears exactly when
+## the item comes into reach and goes exactly when it leaves says it without a line
+## of text anywhere. See [SpriteOutline], which is the boss's own edge lent to
+## something lying in the sand.
+@export var outlines_in_reach: bool = true
+## The shader the edge is drawn with - the game's own.
+@export var outline_shader: Shader
+## How thick the edge is, in source texture pixels. Very thin on purpose: it marks
+## the item out rather than redrawing it.
+@export var outline_width: float = 1.5
+## What colour the edge is.
+@export var outline_color := Color(1.0, 0.13, 0.1, 1.0)
+
 @onready var _prompt: InteractionPrompt = get_node_or_null(prompt_path) as InteractionPrompt
 
 var _in_reach: bool = false
@@ -118,6 +137,7 @@ func use() -> bool:
 	_in_reach = false
 	if _prompt != null:
 		_prompt.set_prompt_visible(false)
+	_show_edge(false)
 
 	var weapon := mount.carry_temporary(weapon_scene, switch_time)
 	_dress(weapon)
@@ -150,6 +170,7 @@ func _watch_player() -> void:
 	_in_reach = reach
 	if _prompt != null:
 		_prompt.set_prompt_visible(_in_reach)
+	_show_edge(_in_reach)
 
 
 ## Whether the thing this is hung on has finished moving. Asked of the host by name
@@ -174,6 +195,17 @@ func _dress(weapon: CarriedWeapon) -> void:
 	var art := _art_source()
 	if art != null and art.texture != null:
 		weapon.call(&"adopt_texture", art.texture)
+
+
+## Puts the edge up or takes it down on whatever picture the item is drawn with.
+##
+## It is the same sprite [method _dress] hands to the built weapon - see
+## [method _art_source] - so the thing that is outlined is exactly the thing the
+## player is about to pick up, and an item drawn without a sprite simply has no edge.
+func _show_edge(shown: bool) -> void:
+	if not outlines_in_reach:
+		return
+	SpriteOutline.set_outlined(_art_source(), shown, outline_shader, outline_width, outline_color)
 
 
 func _art_source() -> Sprite2D:

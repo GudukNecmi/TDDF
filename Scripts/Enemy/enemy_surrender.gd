@@ -173,6 +173,122 @@ const GROUP := &"surrendered_enemy"
 ## The E shown by the player's head while they are in reach. Optional.
 @export var prompt_path: NodePath = ^"../Prompt"
 
+@export_group("What he says")
+## The bubble he speaks in. Left empty he gives up in silence, which is exactly
+## what he did before there was one.
+@export var bubble_scene: PackedScene
+## What he says as he goes down.
+@export var surrender_line: String = "DON'T SHOOT, I SURRENDER"
+## What he says when the player actually talks to him.
+##
+## [b]It is what he says however the conversation went.[/b] Whether he had anything
+## worth telling them is [SurrenderKnowledge]'s business and is reported separately;
+## this is the man himself, thanking them for the one thing he actually got out of
+## the meeting, and about to get up and go.
+@export var talked_line: String = "Thank you for sparing my life!"
+## Where the bubble hangs relative to his origin at his feet. Lower than a standing
+## man's, because he is on his knees.
+@export var bubble_offset := Vector2(52.0, -74.0)
+## How quickly the first bubble goes when he is talked to, so the second can take
+## its place.
+@export var bubble_swap_fade: float = 0.18
+## How quickly whatever he is saying goes as he gets up and runs.
+@export var bubble_leave_fade: float = 0.3
+## Whether the line he was thanked with stays up while he runs.
+##
+## [b]On, and it is why he is thanked at all.[/b] The last thing the player sees of
+## a man they spared is him getting up and going with the thanks still hanging over
+## him, which is a different ending from a bubble that blinks out the moment he
+## moves. It is taken down the ordinary way when he is gone - by [method _on_died]
+## if he is shot on his way out, and by this component being freed with him when he
+## makes it off the screen.
+@export var keeps_bubble_while_fleeing: bool = true
+
+@export_group("Being wounded")
+## Whether a hit he survives makes him swear.
+##
+## [b]It is speech and nothing else, and that is the whole point of it.[/b] It used
+## to be the same words a man says on his knees - so an enemy who was merely shot
+## and kept coming announced that he was surrendering while running at the player
+## with a knife. Being hit and giving up are now two separate things that happen to
+## be raised by the same event: this one only ever puts a bubble up, and the other
+## is [MoraleDirector]'s roll - see [method _ask_morale]. A man who curses is still
+## standing, still armed, still in [member enemy_group] and still counted.
+##
+## What being shot and living actually does to an enemy - the white flash, the
+## shove, the moment of being slowed - is [HitReaction]'s and is not touched, read
+## or duplicated by any of this.
+@export var speaks_when_wounded: bool = true
+## How often a hit he survives gets a curse out of him, as a fraction of 1.
+##
+## Rolled once per hit rather than per pellet - see [member wounded_repeat_guard],
+## which closes the window before the roll is made, so a shotgun blast is one blast
+## rather than eight chances at a bubble.
+@export_range(0.0, 1.0, 0.01) var wounded_curse_chance: float = 0.30
+## What he might say, one picked at random. An array rather than a list of cases, so
+## another line is dropped in here and nothing else is touched.
+@export var wounded_curse_lines: Array[String] = [
+	"F*ing demon!",
+	"That f**** devil!",
+	"You little s*!",
+	"Damn son of a b**!",
+	"What the f*?!",
+	"Oh, s*!",
+	"Holy s*!",
+	"Goddamn it!",
+	"F* this!",
+	"Run, you b****!",
+]
+## Whether being hit also asks [MoraleDirector] whether his nerve held.
+##
+## [b]It is the separate roll, and it is the only one that can put him down.[/b] The
+## odds are the director's - see [method MoraleDirector.get_wounded_surrender_chance]
+## - and what happens if it lands is [method surrender], the real thing, on the
+## floor and out of the fight. Off leaves being shot a purely spoken reaction.
+@export var wounded_asks_morale: bool = true
+## Where that bubble hangs, relative to his origin at his feet. Higher than the
+## kneeling one - he is still on his feet when he says it.
+@export var wounded_bubble_offset := Vector2(52.0, -104.0)
+## How long it stays up before fading, in seconds.
+@export var wounded_bubble_hold: float = 1.6
+## How long it takes to fade at the end of that.
+@export var wounded_bubble_fade: float = 0.4
+## The least time between two wounded reactions, in seconds.
+##
+## [b]It is what makes one attack one event.[/b] A shotgun puts eight pellets into a
+## man and each of them reports its own damage; the window is closed before either
+## roll is made, so the blast is worth exactly one curse roll and, through
+## [member MoraleDirector.repeat_guard], exactly one surrender roll.
+@export var wounded_repeat_guard: float = 1.4
+
+@export_group("Getting up again")
+## Whether a man who has given up eventually gets up and runs.
+##
+## [b]On, and it is what stops him being a permanent fixture.[/b] He is not an
+## opponent while he is down and nothing waits on him - but he cannot lie in the
+## sand forever either, so both of the ways the player can leave him end with him on
+## his feet and running. Off leaves him lying there until he is shot, which is what
+## he did before this existed.
+@export var gets_up: bool = true
+## How long after being talked to he waits before getting up, in seconds. Long
+## enough for his last line to be read.
+@export var stand_after_talking: float = 2.0
+## How long the player has to stay away from him before he risks getting up, in
+## seconds. The clock only runs while they are out of [member interaction_radius]
+## and is put back to the start the moment they come near again, so a player
+## standing over him deciding what to do never has him bolt out from under them.
+@export var stand_after_alone: float = 10.0
+## How long he takes to get back onto his feet, in seconds - the fall played
+## backwards.
+@export var stand_time: float = 0.45
+## Whether he rejoins [member enemy_group] as he gets up.
+##
+## [b]Off.[/b] He stopped being an opponent when he went down and getting up to run
+## away does not make him one again - a man with his hands empty sprinting for the
+## horizon is not somebody the encounter is waiting on. Everything that hunts by
+## that group therefore keeps ignoring him right through his exit.
+@export var rejoins_enemy_group: bool = false
+
 @onready var _head_pop: EnemyHeadPop = get_node_or_null(head_pop_path) as EnemyHeadPop
 @onready var _health: Health = get_node_or_null(health_path) as Health
 @onready var _prompt: InteractionPrompt = get_node_or_null(prompt_path) as InteractionPrompt
@@ -183,6 +299,24 @@ var _in_reach: bool = false
 ## [method use] itself, so a press that turned out to be worth nothing does not use
 ## the man up.
 var _used: bool = false
+## Whether he is on his way back to his feet. One way only - once he is getting up
+## nothing puts him back down.
+var _standing_up: bool = false
+## How long the player has been away from him, in seconds. Reset to zero every time
+## they come near, so this is "time since they were last beside him" rather than
+## time since he went down.
+var _alone: float = 0.0
+## The bubble he is currently speaking in, if any.
+var _bubble: SpeechBubble
+## Where each piece of him was before he fell, so the fall can be played backwards
+## exactly rather than guessed at. Filled in by [method _fall].
+var _fall_rest: Dictionary = {}
+## When he last cried out at being shot, in seconds since the game started. See
+## [member wounded_repeat_guard].
+var _last_cry: float = -1000.0
+## Whether the player actually talked to him, and so whether the bubble he is
+## wearing is the thank-you. It is the one bubble that outlives the man's exit.
+var _thanked: bool = false
 
 
 func _ready() -> void:
@@ -192,6 +326,11 @@ func _ready() -> void:
 		_prompt.set_prompt_visible(false)
 	if _health != null:
 		_health.died.connect(_on_died)
+		_health.damaged.connect(_on_damaged)
+	# Listened to rather than acted on inside [method use], so that what he says and
+	# what he is worth stay separate: [SurrenderKnowledge] hangs off the same signal
+	# and neither of them knows about the other.
+	used.connect(_on_talked_to)
 
 
 ## Every enemy currently lying on the floor, in no particular order.
@@ -263,7 +402,9 @@ func surrender(forced: bool = false) -> bool:
 	if stops_aiming:
 		_stop_aiming(host)
 	_fall(host)
+	_say(surrender_line)
 
+	_alone = 0.0
 	set_process(true)
 	surrendered.emit()
 	return true
@@ -383,6 +524,7 @@ func _fall(host: Node) -> void:
 	var angle := deg_to_rad(fall_degrees) * side
 	var duration := maxf(fall_time, 0.0001)
 
+	_fall_rest.clear()
 	for path: NodePath in fall_paths:
 		var piece := get_node_or_null(path) as Node2D
 		if piece == null:
@@ -392,6 +534,10 @@ func _fall(host: Node) -> void:
 		# angled is turned from where it actually is.
 		var rest := piece.position
 		var landing := fall_pivot + (rest - fall_pivot).rotated(angle) + fall_offset
+		# Kept so the fall can be played backwards to the pixel if he gets up again -
+		# see [method stand_up]. Stored against the piece rather than against the
+		# path, so a man whose parts have been rearranged still stands up straight.
+		_fall_rest[piece.get_instance_id()] = {"position": rest, "rotation": piece.rotation}
 
 		var tween := piece.create_tween().set_parallel(true)
 		tween.tween_property(piece, "rotation", piece.rotation + angle,
@@ -414,8 +560,274 @@ func _fall_side(host: Node) -> float:
 	return 1.0 if randf() < 0.5 else -1.0
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_watch_player()
+	_count_time_alone(delta)
+
+
+# --- Talking -------------------------------------------------------------------
+
+## Puts a line up over him, replacing whatever he was saying.
+##
+## The bubble is added to the running scene rather than to the man, so it hangs in
+## the air at a steady angle while he falls, while he is shot at, and for a moment
+## after he has gone. See [SpeechBubble], which is the same component the enraged
+## use - nothing about how a line is drawn is written twice.
+func _say(line: String) -> void:
+	if bubble_scene == null or line.is_empty():
+		return
+
+	var host := get_parent() as Node2D
+	if host == null:
+		return
+
+	_drop_bubble(bubble_swap_fade)
+
+	var bubble := bubble_scene.instantiate() as SpeechBubble
+	if bubble == null:
+		return
+
+	bubble.head_offset = bubble_offset
+	var keeper: Node = get_tree().current_scene
+	if keeper == null:
+		keeper = host.get_parent()
+	if keeper == null:
+		return
+
+	keeper.add_child(bubble)
+	bubble.global_position = host.global_position + bubble_offset
+	bubble.set_subject(host)
+	bubble.show_bubble(line)
+	_bubble = bubble
+
+
+## Fades whatever he is saying. Safe to call on a man who was never given a bubble
+## and on one whose bubble is already leaving.
+func _drop_bubble(fade: float) -> void:
+	if _bubble != null and is_instance_valid(_bubble):
+		_bubble.dismiss(fade)
+	_bubble = null
+
+
+## A shot landed and he is still standing.
+##
+## [b]Two separate reactions, and neither of them implies the other.[/b] One hit
+## raises one wounded event, and that event asks two independent questions: whether
+## his nerve went, which is [MoraleDirector]'s roll on the wounded curve, and
+## whether he swore about it, which is this component's roll and is speech alone. A
+## man who folds actually goes down - on his knees, weapon dropped, out of
+## [member enemy_group] - and a man who does not is an ordinary enemy who happens to
+## have said something.
+##
+## The nerve is asked first only so that the two bubbles cannot fight over the same
+## man: somebody in the act of surrendering is already saying so, and a curse laid
+## over the top of it would replace the more important line. The roll itself is made
+## either way.
+##
+## [b]It is additive.[/b] Nothing about the existing wounded behaviour is replaced,
+## suppressed or read here - [HitReaction] flashes him white, shoves him and slows
+## him exactly as it always has, and this never learns whether it did. A man already
+## on the floor is left alone.
+func _on_damaged(_amount: float, _hit_direction: Vector2) -> void:
+	if _surrendered or _standing_up:
+		return
+	if _health == null or not _health.is_alive():
+		return
+
+	# Closed before either roll, so a shotgun's worth of pellets is one wounded event
+	# with one roll of each in it rather than eight of both.
+	var now := float(Time.get_ticks_msec()) / 1000.0
+	if now - _last_cry < wounded_repeat_guard:
+		return
+	_last_cry = now
+
+	if _ask_morale():
+		return
+	_curse()
+
+
+## Puts his nerve to [MoraleDirector] as a wounded man. Returns whether he actually
+## went down, which is the only thing this component treats as having happened.
+##
+## [b]The odds are not written here and neither is the outcome.[/b] How likely a
+## wounded man is to fold is [method MoraleDirector.get_wounded_surrender_chance],
+## and folding is [method surrender] - the same call a near miss and a nearby death
+## already make, on the same component, to the same effect. This adds a third event
+## to a system that already existed rather than a second way of giving up.
+func _ask_morale() -> bool:
+	if not wounded_asks_morale:
+		return false
+
+	var host := get_parent() as Node2D
+	if host == null:
+		return false
+	var director := MoraleDirector.get_active(self)
+	if director == null:
+		return false
+
+	director.check(host, MoraleDirector.Source.WOUNDED)
+	# Read off the state rather than off the return, so "he surrendered" means he is
+	# on the floor and nothing else can be mistaken for it.
+	return _surrendered
+
+
+## Swears, sometimes. Speech and nothing else: no state is set, no group is left and
+## nothing is told about it.
+func _curse() -> void:
+	if not speaks_when_wounded or wounded_curse_lines.is_empty():
+		return
+	if randf() >= clampf(wounded_curse_chance, 0.0, 1.0):
+		return
+
+	var kept := bubble_offset
+	bubble_offset = wounded_bubble_offset
+	_say(wounded_curse_lines.pick_random())
+	bubble_offset = kept
+
+	if _bubble == null or wounded_bubble_hold <= 0.0:
+		return
+	# Timed on the tree rather than on the bubble, so a man who then gives up or dies
+	# simply has a second, shorter fade land on a bubble that has already gone.
+	var wait := get_tree().create_timer(wounded_bubble_hold, true, false, true)
+	wait.timeout.connect(_drop_bubble.bind(wounded_bubble_fade))
+
+
+# --- Getting up again ----------------------------------------------------------
+
+## The player pressed E on him. He answers, and then he goes.
+##
+## The two seconds are the line being read, not a cooldown - see
+## [member stand_after_talking]. The timer runs on the tree rather than on this
+## node so it is unaffected by [method consume] switching this node's processing
+## off underneath it, which is exactly what happens when he turned out to have
+## something worth telling them.
+func _on_talked_to() -> void:
+	if not gets_up or _standing_up:
+		return
+
+	_thanked = true
+	_say(talked_line)
+	# Nothing further is offered while he is on his way out, so the E over the
+	# player's head goes down now rather than when he actually moves.
+	_in_reach = false
+	if _prompt != null:
+		_prompt.set_prompt_visible(false)
+
+	if stand_after_talking <= 0.0:
+		stand_up()
+		return
+	var wait := get_tree().create_timer(stand_after_talking, true, false, true)
+	wait.timeout.connect(stand_up)
+
+
+## Counts how long the player has stayed away, and eventually lets him go.
+##
+## Reset rather than paused while they are near, so a player who walks up, thinks
+## about it and walks off again gives him the full window from the moment they
+## left - which is what makes "if the player does not interact and moves away" mean
+## what it says.
+func _count_time_alone(delta: float) -> void:
+	if not gets_up or _standing_up or not _surrendered or stand_after_alone <= 0.0:
+		return
+
+	if _in_reach:
+		_alone = 0.0
+		return
+
+	_alone += delta
+	if _alone >= stand_after_alone:
+		stand_up()
+
+
+## Gets him back onto his feet and sends him running.
+##
+## [b]The retreat is the ordinary retreat.[/b] Everything about running away -
+## dropping what he is carrying, turning his back, the speed, leaving once he is off
+## the screen - is [EnemyEscape]'s and is not repeated here. All this does is undo
+## the three things surrendering did to him: it plays the fall backwards, gives him
+## his physics back, and lifts the refusal his own surrender put on that retreat -
+## see [method EnemyEscape.reinstate].
+##
+## He is deliberately [i]not[/i] made an opponent again. See
+## [member rejoins_enemy_group].
+func stand_up() -> bool:
+	if _standing_up or not _surrendered or not is_inside_tree():
+		return false
+	if _health != null and not _health.is_alive():
+		return false
+
+	var host := get_parent()
+	if host == null:
+		return false
+
+	_standing_up = true
+	set_process(false)
+	_in_reach = false
+	if _prompt != null:
+		_prompt.set_prompt_visible(false)
+	# Spent as he leaves, so the frame between him standing and him being out of
+	# reach cannot be used to talk to a man who is already running.
+	_used = true
+	if is_in_group(GROUP):
+		remove_from_group(GROUP)
+	# The thanks go with him. Everything else he might have been saying is taken down
+	# as he gets up, but the line he was given for being spared is the last thing the
+	# player is meant to see of him, so it stays over his head while he runs and is
+	# taken away with him - see [member keeps_bubble_while_fleeing].
+	if not (_thanked and keeps_bubble_while_fleeing):
+		_drop_bubble(bubble_leave_fade)
+
+	_rise()
+	_start_running(host)
+	return true
+
+
+## Whether he is on his feet or on his way there.
+func is_standing_up() -> bool:
+	return _standing_up
+
+
+## The fall, played backwards to exactly where each piece started - see
+## [method _fall], which recorded it. Eased out rather than in, because getting up
+## is effortful at the start and quick at the end, which is the opposite shape to
+## falling over.
+func _rise() -> void:
+	var duration := maxf(stand_time, 0.0001)
+	for path: NodePath in fall_paths:
+		var piece := get_node_or_null(path) as Node2D
+		if piece == null:
+			continue
+
+		var rest: Dictionary = _fall_rest.get(piece.get_instance_id(), {})
+		if rest.is_empty():
+			continue
+
+		var tween := piece.create_tween().set_parallel(true)
+		tween.tween_property(piece, "rotation", float(rest["rotation"]),
+			duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.tween_property(piece, "position", rest["position"] as Vector2,
+			duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
+## Hands him back to the retreat, once he is upright.
+##
+## The walk is switched on with the rise rather than after it, so he is already
+## moving as he comes up instead of standing still and then setting off - and the
+## aim pivots are given back their processing so he can look where he is going.
+func _start_running(host: Node) -> void:
+	host.set_physics_process(true)
+	if rejoins_enemy_group and not host.is_in_group(enemy_group):
+		host.add_to_group(enemy_group)
+
+	for node: Node in host.find_children("*", "LookAtTarget", true, false):
+		node.set_physics_process(true)
+
+	for node: Node in host.find_children("*", "EnemyEscape", true, false):
+		var escape := node as EnemyEscape
+		if escape == null:
+			continue
+		escape.reinstate()
+		escape.escape(stand_time)
 
 
 ## The prompt is told rather than asked, and only on the crossing, so it is not
@@ -437,7 +849,9 @@ func _watch_player() -> void:
 
 
 func _is_in_reach(body: Node2D) -> bool:
-	if _used or not _surrendered or body == null or not body.is_in_group(body_group):
+	if _used or _standing_up or not _surrendered:
+		return false
+	if body == null or not body.is_in_group(body_group):
 		return false
 
 	var host := get_parent() as Node2D
@@ -463,6 +877,9 @@ func _on_died() -> void:
 		_prompt.set_prompt_visible(false)
 	if is_in_group(GROUP):
 		remove_from_group(GROUP)
+	# Given a moment to go rather than snatched off on the frame of the shot, for the
+	# same reason an enraged man's is - see [member EnemyEnrage.death_bubble_fade].
+	_drop_bubble(bubble_leave_fade)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -476,3 +893,21 @@ func _unhandled_input(event: InputEvent) -> void:
 	# player happens to be standing in front of.
 	if use():
 		get_viewport().set_input_as_handled()
+
+
+## The bubble he is wearing goes with him.
+##
+## [b]Only when he is actually gone.[/b] A man who gets away is freed by
+## [EnemyEscape] once he is off the screen, and this component is freed with him -
+## at which point a line kept for his exit, see [member keeps_bubble_while_fleeing],
+## has nobody left to hang over. Taken on the notification rather than in
+## [method Node._exit_tree] because leaving the tree is also what a surrender does
+## to him on the frame he is lifted out of the enemy container, and that must not
+## take his line away. Being shot on the way out is [method _on_died]'s, which
+## already fades it.
+func _notification(what: int) -> void:
+	if what != NOTIFICATION_PREDELETE:
+		return
+	if _bubble != null and is_instance_valid(_bubble):
+		_bubble.dismiss(bubble_leave_fade)
+	_bubble = null

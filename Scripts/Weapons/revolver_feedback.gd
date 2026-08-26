@@ -57,6 +57,17 @@ extends Node
 @export var blast_colour := Color(1.0, 0.88, 0.55)
 @export var blast_glow: float = 1.25
 
+@export_group("Muzzle light")
+## The light punched on the barrel as the shot leaves, so the flash throws
+## something onto the sand and the men standing in front of it rather than being a
+## sprite on its own. The same arrangement [LeverActionFeedback] already uses - the
+## light is authored in the weapon's scene and only its energy is touched here.
+@export var muzzle_light_path: NodePath = ^"../MuzzleRig/MuzzleLight"
+## How hard it burns at its peak. 0 switches it off.
+@export var muzzle_light_energy: float = 0.9
+## How long it takes to fall back to nothing, in seconds.
+@export var muzzle_light_time: float = 0.07
+
 @export_group("Fire camera")
 @export var fire_shake_strength: float = 11.0
 @export var fire_shake_duration: float = 0.07
@@ -82,11 +93,13 @@ extends Node
 @onready var _source: Node = get_node_or_null(source_path)
 @onready var _sounds: SoundBank = get_node_or_null(sound_bank_path) as SoundBank
 @onready var _blast: CanvasItem = get_node_or_null(blast_path) as CanvasItem
+@onready var _muzzle_light: PointLight2D = get_node_or_null(muzzle_light_path) as PointLight2D
 
 var _camera: CameraController
 var _blast_rest_scale := Vector2.ONE
 var _blast_rest_position := Vector2.ZERO
 var _blast_tween: Tween
+var _light_tween: Tween
 ## The pitch drift running on each voice, so a voice reused by a later shot has
 ## its old drift killed rather than blended.
 var _pitch_tweens: Dictionary = {}
@@ -103,6 +116,10 @@ func _ready() -> void:
 			_blast_rest_position = blast_node.position
 		_blast.visible = false
 		_blast.modulate.a = 0.0
+
+	# Dark until it is fired, whatever the scene was saved with.
+	if _muzzle_light != null:
+		_muzzle_light.energy = 0.0
 
 	if _source == null:
 		return
@@ -121,6 +138,7 @@ func _listen(signal_name: StringName, handler: Callable) -> void:
 func _on_fired() -> void:
 	_play_shot()
 	_flash_blast()
+	_punch_muzzle_light()
 
 	var camera := _get_camera()
 	if camera == null:
@@ -218,6 +236,25 @@ func _flash_blast() -> void:
 	_blast_tween.tween_interval(maxf(blast_hold, 0.0))
 	_blast_tween.tween_property(_blast, "modulate:a", 0.0, maxf(blast_fade, 0.0001))
 	_blast_tween.tween_callback(_blast.hide)
+
+
+## Lights the barrel and lets it fall straight back to nothing.
+##
+## Written the same way [method LeverActionFeedback._punch_muzzle_light] is - the
+## energy is punched to its peak and tweened down, and a second shot kills the
+## first fall rather than blending with it - so a string of six reads as six
+## flashes rather than one long glow.
+func _punch_muzzle_light() -> void:
+	if _muzzle_light == null or muzzle_light_energy <= 0.0:
+		return
+
+	if _light_tween != null and _light_tween.is_running():
+		_light_tween.kill()
+
+	_muzzle_light.energy = muzzle_light_energy
+	_light_tween = create_tween()
+	_light_tween.tween_property(
+		_muzzle_light, "energy", 0.0, maxf(muzzle_light_time, 0.0001))
 
 
 func _get_camera() -> CameraController:

@@ -244,10 +244,35 @@ func _start_waves() -> void:
 	# frame the world is already running at full speed in.
 	_set_slowed(false)
 
-	if start_run and not _boss_takes_the_round() \
+	if start_run and not _free_run_takes_the_round() \
+			and not _boss_takes_the_round() \
 			and not _arrival_takes_the_round() and _wave_manager != null:
 		_wave_manager.start()
 	world_started.emit(true)
+
+
+## Whether this world belongs to a Free Run, and the endless search has actually
+## begun.
+##
+## [b]Asked first, and it takes the round in exactly the way a boss does.[/b] A
+## Free Run is not a round: there is no clock, no wave and nothing to finish, only
+## one Trouble after another for as long as the player keeps saying CONTINUE. So
+## where an ordinary round would start its manager, the search is started instead
+## and the manager is simply never touched - which is what keeps a Free Run from
+## being a wave and a search happening on top of one another.
+##
+## The refusal matters more than the acceptance, as it does for the two below: a
+## world with no search in it, or a session that is not a Free Run at all, answers
+## false and the round is started exactly as it always was. Being a Free Run can
+## never be the reason a world comes up with neither a clock nor a fight in it.
+func _free_run_takes_the_round() -> bool:
+	if _session == null or not _session.has_method(&"is_free_run"):
+		return false
+	if not bool(_session.call(&"is_free_run")):
+		return false
+
+	var director := DangerDirector.get_active(self)
+	return director != null and director.begin_sequence()
 
 
 ## Whether whatever was waiting in the region the player has just ridden into has

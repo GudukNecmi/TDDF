@@ -1,18 +1,10 @@
-[gd_resource type="Resource" script_class="BreakProfile" format=3]
+[gd_resource type="Resource" script_class="BreakProfile" format=3 uid="uid://dism6gmntld2j"]
 
-[ext_resource type="Script" path="res://Scripts/Common/break_profile.gd" id="1_break"]
+[ext_resource type="Script" uid="uid://c8qroouept5ym" path="res://Scripts/Common/break_profile.gd" id="1_break"]
 
 [resource]
 script = ExtResource("1_break")
-piece_count = 2
-split_across_width = true
-piece_tint = Color(0.86, 0.74, 0.72, 1)
 sideways_speed = 165.0
 lift_force = 155.0
-spread = 0.45
-drop_range = Vector2(18, 38)
-gravity = 1500.0
-bounce = 0.4
 ground_friction = 3.2
 settle_time = 1.7
-fade_time = 1.2

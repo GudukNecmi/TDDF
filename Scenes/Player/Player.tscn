@@ -36,13 +36,14 @@
 [ext_resource type="Script" uid="uid://s6y0agq005qf" path="res://Scripts/Player/player_loadout.gd" id="33_loadout"]
 [ext_resource type="Script" uid="uid://dsot8t4dq8x21" path="res://Scripts/Player/zone_healer.gd" id="34_zheal"]
 [ext_resource type="Script" uid="uid://cywajyv7gcca7" path="res://Scripts/Player/player_death_sequence.gd" id="35_death"]
-[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="36_shadow"]
 [ext_resource type="Script" uid="uid://vv4h8bxhjp6j" path="res://Scripts/Common/footprint_emitter.gd" id="37_prints"]
 [ext_resource type="Script" uid="uid://4l20fix2ghxf" path="res://Scripts/Player/terrain_slow.gd" id="38_slow"]
 [ext_resource type="Script" uid="uid://cgo3bx4j0dm0x" path="res://Scripts/Common/ambient_light_dimmer.gd" id="39_dimmer"]
 [ext_resource type="Script" uid="uid://ds3nvbup5byic" path="res://Scripts/Player/character_light.gd" id="40_charlight"]
 [ext_resource type="Texture2D" uid="uid://csjgn5fjkuc5d" path="res://Assets/Efects/Blood/BloodPiece.PNG" id="41_bloodpiece"]
 [ext_resource type="Script" path="res://Scripts/Player/player_sleep.gd" id="42_sleep"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="41_shadow"]
+[ext_resource type="Script" path="res://Scripts/World/Shadows/shadow_group.gd" id="43_shadowgroup"]
 
 [sub_resource type="Gradient" id="Gradient_smokepuff"]
 offsets = PackedFloat32Array(0, 0.45, 1)
@@ -85,11 +86,6 @@ motion_mode = 1
 wall_min_slide_angle = 0.0
 script = ExtResource("1_ft8w5")
 speed_modifier_paths = Array[NodePath]([NodePath("DeathSequence"), NodePath("TerrainSlow"), NodePath("PlayerSleep")])
-
-[node name="Shadow" type="Sprite2D" parent="." unique_id=1264007733 groups=["prop_shadow"]]
-script = ExtResource("36_shadow")
-shadow_scale = Vector2(31.2, 12)
-shadow_offset = Vector2(0, -2)
 
 [node name="Visual" type="Node2D" parent="." unique_id=1788891943]
 scale = Vector2(1.2, 1.2)
@@ -342,3 +338,16 @@ foot_paths = Array[NodePath]([NodePath("../Visual/Legs/LeftLeg"), NodePath("../V
 
 [node name="PlayerSleep" type="Node" parent="."]
 script = ExtResource("42_sleep")
+
+[node name="ShadowGroup" type="Node2D" parent="."]
+script = ExtResource("43_shadowgroup")
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("41_shadow")
+source_sprite_path = NodePath("../Visual/Body")
+
+[node name="ShadowCaster" type="Node2D" parent="Visual/Head"]
+script = ExtResource("41_shadow")
+source_sprite_path = NodePath("..")
+ground_root_path = NodePath("../../..")
+auto_ground_anchor = false

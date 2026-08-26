@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://Scripts/Weapons/throwable_audio.gd" id="5_audio"]
 [ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="6_bank"]
 [ext_resource type="AudioStream" uid="uid://dy44ydgkwl855" path="res://Sound/Efect/Guns/Throwable/Bone/BoneThrow.WAV" id="7_throw"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [node name="Bone" type="Node2D"]
 z_index = 1
@@ -54,3 +55,9 @@ sounds = {
 }
 voice_count = 1
 pitch_variation = 0.05
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("90_shadow")
+source_sprite_path = NodePath("../Art/Body")
+height_source = 3
+opacity_multiplier = 0.8

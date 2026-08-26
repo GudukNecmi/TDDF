@@ -1,0 +1,141 @@
+[gd_scene load_steps=26 format=3 uid="uid://cgotikexplosion"]
+
+[ext_resource type="Script" path="res://Scripts/Effects/explosion.gd" id="1_explosion"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Boom.PNG" id="2_boom"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/ExplationMark.PNG" id="3_mark"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (1).PNG" id="4_smoke1"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (2).PNG" id="5_smoke2"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (3).PNG" id="6_smoke3"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (4).PNG" id="7_smoke4"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (5).PNG" id="8_smoke5"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (6).PNG" id="9_smoke6"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (7).PNG" id="10_smoke7"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Gore/IMG_2365.PNG" id="11_gore1"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Gore/IMG_2366.PNG" id="12_gore2"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Gore/IMG_2367.PNG" id="13_gore3"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Gore/IMG_2368.PNG" id="14_gore4"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Gore/IMG_2369.PNG" id="15_gore5"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Gore/IMG_2370.PNG" id="16_gore6"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Gore/IMG_2371.PNG" id="17_gore7"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Gore/IMG_2372.PNG" id="18_gore8"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="19_bank"]
+[ext_resource type="AudioStream" uid="uid://dx3d1eig6yrp6" path="res://Sound/Efect/Atack/Suicide Bomber/Explotion Sound.WAV" id="20_boomsound"]
+[ext_resource type="AudioStream" uid="uid://dicfajlrv5rx0" path="res://Sound/Efect/Gore/Gore Parts.WAV" id="21_goreimpact"]
+
+[sub_resource type="Gradient" id="Gradient_flare"]
+offsets = PackedFloat32Array(0, 0.32, 0.7, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.6, 1, 1, 1, 0.18, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_flare"]
+gradient = SubResource("Gradient_flare")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_smoke"]
+offsets = PackedFloat32Array(0, 0.16, 0.62, 1)
+colors = PackedColorArray(0.16, 0.14, 0.14, 0, 0.11, 0.1, 0.1, 0.92, 0.08, 0.07, 0.07, 0.55, 0.05, 0.05, 0.05, 0)
+
+[sub_resource type="Curve" id="Curve_smokegrow"]
+_data = [Vector2(0, 0.4), 0.0, 0.0, 0, 0, Vector2(0.45, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.82), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[node name="Explosion" type="Node2D"]
+script = ExtResource("1_explosion")
+boom_seconds = 0.3
+boom_scale = 0.11
+boom_growth = 1.35
+boom_modulate = Color(1.7, 1.45, 1.15, 1)
+flash_seconds = 0.2
+flash_colour = Color(0.95, 0.55, 0.14, 1)
+flash_energy = 3.6
+flash_texture_scale = 3.2
+mark_seconds = 7.0
+mark_fade = 0.9
+mark_scale = 0.16
+mark_modulate = Color(0.12, 0.09, 0.08, 0.72)
+smoke_textures = Array[Texture2D]([ExtResource("4_smoke1"), ExtResource("5_smoke2"), ExtResource("6_smoke3"), ExtResource("7_smoke4"), ExtResource("8_smoke5"), ExtResource("9_smoke6"), ExtResource("10_smoke7")])
+gore_textures = Array[Texture2D]([ExtResource("11_gore1"), ExtResource("12_gore2"), ExtResource("13_gore3"), ExtResource("14_gore4"), ExtResource("15_gore5"), ExtResource("16_gore6"), ExtResource("17_gore7"), ExtResource("18_gore8")])
+gore_count = Vector2i(8, 12)
+gore_scale = Vector2(0.09, 0.18)
+gore_settle_time = 4.0
+gore_kills = true
+gore_body_offset = Vector2(0, -26)
+gore_removes_body = true
+gore_impact_sounds = Array[AudioStream]([ExtResource("21_goreimpact")])
+gore_impact_pitch = Vector2(0.6, 1.6)
+gore_impact_volume_db = -5.0
+gore_impact_min_speed = 40.0
+gore_impact_on_bounce = false
+gore_fade_time = 0.5
+blood_count = 30
+damage = 2.0
+damage_radius = 110.0
+enemy_damage = 600.0
+enemy_damage_radius = -1.0
+chains_bombers = true
+sound_name = &"explosion"
+sound_volume_db = 6.0
+shake_strength = 34.0
+shake_duration = 0.3
+
+[node name="Mark" type="Sprite2D" parent="."]
+visible = false
+z_index = -9
+position = Vector2(0, -6)
+texture = ExtResource("3_mark")
+
+[node name="Smoke" type="CPUParticles2D" parent="."]
+visible = false
+z_index = 9
+position = Vector2(0, -18)
+emitting = false
+amount = 16
+lifetime = 1.7
+one_shot = true
+explosiveness = 0.6
+randomness = 0.5
+lifetime_randomness = 0.35
+texture = ExtResource("4_smoke1")
+emission_shape = 1
+emission_sphere_radius = 14.0
+spread = 180.0
+gravity = Vector2(0, -70)
+initial_velocity_min = 26.0
+initial_velocity_max = 120.0
+angular_velocity_min = -90.0
+angular_velocity_max = 90.0
+damping_min = 2.0
+damping_max = 6.0
+scale_amount_min = 0.2
+scale_amount_max = 0.55
+scale_amount_curve = SubResource("Curve_smokegrow")
+color_ramp = SubResource("Gradient_smoke")
+
+[node name="Boom" type="Sprite2D" parent="."]
+visible = false
+z_index = 10
+position = Vector2(0, -22)
+texture = ExtResource("2_boom")
+
+[node name="Flash" type="PointLight2D" parent="."]
+visible = false
+position = Vector2(0, -22)
+color = Color(0.95, 0.55, 0.14, 1)
+energy = 3.6
+texture = SubResource("GradientTexture2D_flare")
+texture_scale = 3.2
+
+[node name="SoundBank" type="Node" parent="."]
+script = ExtResource("19_bank")
+sounds = {
+&"explosion": ExtResource("20_boomsound")
+}
+voice_count = 2
+bus = &"Game"
+volume_db = -2.0
+pitch_variation = 0.05
+max_distance = 2800.0
+attenuation = 0.8

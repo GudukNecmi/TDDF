@@ -86,8 +86,13 @@ func begin_batch() -> void:
 ## Where it goes is [method pick_spawn_position] - a point on one of the four
 ## screen edges - which is the whole of how an arena round arrives and has not
 ## changed.
-func spawn() -> Node2D:
-	return spawn_at(pick_spawn_position())
+##
+## [param scene] builds something other than [member enemy_scene] for this one
+## spawn, and only for this one spawn. Left null - which is every caller that has
+## ever existed - the spawner's own scene is used, so a mixed wave is the same
+## spawn with a different body in it and there is still exactly one spawner.
+func spawn(scene: PackedScene = null) -> Node2D:
+	return spawn_at(pick_spawn_position(), scene)
 
 
 ## Builds one enemy and puts it at [param point], returning it, or null if it
@@ -104,11 +109,14 @@ func spawn() -> Node2D:
 ## the edge of the screen, and it does that by choosing points and calling this -
 ## so a travel enemy is an ordinary enemy, built by this spawner, with ordinary AI,
 ## and there is no second spawner anywhere in the project.
-func spawn_at(point: Vector2) -> Node2D:
-	if enemy_scene == null:
+## [param scene] does the same thing here that it does in [method spawn]: it
+## chooses the body for this one call and changes nothing about the spawner.
+func spawn_at(point: Vector2, scene: PackedScene = null) -> Node2D:
+	var built := scene if scene != null else enemy_scene
+	if built == null:
 		return null
 
-	var enemy := enemy_scene.instantiate() as Node2D
+	var enemy := built.instantiate() as Node2D
 	if enemy == null:
 		return null
 

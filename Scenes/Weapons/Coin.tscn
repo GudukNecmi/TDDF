@@ -10,6 +10,7 @@
 [ext_resource type="AudioStream" uid="uid://kvb7ocwwonmn" path="res://Sound/Efect/Guns/Revolver and Coin/CoinFlipSoundEfect.WAV" id="8_3dpj8"]
 [ext_resource type="Script" uid="uid://vftr4ljigopq" path="res://Scripts/Weapons/coin_feedback.gd" id="9_2fq7f"]
 [ext_resource type="PackedScene" uid="uid://de78rcqpv7vx1" path="res://Scenes/Effects/CoinHitEffect.tscn" id="10_kwdlr"]
+[ext_resource type="PackedScene" uid="uid://c5pejrdv2cu7d" path="res://Scenes/Effects/CoinImpactFlash.tscn" id="11_coinflash"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_tpgh2"]
 blend_mode = 1
@@ -53,3 +54,5 @@ autoplay = true
 [node name="Feedback" type="Node" parent="." unique_id=521446704]
 script = ExtResource("9_2fq7f")
 hit_effect_scene = ExtResource("10_kwdlr")
+impact_flash_scene = ExtResource("11_coinflash")
+impact_flash_scale = 1.0

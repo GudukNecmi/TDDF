@@ -3,7 +3,7 @@ extends Node
 ## How big this map's scenery is drawn. One node per map, sitting in the map's own
 ## scene, holding the single number every prop in it is sized by.
 ##
-## It exists for the same reason [ShadowPalette] does, and works the same way. The
+## It exists for the same reason [SunController] does, and works the same way. The
 ## prop scenes - a cactus, a bush, a pile of bones - are shared, and each one is
 ## authored at the size its artwork was drawn at. How large that reads on a
 ## particular map is the *map's* business: a desert seen from further out wants

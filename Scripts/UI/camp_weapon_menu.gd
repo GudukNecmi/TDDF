@@ -59,11 +59,11 @@ const GROUP := &"camp_weapon_menu"
 @export var button_equipped: StyleBox
 @export var name_font_size: int = 30
 @export var ammo_font_size: int = 20
-@export var font_colour := Color(0.84, 0.76, 0.73)
-@export var font_hover_colour := Color(1.0, 0.9, 0.87)
-@export var font_disabled_colour := Color(0.4, 0.32, 0.32)
+@export var font_colour := Color(0.16, 0.06, 0.05)
+@export var font_hover_colour := Color(0.45, 0.07, 0.06)
+@export var font_disabled_colour := Color(0.42, 0.36, 0.3)
 ## Colour the carried weapon's name is written in.
-@export var font_equipped_colour := Color(1.0, 0.93, 0.9)
+@export var font_equipped_colour := Color(0.5, 0.08, 0.07)
 ## Colour of the ammunition line under a weapon's name.
 @export var ammo_colour := Color(0.6, 0.42, 0.4)
 ## Smallest an entry is drawn, in pixels.

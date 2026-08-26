@@ -20,6 +20,7 @@
 [ext_resource type="Script" uid="uid://jbauvq2aroyh" path="res://Scripts/Weapons/weapon_ammo.gd" id="16_rkdor"]
 [ext_resource type="Resource" uid="uid://cwqsj28dqr25j" path="res://Resources/Ammo/ammo_shell.tres" id="17_m8huk"]
 [ext_resource type="Script" path="res://Scripts/Weapons/weapon_camera.gd" id="18_camera"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_blast"]
 blend_mode = 1
@@ -114,3 +115,9 @@ offset_fraction = 0.0
 zoom_multiplier = 1.15
 zoom_smoothing = 3.0
 respects_holster = true
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("90_shadow")
+source_sprite_path = NodePath("../Art/Body")
+height_source = 3
+opacity_multiplier = 0.8

@@ -210,6 +210,21 @@ static func get_active(from_node: Node) -> CameraController:
 	return from_node.get_tree().get_first_node_in_group(GROUP) as CameraController
 
 
+## The patch of world this camera is currently showing, in world pixels.
+##
+## [b]The one answer to "is that on screen".[/b] Anything placing something the
+## player has to be able to see - a crate dropped into a fight, a marker, a piece of
+## debris thrown in from off the edge - reads it here rather than working the zoom
+## and the viewport out again, so a change to either is felt everywhere at once.
+##
+## Measured from where the camera is actually looking rather than from its node
+## position, so a shake, a drag or a smoothed follow does not make it lie.
+func get_visible_world_rect() -> Rect2:
+	var size := get_viewport_rect().size
+	var shown := Vector2(size.x / maxf(zoom.x, 0.001), size.y / maxf(zoom.y, 0.001))
+	return Rect2(get_screen_center_position() - shown * 0.5, shown)
+
+
 ## A knock that decays to nothing. Retriggering keeps the stronger of the two
 ## rather than adding, so rapid fire cannot build up an endless shake - and,
 ## because it is a max rather than an overwrite, a light shake arriving during a

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="SunStage" format=3 uid="uid://btrm4654rsy7l"]
+
+[ext_resource type="Script" uid="uid://dcedosoc4shi5" path="res://Scripts/World/Sun/sun_stage.gd" id="1_sun"]
+
+[resource]
+script = ExtResource("1_sun")
+stage_name = &"noon"
+sun_direction = Vector2(0.06, 1)
+sun_distance = 3360.0
+sun_height = 12000.0
+light_color = Color(1, 0.9490196, 0.14901961, 1)
+light_energy = 0.1
+ambient_intensity = 0.1
+shadow_color = Color(0.035, 0.025, 0.025, 1)
+shadow_opacity = 0.3
+shadow_softness = 0.32
+shadow_fade = 0.15
+shadow_width_scale = 1.05
+shadow_length_anchor = 0.35
+shadow_height_opacity_falloff = 0.45

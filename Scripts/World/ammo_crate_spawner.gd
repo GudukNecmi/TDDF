@@ -92,6 +92,31 @@ const GROUP := &"ammo_crate_spawner"
 ## preference, not a guarantee - a crowded arena still gets its crate rather than
 ## silently skipping it.
 @export var placement_attempts: int = 14
+## Whether a crate is only ever put down somewhere the player can currently see.
+##
+## [b]On, and it is what stops a crate being dropped behind the player's back.[/b]
+## The band below throws crates out towards the edges of whatever they are being
+## placed in, and that rectangle used to be the whole arena - which is several
+## screens across, so a crate could quite legitimately land somewhere the player
+## would never look. With this on the rectangle is first cut down to the patch of
+## world the camera is actually showing - see
+## [method CameraController.get_visible_world_rect] - so "out near the edge" becomes
+## "out near the edge of the picture" and everything downstream is unchanged.
+##
+## It is "when possible": a camera that cannot be found, or a visible patch with no
+## room left in it once the clearances are taken off, falls back to the full area
+## rather than refusing to drop a crate at all.
+@export var keeps_on_screen: bool = true
+## How far inside the edge of the picture a crate must land, in pixels, so it is
+## never half off the side of the screen.
+@export var screen_margin: float = 170.0
+## Whether crates fall in from above rather than simply being there.
+##
+## [b]On for every crate, not only the one a search promises.[/b] The arrival - the
+## fall, the shake as it hits, the bounce - is [method AmmoCrate.drop_in] and was
+## already written; the arena's own supply just never asked for it, which is most of
+## why a crate appearing out near a wall was easy to miss.
+@export var drops_in: bool = true
 ## How large a patch crates are dropped into when there is no arena rectangle to drop
 ## them into - a crate asked for directly, in the open desert, rather than one the
 ## fight's own clock produced.
@@ -232,6 +257,11 @@ func spawn_crate() -> Node2D:
 	if box != null and not box.collected.is_connected(_on_crate_collected):
 		box.collected.connect(_on_crate_collected)
 
+	# Dropped in after it has been placed and parented, because the fall is measured
+	# against where it is standing and against what the camera is showing.
+	if drops_in and box != null:
+		box.drop_in()
+
 	crate_spawned.emit(crate, point)
 	return crate
 
@@ -273,7 +303,7 @@ func _on_crate_collected(rounds: int, _ammo_id: StringName) -> void:
 ## crowded arena still gets a crate, in the roomiest place found, instead of the check
 ## being skipped and the player left without ammunition.
 func pick_position() -> Vector2:
-	var box := _drop_area()
+	var box := _on_screen_part_of(_drop_area())
 	var usable := box.grow(-maxf(wall_clearance, 0.0))
 	if usable.size.x <= 0.0 or usable.size.y <= 0.0:
 		usable = box
@@ -291,6 +321,27 @@ func pick_position() -> Vector2:
 			best = point
 
 	return best
+
+
+## [param area] cut down to the part of it the player can currently see.
+##
+## Handed back whole when there is no camera to ask, or when what is left of it once
+## the margin is taken off has no room in it - which is the "when possible" in
+## [member keeps_on_screen]: a crate somewhere awkward is better than no crate.
+func _on_screen_part_of(area: Rect2) -> Rect2:
+	if not keeps_on_screen:
+		return area
+
+	var camera := CameraController.get_active(self)
+	if camera == null:
+		return area
+
+	var shown := camera.get_visible_world_rect().grow(-maxf(screen_margin, 0.0))
+	if shown.size.x <= 0.0 or shown.size.y <= 0.0:
+		return area
+
+	var both := area.intersection(shown)
+	return area if both.size.x <= 0.0 or both.size.y <= 0.0 else both
 
 
 ## A point in [param box] whose distance from the middle, measured as a fraction of the

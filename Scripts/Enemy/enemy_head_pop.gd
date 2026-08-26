@@ -220,6 +220,22 @@ func _on_damaged(_amount: float, hit_direction: Vector2) -> void:
 	_head_hit_pending = false
 
 
+## Calls this death off before it happens, for a killer that is presenting the body
+## some other way.
+##
+## [b]It is the same guard a second death signal already runs into[/b], set from
+## outside instead of from in here - so nothing about the sequence is switched off
+## conditionally and there is no second path through this file. An explosion is the
+## one caller today: a man caught in a blast is torn into [Explosion]'s gore where
+## he stood, and a head and a knife arriving out of the same body a frame later
+## would be that death played twice.
+##
+## Has no effect once the head is already off, and none at all on an enemy nothing
+## calls it on - which is every ordinary death.
+func suppress() -> void:
+	_popped = true
+
+
 func _on_died() -> void:
 	# Guarded because a second death signal, however it arrived, must not tear a
 	# second head off a body that no longer has one.

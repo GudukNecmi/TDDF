@@ -9,10 +9,11 @@ extends Node2D
 ## along a direction, bleed off speed, and stop.
 ##
 ## The hop is the only part with a trick in it. The bone's *position* stays flat
-## on the ground the whole time - that is where its shadow is, and where it will
-## land - and the artwork is lifted above it on its own node instead. So the
-## shadow stays put under the bone and the bone rises off it, which is what makes
-## a flat top-down kick read as something leaving the ground rather than as a
+## on the ground the whole time - that is its ground position, and where it will
+## land - and the artwork is lifted above it on its own node instead. That split is
+## exactly the one [ShadowCaster] is built around: the root is where the bone is on
+## the arena floor, and the lift is how far its visual is above that, which is what
+## makes a flat top-down kick read as something leaving the ground rather than as a
 ## sprite sliding.
 ##
 ## Every number is an inspector value, so a heavier boot or a longer skitter is a
@@ -23,8 +24,6 @@ signal landed
 
 ## Artwork lifted for the hop and spun. Everything visual should hang off it.
 @export var art_path: NodePath = ^"Art"
-## Shadow left on the ground underneath, which does not rise with the artwork.
-@export var shadow_path: NodePath = ^"Shadow"
 
 @export_group("Flight")
 ## How fast the bone leaves the boot, in pixels per second.
@@ -51,7 +50,6 @@ signal landed
 @export var hop_scale: float = 0.18
 
 @onready var _art: Node2D = get_node_or_null(art_path) as Node2D
-@onready var _shadow: PropShadow = get_node_or_null(shadow_path) as PropShadow
 
 var _velocity: Vector2 = Vector2.ZERO
 var _flight_time: float = 0.0
@@ -59,16 +57,14 @@ var _flight_length: float = 1.0
 var _spin: float = 0.0
 var _art_rest: Vector2 = Vector2.ZERO
 var _art_scale: Vector2 = Vector2.ONE
-var _shadow_scale: Vector2 = Vector2.ONE
 var _flying: bool = false
+var _visual_height: float = 0.0
 
 
 func _ready() -> void:
 	if _art != null:
 		_art_rest = _art.position
 		_art_scale = _art.scale
-	if _shadow != null:
-		_shadow_scale = _shadow.scale
 	set_physics_process(_flying)
 
 
@@ -130,16 +126,24 @@ func _physics_process(delta: float) -> void:
 		_land()
 
 
-## One value drives the height, the size and how faint the shadow is, so they
-## can never drift apart part way through the arc: the further off the ground the
-## bone is, the smaller and softer the mark it leaves under itself.
+## One value drives how high the artwork is off the ground and how large it is
+## drawn, so the two can never drift apart part way through the arc.
+##
+## [b]The height is kept rather than only applied.[/b] The bone does not touch a
+## shadow itself any more - a [ShadowCaster] on it reads the height back through
+## [method get_visual_height] and works out the rest, which is what lets the same
+## component handle every airborne thing in the game.
 func _lift(amount: float) -> void:
+	_visual_height = hop_height * amount
 	if _art != null:
-		_art.position = _art_rest + Vector2(0.0, -hop_height * amount)
+		_art.position = _art_rest + Vector2(0.0, -_visual_height)
 		_art.scale = _art_scale * (1.0 + hop_scale * amount)
-	if _shadow != null:
-		_shadow.scale = _shadow_scale * (1.0 - 0.45 * amount)
-		_shadow.self_modulate.a = _shadow.shadow_opacity * (1.0 - 0.5 * amount)
+
+
+## How far the artwork is currently above the ground it is standing on, in world
+## pixels. Read by a [ShadowCaster] set to take its height manually.
+func get_visual_height() -> float:
+	return _visual_height
 
 
 func _land() -> void:

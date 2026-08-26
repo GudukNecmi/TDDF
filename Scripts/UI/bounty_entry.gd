@@ -25,15 +25,15 @@ extends PanelContainer
 signal cancel_requested(bounty: Bounty)
 
 ## Colour the outlaw's name is written in.
-var name_colour := Color(0.86, 0.78, 0.72)
+var name_colour := Color(0.16, 0.06, 0.05)
 ## Colour of the reward line.
 var reward_colour := Color(0.82, 0.1, 0.1)
 ## Colour of a knowledge line's category.
-var label_colour := Color(0.5, 0.36, 0.34)
+var label_colour := Color(0.35, 0.22, 0.16)
 ## Colour a learned line is written in.
-var known_colour := Color(0.84, 0.76, 0.73)
+var known_colour := Color(0.2, 0.08, 0.06)
 ## Colour an unlearned line is written in, so a question mark reads as one.
-var unknown_colour := Color(0.45, 0.3, 0.3)
+var unknown_colour := Color(0.42, 0.3, 0.24)
 var name_font_size: int = 24
 var line_font_size: int = 16
 ## How thick the rung's edge is drawn around the row.

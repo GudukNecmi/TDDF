@@ -80,6 +80,13 @@ extends Control
 		_apply_texture()
 
 @export_group("When it is shown")
+## Whether the pointer is up whatever else is happening.
+##
+## Off in the world, where the sight and the pointer take turns. On for a screen
+## that is nothing but a menu - the title, before there is a player to arm - so
+## it does not have to fake a pause or an empty pair of hands to be pointed with.
+@export var always_shown: bool = false
+
 ## Whether the pause is taken as "a menu owns the screen". On, which is what every
 ## full-screen surface in the game already means by pausing.
 @export var shown_while_paused: bool = true
@@ -155,7 +162,7 @@ func _process(_delta: float) -> void:
 ## Whether the pointer should be up at all: a menu owning the screen, or the player
 ## holding nothing. The one question the sight's visibility is the answer to.
 func is_pointer_wanted() -> bool:
-	return is_ui_mode() or (shown_while_unarmed and is_unarmed())
+	return always_shown or is_ui_mode() or (shown_while_unarmed and is_unarmed())
 
 
 ## Whether a menu currently owns the screen. Public so a test - or a later
@@ -187,17 +194,36 @@ func is_unarmed() -> bool:
 	return weapon == null or weapon.is_stowed()
 
 
-## Swaps to the hover artwork while the mouse is over something that answers to
-## it. Asked of the viewport rather than wired to every button, so a menu added
-## later gets it for nothing.
+## Swaps to the hover artwork while the mouse is over a button. Asked of the
+## viewport rather than wired to every button, so a menu added later gets it for
+## nothing - see [method _is_over_a_button] for what counts as one.
 func _apply_hover() -> void:
 	if hover_texture == null:
 		return
-	var over := get_viewport().gui_get_hovered_control() != null
+	var over := _is_over_a_button()
 	if over == _hovering:
 		return
 	_hovering = over
 	_apply_texture()
+
+
+## Whether the mouse is over a button the player could actually press.
+##
+## [b]A button, not a surface.[/b] A menu being open is not what changes the
+## pointer - the whole of a full-screen panel answers
+## [method Viewport.gui_get_hovered_control], so taking that as the question
+## would leave the hand up the entire time any screen was raised. The question
+## is whether the thing under the mouse is something that can be clicked, which
+## is what [BaseButton] means and what every menu in the game builds its choices
+## out of - so a screen added later is covered without this being told about it.
+##
+## A disabled button is deliberately not one: it looks like a choice and is not
+## one, and offering the hand for it is a promise the game will not keep.
+func _is_over_a_button() -> bool:
+	var hovered := get_viewport().gui_get_hovered_control()
+	var button := hovered as BaseButton
+	return button != null and not button.disabled \
+		and button.mouse_filter != Control.MOUSE_FILTER_IGNORE
 
 
 ## Looked up lazily and re-looked-up if it goes: the mount is built with the world,

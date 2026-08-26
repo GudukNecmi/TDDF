@@ -52,6 +52,26 @@ extends Node
 ## How long it holds full brightness before fading.
 @export var hit_effect_hold: float = 0.05
 
+@export_group("Impact flash")
+## The spark thrown off where the coin arrives on its enemy.
+##
+## [b]It is the other end of the coin's life, and a different moment entirely.[/b]
+## The hit effect above is the round meeting the coin in mid-air - a glint of
+## struck metal. This is the coin landing on a man at the end of its flight, which
+## wants to read as a hard, hot impact: orange going to red, over almost before it
+## is seen. Left unset the landing is silent and unmarked, exactly as it was.
+##
+## It hangs off [signal Projectile.landed], the one place the projectile settles a
+## landing - after the damage has gone to the [Hitbox] and only for a landing that
+## found one - so it cannot fire twice for one hit and cannot fire for a coin that
+## simply ran out of range. Nothing about the damage or the flight is touched.
+@export var impact_flash_scene: PackedScene
+## Size it is drawn at, as a fraction of the scene's own scale. This is a spark on
+## a man, not a blast: much above 1 and it stops reading as an impact.
+@export var impact_flash_scale: float = 1.0
+## Nudge from the point of contact, in world pixels.
+@export var impact_flash_offset := Vector2.ZERO
+
 @export_group("Screen")
 ## Colour the screen is washed with at the moment of contact.
 ##
@@ -81,8 +101,12 @@ extends Node
 
 
 func _ready() -> void:
-	if _source != null and _source.has_signal(&"struck"):
+	if _source == null:
+		return
+	if _source.has_signal(&"struck"):
 		_source.connect(&"struck", _on_struck)
+	if _source.has_signal(&"landed"):
+		_source.connect(&"landed", _on_landed)
 
 
 ## The strike: a wash of pale yellow, a burst where the round met the coin, the
@@ -143,6 +167,40 @@ func _spawn_hit_effect(at: Vector2) -> void:
 	tween.tween_property(effect, "modulate:a", 0.0,
 		maxf(hit_effect_time - hit_effect_hold, 0.0001))
 	tween.tween_callback(effect.queue_free)
+
+
+## The coin arriving on a man. [param hitbox] is not read: where the coin is at
+## this instant [i]is[/i] the point of impact - the projectile has already been
+## moved onto whatever it struck by the time it says so - so the spark is put on
+## the coin's own position and nothing has to be measured.
+func _on_landed(_hitbox: Hitbox) -> void:
+	_spawn_impact_flash()
+
+
+## Puts the spark in the running scene rather than on the coin, because the coin is
+## spent on the frame it lands and the spark has to outlive it. It frees itself -
+## [OneShotParticles] does that on its own - so nothing here times it.
+func _spawn_impact_flash() -> void:
+	var coin := _source as Node2D
+	if impact_flash_scene == null or coin == null or not is_inside_tree():
+		return
+	var container := get_tree().current_scene
+	if container == null:
+		return
+
+	var flash := impact_flash_scene.instantiate() as Node2D
+	if flash == null:
+		return
+
+	container.add_child(flash)
+	flash.global_position = coin.global_position + impact_flash_offset
+	flash.scale *= impact_flash_scale
+	flash.rotation = randf() * TAU
+	flash.reset_physics_interpolation()
+	# Placed first, then started: a burst in global coordinates bakes its emission
+	# point the instant it begins.
+	if flash.has_method(&"play"):
+		flash.call(&"play")
 
 
 func _play_strike() -> void:

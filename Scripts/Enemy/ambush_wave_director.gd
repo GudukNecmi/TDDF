@@ -93,9 +93,67 @@ const GROUP := &"ambush_director"
 @export var spawner_path: NodePath = ^"../EnemySpawner"
 ## Group the player is found in, so the opening can be placed around them without
 ## this node being wired to them.
+## The mix this director fills an ambush with, as opposed to how large it is.
+##
+## [b]It is the arena's own [WaveRoster], not a second one.[/b] What a wave is made
+## of is a question the game already answers - one [WaveRosterEntry] per type, each
+## carrying the wave it first appears on and how quickly its share grows - so a
+## Trouble encounter is filled by dropping that same resource in here rather than by
+## this file knowing there is such a thing as a bomber. Left unresolved, every body
+## is the spawner's own enemy and an ambush is exactly the fight it was before.
+##
+## The wave number the roster is asked against is [method begin_with]'s, which for a
+## Trouble encounter is the Danger number - so "from Danger 3" is
+## [member WaveRosterEntry.first_wave] on a resource and not a threshold here. An
+## ambush on the road never says which wave it is and so is always wave one, which
+## is what keeps the roster out of the ordinary desert.
+@export var roster_path: NodePath = ^"WaveRoster"
+
 @export var player_group: StringName = &"player"
 ## Group every living enemy joins, counted when there is a ceiling to enforce.
 @export var enemy_group: StringName = &"enemies"
+## Whether a man who gives up stops being counted as somebody left to fight.
+##
+## [b]On, and the ambush cannot end without it.[/b] What takes an enemy off
+## [member _alive] is his [signal Health.died], and a man who has given up has not
+## died - he is face down on the floor with a full pool, waiting to be talked to.
+## Left counted, he holds [method _check_cleared] open for good: the search never
+## reports the Danger cleared, [DangerFinale] never plays the last man out, and the
+## only way past him is for the player to walk over and shoot somebody who had
+## already surrendered. He stopped being an opponent the moment he went down -
+## [EnemySurrender] takes him out of [member enemy_group] and out of the enemy
+## container in the same breath - so he is counted out here for the same reason and
+## at the same moment.
+##
+## He is [i]not[/i] removed, hurried or altered in any way: the speech bubble, the E,
+## the four seconds and the run away are all still his to play out. He simply stops
+## being one of the men the fight is waiting on.
+@export var surrender_ends_the_fight: bool = true
+## Whether a man who gives up counts towards [member rout_fraction] as one the player
+## beat.
+##
+## Off, and deliberately: the breaking point measures how much of the ambush was
+## actually put down, and a broken nerve gets the same reading a runner gets - see
+## [method _on_enemy_gone]. On makes fields break sooner.
+@export var surrender_counts_as_beaten: bool = false
+## Whether the men on the floor hold the encounter open until each of them has
+## finished one way or the other.
+##
+## [b]On, and it is the difference between "nobody is fighting" and "it is over".[/b]
+## A man who gives up stops being an opponent immediately - see
+## [member surrender_ends_the_fight] - and for a while that was also treated as him
+## being finished with, so the last surrender in a fight closed the encounter and put
+## the next-round question on screen while he was still lying in the sand waiting to
+## be talked to. He is unresolved rather than gone: he resolves by getting to his feet
+## and making it off the screen, or by being shot, and either way the ending waits for
+## it - see [method _leave_the_floor], which is where both of those arrive.
+##
+## The player is never made to shoot him. He gets up by himself - see
+## [member EnemySurrender.stand_after_alone] - so waiting on him is bounded by his own
+## timings, and none of them are touched here.
+##
+## Off ends the encounter on the attackers alone, which is what it did before.
+@export var downed_hold_the_fight: bool = true
 
 @export_group("How many")
 ## Enemies in an ambush at a region of danger 0 - a map's way in, the desert's A.
@@ -190,6 +248,12 @@ const GROUP := &"ambush_director"
 @export var rout_max_spread: float = 1.2
 
 var _spawner: EnemySpawner
+var _roster: WaveRoster
+## One entry per body this ambush is worth, in the order they will be built - the
+## roster's answer, kept rather than re-rolled, so the mix an encounter was
+## promised is the mix it actually gets however the men end up being released. A
+## null is the spawner's own enemy, which is what most of them are.
+var _plan: Array[PackedScene] = []
 var _running: bool = false
 ## How many of the ambush have still to be put out.
 var _owed: int = 0
@@ -208,6 +272,11 @@ var _routing: bool = false
 ## sent home in one pass when the rest break. Entries come off it as each of them
 ## goes, which is also what stops one man being counted out twice.
 var _standing: Array[Node2D] = []
+## Everybody this ambush put out who has given up and is still on the floor. They
+## are off [member _alive] - they are nobody's opponent any more - but they are
+## still this encounter's men until they run or are killed. See
+## [method get_enemies_downed].
+var _downed: Array[Node2D] = []
 ## How many go out per release, worked out once as the ambush opens so the whole of
 ## it lands inside [member spawn_window].
 var _group_size: int = 1
@@ -244,9 +313,36 @@ func get_enemies_owed() -> int:
 	return _owed
 
 
-## How many of this ambush are still standing.
+## How many of this ambush are still standing - [b]the active attackers[/b], and
+## the only number the ambush's own ending is measured on.
+##
+## A man who has given up is not one of them. See [method get_enemies_downed] for
+## the men who are on the floor, and [method get_encounter_count] for the two
+## together.
 func get_enemies_alive() -> int:
 	return _alive
+
+
+## How many of this ambush are lying on the floor having given up.
+##
+## [b]They are not attackers and they are not gone.[/b] That distinction is the
+## whole reason this is a second number rather than a flag on the first: a man who
+## has surrendered stops being somebody to fight the instant he goes down - which
+## is what lets the fight end over the top of him - but he is still one of the men
+## this encounter put on the field, and he stays one until he gets to his feet and
+## runs or somebody shoots him.
+##
+## Nothing is gated on this today. [method _check_cleared] deliberately still ends
+## the ambush on the attackers alone, so a man on the floor can never hold a fight
+## open; this is here for whatever decides the encounter's final word on him.
+func get_enemies_downed() -> int:
+	return _downed.size()
+
+
+## Everybody this encounter still has on the field in any state: the men still
+## fighting and the men on the floor.
+func get_encounter_count() -> int:
+	return _alive + _downed.size()
 
 
 ## How many the ambush being fought was worth in total, for a readout or a test.
@@ -309,16 +405,23 @@ func begin(region: MapRegion) -> int:
 ## [param total] is how many enemies it is worth altogether. [param opening] is how
 ## many of them are already standing in view when it opens; below zero rolls
 ## [member opening_count] as usual, which is what [method begin] leaves it at.
-## [param rout] is the fraction of the total that has to be killed before the rest
+## [param rout_at] is the fraction of the total that has to be killed before the rest
 ## break and run - see [member rout_fraction] - and below zero uses the authored
 ## value, so a caller that says nothing about breaking gets whatever this world's
 ## ambushes are set to.
 ##
-## The last two are arguments rather than properties written before the call
+## [param wave_number] is which wave of the fight this is, for the roster - see
+## [member roster_path]. For a Trouble encounter that is the Danger number, so what
+## turns up in it deepens with the search; an ambush on the road leaves it at one
+## and gets whatever a roster's first wave is worth, which for the bomber is
+## nothing.
+##
+## The last three are arguments rather than properties written before the call
 ## because they belong to [i]this[/i] ambush: one director serves the road and the
 ## Trouble encounters alike, and a Danger that breaks at three-quarters must not
 ## leave the next ambush on the road doing the same.
-func begin_with(total: int, opening: int = -1, rout: float = -1.0) -> int:
+func begin_with(total: int, opening: int = -1, rout_at: float = -1.0,
+		wave_number: int = 1) -> int:
 	if _running or _resolve_spawner() == null:
 		return 0
 	if total <= 0:
@@ -331,7 +434,12 @@ func begin_with(total: int, opening: int = -1, rout: float = -1.0) -> int:
 	_killed = 0
 	_alive = 0
 	_standing.clear()
-	_rout = clampf(rout_fraction if rout < 0.0 else rout, 0.0, 1.0)
+	_downed.clear()
+	# Rolled once, here, and taken from as the men are built. Reversed because the
+	# plan is popped from the back, so the order the roster laid out is the order the
+	# fight actually arrives in - the opening group included.
+	_plan = _build_plan(total, wave_number)
+	_rout = clampf(rout_fraction if rout_at < 0.0 else rout_at, 0.0, 1.0)
 	_timer = maxf(group_interval, 0.0)
 	# The spawner's own spacing memory is dropped, because this director places every
 	# point itself and would otherwise be measured against a fight long over.
@@ -350,9 +458,13 @@ func begin_with(total: int, opening: int = -1, rout: float = -1.0) -> int:
 ## field alone - the enemies keep chasing, exactly as [method WaveManager.stop]
 ## leaves an arena.
 ##
-## Called when the road ends under it: the player killed, the journey abandoned, a
-## world torn down. [b]It reports nothing[/b], because a stopped ambush was not
-## cleared.
+## Called when the journey is abandoned or a world is torn down. [b]It reports
+## nothing[/b], because a stopped ambush was not cleared.
+##
+## [b]It is not what a death should call.[/b] A field of men left chasing a player who
+## has been carried home is the very thing a death has to clear, and this drops the
+## death watch that would have cleared it - so whoever owns an ambush asks for
+## [method rout] instead when the player goes down, and the two never race.
 func stop() -> void:
 	if not _running:
 		return
@@ -361,8 +473,29 @@ func stop() -> void:
 	_owed = 0
 	_alive = 0
 	_standing.clear()
+	_downed.clear()
+	_plan.clear()
 	_drop_player_death()
 	set_process(false)
+
+
+## Breaks the ambush now: nothing more is put out, and everybody still standing turns
+## and runs through the retreat they already carry.
+##
+## [b]It is the same breaking [member rout_fraction] produces[/b] - see
+## [method _rout_the_rest] - asked for rather than earned by killing enough of them. So
+## an ambush that can no longer be finished, because the man fighting it is dead, empties
+## through the one ending an ambush has instead of being left standing in a world nobody
+## is in. The fight still ends through [signal cleared] once the last of them is off the
+## field, so nothing downstream has to know which of the two broke it.
+##
+## Reports whether anything was actually broken - false for an ambush that is not
+## running, or one that has already turned.
+func rout() -> bool:
+	if not _running or _routing:
+		return false
+	_rout_the_rest()
+	return true
 
 
 func _process(delta: float) -> void:
@@ -506,7 +639,7 @@ func _spawn_one(point: Vector2) -> void:
 	if _owed <= 0:
 		return
 
-	var enemy := _spawner.spawn_at(point)
+	var enemy := _spawner.spawn_at(point, _next_body())
 	if enemy == null:
 		_owed -= 1
 		_check_cleared()
@@ -523,6 +656,20 @@ func _spawn_one(point: Vector2) -> void:
 	_alive += 1
 	_standing.append(enemy)
 	health.died.connect(_on_enemy_gone.bind(enemy), CONNECT_ONE_SHOT)
+	_follow_surrender(enemy)
+
+
+## Starts waiting on this man's nerve as well as on his health, so the fight hears
+## about him going down the moment it happens rather than never - see
+## [member surrender_ends_the_fight]. An enemy carrying no [EnemySurrender] has
+## nothing to wait on and is left as it was.
+func _follow_surrender(enemy: Node2D) -> void:
+	if not surrender_ends_the_fight:
+		return
+	var surrender := EnemySurrender.find_on(enemy)
+	if surrender == null:
+		return
+	surrender.surrendered.connect(_on_enemy_gave_up.bind(enemy), CONNECT_ONE_SHOT)
 
 
 ## One of the ambush is off the field.
@@ -537,7 +684,14 @@ func _spawn_one(point: Vector2) -> void:
 ## The list is what stops one man being counted out twice: a runner is followed to
 ## both its death and its removal, and only whichever happens first finds it there.
 func _on_enemy_gone(enemy: Node2D) -> void:
-	if not _running or not _forget(enemy):
+	if not _running:
+		return
+
+	# Shooting a man who had already given up is what finally settles him: he was
+	# taken off the attackers when he went down, so this is the only count his death
+	# still moves. Done before the guard below, which will refuse him.
+	_leave_the_floor(enemy)
+	if not _forget(enemy):
 		return
 
 	_alive = maxi(_alive - 1, 0)
@@ -546,6 +700,71 @@ func _on_enemy_gone(enemy: Node2D) -> void:
 		if _check_rout():
 			return
 	_check_cleared()
+
+
+## One of the ambush has given up, which ends him as an opponent exactly as being
+## killed or getting away does.
+##
+## [b]The body stays and the count moves anyway[/b], and that is the whole of it. He
+## comes off [member _standing], so a rout can never order a man on the floor to get
+## up and run, and off [member _alive], so [method _check_cleared] stops waiting for
+## him - and then he is left entirely alone to play out his own ending.
+##
+## Shooting him afterwards is still an ordinary death and cannot count him out twice:
+## [method _on_enemy_gone] asks [method _forget] first and finds him already gone
+## from the list.
+func _on_enemy_gave_up(enemy: Node2D) -> void:
+	if not _running or not surrender_ends_the_fight or not _forget(enemy):
+		return
+
+	# Off the attackers and onto the floor - two lists rather than one, because he is
+	# no longer somebody to fight but is still one of this encounter's men.
+	_downed.append(enemy)
+	_follow_escape(enemy)
+	_alive = maxi(_alive - 1, 0)
+	if not _routing and surrender_counts_as_beaten:
+		_killed += 1
+		if _check_rout():
+			return
+	_check_cleared()
+
+
+## Starts waiting for a man on the floor to get to his feet and run, which is the
+## other of the two ways he stops being this encounter's - see
+## [method EnemySurrender.stand_up], which hands him back to his ordinary retreat.
+##
+## [b]It waits for the end of the retreat rather than the start of it.[/b]
+## [signal EnemyEscape.escaped] is the moment he turns and runs and
+## [signal EnemyEscape.escape_finished] is the moment he is off the screen and gone -
+## and he is this encounter's man for the whole of the run between them, killable the
+## entire way. The second is what [method _send_home] already waits on for a routed
+## man, so both kinds of runner are finished with at the same point.
+func _follow_escape(enemy: Node2D) -> void:
+	var escape := _find_escape(enemy)
+	if escape == null or escape.escape_finished.is_connected(_on_downed_ran):
+		return
+	escape.escape_finished.connect(_on_downed_ran.bind(enemy), CONNECT_ONE_SHOT)
+
+
+func _on_downed_ran(enemy: Node2D) -> void:
+	_leave_the_floor(enemy)
+
+
+## Takes one man off the floor, whichever way he left it - shot where he lay, shot on
+## his way out, or gone over the horizon - and asks whether he was the last thing the
+## encounter was waiting on.
+##
+## [b]The ending arrives here as often as it arrives anywhere else.[/b] A fight whose
+## attackers are all down is finished by whichever of these men resolves last, so the
+## check belongs on the leaving rather than on any one of the three ways of leaving.
+## Read by index and compared for the same reason [method _forget] is: an entry whose
+## body has already been freed cannot be read out into a typed name at all.
+func _leave_the_floor(enemy: Node2D) -> void:
+	for index: int in range(_downed.size()):
+		if _downed[index] == enemy:
+			_downed.remove_at(index)
+			_check_cleared()
+			return
 
 
 ## Takes one man off the list of who is still out there, and reports whether he was
@@ -633,33 +852,53 @@ func _send_home(enemy: Node2D, delay: float) -> bool:
 	return false
 
 
-## The one place an ambush ends. Both halves are required: an ambush whose first
-## group is already dead is not over while there are still men coming.
+## The one place an ambush ends, and it now has three halves.
+##
+## Nobody still to come, nobody still fighting, and nobody left unresolved on the
+## floor - see [member downed_hold_the_fight]. The first two are the fight itself:
+## an ambush whose first group is already dead is not over while there are still men
+## coming. The third is everything that happened after the fighting stopped, and it
+## is what keeps the next-round question from arriving over the top of a man who is
+## still lying in the sand, still getting to his feet, or still running for the edge
+## of the screen.
 func _check_cleared() -> void:
 	if not _running or _owed > 0 or _alive > 0:
 		return
+	if downed_hold_the_fight and not _downed.is_empty():
+		return
 	_running = false
 	_standing.clear()
+	_downed.clear()
+	_plan.clear()
 	_drop_player_death()
 	set_process(false)
 	cleared.emit()
 
 
-## [b]Nothing more arrives once the player is down.[/b] A death on the road is the
-## player's own death sequence, which carries them home to the base - and an ambush
-## still counting down its window would go on placing men around them, several
-## thousand pixels from where the fight was. So what is still owed is written off
-## the moment they fall.
+## [b]The fight is over when the player is down, and so is the ambush.[/b] A death is
+## the player's own death sequence, which carries them home to the base - and an
+## ambush still counting down its window would go on placing men around them, several
+## thousand pixels from where the fight was. So what is still owed is written off the
+## moment they fall.
 ##
-## [b]What is already standing is left alone[/b], and the ambush still ends through
-## [method _check_cleared] rather than being torn down - so whatever becomes of
-## those bodies, the road picks up in exactly the way it does after any other fight
-## instead of hanging on a fight that can no longer be won.
+## [b]The men still standing break and run, and that is the change.[/b] Writing off
+## what was owed and leaving the field alone was not an ending: [method _check_cleared]
+## needs an empty field as well as an empty debt, and the man who has just killed the
+## player is not going to be killed by anybody, so [signal cleared] was never emitted -
+## the road, the night or the search that opened the ambush hung on it for good, and a
+## dozen men were left chasing a body that was no longer in the world. They are asked
+## to leave instead, through the very [method _rout_the_rest] a broken ambush already
+## uses, so there is one way an ambush empties and a death goes through it: no ambush
+## retreat of its own, no bodies deleted, and the ending arrives through the same
+## [signal cleared] every other one does.
 func _on_player_died() -> void:
 	if not _running:
 		return
-	_owed = 0
-	_check_cleared()
+	if not rout():
+		# Already breaking - the men are on their way off the field and are left to
+		# finish leaving. Only what is still owed is written off again.
+		_owed = 0
+		_check_cleared()
 
 
 func _follow_player_death() -> void:
@@ -698,6 +937,35 @@ func _rolled_opening() -> int:
 
 
 # --- Looking things up ---------------------------------------------------------
+
+## The next body off the plan, or null for the spawner's own enemy - which is also
+## what an ambush with no roster answers for every man in it.
+## The mix this ambush is worth, one entry per body, or an empty plan when there is
+## no roster to ask - which every body then reads as the spawner's own enemy.
+func _build_plan(total: int, wave_number: int) -> Array[PackedScene]:
+	var roster := _resolve_roster()
+	if roster == null:
+		return []
+
+	var plan := roster.build_wave(maxi(wave_number, 1), total)
+	plan.reverse()
+	return plan
+
+
+## The next body off the plan, or null for the spawner's own enemy - which is also
+## what an ambush with no roster answers for every man in it.
+func _next_body() -> PackedScene:
+	if _plan.is_empty():
+		return null
+	return _plan.pop_back()
+
+
+## The roster this world fills its ambushes from, or null when it has none.
+func _resolve_roster() -> WaveRoster:
+	if _roster == null or not is_instance_valid(_roster):
+		_roster = get_node_or_null(roster_path) as WaveRoster
+	return _roster
+
 
 func _resolve_spawner() -> EnemySpawner:
 	if _spawner == null or not is_instance_valid(_spawner):

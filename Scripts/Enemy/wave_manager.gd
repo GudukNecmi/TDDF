@@ -56,6 +56,10 @@ enum State { IDLE, SPAWNING, BETWEEN_WAVES, FINISHED }
 @export var max_active_enemies: int = 0
 ## Group the living enemies are counted in when there is a ceiling to enforce.
 @export var enemy_group: StringName = &"enemies"
+## Group the player's own [Health] is found by, so a round can be stopped if they are
+## killed in it - see [method _on_player_died]. The world's own group, the same one
+## every other system follows the player's death through.
+@export var health_group: StringName = &"player_health"
 
 @export_group("Rounds")
 ## The difficulty curve. How much larger a round's waves are than the round
@@ -66,20 +70,42 @@ enum State { IDLE, SPAWNING, BETWEEN_WAVES, FINISHED }
 ## Left unresolved every round is the first one, so a world opened on its own
 ## still plays.
 @export var round_scaling_path: NodePath = ^"../RoundScaling"
+## What each wave is [i]made of[/i] - see [WaveRoster]. It is asked once, as a wave
+## begins, for one body per enemy the count above already decided on, so the
+## composition and the size of a wave are tuned in two separate places and neither
+## can change the other.
+##
+## Left unresolved every enemy is the spawner's own, which is the wave this manager
+## has always spawned.
+@export var roster_path: NodePath = ^"WaveRoster"
 
 @onready var _spawner: EnemySpawner = get_node_or_null(spawner_path) as EnemySpawner
 @onready var _scaling: RoundScaling = get_node_or_null(round_scaling_path) as RoundScaling
+@onready var _roster: WaveRoster = get_node_or_null(roster_path) as WaveRoster
 
 var _state: State = State.IDLE
 var _elapsed: float = 0.0
 var _timer: float = 0.0
 var _wave: int = 0
 var _remaining: int = 0
+## One body per enemy of the wave being spawned, decided in full the moment the
+## wave began. Rolling the mix once per wave rather than once per enemy is what
+## lets a roster promise "five or six together" and actually deliver it.
+var _plan: Array[PackedScene] = []
+## The player's pool while a round is running, so the waves can be stopped if they are
+## killed in it. Held rather than looked up each time, for the same reason every other
+## system that follows this holds it: the connection has to be droppable again.
+var _player_health: Health
 
 
 func _ready() -> void:
 	if auto_start:
 		start()
+
+
+## Nothing is left spawning behind us.
+func _exit_tree() -> void:
+	_drop_player_death()
 
 
 ## Enemies wave [param wave_number] asks for. Wave 1 is [member base_enemy_count]
@@ -153,6 +179,7 @@ func start() -> void:
 	_wave = 0
 	_remaining = 0
 	_state = State.BETWEEN_WAVES
+	_follow_player_death()
 	run_started.emit()
 
 
@@ -163,7 +190,39 @@ func stop() -> void:
 
 	_remaining = 0
 	_state = State.FINISHED
+	_drop_player_death()
 	run_finished.emit()
+
+
+## [b]A death ends the round.[/b] Dying is the player's own death sequence and it
+## carries them home to the base, several thousand pixels from the arena - so a clock
+## still counting down and a spawner still placing waves would go on filling a
+## rectangle nobody is standing in, and the player would be put back on their feet at
+## home with a round still running behind them.
+##
+## It is the ordinary [method stop], not a second ending: what is already standing is
+## sent home by whatever is listening for [signal run_finished] - [RunEndDefeat] - so
+## the arena empties exactly the way it does when the clock runs out, and nothing about
+## how a round is wound up exists in two places.
+func _on_player_died() -> void:
+	stop()
+
+
+func _follow_player_death() -> void:
+	_drop_player_death()
+	_player_health = get_tree().get_first_node_in_group(health_group) as Health
+	if _player_health != null and not _player_health.died.is_connected(_on_player_died):
+		_player_health.died.connect(_on_player_died)
+
+
+## Dropped rather than left one-shot, because the player's pool outlives their death -
+## they are revived into the same [Health] - so a connection left behind would still be
+## listening at the round after next.
+func _drop_player_death() -> void:
+	if _player_health != null and is_instance_valid(_player_health) \
+			and _player_health.died.is_connected(_on_player_died):
+		_player_health.died.disconnect(_on_player_died)
+	_player_health = null
 
 
 func _process(delta: float) -> void:
@@ -192,6 +251,9 @@ func _process(delta: float) -> void:
 func _begin_wave() -> void:
 	_wave += 1
 	_remaining = get_wave_enemy_count(_wave)
+	# The count is settled first and handed over, so the roster can only decide what
+	# the wave is made of and never how large it is.
+	_plan = [] if _roster == null else _roster.build_wave(_wave, _remaining)
 	_timer = 0.0
 	_state = State.SPAWNING
 	# Spacing is measured within a wave, so each one starts from a clean slate.
@@ -220,7 +282,7 @@ func _advance_spawning() -> void:
 		if is_at_enemy_cap():
 			return
 		if _spawner != null:
-			_spawner.spawn()
+			_spawner.spawn(_planned_scene())
 		_remaining -= 1
 		if spawn_interval > 0.0:
 			_timer += spawn_interval
@@ -231,3 +293,13 @@ func _advance_spawning() -> void:
 	wave_spawn_completed.emit(_wave)
 	_state = State.BETWEEN_WAVES
 	_timer = time_between_waves
+
+
+## The body the next enemy of this wave is built from, or null for the spawner's
+## own. Read off the plan by how much of the wave is left, so a wave held back by
+## the enemy ceiling picks up exactly where it stopped rather than losing its mix.
+func _planned_scene() -> PackedScene:
+	var index := _plan.size() - _remaining
+	if index < 0 or index >= _plan.size():
+		return null
+	return _plan[index]

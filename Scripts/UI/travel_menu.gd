@@ -173,7 +173,7 @@ const GROUP := &"travel_menu"
 @export var icon_size := Vector2(60.0, 60.0)
 @export var days_font_size: int = 34
 @export var arrival_font_size: int = 18
-@export var font_colour := Color(0.84, 0.76, 0.73)
+@export var font_colour := Color(0.16, 0.06, 0.05)
 @export var label_colour := Color(0.5, 0.36, 0.34)
 ## Whether the arrival line is written in that hour's own colour, so the word and
 ## the picture read as one thing the way they do on the HUD.

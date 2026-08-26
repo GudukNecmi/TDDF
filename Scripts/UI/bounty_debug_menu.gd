@@ -90,7 +90,7 @@ signal closed
 
 @export_group("Buttons")
 ## Colour the reveal buttons are lettered in.
-@export var button_font_color := Color(0.84, 0.76, 0.73)
+@export var button_font_color := Color(0.16, 0.06, 0.05)
 ## The look of a reveal button, so the panel's buttons are the game's buttons
 ## rather than default Godot ones. Dropped in from the HUD scene, where the same
 ## styles the other menus use already live; left empty the buttons fall back to

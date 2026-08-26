@@ -312,13 +312,20 @@ func _on_enemy_spawned(enemy: Node2D) -> void:
 
 
 ## A man of a Danger is down. The ending is claimed only if he was the last of it:
-## nobody else standing and nobody still owed.
+## nobody else left in any state and nobody still owed.
 ##
 ## [b]The counts are read before the ambush has moved them.[/b] This is connected
 ## as the enemy is built and the ambush connects its own listener after that call
-## returns, so on the frame of a death the man dying is still counted among the
-## living - which is why the last of them is [code]alive == 1[/code] rather than
-## none.
+## returns, so on the frame of a death the man dying is still counted - which is why
+## the last of them is [code]one[/code] rather than none.
+##
+## [b]The floor counts as well as the field.[/b] A man who has given up is nobody's
+## opponent but is not finished with - see
+## [member AmbushWaveDirector.downed_hold_the_fight] - so the last man of an
+## encounter is the last man in any state, which is what
+## [method AmbushWaveDirector.get_encounter_count] already reports. Killing the last
+## attacker while somebody is still lying in the sand is therefore not the ending;
+## shooting that man on the floor, or catching him on his way out, is.
 func _on_enemy_died(enemy: Node2D) -> void:
 	if not enabled or _playing or _waiting_for_head:
 		return
@@ -332,7 +339,7 @@ func _on_enemy_died(enemy: Node2D) -> void:
 	var ambush := _resolve_ambush()
 	if ambush == null or not ambush.is_running():
 		return
-	if ambush.get_enemies_owed() > 0 or ambush.get_enemies_alive() > 1:
+	if ambush.get_enemies_owed() > 0 or ambush.get_encounter_count() > 1:
 		return
 
 	var pop := _find_head_pop(enemy)

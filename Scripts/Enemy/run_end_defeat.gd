@@ -39,6 +39,15 @@ signal surrendered(enemy: Node)
 @export var wave_manager_path: NodePath = ^"../WaveManager"
 ## Group the enemies are found by.
 @export var enemy_group: StringName = &"enemies"
+## Enemies in this group are left standing when the round is wound up.
+##
+## [b]It is a developer's door, and it is empty in ordinary play.[/b] The test map's
+## [TestSpawnStation] marks everything it puts on the floor with this group, so a
+## round ending elsewhere in the world does not quietly send a developer's subjects
+## home - and nothing a real run spawns ever joins it, so a real round is wound up
+## exactly as it always was. It is the same exemption [ZoneEnemyGuard] honours, by
+## the same group name, so the two cannot disagree about who is fair game.
+@export var exempt_group: StringName = &"test_spawned"
 ## Pause before the first one goes, so the clock hitting zero registers first.
 @export var lead_in: float = 0.35
 ## Gap between one enemy and the next.
@@ -73,7 +82,7 @@ func clear_arena() -> void:
 		return
 	_fired = true
 
-	var enemies := get_tree().get_nodes_in_group(enemy_group)
+	var enemies := _fair_game(get_tree().get_nodes_in_group(enemy_group))
 	# Decided before anybody is told anything, so who gives up is drawn from
 	# everybody who was still standing rather than from whoever happened to be left
 	# once the ripple had started.
@@ -94,6 +103,20 @@ func clear_arena() -> void:
 			told += 1
 
 	cleared.emit(told)
+
+
+## [param enemies] with anything the round may not wind up taken out. Applied once,
+## before anybody is drawn or told anything, so an exempt enemy cannot even be picked
+## to surrender.
+func _fair_game(enemies: Array) -> Array:
+	if exempt_group == &"":
+		return enemies
+
+	var kept: Array[Node] = []
+	for enemy: Node in enemies:
+		if not enemy.is_in_group(exempt_group):
+			kept.append(enemy)
+	return kept
 
 
 ## Which of [param enemies] give up rather than run.

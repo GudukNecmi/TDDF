@@ -63,10 +63,10 @@ const GROUP := &"bounty_list_menu"
 @export_group("Rows")
 @export var entry_name_font_size: int = 24
 @export var entry_line_font_size: int = 16
-@export var entry_name_colour := Color(0.86, 0.78, 0.72)
+@export var entry_name_colour := Color(0.16, 0.06, 0.05)
 @export var entry_label_colour := Color(0.5, 0.36, 0.34)
-@export var entry_known_colour := Color(0.84, 0.76, 0.73)
-@export var entry_unknown_colour := Color(0.45, 0.3, 0.3)
+@export var entry_known_colour := Color(0.2, 0.08, 0.06)
+@export var entry_unknown_colour := Color(0.42, 0.3, 0.24)
 ## Whether each row offers a button to give the contract up.
 @export var allow_cancel: bool = true
 @export var cancel_text: String = "GIVE UP"

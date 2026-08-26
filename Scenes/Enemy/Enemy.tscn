@@ -44,7 +44,6 @@
 [ext_resource type="Script" uid="uid://b22cwy4t73gk1" path="res://Scripts/Enemy/enemy_defeat.gd" id="45_defeat"]
 [ext_resource type="PackedScene" path="res://Scenes/Effects/DeathSmoke.tscn" id="46_smoke"]
 [ext_resource type="Script" uid="uid://bxqda7netn50a" path="res://Scripts/Enemy/enemy_head_pop.gd" id="47_headpop"]
-[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="48_shadow"]
 [ext_resource type="Script" uid="uid://vv4h8bxhjp6j" path="res://Scripts/Common/footprint_emitter.gd" id="49_prints"]
 [ext_resource type="Script" uid="uid://4mdt53ojmh0t" path="res://Scripts/Enemy/enemy_escape.gd" id="50_escape"]
 [ext_resource type="Script" uid="uid://0vh4rx50p0aa" path="res://Scripts/Enemy/enemy_attack_audio.gd" id="51_0vlx4"]
@@ -59,7 +58,14 @@
 [ext_resource type="AudioStream" uid="uid://c6tws6jm4s5jw" path="res://Sound/Efect/Boss/Atack (1).mp3" id="57_cs1vk"]
 [ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="58_mmefb"]
 [ext_resource type="PackedScene" path="res://Scenes/World/Pickups/KnifePickup.tscn" id="59_knifepick"]
-[ext_resource type="Resource" path="res://Resources/Break/knife_drop_break.tres" id="60_knifebreak"]
+[ext_resource type="Resource" uid="uid://dism6gmntld2j" path="res://Resources/Break/knife_drop_break.tres" id="60_knifebreak"]
+[ext_resource type="Script" uid="uid://flt2wk7n25yr" path="res://Scripts/Enemy/enemy_enrage.gd" id="61_enrage"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/SpeechBubble.tscn" id="62_bubble"]
+[ext_resource type="Texture2D" uid="uid://cd1unn8cmap5r" path="res://Assets/Enemies/Enemy1/Tear.PNG" id="63_tear"]
+[ext_resource type="AudioStream" uid="uid://bjr2fjg85dgvo" path="res://Sound/Efect/Boss/BossBladeSwoosh.WAV" id="64_bswoosh"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="64_shadow"]
+[ext_resource type="Script" uid="uid://b8onw55m5xw3k" path="res://Scripts/World/Shadows/shadow_group.gd" id="65_shadowgroup"]
+[ext_resource type="Script" uid="uid://cbiv72obcequn" path="res://Scripts/Enemy/blast_reaction.gd" id="70_blast"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_02vxf"]
 radius = 18.0
@@ -79,11 +85,12 @@ size = Vector2(28, 23.6)
 [sub_resource type="CircleShape2D" id="CircleShape2D_kvc4n"]
 radius = 24.0
 
-[node name="Enemy" type="CharacterBody2D" unique_id=1835476807 groups=["enemies"]]
+[node name="Enemy" type="CharacterBody2D" unique_id=1835476807 groups=["enemies", "shadow_ground_root"]]
 collision_layer = 8
 collision_mask = 9
 motion_mode = 1
 script = ExtResource("1_3l8kd")
+steering_path = NodePath("BlastReaction")
 
 [node name="Appearance" type="Node" parent="." unique_id=921246072]
 script = ExtResource("18_look")
@@ -94,11 +101,6 @@ knife_textures = Array[Texture2D]([ExtResource("34_k1"), ExtResource("35_k2"), E
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=697630273]
 position = Vector2(0, -18)
 shape = SubResource("CircleShape2D_02vxf")
-
-[node name="Shadow" type="Sprite2D" parent="." unique_id=872273377 groups=["prop_shadow"]]
-script = ExtResource("48_shadow")
-shadow_scale = Vector2(28, 10)
-shadow_offset = Vector2(0, -2)
 
 [node name="Visual" type="Node2D" parent="." unique_id=1763882585]
 
@@ -146,7 +148,6 @@ smoke_scene = ExtResource("46_smoke")
 
 [node name="HeadPop" type="Node" parent="." unique_id=52284064]
 script = ExtResource("47_headpop")
-knife_intact_chance = 0.4
 knife_pickup_scene = ExtResource("59_knifepick")
 knife_break = ExtResource("60_knifebreak")
 
@@ -155,6 +156,11 @@ script = ExtResource("50_escape")
 
 [node name="Surrender" type="Node" parent="." unique_id=52284066]
 script = ExtResource("51_surrender")
+bubble_scene = ExtResource("62_bubble")
+
+[node name="Enrage" type="Node" parent="." unique_id=52284070]
+script = ExtResource("61_enrage")
+bubble_scene = ExtResource("62_bubble")
 
 [node name="SurrenderKnowledge" type="Node" parent="." unique_id=52284069]
 script = ExtResource("53_knowledge")
@@ -240,6 +246,17 @@ visible = false
 position = Vector2(7, 24)
 texture = ExtResource("44_deadeyes")
 
+[node name="Tear" type="Sprite2D" parent="HeadAim/Head" unique_id=1941201214]
+visible = false
+position = Vector2(-52, 118)
+texture = ExtResource("63_tear")
+
+[node name="ShadowCaster" type="Node2D" parent="HeadAim/Head" unique_id=878787648]
+script = ExtResource("64_shadow")
+source_sprite_path = NodePath("..")
+ground_root_mode = 1
+auto_ground_anchor = false
+
 [node name="KnifeAim" type="Node2D" parent="." unique_id=1722761260]
 position = Vector2(0, -30)
 script = ExtResource("2_3jkxs")
@@ -262,6 +279,12 @@ script = ExtResource("4_seemo")
 lag = 0.03
 max_offset = 4.0
 
+[node name="ShadowCaster" type="Node2D" parent="KnifeAim/KnifeHand/Knife" unique_id=559211466]
+script = ExtResource("64_shadow")
+source_sprite_path = NodePath("..")
+ground_root_mode = 1
+auto_ground_anchor = false
+
 [node name="AttackAudio" type="Node" parent="." unique_id=1641374723]
 script = ExtResource("51_0vlx4")
 attack_sounds = Array[AudioStream]([ExtResource("52_t2g6m"), ExtResource("53_nhyut"), ExtResource("54_krql2"), ExtResource("55_iydd2")])
@@ -269,9 +292,22 @@ swoosh_sounds = Array[AudioStream]([ExtResource("56_0g2yw")])
 attack_volume_db = -6.0
 swoosh_volume_db = -4.0
 boss_attack_sounds = Array[AudioStream]([ExtResource("57_cs1vk")])
+boss_swoosh_sounds = Array[AudioStream]([ExtResource("64_bswoosh")])
+boss_swoosh_volume_db = -3.0
 
 [node name="SoundBank" type="Node" parent="AttackAudio" unique_id=975132685]
 script = ExtResource("58_mmefb")
 voice_count = 3
 bus = &"Game"
 pitch_variation = 0.06
+
+[node name="BlastReaction" type="Node" parent="." unique_id=1764565854]
+script = ExtResource("70_blast")
+bubble_scene = ExtResource("62_bubble")
+
+[node name="ShadowGroup" type="Node2D" parent="." unique_id=1237692113]
+script = ExtResource("65_shadowgroup")
+
+[node name="ShadowCaster" type="Node2D" parent="." unique_id=1389352987]
+script = ExtResource("64_shadow")
+source_sprite_path = NodePath("../Visual/Body")

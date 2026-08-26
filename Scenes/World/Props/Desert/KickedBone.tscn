@@ -1,7 +1,6 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" uid="uid://bnoq7214dwu58" path="res://Scripts/World/kicked_bone.gd" id="1_bone"]
-[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="2_shadow"]
 [ext_resource type="Texture2D" uid="uid://d2m1ngf6xku7" path="res://Assets/Maps/Desert/2- Props/Bone/Bone.PNG" id="3_boneart"]
 [ext_resource type="PackedScene" path="res://Scenes/World/Pickups/BonePickup.tscn" id="4_pickup"]
 
@@ -10,12 +9,6 @@ script = ExtResource("1_bone")
 launch_speed = Vector2(330, 520)
 drag = 3.2
 hop_height = 26.0
-
-[node name="Shadow" type="Sprite2D" parent="."]
-script = ExtResource("2_shadow")
-shadow_scale = Vector2(64, 24)
-shadow_offset = Vector2(4, -4)
-shadow_opacity = 0.34
 
 [node name="Art" type="Sprite2D" parent="."]
 position = Vector2(0, -16)

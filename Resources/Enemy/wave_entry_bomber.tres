@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WaveRosterEntry" load_steps=3 format=3 uid="uid://cgotikwavebomber"]
+
+[ext_resource type="Script" path="res://Scripts/Enemy/wave_roster_entry.gd" id="1_entry"]
+[ext_resource type="PackedScene" uid="uid://cgotikbomber" path="res://Scenes/Enemy/Bomber.tscn" id="2_bomber"]
+
+[resource]
+script = ExtResource("1_entry")
+scene = ExtResource("2_bomber")
+display_name = "Bomber"
+one_per_enemies = 20
+share_growth_per_wave = 0.015
+first_wave = 3
+max_fraction = 0.35
+guarantee_every_waves = 0
+guaranteed_minimum = 1
+burst_chance = 0.0
+burst_min = 3
+burst_max = 3
+burst_first_wave = 4

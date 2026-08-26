@@ -1,0 +1,46 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Dev/shadow_architecture_test.gd" id="1_test"]
+[ext_resource type="Script" path="res://Scripts/World/day_cycle_director.gd" id="2_daycycle"]
+[ext_resource type="Script" path="res://Scripts/World/day_stage.gd" id="3_stage"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/1_dawn.tres" id="4_dawn"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/2_morning.tres" id="5_morning"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/3_noon.tres" id="6_noon"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/4_evening.tres" id="7_evening"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/5_twilight.tres" id="8_twilight"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/6_night.tres" id="9_night"]
+[ext_resource type="Script" path="res://Scripts/World/Sun/sun_controller.gd" id="10_sun"]
+[ext_resource type="Script" path="res://Scripts/World/Sun/sun_stage.gd" id="11_sunstage"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/1_dawn.tres" id="12_sdawn"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/2_morning.tres" id="13_smorning"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/3_noon.tres" id="14_snoon"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/4_evening.tres" id="15_sevening"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/5_twilight.tres" id="16_stwilight"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/6_night.tres" id="17_snight"]
+[ext_resource type="Script" path="res://Scripts/World/Shadows/shadow_caster.gd" id="18_caster"]
+[ext_resource type="Texture2D" uid="uid://dc0yiv48n3sbn" path="res://Assets/Maps/Desert/2- Props/Cactus/IMG_2274.PNG" id="19_art"]
+
+[node name="ShadowArchitectureTest" type="Node2D"]
+script = ExtResource("1_test")
+
+[node name="Darkness" type="CanvasModulate" parent="." groups=["ambient_modulate"]]
+
+[node name="DayCycle" type="Node" parent="." groups=["day_cycle"]]
+script = ExtResource("2_daycycle")
+stages = Array[ExtResource("3_stage")]([ExtResource("4_dawn"), ExtResource("5_morning"), ExtResource("6_noon"), ExtResource("7_evening"), ExtResource("8_twilight"), ExtResource("9_night")])
+stage_override = 0
+
+[node name="Sun" type="Node2D" parent="." groups=["sun"]]
+script = ExtResource("10_sun")
+stages = Array[ExtResource("11_sunstage")]([ExtResource("12_sdawn"), ExtResource("13_smorning"), ExtResource("14_snoon"), ExtResource("15_sevening"), ExtResource("16_stwilight"), ExtResource("17_snight")])
+transition_duration = 1.6
+
+[node name="Subject" type="Node2D" parent="."]
+
+[node name="Art" type="Sprite2D" parent="Subject"]
+texture = ExtResource("19_art")
+offset = Vector2(0, -136)
+
+[node name="ShadowCaster" type="Node2D" parent="Subject"]
+script = ExtResource("18_caster")
+source_sprite_path = NodePath("../Art")

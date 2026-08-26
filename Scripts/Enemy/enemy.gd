@@ -35,6 +35,40 @@ extends CharacterBody2D
 ## body collision.
 @export var separation_strength: float = 0.7
 
+@export_group("Steering")
+## Optional component that bends the walk before it is taken.
+##
+## [b]It is one hook, not a second mover.[/b] Whatever is named here is asked once
+## a frame - [code]steer(chase: Vector2, delta: float) -> Vector2[/code], with the
+## direction this enemy was about to walk in - and whatever comes back is what it
+## walks in. Everything after that point is untouched: the separation from the
+## crowd, the hit reaction, the world's slow motion, the swing and the retreat are
+## all the same code either way.
+##
+## Left unset - which is every ordinary Enemy1 - the chase is taken exactly as it
+## was computed, so nothing about an enemy without one is changed by this being
+## here. See [BomberSway], which is what a bomber's wobbling approach is made of.
+@export var steering_path: NodePath
+
+@export_group("Toughness")
+## Whether this enemy's health is the figure its region states rather than the one
+## its own scene was authored with.
+##
+## [b]On for an ordinary man, and that is the whole of regional health.[/b] The pool
+## is written as the enemy is built - see [method RoundScaling.apply_to] - to
+## [member MapRegion.enemy_base_health] for the part of the map being fought in, and
+## nothing multiplies it afterwards.
+##
+## [b]Off for anything whose toughness is a property of the thing rather than of the
+## place[/b] - the bomber, whose short pool is the point of it: it is meant to be
+## killable before it reaches you, and a bomber that got tougher the deeper the
+## player went would stop being that. An enemy switched off here keeps exactly what
+## its scene says.
+##
+## Bosses do not read this at all. A boss's pool is built from its scene's authored
+## figure and its bounty by [MiniBossDirector] and is untouched either way.
+@export var uses_regional_health: bool = true
+
 @export_group("Hit reaction")
 ## Optional [HitReaction] whose knockback and slow are folded into this enemy's
 ## movement. Left unset, the enemy simply moves as it always did.
@@ -62,7 +96,11 @@ extends CharacterBody2D
 @export var idle_hop_path: NodePath = ^"Visual"
 
 @onready var _target: Node2D = get_node_or_null(target_path) as Node2D
-@onready var _knife_slash: KnifeSlash = $KnifeAim/KnifeSlash
+## Looked up rather than required, because an enemy that carries no blade is a real
+## thing now - a bomber's whole attack is the charge - and one must simply not swing
+## rather than fail to load.
+@onready var _knife_slash: KnifeSlash = get_node_or_null(^"KnifeAim/KnifeSlash") as KnifeSlash
+@onready var _steering: Node = get_node_or_null(steering_path)
 @onready var _hit_reaction: HitReaction = get_node_or_null(hit_reaction_path) as HitReaction
 
 var _slash_cooldown: float = 0.0
@@ -76,10 +114,26 @@ var _fleeing: bool = false
 ## What the walk is multiplied by while fleeing. Handed in rather than exported
 ## here, because how fast a retreat is belongs with the rest of the escape.
 var _flee_multiplier: float = 1.0
+## True while this enemy is charging a place rather than chasing a person. The third
+## of the flags that change where the walk points, and deliberately the same shape as
+## the two above it: the walk, the separation, the hit reaction, the swing and the
+## world's slow motion are all the same code either way, and only the destination and
+## the speed differ. See [BossCharge], which owns everything else about the attack.
+var _charging: bool = false
+var _charge_point: Vector2 = Vector2.ZERO
+## What the walk is multiplied by while charging. Handed in rather than exported here,
+## because how fast a charge runs belongs with the rest of the attack.
+var _charge_multiplier: float = 1.0
 ## True while this enemy is standing by: present, breathing, and taking no part.
 ## The second of the two flags that reverse the chase, and deliberately the same
 ## shape as [member _fleeing] rather than a state machine.
 var _passive: bool = false
+## Whether this enemy may swing at all. The fourth of the flags, and deliberately
+## the same shape as the three above it: it is read at one place, it switches
+## nothing off and it leaves the walk, the separation, the knockback and the world's
+## slow motion exactly as they were. See [BlastReaction], which holds a man's knife
+## down while he is running from a lit bomber and gives it straight back afterwards.
+var _attacks_enabled: bool = true
 var _hop_time: float = 0.0
 var _hop_node: Node2D
 ## The hop's resting spot, captured the first time it is needed, so releasing an
@@ -115,6 +169,20 @@ func _physics_process(delta: float) -> void:
 	var chase := global_position.direction_to(_target.global_position)
 	if _fleeing:
 		chase = -chase
+	elif _charging:
+		# The other line that changes it. A charge is the same walk again, pointed at a
+		# place rather than at a person - see [method begin_charge] - so it keeps the
+		# separation, the knockback and the world's slow motion for nothing, and the
+		# swing below is left running so a player standing in the way is still cut.
+		chase = global_position.direction_to(_charge_point)
+
+	# The one place a walk can be bent into something other than a straight line at
+	# whatever it is heading for. Asked after the destination has been decided, so a
+	# steering component sees the direction the enemy would otherwise have taken and
+	# is free to hand it straight back.
+	if _steering != null and _steering.has_method(&"steer"):
+		chase = _steering.steer(chase, delta)
+
 	# Blended before normalising, so shouldering a neighbour changes the
 	# direction of travel but never the speed - the chase stays constant-speed.
 	var steer := chase + _separation_push() * separation_strength
@@ -127,7 +195,7 @@ func _physics_process(delta: float) -> void:
 	# same way and for the same reason - it is a multiplier read per frame, so an
 	# enemy can never be left crawling once it is switched off, and it is the same
 	# number the player is moving at.
-	var move_speed := speed * WorldSlowdown.get_multiplier(self) * _flee_multiplier
+	var move_speed := speed * WorldSlowdown.get_multiplier(self) * _flee_multiplier * _charge_multiplier
 	var knockback := Vector2.ZERO
 	if _hit_reaction != null:
 		move_speed *= _hit_reaction.get_speed_multiplier()
@@ -138,7 +206,7 @@ func _physics_process(delta: float) -> void:
 	# An enemy running for the edge of the map does not stop to stab anybody, and it
 	# no longer has a knife to do it with. Skipping the whole routine is also what
 	# stops a retreat that happens to pass close to the player costing them a heart.
-	if not _fleeing:
+	if not _fleeing and _attacks_enabled:
 		_update_slash_visual(delta)
 
 
@@ -157,6 +225,62 @@ func begin_flight(speed_multiplier: float = 2.0) -> void:
 ## Whether this enemy is running for the edge of the map.
 func is_fleeing() -> bool:
 	return _fleeing
+
+
+## Sends this enemy at [param point] instead of at the player, at
+## [param speed_multiplier] times its own speed.
+##
+## [b]It is only the destination and the pace.[/b] Deciding when to charge, how long
+## to wait first, when the destination has been reached and what to do on arrival are
+## all [BossCharge]'s - so an enemy nothing ever charges with simply never charges, and
+## nothing about an ordinary enemy's behaviour is changed by any of it being here.
+##
+## Safe to call again mid-charge, which is how the attack moves from its planted
+## wind-up to its run without a second call shape: the same point at a new pace.
+##
+## Fleeing wins over it, deliberately. An enemy sent home by the round's clock is
+## going home whatever else was asked of it.
+func begin_charge(point: Vector2, speed_multiplier: float = 1.0) -> void:
+	_charging = true
+	_charge_point = point
+	_charge_multiplier = maxf(speed_multiplier, 0.0)
+
+
+## Puts this enemy back on the player at its ordinary speed. Safe when it was never
+## charging, so an attack called off half way through has nothing to check first.
+func end_charge() -> void:
+	_charging = false
+	_charge_multiplier = 1.0
+
+
+## Stops this enemy swinging, or lets it swing again.
+##
+## [b]Temporary by construction.[/b] Nothing is disabled and nothing is re-timed -
+## the swing routine is simply not asked for while this is off, and the cooldown is
+## cleared so the first swing after it comes back is immediate rather than owing
+## time to a cooldown that ran while the man was busy running. Whatever turned it
+## off is responsible for turning it back on.
+func set_attacks_enabled(enabled: bool) -> void:
+	if enabled == _attacks_enabled:
+		return
+	_attacks_enabled = enabled
+	if not enabled:
+		_slash_cooldown = 0.0
+
+
+## Whether this enemy is currently allowed to swing.
+func attacks_enabled() -> bool:
+	return _attacks_enabled
+
+
+## Whether this enemy is running at a place rather than at the player.
+func is_charging() -> bool:
+	return _charging
+
+
+## The place it is running at. Meaningless while it is not charging.
+func get_charge_point() -> Vector2:
+	return _charge_point
 
 
 ## Stands this enemy down, or puts it back to work.
@@ -273,7 +397,8 @@ func _update_slash_visual(delta: float) -> void:
 		return
 
 	if _slash_cooldown <= 0.0:
-		_knife_slash.slash()
+		if _knife_slash != null:
+			_knife_slash.slash()
 		_deal_contact_damage()
 		_slash_cooldown = slash_interval
 	else:

@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="ProjectileProfile" format=3]
+[gd_resource type="Resource" script_class="ProjectileProfile" format=3 uid="uid://dq100yp0hwlhv"]
 
-[ext_resource type="Script" path="res://Scripts/Projectile/projectile_profile.gd" id="1_profile"]
+[ext_resource type="Script" uid="uid://b5jv1h7ruv3we" path="res://Scripts/Projectile/projectile_profile.gd" id="1_profile"]
 
 [resource]
 script = ExtResource("1_profile")
@@ -15,10 +15,7 @@ speed_exponent = 1.0
 color_near = Color(1, 1, 1, 1)
 color_far = Color(1, 1, 1, 1)
 glow_near = 0.0
-glow_far = 0.0
 glow_exponent = 1.0
 light_energy_near = 0.0
-light_energy_far = 0.0
-light_scale_near = 1.0
 light_scale_far = 1.0
 light_exponent = 1.0

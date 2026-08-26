@@ -84,12 +84,12 @@ const GROUP := &"region_select_menu"
 @export var tile_size := Vector2(200.0, 120.0)
 @export var name_font_size: int = 40
 @export var description_font_size: int = 15
-@export var font_colour := Color(0.84, 0.76, 0.73)
-@export var font_hover_colour := Color(1.0, 0.9, 0.87)
-@export var font_disabled_colour := Color(0.4, 0.32, 0.32)
+@export var font_colour := Color(0.16, 0.06, 0.05)
+@export var font_hover_colour := Color(0.45, 0.07, 0.06)
+@export var font_disabled_colour := Color(0.42, 0.36, 0.3)
 ## Colour the selected tile's name is written in, so the choice reads even at a
 ## glance across the panel.
-@export var font_selected_colour := Color(1.0, 0.93, 0.9)
+@export var font_selected_colour := Color(0.5, 0.08, 0.07)
 ## Colour of the line under a region's name.
 @export var description_colour := Color(0.45, 0.3, 0.3)
 

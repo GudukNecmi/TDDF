@@ -145,6 +145,20 @@ enum Stage {
 @export var fall_degrees: float = 84.0
 ## How long the fall takes, in seconds.
 @export var fall_time: float = 0.85
+## Whether the beaten man's breathing stops with him.
+##
+## On. Every character in the game carries a squash-and-stretch idle that restarts
+## itself the moment it is found stopped - see [SquashIdle] - so a body left with it
+## running goes on quietly breathing in the sand for the rest of the round, and
+## shooting it starts it again. Off leaves it running, which is what looking at the
+## fall on its own wants.
+@export var stills_the_idle: bool = true
+## Whether the director is told the encounter is over as the man goes down.
+##
+## On. It is what takes the mark off his head and the arrow off the HUD the instant he
+## is beaten, rather than leaving either aimed at a corpse; see
+## [method MiniBossDirector.close_encounter], which leaves the body itself alone.
+@export var closes_the_encounter: bool = true
 ## How close the player has to stand to talk to the body, in pixels. Wider than an
 ## ordinary man's, because a boss is drawn up to two and a half times the size and the
 ## reach is measured from the middle of the sand he is lying on.
@@ -437,6 +451,9 @@ func _begin_defeat() -> void:
 	_extend_the_streak()
 	_drop_the_boss()
 	_stop_the_fight()
+	# After the contract has been read and the fight wound up, because both of those
+	# ask the director for what it is about to forget.
+	_close_the_encounter()
 	_focus_camera()
 	_show_name()
 
@@ -529,6 +546,41 @@ func _drop_the_boss() -> void:
 	# enemies group and out of the container the live ones are kept in, which is how the
 	# arena reads as clear with his body still lying in it.
 	surrender.surrender(true)
+	_still_the_idle()
+
+
+## Stops the beaten man breathing, for good.
+##
+## [b]A corpse that is still doing its idle is a corpse that is still alive.[/b] The
+## squash-and-stretch every character in the game carries is deliberately relentless -
+## it restarts itself the moment it is found stopped, which is exactly right for
+## anything on its feet - so the only honest way to end it is to tell it to stop
+## rather than to stop it; see [method SquashIdle.lie_still], which is what makes it
+## permanent and what makes shooting the body afterwards unable to start it again.
+##
+## Nothing else about the ending is touched. The fall is a tween on the body's own
+## rotation and the fade, the blood and the loot are all their own components, so a
+## still idle is a still idle and nothing more.
+func _still_the_idle() -> void:
+	if not stills_the_idle or _boss == null or not is_instance_valid(_boss):
+		return
+	for node: Node in _boss.find_children("*", "SquashIdle", true, false):
+		var idle := node as SquashIdle
+		if idle != null:
+			idle.lie_still()
+
+
+## Lets the director go, so nothing is left aimed at a man who has been beaten.
+##
+## See [method MiniBossDirector.close_encounter]: the mark over his head and the arrow
+## on the HUD come down together and the encounter is forgotten, while the body itself
+## is left lying exactly where it fell - which is the whole of what this ending is for.
+func _close_the_encounter() -> void:
+	if not closes_the_encounter:
+		return
+	var director := _resolve_director()
+	if director != null:
+		director.close_encounter()
 
 
 ## The fight is over: nothing more is sent, and everybody still standing goes home.

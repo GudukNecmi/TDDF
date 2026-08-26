@@ -187,6 +187,20 @@ enum Phase {
 ## instance by the spawner, so this deliberately overwrites it: a boss hits for two
 ## hearts in round one and in round twenty.
 @export var boss_contact_damage: float = 2.0
+## What the boss's weapon is drawn at, as a multiple of the scale it already has.
+##
+## [b]A multiplier rather than a size[/b], and deliberately: the blade the boss is
+## carrying may be the enemy scene's own or one out of the wardrobe, drawn at whatever
+## scale that set authors - see [member MiniBossWardrobe.weapon_scale_multiplier] - so
+## the only figure that means the same thing for every outlaw is how much larger his is
+## than it would otherwise have been. The whole man is already scaled by his rung, so
+## this is on top of that too: it is the weapon looking oversized in his hand, not the
+## weapon looking the right size on a large man.
+@export var boss_weapon_scale_multiplier: float = 1.2
+## The weapon sprite it is applied to, relative to the boss. The same blade
+## [member MiniBossAppearance.weapon_path] dresses, so a wardrobe and this agree on
+## which sprite the weapon is.
+@export var boss_weapon_path: NodePath = ^"KnifeAim/KnifeHand/Knife"
 
 @export_group("The support group")
 ## How many ordinary enemies stand with the boss, for the rungs that do not override
@@ -651,6 +665,45 @@ func reset_encounter() -> void:
 	set_process(false)
 
 
+## Lets go of an encounter that is over, leaving the body exactly where it fell.
+##
+## [b]This is the other half of [method reset_encounter], and the two are not the
+## same thing.[/b] A reset takes the fight off the map so another can be put up in its
+## place, which means freeing the man. A close is the fight having been [i]won[/i]:
+## the corpse is the whole point of the ending - it can be walked up to, spoken to and
+## shot; see [BossDefeat] - so the body, the mark's own parent, is the one thing here
+## that is not touched.
+##
+## What it does end is this director's hold on him. The mark comes down and leaves its
+## group on the same call, so the X over his head and the arrow on the HUD go together
+## and neither can be left pointing at a dead man - both are the marker's doing, which
+## is why there is one call rather than two; see
+## [method DestinationMarker.remove_marker]. The contract, the tier and the boss are
+## then forgotten, which is what puts [method is_active] back to false, so a player who
+## dies afterwards is not carried home from a fight that is already over and a later
+## day can find a fresh contract.
+##
+## The title card is deliberately left alone: [BossDefeat] is showing the beaten man's
+## name on that same card as this is called, and hiding it here would take the ending's
+## own announcement off the screen halfway through.
+func close_encounter() -> void:
+	if _marker != null and is_instance_valid(_marker):
+		_marker.remove_marker()
+	_marker = null
+
+	# Forgotten rather than freed. Whoever is still standing has been sent home by
+	# [method BossDefeat._stop_the_fight] and runs off under their own [EnemyEscape];
+	# they are simply no longer an encounter's men, so the next one starts counting
+	# from nobody.
+	_support.clear()
+	_boss = null
+	_boss_component = null
+	_bounty = null
+	_tier = null
+	_phase = Phase.NONE
+	set_process(false)
+
+
 ## Where he waits: out at [member boss_distance_fraction] of the playable area from the
 ## player on some bearing, and always far enough inside it that the whole of his scaled
 ## body stands clear of the walls.
@@ -776,6 +829,10 @@ func _build_boss(
 	_boss_component = component
 
 	_dress_boss(boss, bounty)
+	# Deferred, so it lands on top of whatever the wardrobe scaled the weapon to rather
+	# than being overwritten by it - see [method MiniBossAppearance.apply], which runs on
+	# ready and writes the sprite's scale absolutely from the size it was authored at.
+	_scale_boss_weapon.call_deferred(boss)
 
 	# Held still from the frame he exists, so a player who happens to be facing his
 	# way sees a man standing there rather than one already walking at them.
@@ -805,6 +862,28 @@ func _dress_boss(boss: Node2D, bounty: Bounty) -> void:
 	look.wardrobe = wardrobe
 	look.look_key = look_key_for(bounty)
 	boss.add_child(look)
+
+
+## Makes the blade in the boss's hand bigger than the one every other man is carrying.
+##
+## [b]It is the sprite's own scale, multiplied.[/b] The blade is aimed, swung and drawn
+## by the enemy's ordinary rig - see [KnifeSlash] - and all of that is measured off the
+## sprite rather than off a number written down anywhere, so a larger weapon is a
+## larger weapon everywhere at once: it is drawn bigger, it reaches further, and the
+## arc it cuts is wider, with nothing else to keep in step.
+##
+## Applied once and only to the boss. A multiplier of 1 leaves the weapon exactly as the
+## wardrobe or the enemy scene drew it.
+func _scale_boss_weapon(boss: Node2D) -> void:
+	if boss == null or not is_instance_valid(boss):
+		return
+	if is_equal_approx(boss_weapon_scale_multiplier, 1.0):
+		return
+
+	var weapon := boss.get_node_or_null(boss_weapon_path) as Node2D
+	if weapon == null:
+		return
+	weapon.scale *= maxf(boss_weapon_scale_multiplier, 0.01)
 
 
 ## What the look is drawn from: the outlaw himself where the contract names one, and
@@ -1111,6 +1190,14 @@ func _strip_giving_up(boss: Node2D) -> void:
 		var surrender := node as EnemySurrender
 		if surrender != null:
 			surrender.gives_up_on_its_own = false
+	# And he does not lose his temper either. A boss already has his own phases, his
+	# own tint and his own speed, and letting [MoraleDirector] multiply any of them
+	# because one of his men was shot would fight [BossPhases] over the same numbers.
+	# Refused through the component's own door for the same reason the other two are.
+	for node: Node in boss.find_children("*", "EnemyEnrage", true, false):
+		var rage := node as EnemyEnrage
+		if rage != null:
+			rage.can_enrage = false
 
 
 func _ask_session(method: StringName) -> StringName:

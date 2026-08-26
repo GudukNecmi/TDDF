@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Dev/shadow_stress_test.gd" id="1_stress"]
+[ext_resource type="PackedScene" uid="uid://bqgtyn0mdbo7d" path="res://Scenes/World/World.tscn" id="2_world"]
+[ext_resource type="PackedScene" uid="uid://cpvswf25xhxh" path="res://Scenes/Enemy/Enemy.tscn" id="3_enemy"]
+
+[node name="ShadowStress" type="Node2D"]
+script = ExtResource("1_stress")
+world_scene = ExtResource("2_world")
+enemy_scene = ExtResource("3_enemy")

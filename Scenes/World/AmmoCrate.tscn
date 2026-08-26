@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://vul7efrp6mk0" path="res://Assets/Base/Pipes/pipe_flange.png" id="3_flange"]
 [ext_resource type="Texture2D" uid="uid://dldo8j666vkau" path="res://Assets/Guns/Shotgun/Shell.PNG" id="4_shell"]
 [ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="5_prompt"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [node name="AmmoCrate" type="Node2D" unique_id=1296300122]
 script = ExtResource("1_crate")
@@ -89,3 +90,9 @@ theme_override_font_sizes/font_size = 44
 text = "E"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("90_shadow")
+shadow_pull = 6.0
+cast_mode = 1
+source_sprite_path = NodePath("../Art/Box")

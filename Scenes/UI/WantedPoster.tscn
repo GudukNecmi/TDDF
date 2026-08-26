@@ -1,6 +1,9 @@
 [gd_scene format=3 uid="uid://cgotikwantedposter"]
 
 [ext_resource type="Script" path="res://Scripts/UI/wanted_poster.gd" id="1_poster"]
+[ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="200_uipanel"]
+[ext_resource type="Texture2D" uid="uid://b5tbx3ndtm3yn" path="res://Assets/UI/UI Screens/Button1.PNG" id="200_uibtn1"]
+[ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="200_uibtn2"]
 [ext_resource type="Texture2D" path="res://Assets/UI/WantedBoard/poster_paper.png" id="2_paper"]
 [ext_resource type="Script" path="res://Scripts/UI/mini_boss_portrait.gd" id="3_mugshot"]
 
@@ -15,70 +18,52 @@ texture_margin_top = 46.0
 texture_margin_right = 46.0
 texture_margin_bottom = 46.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_take_normal"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_take_normal"]
 content_margin_left = 14.0
 content_margin_top = 8.0
 content_margin_right = 14.0
 content_margin_bottom = 8.0
-bg_color = Color(0.055, 0.02, 0.024, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.42, 0.055, 0.06, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_take_hover"]
+texture = ExtResource("200_uibtn1")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_take_hover"]
 content_margin_left = 14.0
 content_margin_top = 8.0
 content_margin_right = 14.0
 content_margin_bottom = 8.0
-bg_color = Color(0.16, 0.03, 0.034, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.85, 0.12, 0.11, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_take_pressed"]
+texture = ExtResource("200_uibtn2")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_take_pressed"]
 content_margin_left = 14.0
 content_margin_top = 8.0
 content_margin_right = 14.0
 content_margin_bottom = 8.0
-bg_color = Color(0.34, 0.045, 0.045, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.24, 0.2, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_take_disabled"]
+texture = ExtResource("200_uibtn2")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+modulate_color = Color(0.76, 0.7, 0.6, 1)
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_take_disabled"]
 content_margin_left = 14.0
 content_margin_top = 8.0
 content_margin_right = 14.0
 content_margin_bottom = 8.0
-bg_color = Color(0.04, 0.03, 0.03, 0.8)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.22, 0.09, 0.09, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
+texture = ExtResource("200_uibtn1")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+modulate_color = Color(0.55, 0.52, 0.48, 0.8)
 [node name="WantedPoster" type="PanelContainer"]
 custom_minimum_size = Vector2(187, 372)
 offset_right = 187.0
@@ -158,11 +143,11 @@ horizontal_alignment = 1
 [node name="TakeButton" type="Button" parent="Layout"]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/disabled = SubResource("StyleBoxFlat_take_disabled")
 theme_override_styles/focus = SubResource("StyleBoxFlat_take_normal")

@@ -1,0 +1,50 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/speech_bubble.gd" id="1_bubble"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bubble"]
+content_margin_left = 20.0
+content_margin_top = 10.0
+content_margin_right = 20.0
+content_margin_bottom = 10.0
+bg_color = Color(0.09, 0.03, 0.03, 0.92)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.82, 0.1, 0.1, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="SpeechBubble" type="Node2D"]
+top_level = true
+script = ExtResource("1_bubble")
+
+[node name="Tail" type="Node2D" parent="."]
+
+[node name="Edge" type="Polygon2D" parent="Tail"]
+color = Color(0.82, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-15, 24, 15, 24, 0, 62)
+
+[node name="Fill" type="Polygon2D" parent="Tail"]
+color = Color(0.09, 0.03, 0.03, 1)
+polygon = PackedVector2Array(-10, 20, 10, 20, 0, 53)
+
+[node name="Panel" type="PanelContainer" parent="."]
+mouse_filter = 2
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bubble")
+
+[node name="Label" type="Label" parent="Panel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 40
+text = "..."
+horizontal_alignment = 1
+vertical_alignment = 1

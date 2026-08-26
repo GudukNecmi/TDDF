@@ -139,6 +139,22 @@ var _outfit_owed: bool = false
 ## [method take_arrival] and [RegionArrival].
 var _arrival_owed: bool = false
 
+## Whether this session is a Free Run rather than the story.
+##
+## [b]It is a property of the session for the same reason the map is.[/b] A Free
+## Run outlives every world it builds - the loop is one Trouble after another and
+## each of them rebuilds nothing but the fight - so the one thing that must not be
+## forgotten is what kind of game this is. An autoload is the only thing a
+## [method SceneTree.reload_current_scene] leaves standing, so it is remembered
+## here and read by whoever is deciding what a freshly built world is for.
+##
+## [b]Nothing about the story is conditional on it.[/b] It is asked in exactly two
+## places - [WorldBoot], deciding whether the round belongs to the wave manager or
+## to the search, and [DangerDirector], deciding whether a search has a bottom to
+## it - and both of those refuse to it exactly as they refuse to a boss or an
+## arrival. A story run never sets it and so never sees either question.
+var _free_run: bool = false
+
 var _catalog: MapCatalog
 
 
@@ -542,9 +558,29 @@ func end() -> void:
 	_destination_region_id = &""
 	_travelling = false
 	_outfit_owed = false
+	# A Free Run ends where every other run ends: at the base, having died, gone home
+	# or backed out. Cleared here so the flag cannot outlive the game it belonged to
+	# and take the next story run's round over from the pit.
+	_free_run = false
 	_arrival_owed = false
 	# The wounds of a run belong to that run. Walking back into the base is walking
 	# in whole, which is also what stops a player who went home on half a heart from
 	# being stuck with it.
 	_clear_vitals()
 	run_ended.emit()
+
+
+## Whether the player is on a Free Run - the endless search, with no story run to
+## finish and no bottom to the ladder.
+func is_free_run() -> bool:
+	return _free_run
+
+
+## Says which kind of game this is. Called by the title screen before the world is
+## built, because the answer has to be in place by the time [WorldBoot] asks it.
+##
+## Setting it does not begin anything: what a Free Run [i]is[/i] belongs to the
+## world - see [method WorldBoot._free_run_takes_the_round] - and this is only the
+## fact that it is one.
+func set_free_run(free_run: bool) -> void:
+	_free_run = free_run

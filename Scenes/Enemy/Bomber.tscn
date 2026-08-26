@@ -1,0 +1,275 @@
+[gd_scene format=3 uid="uid://cgotikbomber"]
+
+[ext_resource type="Script" uid="uid://u2nlp810u5e" path="res://Scripts/Enemy/enemy.gd" id="1_enemy"]
+[ext_resource type="Script" uid="uid://cu628lbmgnglh" path="res://Scripts/Common/look_at_target.gd" id="2_lookat"]
+[ext_resource type="Script" uid="uid://br15pyfwinym7" path="res://Scripts/Common/soft_follow.gd" id="3_softfollow"]
+[ext_resource type="Script" uid="uid://cmhjjned50sj" path="res://Scripts/Common/health.gd" id="4_health"]
+[ext_resource type="Script" uid="uid://br8oyhkkml7bq" path="res://Scripts/Common/hitbox.gd" id="5_hitbox"]
+[ext_resource type="AnimationLibrary" uid="uid://hr15jfxlr4on" path="res://Resources/enemy1_idle.tres" id="6_idle"]
+[ext_resource type="Script" uid="uid://bjb8au3p6myu8" path="res://Scripts/Common/squash_idle.gd" id="7_squash"]
+[ext_resource type="Script" uid="uid://dfrcyrkkcdsia" path="res://Scripts/Common/hit_reaction.gd" id="8_hitreact"]
+[ext_resource type="Shader" uid="uid://bdokp0457hj52" path="res://Shaders/hit_flash.gdshader" id="9_flash"]
+[ext_resource type="Script" uid="uid://bhiaxi33sa8dp" path="res://Scripts/World/blood_emitter.gd" id="10_blood"]
+[ext_resource type="PackedScene" uid="uid://b6uem6u8qvq5n" path="res://Scenes/Effects/BloodSplash.tscn" id="11_bsplash"]
+[ext_resource type="Script" uid="uid://cnxml6aexd8a2" path="res://Scripts/Common/death_fade.gd" id="12_deathfade"]
+[ext_resource type="Script" uid="uid://bguc2fnrtoqgi" path="res://Scripts/Common/leg_animator.gd" id="13_leganim"]
+[ext_resource type="Script" uid="uid://ddteuwliuqfhj" path="res://Scripts/Enemy/bomber_appearance.gd" id="14_look"]
+[ext_resource type="Script" uid="uid://b22cwy4t73gk1" path="res://Scripts/Enemy/enemy_defeat.gd" id="15_defeat"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/DeathSmoke.tscn" id="16_smoke"]
+[ext_resource type="Script" uid="uid://bxqda7netn50a" path="res://Scripts/Enemy/enemy_head_pop.gd" id="17_headpop"]
+[ext_resource type="Script" uid="uid://vv4h8bxhjp6j" path="res://Scripts/Common/footprint_emitter.gd" id="19_prints"]
+[ext_resource type="Script" uid="uid://4mdt53ojmh0t" path="res://Scripts/Enemy/enemy_escape.gd" id="20_escape"]
+[ext_resource type="Script" uid="uid://bv40jl75flxm6" path="res://Scripts/Enemy/bomber_sway.gd" id="21_sway"]
+[ext_resource type="Script" uid="uid://bqvtt3m2grqlc" path="res://Scripts/Enemy/bomber_attack.gd" id="22_attack"]
+[ext_resource type="Script" uid="uid://be3t012qayrc6" path="res://Scripts/Enemy/bomber_fuse.gd" id="23_fuse"]
+[ext_resource type="PackedScene" uid="uid://c5pel1kucj33j" path="res://Scenes/Effects/Explosion.tscn" id="24_explosion"]
+[ext_resource type="Texture2D" uid="uid://cas5sbbh686pk" path="res://Assets/Enemies/Suicide Bomber/Body Parts/IMG_2349.PNG" id="25_lleg"]
+[ext_resource type="Texture2D" uid="uid://ccbf31pyb467m" path="res://Assets/Enemies/Suicide Bomber/Body Parts/IMG_2350.PNG" id="26_rleg"]
+[ext_resource type="Texture2D" uid="uid://bn1w3qbkx2qaq" path="res://Assets/Enemies/Suicide Bomber/Body Parts/IMG_2352.PNG" id="27_body"]
+[ext_resource type="Texture2D" uid="uid://dn4vnukxo6cru" path="res://Assets/Enemies/Suicide Bomber/Body Parts/IMG_2354.PNG" id="28_head"]
+[ext_resource type="Resource" uid="uid://c5peirhj1iv6j" path="res://Resources/Enemy/bomber_outfit_brown.tres" id="29_fitbrown"]
+[ext_resource type="Resource" uid="uid://b26q02kqet4sa" path="res://Resources/Enemy/bomber_outfit_blue.tres" id="30_fitblue"]
+[ext_resource type="Resource" uid="uid://b26q02kqe0bcu" path="res://Resources/Enemy/bomber_outfit_grey.tres" id="31_fitgrey"]
+[ext_resource type="Texture2D" uid="uid://dtdekbcqfuqh2" path="res://Assets/Enemies/Suicide Bomber/Dynamite Ignite Effect/IMG_2360.PNG" id="32_ign1"]
+[ext_resource type="Texture2D" uid="uid://dxy33ujoapomu" path="res://Assets/Enemies/Suicide Bomber/Dynamite Ignite Effect/IMG_2361.PNG" id="33_ign2"]
+[ext_resource type="Texture2D" uid="uid://buful07owagjl" path="res://Assets/Enemies/Suicide Bomber/Dynamite Ignite Effect/IMG_2362.PNG" id="34_ign3"]
+[ext_resource type="Texture2D" uid="uid://dsx34u3xi0wpi" path="res://Assets/Enemies/Suicide Bomber/Dynamite Ignite Effect/IMG_2363.PNG" id="35_ign4"]
+[ext_resource type="Script" uid="uid://csclxtpmgilph" path="res://Scripts/Enemy/bomber_outfit.gd" id="36_outfitscript"]
+[ext_resource type="AudioStream" uid="uid://bmqlf8uxnv5kr" path="res://Sound/Efect/Atack/Suicide Bomber/BombFuseBurning.WAV" id="37_fusesound"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/SpeechBubble.tscn" id="38_bubble"]
+[ext_resource type="Script" uid="uid://bv850quxbqtrc" path="res://Scripts/Enemy/bomber_shout.gd" id="39_shout"]
+[ext_resource type="AudioStream" uid="uid://c03xua60pvrqu" path="res://Sound/Efect/Atack/Suicide Bomber/BomberScream1.WAV" id="40_scream1"]
+[ext_resource type="AudioStream" uid="uid://bnbeqbhnnbghu" path="res://Sound/Efect/Atack/Suicide Bomber/BomberScream2.WAV" id="41_scream2"]
+[ext_resource type="AudioStream" uid="uid://bcddvibxia3je" path="res://Sound/Efect/Atack/Suicide Bomber/BomberScream3.WAV" id="42_scream3"]
+[ext_resource type="AudioStream" uid="uid://bs5ik200y2qho" path="res://Sound/Efect/Atack/Suicide Bomber/BomberScream4.WAV" id="43_scream4"]
+[ext_resource type="Script" uid="uid://bys6ui274r4tj" path="res://Scripts/Enemy/bomber_scream.gd" id="44_screamer"]
+[ext_resource type="Script" uid="uid://cbiv72obcequn" path="res://Scripts/Enemy/blast_reaction.gd" id="45_blast"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="44_shadow"]
+[ext_resource type="Script" path="res://Scripts/World/Shadows/shadow_group.gd" id="45_shadowgroup"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 20.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_flash"]
+shader = ExtResource("9_flash")
+shader_parameter/flash = 0.0
+shader_parameter/flash_color = Color(1, 1, 1, 1)
+shader_parameter/outline_width = 0.0
+shader_parameter/outline_color = Color(1, 0, 0, 1)
+shader_parameter/tint = 0.0
+shader_parameter/tint_color = Color(1, 0, 0, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bodyhit"]
+size = Vector2(48, 34)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_headhit"]
+radius = 26.0
+
+[sub_resource type="Gradient" id="Gradient_lamp"]
+offsets = PackedFloat32Array(0, 0.28, 0.68, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.58, 1, 1, 1, 0.16, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_lamp"]
+gradient = SubResource("Gradient_lamp")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="Bomber" type="CharacterBody2D" unique_id=1480512307 groups=["enemies", "shadow_ground_root"]]
+collision_layer = 8
+collision_mask = 9
+motion_mode = 1
+script = ExtResource("1_enemy")
+speed = 180.0
+slash_range = 0.0
+contact_damage = 0.0
+steering_path = NodePath("BlastReaction")
+uses_regional_health = false
+
+[node name="Appearance" type="Node" parent="." unique_id=1899144356]
+script = ExtResource("14_look")
+outfits = Array[ExtResource("36_outfitscript")]([ExtResource("29_fitbrown"), ExtResource("30_fitblue"), ExtResource("31_fitgrey")])
+lamp_path = NodePath("../HeadAim/Lamp")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=335400625]
+position = Vector2(0, -20)
+shape = SubResource("CircleShape2D_body")
+
+[node name="Visual" type="Node2D" parent="." unique_id=562946095]
+
+[node name="Legs" type="Node2D" parent="Visual" unique_id=1855241221]
+
+[node name="LeftLeg" type="Sprite2D" parent="Visual/Legs" unique_id=344873604]
+material = SubResource("ShaderMaterial_flash")
+position = Vector2(-11.074, -11.639)
+scale = Vector2(0.113, 0.113)
+texture = ExtResource("25_lleg")
+centered = false
+offset = Vector2(-396, -901)
+
+[node name="RightLeg" type="Sprite2D" parent="Visual/Legs" unique_id=1848652124]
+material = SubResource("ShaderMaterial_flash")
+position = Vector2(10.396, -11.526)
+scale = Vector2(0.113, 0.113)
+texture = ExtResource("26_rleg")
+centered = false
+offset = Vector2(-586, -902)
+
+[node name="Body" type="Sprite2D" parent="Visual" unique_id=98308495]
+material = SubResource("ShaderMaterial_flash")
+scale = Vector2(0.113, 0.113)
+texture = ExtResource("27_body")
+centered = false
+offset = Vector2(-494, -1004)
+
+[node name="Health" type="Node" parent="." unique_id=474345417]
+script = ExtResource("4_health")
+max_health = 200.0
+free_owner_on_death = false
+
+[node name="HitReaction" type="Node" parent="." unique_id=1665063389]
+script = ExtResource("8_hitreact")
+flash_paths = Array[NodePath]([NodePath("../Visual/Body"), NodePath("../Visual/Legs/LeftLeg"), NodePath("../Visual/Legs/RightLeg"), NodePath("../HeadAim/Head")])
+
+[node name="BloodEmitter" type="Node" parent="." unique_id=630605611]
+script = ExtResource("10_blood")
+burst_scene = ExtResource("11_bsplash")
+
+[node name="Defeat" type="Node" parent="." unique_id=712739338]
+script = ExtResource("15_defeat")
+dead_eyes_path = NodePath("")
+smoke_scene = ExtResource("16_smoke")
+
+[node name="Fuse" type="Node2D" parent="." unique_id=739169241]
+script = ExtResource("23_fuse")
+explosion_scene = ExtResource("24_explosion")
+ignite_textures = Array[Texture2D]([ExtResource("32_ign1"), ExtResource("33_ign2"), ExtResource("34_ign3"), ExtResource("35_ign4")])
+ignite_modulate = Color(1.85, 1.5, 1.15, 1)
+
+[node name="FuseSound" type="AudioStreamPlayer2D" parent="Fuse" unique_id=1861080546]
+process_mode = 3
+stream = ExtResource("37_fusesound")
+volume_db = -1.0
+max_distance = 2400.0
+panning_strength = 0.6
+bus = &"Game"
+
+[node name="HeadPop" type="Node" parent="." unique_id=378539965]
+script = ExtResource("17_headpop")
+
+[node name="Escape" type="Node" parent="." unique_id=247654651]
+script = ExtResource("20_escape")
+drops_knife = false
+
+[node name="DeathFade" type="Node" parent="." unique_id=1284303771]
+script = ExtResource("12_deathfade")
+sprite_paths = Array[NodePath]([NodePath("../Visual/Body"), NodePath("../Visual/Legs/LeftLeg"), NodePath("../Visual/Legs/RightLeg"), NodePath("../Shadow")])
+death_tint = Color(0.86, 0.74, 0.72, 1)
+hold_time = 0.7
+fade_time = 1.2
+
+[node name="BodyHitbox" type="Area2D" parent="." unique_id=723709005]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("5_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BodyHitbox" unique_id=764640051]
+position = Vector2(0, -22)
+shape = SubResource("RectangleShape2D_bodyhit")
+
+[node name="HeadHitbox" type="Area2D" parent="." unique_id=530161148]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("5_hitbox")
+damage_multiplier = 1.5
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HeadHitbox" unique_id=419490283]
+position = Vector2(-1.1, -52.5)
+shape = SubResource("CircleShape2D_headhit")
+
+[node name="SquashPlayer" type="AnimationPlayer" parent="." unique_id=245771999]
+callback_mode_process = 0
+libraries/ = ExtResource("6_idle")
+script = ExtResource("7_squash")
+
+[node name="LegAnimator" type="Node" parent="." unique_id=777308424]
+script = ExtResource("13_leganim")
+left_leg_path = NodePath("../Visual/Legs/LeftLeg")
+right_leg_path = NodePath("../Visual/Legs/RightLeg")
+walk_reference_speed = 180.0
+
+[node name="FootprintEmitter" type="Node" parent="." unique_id=18504941]
+script = ExtResource("19_prints")
+foot_paths = Array[NodePath]([NodePath("../Visual/Legs/LeftLeg"), NodePath("../Visual/Legs/RightLeg")])
+step_distance = 24.0
+minimum_speed = 12.0
+print_scale = 0.95
+
+[node name="HeadAim" type="Node2D" parent="." unique_id=44948658]
+position = Vector2(-2.147, -55.82)
+script = ExtResource("2_lookat")
+mode = 1
+flip_node_path = NodePath("Head")
+
+[node name="Head" type="Sprite2D" parent="HeadAim" unique_id=1551827279]
+material = SubResource("ShaderMaterial_flash")
+scale = Vector2(0.113, 0.113)
+texture = ExtResource("28_head")
+centered = false
+offset = Vector2(-475, -510)
+script = ExtResource("3_softfollow")
+
+[node name="Lamp" type="PointLight2D" parent="HeadAim" unique_id=1281624310]
+position = Vector2(1, -18.1)
+color = Color(1, 0.93, 0.74, 1)
+energy = 0.8
+texture = SubResource("GradientTexture2D_lamp")
+texture_scale = 0.55
+
+[node name="Sway" type="Node" parent="." unique_id=1792170132]
+script = ExtResource("21_sway")
+sway_amount = 1.05
+sway_frequency = 0.95
+sway_frequency_jitter = 0.22
+sway_amount_jitter = 0.25
+hop_height = 18.0
+rotation_amount = 15.0
+hop_rotation_degrees = 12.0
+rotation_follow = 9.0
+
+[node name="Attack" type="Node" parent="." unique_id=1279182662]
+script = ExtResource("22_attack")
+
+[node name="Shout" type="Node" parent="." unique_id=2065058812]
+script = ExtResource("39_shout")
+bubble_scene = ExtResource("38_bubble")
+
+[node name="Scream" type="Node" parent="." unique_id=181723508]
+script = ExtResource("44_screamer")
+screams = Array[AudioStream]([ExtResource("40_scream1"), ExtResource("41_scream2"), ExtResource("42_scream3"), ExtResource("43_scream4")])
+
+[node name="Voice" type="AudioStreamPlayer2D" parent="Scream" unique_id=558583496]
+max_distance = 2400.0
+panning_strength = 0.6
+bus = &"Game"
+
+[node name="BlastReaction" type="Node" parent="." unique_id=944340310]
+script = ExtResource("45_blast")
+panics = false
+locks_after_escape = false
+inner_steering_path = NodePath("../Sway")
+
+[node name="ShadowGroup" type="Node2D" parent="."]
+script = ExtResource("45_shadowgroup")
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("44_shadow")
+source_sprite_path = NodePath("../Visual/Body")
+
+[node name="ShadowCaster" type="Node2D" parent="HeadAim/Head"]
+script = ExtResource("44_shadow")
+source_sprite_path = NodePath("..")
+ground_root_mode = 1
+auto_ground_anchor = false

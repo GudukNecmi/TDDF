@@ -1,7 +1,6 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" uid="uid://cglg45g7le8qo" path="res://Scripts/World/bone_prop.gd" id="1_boneprop"]
-[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="2_shadow"]
 [ext_resource type="Script" uid="uid://bm3ln8gbx37l4" path="res://Scripts/World/prop_sway.gd" id="3_sway"]
 [ext_resource type="Script" uid="uid://da4exs3wtf10i" path="res://Scripts/World/prop_art.gd" id="4_art"]
 [ext_resource type="Script" uid="uid://dtnfb87bh7qke" path="res://Scripts/World/prop_touch.gd" id="5_touch"]
@@ -30,12 +29,6 @@ hide_on_kick = false
 launch_offset = Vector2(0, -4)
 reference_speed = 220.0
 power_range = Vector2(0.7, 1.35)
-
-[node name="Shadow" type="Sprite2D" parent="."]
-script = ExtResource("2_shadow")
-shadow_scale = Vector2(72, 25)
-shadow_offset = Vector2(4, -4)
-shadow_opacity = 0.3
 
 [node name="Sway" type="Node2D" parent="."]
 script = ExtResource("3_sway")

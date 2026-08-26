@@ -16,6 +16,11 @@ extends Node
 ## node that is shown or hidden. This component owns only the *decision* and the
 ## fade, which is why switching it off leaves the player permanently armed
 ## rather than permanently broken.
+##
+## [b]It defers to the death.[/b] While [PlayerDeathSequence] is busy the weapon is
+## never drawn, whichever zone the body happens to be lying in - see
+## [method _is_dead]. That is what stops a man killed in his sleep standing the
+## night up with a gun in his hand.
 
 ## Emitted as the player is disarmed or handed their weapon back.
 signal loadout_changed(unarmed: bool)
@@ -33,6 +38,13 @@ signal loadout_changed(unarmed: bool)
 ## of their own, running whether they are visible or not, so they are already
 ## mid-stride the instant they appear.
 @export var hands_path: NodePath = ^"../Visual/Hands"
+## The death that overrules this one. While it is busy the player is on the
+## ground, and a body on the ground is never handed its weapon back - see
+## [method _apply].
+##
+## Left unresolved - a test scene with no death in it - the loadout decides on
+## its own, exactly as it did before this existed.
+@export var death_path: NodePath = ^"../DeathSequence"
 
 @export_group("Timing")
 ## How long the weapon takes to shrink away to the belt on the way in.
@@ -45,6 +57,7 @@ signal loadout_changed(unarmed: bool)
 
 @onready var _body: Node2D = get_node_or_null(body_path) as Node2D
 @onready var _hands: CanvasItem = get_node_or_null(hands_path) as CanvasItem
+@onready var _death: PlayerDeathSequence = get_node_or_null(death_path) as PlayerDeathSequence
 
 var _unarmed: bool = false
 var _hands_tween: Tween
@@ -122,10 +135,30 @@ func _apply(instant: bool) -> void:
 	if weapon != null:
 		if _unarmed and weapon.has_method(&"stow"):
 			weapon.call(&"stow", weapon_time)
-		elif not _unarmed and weapon.has_method(&"unstow"):
+		elif not _unarmed and not _is_dead() and weapon.has_method(&"unstow"):
 			weapon.call(&"unstow", weapon_time)
 
 	_show_hands(_unarmed, instant)
+
+
+## Whether the player is in the middle of dying, in which case the weapon is not
+## drawn whatever the zone says.
+##
+## [b]It suppresses the draw and nothing else.[/b] Putting a weapon away is always
+## right - it is what the death itself asks for - and the zone decision and the
+## bare hands go on exactly as before, so this is still the one node that knows
+## what the player is holding and still knows the right answer the moment the
+## death lets go: [PlayerDeathSequence] calls [method refresh] as it finishes, by
+## which point it is no longer busy and the weapon comes back with the rest of
+## the player.
+##
+## It is guarded here rather than at each caller because the draw is asked for
+## from several - the zone crossing every frame, a weapon rebuilt by the
+## [WeaponMount] as a borrowed throwable is handed back, a night ending - and a
+## death can land on any of them. One guard where they all arrive is why none of
+## them can put a gun back in a dead man's hand.
+func _is_dead() -> bool:
+	return _death != null and _death.is_busy()
 
 
 ## Whatever is in the player's hands right now.

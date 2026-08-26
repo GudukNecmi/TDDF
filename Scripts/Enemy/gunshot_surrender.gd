@@ -47,8 +47,23 @@ signal scared(enemy: Node2D)
 ## pixels. Point-blank - this is a man flinching at a barrel beside his head, not
 ## everyone within earshot.
 @export var scare_radius: float = 140.0
-## How often a shot that close makes that enemy give up.
+## How often a shot that close makes that enemy give up, [b]when there is no
+## [MoraleDirector] in the world[/b].
+##
+## It is the fallback and nothing else. Ordinarily this node finds nobody and rolls
+## nothing: it reports the near miss to the director - see
+## [member asks_the_morale_director] - which owns the odds, owns the "how many of
+## them are left" curve they are drawn from, and owns the rarer chance that the man
+## loses his temper instead of his nerve. This flat number is what a scene without
+## that director falls back to, so taking the director out leaves the behaviour the
+## game had before there was one rather than leaving enemies that never react.
 @export_range(0.0, 1.0, 0.01) var chance: float = 0.2
+## Whether a near miss is handed to the [MoraleDirector] rather than rolled here.
+##
+## On. This node's job is to notice that a shot went past somebody - which is a fact
+## about the weapon, and is why it lives out here beside the gun rather than on the
+## enemy. What that is worth is a fact about the fight, and belongs to the director.
+@export var asks_the_morale_director: bool = true
 ## Whether the rule is live at all. Off leaves every shot a shot.
 @export var enabled: bool = true
 
@@ -122,6 +137,17 @@ func _on_fired() -> void:
 	var enemy := EnemyTargeting.nearest(self, _weapon.global_position, scare_radius)
 	if enemy == null:
 		return
+
+	# The near miss is reported, and what it is worth is somebody else's answer. The
+	# director refuses a man who is already down, running, berserk or dead, so
+	# nothing about who is a fair thing to frighten is decided twice.
+	if asks_the_morale_director:
+		var director := MoraleDirector.get_active(self)
+		if director != null:
+			if director.check(enemy, MoraleDirector.Source.NEAR_MISS):
+				scared.emit(enemy)
+			return
+
 	if randf() >= chance:
 		return
 

@@ -1,0 +1,55 @@
+[gd_scene load_steps=22 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Dev/shadow_coverage_smoke.gd" id="1_smoke"]
+[ext_resource type="PackedScene" uid="uid://bqgtyn0mdbo7d" path="res://Scenes/World/World.tscn" id="2_world"]
+[ext_resource type="PackedScene" uid="uid://cpvswf25xhxh" path="res://Scenes/Enemy/Enemy.tscn" id="3_enemy"]
+[ext_resource type="PackedScene" uid="uid://cgotikbomber" path="res://Scenes/Enemy/Bomber.tscn" id="4_bomber"]
+[ext_resource type="PackedScene" uid="uid://cvpvthdqu1ii2" path="res://Scenes/Weapons/Revolver.tscn" id="5_revolver"]
+[ext_resource type="PackedScene" uid="uid://jmnenfygn40k" path="res://Scenes/Weapons/LeverActionRifle.tscn" id="6_lever"]
+[ext_resource type="PackedScene" uid="uid://b2vcwi7dm7w5e" path="res://Scenes/Weapons/Shotgun.tscn" id="7_shotgun"]
+[ext_resource type="PackedScene" path="res://Scenes/Weapons/Knife.tscn" id="8_knife"]
+[ext_resource type="PackedScene" path="res://Scenes/Weapons/Bone.tscn" id="9_bone"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Cactus.tscn" id="10_cactus"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Bush.tscn" id="11_bush"]
+[ext_resource type="PackedScene" uid="uid://ctxjyl7xbxk4k" path="res://Scenes/World/Props/Desert/Regions/DustCampTent.tscn" id="12_tent"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Regions/TheDeadStake.tscn" id="13_stake"]
+[ext_resource type="PackedScene" uid="uid://c5peorm102u6p" path="res://Scenes/World/HorseCart.tscn" id="14_cart"]
+[ext_resource type="PackedScene" uid="uid://cgotikcamp" path="res://Scenes/World/Camp.tscn" id="15_camp"]
+[ext_resource type="PackedScene" uid="uid://c5pehphwyiu8a" path="res://Scenes/World/AmmoCrate.tscn" id="16_crate"]
+[ext_resource type="PackedScene" uid="uid://doswnextrckl" path="res://Scenes/World/RewardChest.tscn" id="17_chest"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Lizard.tscn" id="18_lizard"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Pickups/KnifePickup.tscn" id="19_knifepick"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Pickups/BonePickup.tscn" id="20_bonepick"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Pickups/Gem.tscn" id="21_gem"]
+
+[node name="ShadowCoverageSmoke" type="Node2D"]
+script = ExtResource("1_smoke")
+shadowed_scenes = Dictionary[StringName, PackedScene]({
+&"Enemy A": ExtResource("3_enemy"),
+&"Enemy B": ExtResource("3_enemy"),
+&"Enemy C": ExtResource("3_enemy"),
+&"Bomber": ExtResource("4_bomber"),
+&"Revolver": ExtResource("5_revolver"),
+&"Lever action rifle": ExtResource("6_lever"),
+&"Shotgun": ExtResource("7_shotgun"),
+&"Knife": ExtResource("8_knife"),
+&"Bone": ExtResource("9_bone"),
+&"Cactus": ExtResource("10_cactus"),
+&"Bush": ExtResource("11_bush"),
+&"Dust Camp tent": ExtResource("12_tent"),
+&"The Dead stake": ExtResource("13_stake"),
+&"Wagon": ExtResource("14_cart"),
+&"Camp wagon": ExtResource("15_camp"),
+&"Ammo crate": ExtResource("16_crate"),
+&"Reward chest": ExtResource("17_chest")
+})
+shadowless_scenes = Dictionary[StringName, PackedScene]({
+&"Lizard": ExtResource("18_lizard"),
+&"Knife pickup": ExtResource("19_knifepick"),
+&"Bone pickup": ExtResource("20_bonepick"),
+&"Gem loot": ExtResource("21_gem")
+})
+world_scene = ExtResource("2_world")
+world_shadowed = Dictionary[StringName, NodePath]({
+&"Player": NodePath("Player")
+})

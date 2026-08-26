@@ -1,12 +1,12 @@
-[gd_resource type="Resource" script_class="MapCatalog" load_steps=8 format=3]
+[gd_resource type="Resource" script_class="MapCatalog" format=3 uid="uid://drk6ryrr7ba72"]
 
-[ext_resource type="Script" path="res://Scripts/World/map_catalog.gd" id="1_catalog"]
-[ext_resource type="Script" path="res://Scripts/World/map_definition.gd" id="2_mapdef"]
-[ext_resource type="Resource" path="res://Resources/Maps/map_desert.tres" id="3_desert"]
-[ext_resource type="Resource" path="res://Resources/Maps/map_forest.tres" id="4_forest"]
-[ext_resource type="Resource" path="res://Resources/Maps/map_town.tres" id="5_town"]
-[ext_resource type="Resource" path="res://Resources/Maps/map_saloon.tres" id="6_saloon"]
-[ext_resource type="Resource" path="res://Resources/Maps/map_camp.tres" id="7_camp"]
+[ext_resource type="Script" uid="uid://c0ypo8heb4g5f" path="res://Scripts/World/map_catalog.gd" id="1_catalog"]
+[ext_resource type="Script" uid="uid://piev1mq2t3rq" path="res://Scripts/World/map_definition.gd" id="2_mapdef"]
+[ext_resource type="Resource" uid="uid://bnukpomjbbgb8" path="res://Resources/Maps/map_desert.tres" id="3_desert"]
+[ext_resource type="Resource" uid="uid://7p85dedeitk3" path="res://Resources/Maps/map_forest.tres" id="4_forest"]
+[ext_resource type="Resource" uid="uid://cn88dmejvonb7" path="res://Resources/Maps/map_town.tres" id="5_town"]
+[ext_resource type="Resource" uid="uid://cqt7kt8lpkgs6" path="res://Resources/Maps/map_saloon.tres" id="6_saloon"]
+[ext_resource type="Resource" uid="uid://cxdtkmwng1el2" path="res://Resources/Maps/map_camp.tres" id="7_camp"]
 
 [resource]
 script = ExtResource("1_catalog")

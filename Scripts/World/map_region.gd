@@ -83,6 +83,28 @@ extends Resource
 ## three parts and one divided into nine both run 0 to 1, so nothing anywhere
 ## counts regions or knows how many a map has.
 @export_range(0.0, 1.0, 0.01) var difficulty: float = 0.0
+## What an ordinary enemy standing in this part of the map is worth, in hit points.
+##
+## [b]This is the whole of a normal enemy's toughness, and it is the only thing that
+## decides it.[/b] It is written onto the pool as the enemy is built - see
+## [method RoundScaling.apply_to] - as a value rather than as a multiplier, so
+## nothing before it and nothing after it can make the number anything other than
+## what is authored here. The round does not raise it, the Danger number does not
+## raise it, and how far the player has got does not raise it: a man in region C is
+## worth exactly this whether he is met in the first minute of a run or the last.
+##
+## Deliberately a figure rather than a fraction, unlike [member difficulty] beside
+## it. Difficulty is read between two ends by whoever is asking, which is right for
+## a crowd size that a map should be free to retune; a health pool is a number the
+## designer wants to be able to read off the file and recognise in the game.
+##
+## 0 - the default - leaves an enemy at whatever its own scene was authored with,
+## which is what every map that has not been given regional health does.
+##
+## [b]Bosses are not this.[/b] A boss's pool is built from its scene's authored
+## figure and its bounty - see [method MiniBossDirector.get_boss_health_multiplier] -
+## and is untouched by anything here.
+@export var enemy_base_health: float = 0.0
 
 @export_group("Arriving")
 ## Where in the world the player stands when they arrive here, in world pixels.
@@ -129,6 +151,12 @@ func get_scatter_layers() -> Array[ScatterLayer]:
 ## something every caller can lerp between.
 func get_difficulty() -> float:
 	return clampf(difficulty, 0.0, 1.0)
+
+
+## What an ordinary enemy here is worth, or 0 for a region that has not been given a
+## figure - which every caller reads as "leave the enemy at its scene's own health".
+func get_enemy_base_health() -> float:
+	return maxf(enemy_base_health, 0.0)
 
 
 ## What a poster or a tile writes for this region. Falls back to the id, so a

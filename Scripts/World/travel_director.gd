@@ -183,6 +183,10 @@ enum State {
 ## Group every enemy joins, used to clear the road of anything left standing when a
 ## journey ends. The world's own group, not one of travel's.
 @export var enemy_group: StringName = &"enemies"
+## Group the player's own [Health] is found by, so the road can be put back if they
+## are killed on it - see [method _on_player_died]. The world's own group, the same
+## one [DangerDirector] and [SleepDirector] follow the player's death through.
+@export var health_group: StringName = &"player_health"
 
 @export_group("Stopping for the day")
 ## Whether the road stops at the end of every day it spends.
@@ -245,6 +249,18 @@ enum State {
 ## Whether the world is actually rebuilt on arrival. Off makes the journey report
 ## itself and change nothing, which is what a test harness wants.
 @export var reload_scene: bool = true
+## Whether the world is put back to how it was found as the ride begins, behind the
+## black, before a single day of the journey is spent.
+##
+## On, and it is not made redundant by [member reload_scene]. A journey is not one
+## cut to somewhere else: its days are rolled against [member travel_events] and an
+## ambush is fought [i]in this world[/i], around the player, before the arrival ever
+## rebuilds anything - so without this the road's fights are had among the corpses,
+## the dropped knives and the tracks of the region the player is leaving. It is
+## [WorldReset]'s doing rather than this node's, the same request looking for
+## trouble makes on its own walk; a world with no reset in it rides out exactly as it
+## did.
+@export var rebuilds_the_world: bool = true
 ## Gap between the player confirming and the fade starting, so the press is seen
 ## to land.
 @export var start_delay: float = 0.15
@@ -271,6 +287,10 @@ var _enemies_left: int = 0
 ## survives the screen going up and coming down again - that is the whole of what
 ## "continue automatically through the following days" means.
 var _hurrying: bool = false
+## The player's pool while a ride is being made, so the road can be put back if they
+## are killed on it. Held rather than looked up each time for the same reason
+## [AmbushWaveDirector] holds it: the connection has to be droppable again.
+var _player_health: Health
 
 
 ## Joined here rather than in [method Node._ready] so the director is findable,
@@ -300,6 +320,7 @@ func _ready() -> void:
 ## half again its speed.
 func _exit_tree() -> void:
 	_set_hurrying(false)
+	_drop_player_death()
 
 
 ## The director the world should talk to. Null means this world has none, which
@@ -487,7 +508,26 @@ func _ride(days: int) -> void:
 	_days_total = maxi(days, 0)
 	_days_done = 0
 	_state = State.ON_THE_ROAD
+	# Before the first day is rolled, so an ambush on the very first one is fought in a
+	# world that has already been put back rather than in the one being left.
+	if rebuilds_the_world:
+		_rebuild_the_world()
+	# Followed from the moment the ride actually begins, because from here on the road
+	# can put the player in front of somebody who can kill them.
+	_follow_player_death()
 	_next_day()
+
+
+## Hands the world back empty for the road to be ridden through.
+##
+## [b]Nothing about what a clean world is lives here.[/b] The one call is
+## [method WorldReset.reset], the same request looking for trouble makes on its walk
+## - see [method DangerDirector._rebuild_the_world] - so there is one answer to "put
+## this world back" in the project and both are asking it.
+func _rebuild_the_world() -> void:
+	var reset := WorldReset.get_active(self)
+	if reset != null:
+		reset.reset()
 
 
 ## One day of the journey, ridden in three beats: the road, the roll, and whatever
@@ -983,7 +1023,8 @@ func _spawn_encounter(event: TravelEvent) -> int:
 
 ## The player's own health is deliberately not looked at here. Dying on the road is
 ## the player's death sequence exactly as it is in the arena, and it carries them
-## home - see [method _on_player_died].
+## home; what the road does about it is [method _on_player_died], which follows that
+## same pool by group rather than by walking a body's children.
 func _find_health(enemy: Node) -> Health:
 	for node: Node in enemy.find_children("*", "Health", true, false):
 		var health := node as Health
@@ -1017,6 +1058,98 @@ func _end_encounter() -> void:
 		_resume_road()
 		return
 	fade.fade_out(maxf(encounter_fade_time, 0.0), _resume_road)
+
+
+## [b]A death on the road ends the road.[/b] Dying is the player's own death sequence
+## exactly as it is in the arena and it carries them home to the base - so without
+## this the journey is left standing in every one of its parts: the ambush going on
+## placing men around a body that is no longer there, the black or the day's stop
+## still up over a player being put back together several thousand pixels away, the
+## game still running at fast travel's speed, and the session still claiming somebody
+## is on the road - which is a dead TRAVEL button for the rest of the game, because
+## [method RunSessionState.begin_travel] refuses a journey that is already under way.
+##
+## [b]Nothing here is new machinery.[/b] Each line is the same call the road already
+## makes when it leaves that part of itself behind - the ambush stopped as
+## [method _resume_road] stops it, the dial handed back as [method _arrive] hands it
+## back, the ride taken off the screen through the presentation's own
+## [method TravelLoading.stop], and the journey put back through
+## [method RunSessionState.abandon_travel], which is exactly what backing out of the
+## travel screen does.
+##
+## [signal travel_cancelled] is deliberately [i]not[/i] emitted. That signal means the
+## player changed their mind and is standing at the waggon again - [CampMenu] puts its
+## own panel back up on it - and a man being carried home dead is not standing
+## anywhere. The destination is left marked, so the ride is still there to be taken
+## when the next run reaches this region.
+func _on_player_died() -> void:
+	if _state == State.IDLE:
+		return
+
+	# Put back first, so nothing below can be read as a journey still under way - the
+	# travel screen closing calls [method cancel], which is a no-op once this is IDLE.
+	_state = State.IDLE
+	_drop_player_death()
+
+	_release_ambush()
+	_set_hurrying(false)
+	_close_day_stop()
+	_close_travel_screen()
+	_stop_loading()
+	get_tree().paused = false
+	_abandon_on_session()
+
+
+## The road stops listening for the end of a fight it will never see, and leaves the
+## ambush itself alone.
+##
+## [b]It is deliberately not [method _stop_ambush].[/b] The ambush has its own answer to
+## the player going down - the men still standing break and run, see
+## [method AmbushWaveDirector._on_player_died] - and stopping it here would take that
+## answer away, because [method AmbushWaveDirector.stop] drops the very death watch that
+## would have played it. Whichever of the two handlers the signal reaches first, the
+## field empties.
+##
+## Dropping [signal AmbushWaveDirector.cleared] matters just as much: the men leaving
+## will report the ambush cleared, and the road must not read that as a fight it
+## survived and pick itself back up around a player who is no longer there.
+func _release_ambush() -> void:
+	var director := get_node_or_null(ambush_path) as AmbushWaveDirector
+	if director == null:
+		director = AmbushWaveDirector.get_active(self)
+	if director != null and director.cleared.is_connected(_on_ambush_cleared):
+		director.cleared.disconnect(_on_ambush_cleared)
+
+
+## The travel screen taken down, if one is still up. It reports a confirmation by
+## hiding rather than closing, so on most of the road there is nothing to do here.
+func _close_travel_screen() -> void:
+	if _menu != null and is_instance_valid(_menu) and _menu.has_method(&"close"):
+		_menu.call(&"close")
+
+
+## The ride itself taken off the screen, through the presentation's own way back.
+func _stop_loading() -> void:
+	var loading := get_node_or_null(loading_path)
+	if loading != null and loading.has_method(&"stop"):
+		loading.call(&"stop")
+
+
+func _follow_player_death() -> void:
+	_drop_player_death()
+	_player_health = get_tree().get_first_node_in_group(health_group) as Health
+	if _player_health != null and not _player_health.died.is_connected(_on_player_died):
+		_player_health.died.connect(_on_player_died)
+
+
+## Dropped rather than left one-shot, because the player's pool outlives their death -
+## they are revived into the same [Health] - so a connection left behind would still be
+## listening at the journey after next.
+func _drop_player_death() -> void:
+	if _player_health != null and is_instance_valid(_player_health) \
+			and _player_health.died.is_connected(_on_player_died):
+		_player_health.died.disconnect(_on_player_died)
+	_player_health = null
 
 
 ## Back onto the road after an event, however it ended. The world is frozen again,
@@ -1064,8 +1197,10 @@ func _arrive(days: int) -> void:
 		return
 
 	# The ride is over, so the game goes back to its ordinary speed before anything
-	# is rebuilt around it.
+	# is rebuilt around it, and the road stops listening for a death it can no longer
+	# be the one to put back.
 	_set_hurrying(false)
+	_drop_player_death()
 
 	if _session != null and _session.has_method(&"complete_travel"):
 		_session.call(&"complete_travel", days)

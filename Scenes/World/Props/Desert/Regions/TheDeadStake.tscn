@@ -1,25 +1,21 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://bir1hps5elon4" path="res://Scripts/World/prop_shadow.gd" id="1_shadow"]
 [ext_resource type="Script" uid="uid://da4exs3wtf10i" path="res://Scripts/World/prop_art.gd" id="2_art"]
 [ext_resource type="Script" uid="uid://cuqueuaya768u" path="res://Scripts/World/prop_footing.gd" id="3_footing"]
 [ext_resource type="Texture2D" uid="uid://bx7b4dvd7155s" path="res://Assets/Maps/Desert/The Dead/Props (1).PNG" id="4_stake1"]
 [ext_resource type="Texture2D" uid="uid://b8sili45jfirg" path="res://Assets/Maps/Desert/The Dead/Props (2).PNG" id="5_stake2"]
 [ext_resource type="Texture2D" uid="uid://bm5sgq2jut1br" path="res://Assets/Maps/Desert/The Dead/Props (3).PNG" id="6_stake3"]
 [ext_resource type="Texture2D" uid="uid://c4v4nwnksc5np" path="res://Assets/Maps/Desert/The Dead/Props (4).PNG" id="7_stake4"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_stakebase"]
 resource_local_to_scene = true
 size = Vector2(27, 27)
 
 [node name="TheDeadStake" type="StaticBody2D" groups=["desert_prop", "region_prop"]]
+scale = Vector2(0.8, 0.8)
 collision_layer = 32
 collision_mask = 0
-
-[node name="Shadow" type="Sprite2D" parent="."]
-script = ExtResource("1_shadow")
-shadow_scale = Vector2(150, 44)
-shadow_offset = Vector2(0, -8)
 
 [node name="Art" type="Sprite2D" parent="."]
 script = ExtResource("2_art")
@@ -36,3 +32,9 @@ width_units = 0.6
 width_fraction = 0.8
 art_path = NodePath("../Art")
 holds_world_size = true
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("90_shadow")
+shadow_pull = 36.0
+cast_mode = 1
+source_sprite_path = NodePath("../Art")

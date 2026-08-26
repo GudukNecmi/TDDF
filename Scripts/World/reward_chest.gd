@@ -278,7 +278,15 @@ func _place_items() -> int:
 		var angle := TAU * (float(index) + randf() * 0.6) / float(maxi(_items, 1))
 		var reach := randf_range(minf(item_spread.x, item_spread.y), maxf(item_spread.x, item_spread.y))
 		container.add_child(item)
-		item.global_position = global_position + Vector2.RIGHT.rotated(angle) * reach
+		item.global_position = global_position
+		# Thrown out where the item knows how to be thrown, and simply put down where it
+		# does not. Asked of the item by method rather than by type, so what a chest pays
+		# out can be changed to something that only knows how to lie there without this
+		# line becoming a case - see [method LootGem.burst].
+		if item.has_method(&"burst"):
+			item.call(&"burst", angle, reach)
+		else:
+			item.global_position = global_position + Vector2.RIGHT.rotated(angle) * reach
 		item.reset_physics_interpolation()
 		placed += 1
 	return placed

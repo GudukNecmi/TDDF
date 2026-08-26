@@ -132,21 +132,41 @@ func _unhandled_input(event: InputEvent) -> void:
 ## go - a gesture they make - so a body being carried home after it has died
 ## should not make it. Everything else about the transition is unchanged, which is
 ## why this is one argument rather than a second path through the sequence.
-func teleport(silent: bool = false) -> void:
+##
+## [param use_portal] is the same idea for the contextual branch above.
+##
+## [param to] overrides [member destination_id] for this one journey, so a door
+## somewhere in the world can send the player to its own [TeleportDestination]
+## without a second teleporter existing on the body. Left empty - which is every
+## caller that is answering the B key - this reads the node's own destination
+## exactly as it always did. See [TestMapGate], which is nothing but a place, an id
+## and this call.
+## [b]Only a press can start a run.[/b] The portal branch is what makes B mean two
+## things, and it means them because the *player* chose to stand there; a caller that
+## is carrying a body rather than answering a key must be able to refuse it, or a
+## death in the pit at the foot of the base raises the map screen over a corpse and
+## never travels anywhere. Left true this behaves exactly as it always did.
+##
+## Returns whether a journey home actually began - false for a press that started a
+## run instead, and false when there was nothing to travel to or a transition was
+## already under way. [b]A caller waiting on [signal teleported] has to know[/b]: on
+## every false path that signal is never emitted, and the death sequence waited on it
+## for good.
+func teleport(silent: bool = false, use_portal: bool = true, to: StringName = &"") -> bool:
 	if _teleporting:
-		return
+		return false
 
-	if portal_starts_run and _body != null:
+	if use_portal and portal_starts_run and _body != null:
 		var portal := RunPortal.get_active(self)
 		if portal != null and portal.is_inside(_body):
 			_teleporting = true
 			_play_snap(silent)
 			portal.start_run()
-			return
+			return false
 
-	var destination := TeleportDestination.get_by_id(self, destination_id)
+	var destination := TeleportDestination.get_by_id(self, to if to != &"" else destination_id)
 	if destination == null or _body == null:
-		return
+		return false
 
 	_teleporting = true
 
@@ -159,6 +179,7 @@ func teleport(silent: bool = false) -> void:
 	# their own movement right up to the moment they vanish.
 	var timer := get_tree().create_timer(travel_time, true, false, true)
 	timer.timeout.connect(_arrive.bind(destination))
+	return true
 
 
 ## Leaving the run takes the soundtrack with it: the arena track goes down and the

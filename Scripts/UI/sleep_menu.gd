@@ -122,8 +122,8 @@ const GROUP := &"sleep_menu"
 @export_group("Length buttons")
 ## How large the numbers on them are.
 @export var duration_font_size: int = 26
-@export var duration_font_colour := Color(0.84, 0.76, 0.73, 1.0)
-@export var duration_hover_colour := Color(1.0, 0.9, 0.87, 1.0)
+@export var duration_font_colour := Color(0.16, 0.06, 0.05, 1.0)
+@export var duration_hover_colour := Color(0.45, 0.07, 0.06, 1.0)
 ## The game's own bordered dark-red buttons, dropped in from the scene so this screen
 ## is styled where every other one is.
 @export var button_normal: StyleBox

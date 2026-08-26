@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://Scripts/World/ground_pickup.gd" id="1_pickup"]
 [ext_resource type="PackedScene" path="res://Scenes/Weapons/Knife.tscn" id="2_knife"]
 [ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="3_prompt"]
+[ext_resource type="Shader" uid="uid://bdokp0457hj52" path="res://Shaders/hit_flash.gdshader" id="4_outline"]
 
 [node name="KnifePickup" type="Node2D"]
 script = ExtResource("1_pickup")
@@ -15,6 +16,10 @@ reach_offset = Vector2(0, 0)
 moving_method = &"is_flying"
 prompt_path = NodePath("Prompt")
 frees_host = true
+outlines_in_reach = true
+outline_shader = ExtResource("4_outline")
+outline_width = 1.5
+outline_color = Color(1, 0.13, 0.1, 1)
 
 [node name="Prompt" type="Node2D" parent="."]
 top_level = true
@@ -24,14 +29,14 @@ head_offset = Vector2(30, -70)
 prompt_scale = 0.55
 
 [node name="Label" type="Label" parent="Prompt"]
-offset_left = -170.0
-offset_top = -24.0
-offset_right = 170.0
-offset_bottom = 24.0
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
 theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
 theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 9
-theme_override_font_sizes/font_size = 34
-text = "E — PICK UP KNIFE"
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "E"
 horizontal_alignment = 1
 vertical_alignment = 1

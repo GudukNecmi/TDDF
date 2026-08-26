@@ -49,6 +49,9 @@
 [ext_resource type="Script" path="res://Scripts/UI/crosshair_ammo.gd" id="35_crossammo"]
 [ext_resource type="Texture2D" path="res://Assets/Cursor/DefaultCursor.PNG" id="35_cursorart"]
 [ext_resource type="Texture2D" path="res://Assets/Cursor/OnButtonCursor.PNG" id="35_cursorhover"]
+[ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="200_uipanel"]
+[ext_resource type="Texture2D" uid="uid://b5tbx3ndtm3yn" path="res://Assets/UI/UI Screens/Button1.PNG" id="200_uibtn1"]
+[ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="200_uibtn2"]
 [ext_resource type="Script" uid="uid://b0kr6l6fq3exh" path="res://Scripts/UI/wanted_board_menu.gd" id="36_wantedmenu"]
 [ext_resource type="PackedScene" uid="uid://dton60x7yqk5r" path="res://Scenes/UI/WantedPoster.tscn" id="37_poster"]
 [ext_resource type="Script" uid="uid://b2ncgjkts2ivm" path="res://Scripts/UI/dev_settings_menu.gd" id="38_devmenu"]
@@ -77,6 +80,7 @@
 [ext_resource type="Script" uid="uid://bydqyfu3iolnl" path="res://Scripts/UI/day_transition_dial.gd" id="68_swch0"]
 [ext_resource type="Script" path="res://Scripts/UI/sleep_menu.gd" id="69_sleep"]
 [ext_resource type="Script" path="res://Scripts/UI/spin_multiplier.gd" id="70_spinmult"]
+[ext_resource type="Script" uid="uid://c3il3h5r4abul" path="res://Scripts/Dev/test_spawn_menu.gd" id="71_testmenu"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("29_vignette")
@@ -127,151 +131,113 @@ shader = ExtResource("3_blur")
 shader_parameter/blur_amount = 3.2
 shader_parameter/dim = 0.72
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_hover"]
 content_margin_left = 28.0
 content_margin_top = 16.0
 content_margin_right = 28.0
 content_margin_bottom = 16.0
-bg_color = Color(0.15, 0.028, 0.032, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.85, 0.12, 0.11, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
+texture = ExtResource("200_uibtn2")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_pressed"]
 content_margin_left = 28.0
 content_margin_top = 16.0
 content_margin_right = 28.0
 content_margin_bottom = 16.0
-bg_color = Color(0.34, 0.045, 0.045, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.24, 0.2, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sleep_panel"]
+texture = ExtResource("200_uibtn2")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+modulate_color = Color(0.76, 0.7, 0.6, 1)
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_sleep_panel"]
 content_margin_left = 34.0
 content_margin_top = 22.0
 content_margin_right = 34.0
 content_margin_bottom = 22.0
-bg_color = Color(0.09, 0.03, 0.03, 0.9)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.82, 0.1, 0.1, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_normal"]
+texture = ExtResource("200_uipanel")
+region_rect = Rect2(92, 26, 2800, 2102)
+texture_margin_left = 70.0
+texture_margin_top = 70.0
+texture_margin_right = 70.0
+texture_margin_bottom = 70.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_normal"]
 content_margin_left = 28.0
 content_margin_top = 16.0
 content_margin_right = 28.0
 content_margin_bottom = 16.0
-bg_color = Color(0.055, 0.02, 0.024, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.42, 0.055, 0.06, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
+texture = ExtResource("200_uibtn1")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_upgradeblur"]
 shader = ExtResource("3_blur")
 shader_parameter/blur_amount = 2.8
 shader_parameter/dim = 0.66
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_upgrade_panel"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_upgrade_panel"]
 content_margin_left = 44.0
 content_margin_top = 32.0
 content_margin_right = 44.0
 content_margin_bottom = 32.0
-bg_color = Color(0.04, 0.016, 0.018, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.42, 0.055, 0.06, 1)
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_disabled"]
+texture = ExtResource("200_uipanel")
+region_rect = Rect2(92, 26, 2800, 2102)
+texture_margin_left = 70.0
+texture_margin_top = 70.0
+texture_margin_right = 70.0
+texture_margin_bottom = 70.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_disabled"]
 content_margin_left = 28.0
 content_margin_top = 16.0
 content_margin_right = 28.0
 content_margin_bottom = 16.0
-bg_color = Color(0.04, 0.03, 0.03, 0.8)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.22, 0.09, 0.09, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_region_normal"]
+texture = ExtResource("200_uibtn1")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+modulate_color = Color(0.55, 0.52, 0.48, 0.8)
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_region_normal"]
 content_margin_left = 18.0
 content_margin_top = 14.0
 content_margin_right = 18.0
 content_margin_bottom = 14.0
-bg_color = Color(0.055, 0.02, 0.024, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.42, 0.055, 0.06, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_region_hover"]
+texture = ExtResource("200_uibtn1")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_region_hover"]
 content_margin_left = 18.0
 content_margin_top = 14.0
 content_margin_right = 18.0
 content_margin_bottom = 14.0
-bg_color = Color(0.15, 0.028, 0.032, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.85, 0.12, 0.11, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_region_selected"]
+texture = ExtResource("200_uibtn2")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_region_selected"]
 content_margin_left = 18.0
 content_margin_top = 14.0
 content_margin_right = 18.0
 content_margin_bottom = 14.0
-bg_color = Color(0.34, 0.045, 0.045, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(1, 0.32, 0.26, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
+texture = ExtResource("200_uibtn2")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+modulate_color = Color(1, 0.84, 0.66, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_027v8"]
 bg_color = Color(0.1, 0.03, 0.03, 0.18)
 border_width_left = 3
@@ -635,10 +601,10 @@ theme_override_constants/separation = 14
 
 [node name="ContinueButton" type="Button" parent="EndScreen/Menu/Buttons" unique_id=666042234]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.88, 0.85, 1)
-theme_override_colors/font_focus_color = Color(1, 0.95, 0.93, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.95, 0.93, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -648,10 +614,10 @@ text = "CONTINUE"
 
 [node name="NextRunButton" type="Button" parent="EndScreen/Menu/Buttons" unique_id=255478968]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -661,10 +627,10 @@ text = "NEXT ROUND"
 
 [node name="ExitButton" type="Button" parent="EndScreen/Menu/Buttons" unique_id=2132168273]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -752,11 +718,11 @@ vertical_alignment = 1
 
 [node name="RefreshButton" type="Button" parent="UpgradeMenu/Panel/Body/Footer" unique_id=554323890]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -767,10 +733,10 @@ text = "REFRESH"
 
 [node name="NextRoundButton" type="Button" parent="UpgradeMenu/Panel/Body/Footer" unique_id=190260451]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_constants/h_separation = 10
 theme_override_constants/icon_max_width = 34
 theme_override_font_sizes/font_size = 26
@@ -1068,11 +1034,11 @@ vertical_alignment = 1
 
 [node name="ConfirmButton" type="Button" parent="RegionSelectMenu/Panel/Body/Footer" unique_id=1930668440]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1243,10 +1209,10 @@ vertical_alignment = 1
 
 [node name="SaveButton" type="Button" parent="DevSettingsMenu/Panel/Body/Footer" unique_id=1470022594]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1610,11 +1576,11 @@ vertical_alignment = 1
 
 [node name="ConfirmButton" type="Button" parent="TimeSelectMenu/Panel/Body/Footer" unique_id=1356267694]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1736,10 +1702,10 @@ color = Color(0.42, 0.055, 0.06, 1)
 [node name="HealButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1856706851]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1751,10 +1717,10 @@ text = "HEAL"
 [node name="AmmoButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1140317808]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1766,10 +1732,10 @@ text = "BUY AMMO"
 [node name="DepositButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1249691896]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1781,10 +1747,10 @@ text = "STASH BLOOD"
 [node name="WeaponButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=2061670148]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1796,10 +1762,10 @@ text = "WEAPONS"
 [node name="MapButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=478449925]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1811,10 +1777,10 @@ text = "REGIONAL MAP"
 [node name="ReturnHomeButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=913074280]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1850,10 +1816,10 @@ color = Color(0.42, 0.055, 0.06, 1)
 [node name="SleepButton" type="Button" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=2133315053]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1865,10 +1831,10 @@ text = "SLEEP / CAMP"
 [node name="TravelButton" type="Button" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=1581212610]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1880,10 +1846,10 @@ text = "TRAVEL"
 [node name="TroubleButton" type="Button" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=1254531852]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -1999,10 +1965,10 @@ vertical_alignment = 1
 [node name="ContinueButton" type="Button" parent="CashOutScreen/Panel/Body/Footer" unique_id=847766688]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -2488,11 +2454,11 @@ vertical_alignment = 1
 
 [node name="ConfirmButton" type="Button" parent="TravelMenu/Panel/Body/Footer" unique_id=1592448862]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -2608,10 +2574,10 @@ alignment = 1
 [node name="IgnoreButton" type="Button" parent="TravelEventMenu/Panel/Body/Buttons" unique_id=1592448896]
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 28
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -2622,10 +2588,10 @@ text = "IGNORE"
 [node name="FightButton" type="Button" parent="TravelEventMenu/Panel/Body/Buttons" unique_id=1592448897]
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 28
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -2831,10 +2797,10 @@ text = "BLOOD 0"
 [node name="HealButton" type="Button" parent="TravelDayMenu/Actions" unique_id=1592448924]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -2846,10 +2812,10 @@ text = "HEAL"
 [node name="AmmoButton" type="Button" parent="TravelDayMenu/Actions" unique_id=1592448925]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -2861,10 +2827,10 @@ text = "BUY AMMO"
 [node name="WeaponButton" type="Button" parent="TravelDayMenu/Actions" unique_id=1592448926]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -2887,9 +2853,9 @@ offset_bottom = 46.0
 grow_horizontal = 0
 grow_vertical = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -3047,9 +3013,9 @@ alignment = 1
 [node name="WakeButton" type="Button" parent="SleepMenu/Panel/Body"]
 layout_mode = 2
 focus_mode = 0
-theme_override_colors/font_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
-theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
@@ -3111,5 +3077,147 @@ theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
 theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 46
 text = "NIGHT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TestSpawnMenu" type="Control" parent="."]
+visible = false
+z_index = 150
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("71_testmenu")
+button_normal = SubResource("StyleBoxFlat_button_normal")
+button_hover = SubResource("StyleBoxFlat_button_hover")
+button_pressed = SubResource("StyleBoxFlat_button_pressed")
+button_disabled = SubResource("StyleBoxFlat_button_disabled")
+
+[node name="Blur" type="ColorRect" parent="TestSpawnMenu"]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="TestSpawnMenu"]
+layout_mode = 0
+anchor_left = 0.24
+anchor_top = 0.06
+anchor_right = 0.76
+anchor_bottom = 0.94
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="TestSpawnMenu/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="TestSpawnMenu/Panel/Body"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="TestSpawnMenu/Panel/Body/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 40
+text = "TEST SPAWN STATION"
+vertical_alignment = 1
+
+[node name="Keys" type="Label" parent="TestSpawnMenu/Panel/Body/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "ESC CLOSES"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="TestSpawnMenu/Panel/Body"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Scroll" type="ScrollContainer" parent="TestSpawnMenu/Panel/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Entries" type="VBoxContainer" parent="TestSpawnMenu/Panel/Body/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Rule2" type="ColorRect" parent="TestSpawnMenu/Panel/Body"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Footer" type="HBoxContainer" parent="TestSpawnMenu/Panel/Body"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 2
+
+[node name="Hint" type="Label" parent="TestSpawnMenu/Panel/Body/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "DEVELOPER ONLY  -  NOTHING HERE TOUCHES A RUN"
+vertical_alignment = 1
+
+[node name="ClearButton" type="Button" parent="TestSpawnMenu/Panel/Body/Footer"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "CLEAR SPAWNED  (0)"
+
+[node name="Banner" type="Control" parent="TestSpawnMenu"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="TestSpawnMenu/Banner"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.14
+anchor_top = 1.0
+anchor_right = 0.86
+anchor_bottom = 1.0
+offset_top = -110.0
+offset_bottom = -46.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Text" type="Label" parent="TestSpawnMenu/Banner/Panel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.9, 0.32, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 24
+text = "PLACING"
 horizontal_alignment = 1
 vertical_alignment = 1

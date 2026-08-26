@@ -576,9 +576,16 @@ func _end_sleep(reason: StringName) -> void:
 
 	var sleeper := PlayerSleep.get_active(self)
 	if sleeper != null:
-		sleeper.get_up()
+		# A death is the one ending nobody gets up from: [PlayerDeathSequence] has the
+		# body from the same frame, so the night is simply let go of and the sleeper is
+		# left lying exactly where it is. See [method PlayerSleep.get_up].
+		sleeper.get_up(reason != REASON_LOST)
 
-	if restores_time_scale:
+	# Written back only where the night is really over. A death runs the world down to
+	# its own slow motion on the same frame and drives it every frame afterwards - see
+	# [PlayerDeathSequence] - so putting the dial to 1 here is a write that the death
+	# has to undo, and on the frame it lands the player is watched dying at full speed.
+	if restores_time_scale and reason != REASON_LOST:
 		Engine.time_scale = 1.0
 
 	sleep_ended.emit(reason, _slept)

@@ -132,7 +132,7 @@ signal saved(balance: DevBalance)
 
 @export_group("Buttons")
 ## Colour the tool buttons are lettered in.
-@export var button_font_color := Color(0.84, 0.76, 0.73)
+@export var button_font_color := Color(0.16, 0.06, 0.05)
 ## Padding inside a tool button, sideways and down.
 ##
 ## The styles are taken from the footer's SAVE button, which is half a menu wide and

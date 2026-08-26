@@ -23,7 +23,6 @@
 [ext_resource type="Script" uid="uid://04a8l36urja8" path="res://Scripts/Weapons/weapon_mount.gd" id="26_ad6j5"]
 [ext_resource type="Script" uid="uid://c8r6t22l5r3a2" path="res://Scripts/World/footprint_field.gd" id="26_prints"]
 [ext_resource type="Resource" uid="uid://dwylkh854xmip" path="res://Resources/Weapons/weapon_catalog.tres" id="27_s0y1m"]
-[ext_resource type="Script" uid="uid://daxylbga1wr3c" path="res://Scripts/World/shadow_palette.gd" id="27_shadows"]
 [ext_resource type="Script" uid="uid://dmeyhvk7sc3g4" path="res://Scripts/World/prop_scatter.gd" id="28_scatter"]
 [ext_resource type="Script" uid="uid://iovrrf6qlbhk" path="res://Scripts/World/camera_bounds.gd" id="29_bounds"]
 [ext_resource type="Script" uid="uid://jbqgmet8idv" path="res://Scripts/World/scatter_layer.gd" id="29_layer"]
@@ -82,13 +81,36 @@
 [ext_resource type="Resource" uid="uid://dq6o7w6v4f5j2" path="res://Resources/Trouble/reward_tier_2.tres" id="78_41wwn"]
 [ext_resource type="Resource" uid="uid://dq6o7w6v4f5j3" path="res://Resources/Trouble/reward_tier_3.tres" id="79_th182"]
 [ext_resource type="Script" uid="uid://q74l51wsm4wk" path="res://Scripts/World/trouble_ammo_drop.gd" id="81_7foer"]
-[ext_resource type="Script" uid="uid://pdc3ixgyh1jb" path="res://Scripts/World/sleep_director.gd" id="82_sleep"]
 [ext_resource type="PackedScene" uid="uid://cgotikbossmap" path="res://Scenes/World/BossEncounterMap.tscn" id="82_bossmap"]
+[ext_resource type="Script" uid="uid://pdc3ixgyh1jb" path="res://Scripts/World/sleep_director.gd" id="82_sleep"]
 [ext_resource type="Script" uid="uid://fvulc80yy0fo" path="res://Scripts/World/cloud_shadows.gd" id="83_clouds"]
 [ext_resource type="Texture2D" uid="uid://cngd3kl30325i" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2293.PNG" id="84_cloud1"]
 [ext_resource type="Texture2D" uid="uid://cc1manbel7o26" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2294.PNG" id="85_cloud2"]
 [ext_resource type="Texture2D" uid="uid://77sodi61ihdd" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2295.PNG" id="86_cloud3"]
 [ext_resource type="Texture2D" uid="uid://dveuyhjjvmrmd" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2296.PNG" id="87_cloud4"]
+[ext_resource type="PackedScene" uid="uid://cgotiktestmap" path="res://Scenes/World/TestMap.tscn" id="88_testmap"]
+[ext_resource type="PackedScene" uid="uid://82ydqw03lnfu" path="res://Scenes/World/TestMapGate.tscn" id="89_testgate"]
+[ext_resource type="Script" uid="uid://bataexivlv50x" path="res://Scripts/World/world_reset.gd" id="90_worldreset"]
+[ext_resource type="Script" uid="uid://c2jlpn0dbyaks" path="res://Scripts/Enemy/morale_director.gd" id="91_morale"]
+[ext_resource type="Script" uid="uid://c8cl7pocjoaaw" path="res://Scripts/Enemy/boss_charge.gd" id="92_bosscharge"]
+[ext_resource type="Script" uid="uid://0um1tm1ujjns" path="res://Scripts/Enemy/boss_footsteps.gd" id="93_bosssteps"]
+[ext_resource type="AudioStream" uid="uid://bmoxb4qimacg8" path="res://Sound/Efect/Boss/Steps/Step1.WAV" id="94_step1"]
+[ext_resource type="AudioStream" uid="uid://d1aia852ki1qv" path="res://Sound/Efect/Boss/Steps/Step2.WAV" id="95_step2"]
+[ext_resource type="AudioStream" uid="uid://1vxofxqfnwd" path="res://Sound/Efect/Boss/Steps/Step3.WAV" id="96_step3"]
+[ext_resource type="AudioStream" uid="uid://bvawr5wit7741" path="res://Sound/Efect/Boss/Steps/Step4.WAV" id="97_step4"]
+[ext_resource type="AudioStream" uid="uid://crhl1xgsic7fv" path="res://Sound/Efect/Boss/Steps/Step5.WAV" id="98_step5"]
+[ext_resource type="AudioStream" uid="uid://c806agx8bopsy" path="res://Sound/Efect/Boss/Steps/Step6.WAV" id="99_step6"]
+[ext_resource type="Script" uid="uid://dg52ng2o0l4b3" path="res://Scripts/Enemy/wave_roster.gd" id="100_roster"]
+[ext_resource type="Script" uid="uid://egg5xr515j5x" path="res://Scripts/Enemy/wave_roster_entry.gd" id="101_entryscript"]
+[ext_resource type="Resource" uid="uid://b27dmcnnb5tcn" path="res://Resources/Enemy/wave_entry_bomber.tres" id="102_bomberentry"]
+[ext_resource type="Script" uid="uid://dwy8cjxd0mae4" path="res://Scripts/World/Sun/sun_controller.gd" id="103_sun"]
+[ext_resource type="Script" uid="uid://dcedosoc4shi5" path="res://Scripts/World/Sun/sun_stage.gd" id="104_sunstage"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/1_dawn.tres" id="105_shdawn"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/2_morning.tres" id="106_shmorning"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/3_noon.tres" id="107_shnoon"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/4_evening.tres" id="108_shevening"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/5_twilight.tres" id="109_shtwilight"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/6_night.tres" id="110_shnight"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xf6vi"]
 size = Vector2(2048, 64)
@@ -183,11 +205,10 @@ script = ExtResource("83_clouds")
 textures = Array[Texture2D]([ExtResource("84_cloud1"), ExtResource("85_cloud2"), ExtResource("86_cloud3"), ExtResource("87_cloud4")])
 scale_range = Vector2(0.35, 0.85)
 
-[node name="ShadowPalette" type="Node" parent="Arena" unique_id=1094431640 groups=["shadow_palette"]]
-script = ExtResource("27_shadows")
-shadow_color = Color(0.5137255, 0.22745098, 0, 1)
-shadow_opacity = 0.855
-size_scale = 1.5
+[node name="Sun" type="Node2D" parent="Arena" groups=["sun"]]
+script = ExtResource("103_sun")
+stages = Array[ExtResource("104_sunstage")]([ExtResource("105_shdawn"), ExtResource("106_shmorning"), ExtResource("107_shnoon"), ExtResource("108_shevening"), ExtResource("109_shtwilight"), ExtResource("110_shnight")])
+transition_duration = 1.6
 
 [node name="Base" parent="." unique_id=1285401608 instance=ExtResource("17_base")]
 z_index = -1
@@ -239,6 +260,10 @@ script = ExtResource("20_scaling")
 script = ExtResource("10_wave")
 auto_start = false
 
+[node name="WaveRoster" type="Node" parent="WaveManager" unique_id=131058205]
+script = ExtResource("100_roster")
+entries = Array[ExtResource("101_entryscript")]([ExtResource("102_bomberentry")])
+
 [node name="RunEndDefeat" type="Node" parent="." unique_id=796127387]
 script = ExtResource("18_enddefeat")
 
@@ -266,6 +291,10 @@ travel_events = Array[ExtResource("47_travelevent")]([ExtResource("48_evnothing"
 
 [node name="AmbushDirector" type="Node" parent="." unique_id=1592448899 groups=["ambush_director"]]
 script = ExtResource("46_ambushdir")
+
+[node name="WaveRoster" type="Node" parent="AmbushDirector" unique_id=1592448951]
+script = ExtResource("100_roster")
+entries = Array[ExtResource("101_entryscript")]([ExtResource("102_bomberentry")])
 
 [node name="DangerDirector" type="Node" parent="." unique_id=1592448905 groups=["danger_director"]]
 script = ExtResource("72_dangerdir")
@@ -335,3 +364,30 @@ script = ExtResource("81_7foer")
 
 [node name="SleepDirector" type="Node" parent="." unique_id=1488325647]
 script = ExtResource("82_sleep")
+
+[node name="TestMap" parent="." unique_id=1592448930 instance=ExtResource("88_testmap")]
+position = Vector2(0, 4200)
+
+[node name="TestMapGate" parent="." unique_id=1592448931 instance=ExtResource("89_testgate")]
+position = Vector2(-880, 700)
+destination_id = &"test_map"
+shortcut_action = &"dev_test_map"
+
+[node name="WorldReset" type="Node" parent="." unique_id=1592448932 groups=["world_reset"]]
+script = ExtResource("90_worldreset")
+
+[node name="MoraleDirector" type="Node" parent="." unique_id=1592448933 groups=["morale_director"]]
+script = ExtResource("91_morale")
+
+[node name="BossCharge" type="Node" parent="." unique_id=1592448934 groups=["boss_charge"]]
+script = ExtResource("92_bosscharge")
+
+[node name="BossFootsteps" type="Node" parent="." unique_id=1592448935 groups=["boss_footsteps"]]
+script = ExtResource("93_bosssteps")
+steps = Array[AudioStream]([ExtResource("94_step1"), ExtResource("95_step2"), ExtResource("96_step3"), ExtResource("97_step4"), ExtResource("98_step5"), ExtResource("99_step6")])
+step_volume_db = -4.0
+
+[node name="SoundBank" type="Node" parent="BossFootsteps" unique_id=1592448936]
+script = ExtResource("67_1fesm")
+bus = &"Game"
+pitch_variation = 0.07

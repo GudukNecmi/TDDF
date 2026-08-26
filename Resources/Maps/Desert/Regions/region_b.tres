@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="MapRegion" load_steps=3 format=3 uid="uid://8v5pie2b1dv"]
+[gd_resource type="Resource" script_class="MapRegion" format=3 uid="uid://8v5pie2b1dv"]
 
 [ext_resource type="Script" uid="uid://c6wrwwhvdce4o" path="res://Scripts/World/map_region.gd" id="1_region"]
-[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/Old Mine/Old Mine Background.PNG" id="2_ground"]
+[ext_resource type="Texture2D" uid="uid://c7td86pufbgmm" path="res://Assets/Maps/Desert/Old Mine/Old Mine Background.PNG" id="2_ground"]
+[ext_resource type="Script" uid="uid://jbqgmet8idv" path="res://Scripts/World/scatter_layer.gd" id="2_ys02d"]
 
 [resource]
 script = ExtResource("1_region")
@@ -9,8 +10,8 @@ region_id = &"B"
 display_name = "B"
 description = "OLD MINE"
 ground_texture = ExtResource("2_ground")
-ground_tile_size = 0.0
 difficulty = 0.25
+enemy_base_health = 350.0
 start_position = Vector2(580, -1180)
 map_position = Vector2(0.58, 0.22)
 map_size = Vector2(0.222, 0.25)

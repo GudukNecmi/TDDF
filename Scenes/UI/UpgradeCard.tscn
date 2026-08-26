@@ -1,23 +1,21 @@
 [gd_scene format=3 uid="uid://cgotikupgradecard"]
 
 [ext_resource type="Script" path="res://Scripts/UI/upgrade_card.gd" id="1_card"]
+[ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="200_uipanel"]
+[ext_resource type="Texture2D" uid="uid://b5tbx3ndtm3yn" path="res://Assets/UI/UI Screens/Button1.PNG" id="200_uibtn1"]
+[ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="200_uibtn2"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_card"]
 content_margin_left = 20.0
 content_margin_top = 20.0
 content_margin_right = 20.0
 content_margin_bottom = 20.0
-bg_color = Color(0.075, 0.028, 0.032, 0.94)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.46, 0.06, 0.065, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
+texture = ExtResource("200_uipanel")
+region_rect = Rect2(92, 26, 2800, 2102)
+texture_margin_left = 70.0
+texture_margin_top = 70.0
+texture_margin_right = 70.0
+texture_margin_bottom = 70.0
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
 bg_color = Color(0.035, 0.014, 0.016, 0.9)
 border_width_left = 1
@@ -30,70 +28,52 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_buy_normal"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_buy_normal"]
 content_margin_left = 16.0
 content_margin_top = 10.0
 content_margin_right = 16.0
 content_margin_bottom = 10.0
-bg_color = Color(0.055, 0.02, 0.024, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.42, 0.055, 0.06, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_buy_hover"]
+texture = ExtResource("200_uibtn1")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_buy_hover"]
 content_margin_left = 16.0
 content_margin_top = 10.0
 content_margin_right = 16.0
 content_margin_bottom = 10.0
-bg_color = Color(0.16, 0.03, 0.034, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.85, 0.12, 0.11, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_buy_pressed"]
+texture = ExtResource("200_uibtn2")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_buy_pressed"]
 content_margin_left = 16.0
 content_margin_top = 10.0
 content_margin_right = 16.0
 content_margin_bottom = 10.0
-bg_color = Color(0.34, 0.045, 0.045, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.24, 0.2, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_buy_disabled"]
+texture = ExtResource("200_uibtn2")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+modulate_color = Color(0.76, 0.7, 0.6, 1)
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_buy_disabled"]
 content_margin_left = 16.0
 content_margin_top = 10.0
 content_margin_right = 16.0
 content_margin_bottom = 10.0
-bg_color = Color(0.04, 0.03, 0.03, 0.8)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.22, 0.09, 0.09, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
+texture = ExtResource("200_uibtn1")
+region_rect = Rect2(20, 14, 994, 208)
+texture_margin_left = 26.0
+texture_margin_top = 22.0
+texture_margin_right = 26.0
+texture_margin_bottom = 22.0
+modulate_color = Color(0.55, 0.52, 0.48, 0.8)
 [node name="UpgradeCard" type="PanelContainer"]
 custom_minimum_size = Vector2(176, 330)
 offset_right = 176.0
@@ -150,11 +130,11 @@ horizontal_alignment = 1
 
 [node name="BuyButton" type="Button" parent="Layout"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_disabled_color = Color(0.4, 0.32, 0.32, 1)
-theme_override_colors/font_focus_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_hover_color = Color(1, 0.9, 0.87, 1)
-theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
 theme_override_font_sizes/font_size = 22
 theme_override_styles/disabled = SubResource("StyleBoxFlat_buy_disabled")
 theme_override_styles/focus = SubResource("StyleBoxFlat_buy_normal")

@@ -7,22 +7,31 @@ record of what was planned. Nothing below is marked implemented because it was d
 only because the files prove it. Where a system is half-built it says so and says which
 half.
 
-Last verified: 2026-08-23.
+Last verified: 2026-08-25.
 
 ---
 
 ## 1. WHAT IS ACTUALLY LEFT
 
-Milestone 2 is close to closed. Three things are genuinely unbuilt or unfixed, and they are
-the whole of the outstanding work:
+**Milestone 2 is not closed.** The dedicated boss swoosh asset is now in and wired, and
+most of the live verification has been done (§12). What is left is the remainder of that
+verification list — nothing here is unbuilt:
 
-1. **The six death / run-failure cleanup bugs** (§11)
-2. **The dedicated boss swoosh asset** (§10)
-3. **Live play verification** of the systems listed in §12, which are built and wired but
-   whose behaviour has not been watched end to end and written down here
+1. **The Camp Streak stash (§6.1)** — implemented, never watched in play
+2. **The rest of the §12 list** — the parts marked *still owed* there
 
-The Camp Streak Blood deposit multiplier (§6) is now **implemented** and awaits play
-verification.
+The dedicated boss swoosh asset (§10) is **done**: `Sound/Efect/Boss/BossBladeSwoosh.WAV`
+exists, is wired into `EnemyAttackAudio.boss_swoosh_sounds` on `Scenes/Enemy/Enemy.tscn`,
+and was heard playing on the Boss Charge swing in the running game.
+
+The six death / run-failure cleanup bugs (§11) are **fixed**, each reproduced in the
+running game before the fix and watched again after it.
+
+**Startup is clean.** The `Unrecognized UID: uid://d2gydhh7i03dm` and `Can't save resource
+to empty path` errors are gone and stayed gone: `audio/buses/default_bus_layout` is a
+`res://` path again rather than a UID, so `AudioServer` loads the layout on boot (3 buses —
+Master, Game, Snap) instead of silently falling back to one. A headless boot of the project
+prints no errors and no warnings.
 
 Everything else in this document is implemented and present on disk.
 
@@ -67,6 +76,8 @@ Verified present on **both** `CameraBounds.region` and `EnemySpawner.arena_bound
 - The Knife / Bone throwable weapon system and its audio (§3.3)
 - The cursor / crosshair system (§3.4)
 - The revolver spin system (§3.5)
+- The developer Test Map, its entry gate at the bottom of the Desert and its Spawn Station
+  (§12.3)
 
 ### 3.1 — Music state system and combat audio (implemented, live-tested)
 
@@ -163,7 +174,8 @@ Wiring, verified in the files:
 - `World.tscn:273` — the `DangerFinale` node is present, immediately after `DangerDirector`
 - Its references resolve on the script's export defaults, with no scene overrides needed
 
-**Not yet play-verified** — see §12.
+**Play-verified 2026-08-25** — the head, the slow-motion, the freeze, CONTINUE / STOP and a
+clean hand-back. Three details are still owed; see §12.
 
 ### 4.2 — Reward, chest and horse return (implemented and live-verified)
 
@@ -227,7 +239,8 @@ a capacity upgrade raises that ceiling. It listens to `DangerDirector.sequence_s
 **Note:** `AmmoCrate.tscn` is also still `RewardChest.item_scene` (see judgment call 1 above),
 so the same crate scene serves three callers.
 
-**Not yet play-verified** — see §12.
+**Play-verified 2026-08-25** — the promised crate drops when a Danger opens. The emergency
+crate is still owed; see §12.2.
 
 ---
 
@@ -278,7 +291,8 @@ region's own ground behind them.
 The Sleep music state exists and preserves its playback position across entering and leaving,
 like every other music state.
 
-**Not yet play-verified** — see §12.
+**Play-verified 2026-08-25** — the screen, the ambush at the camp and the bounty question.
+The rest of the night is still owed; see §12.2.
 
 ---
 
@@ -330,7 +344,8 @@ when the count moves. Doc comments on `StreakCounter`, `CashOutScreen` and `Camp
 corrected — they previously said the base was the *only* place a Streak was ever worth
 anything.
 
-**Not yet play-verified** — see §12.
+**Not yet play-verified** — see §12.2. This is the last system in Milestone 2 that has
+never been run.
 
 ---
 
@@ -423,6 +438,11 @@ the duration and handed back on the way out.
 - Standing room is `body_radius` (90) × his rung's size + `wall_clearance` (60), so a 2.5×
   boss is held further off the wall than a 1.5× one with no second number authored
 
+**Play-verified 2026-08-25** — the poster face, the reward-driven health, the 750 approach
+trigger, the carry into the encounter map with the camera limits and `arena_bounds` handed
+over, and the carry back out again. The health curve was read at one point only (1000 →
+75×); the rest of its range is still owed, see §12.2.
+
 ---
 
 ## 8. TRAVEL
@@ -433,6 +453,10 @@ the duration and handed back on the way out.
 - An Ambush returns to the Travel screen after combat
 - Shift fast travel uses 1.5× speed with automatic Continue
 - Travel music preserves its position
+
+**Play-verified 2026-08-25** — a full journey: `TravelMenu` → RIDE OUT → `TravelLoading` →
+the day stop → arrival in the destination region, with the HUD back to gameplay,
+`is_travelling()` false and `Engine.time_scale` at 1.0. Fast travel was not exercised.
 
 ### 8.1 — Arrival clamp and framing (implemented)
 
@@ -469,7 +493,8 @@ told how long that transition lasts, and emits `turned` on the beat the halves s
   frozen world, `z_index` 260, with `NowFace` and `NextFace` each carrying an `Icon` and a
   `Name`. Colours are the game's red-on-dark.
 
-**Not yet play-verified** — see §12.
+**Play-verified 2026-08-25** — hidden at rest, turns through 180° on `play()`, hidden again
+on `stop()`.
 
 ---
 
@@ -497,35 +522,131 @@ scene, so a region's identity is one Inspector entry.
 - Knife and Bone each have a throw and a hit sound
 - Death has no separate music
 
-**STILL MISSING — the dedicated boss swoosh asset.** There is no boss swoosh file under
-`Sound/`; only Enemy1's `BladeSwoosh.WAV` exists. The boss swoosh should use its own asset
-once one is available.
+**The dedicated boss swoosh asset is in — verified in play.**
+`Sound/Efect/Boss/BossBladeSwoosh.WAV` sits in `EnemyAttackAudio.boss_swoosh_sounds` on
+`Scenes/Enemy/Enemy.tscn` at `boss_swoosh_volume_db` −3, beside the boss attack shout in
+`boss_attack_sounds`. Nothing was added to carry it: the array was already there and
+already fell back to Enemy1's `BladeSwoosh.WAV` while it was empty, exactly as
+`enemy_attack_audio.gd` was written to.
+
+It reaches the Boss Charge for free, because the charge has no swing of its own —
+`BossCharge._begin_swing()` runs the boss's own `KnifeSlash` faster for one arc, and that
+blade's `strike_started` is what `EnemyAttackAudio._on_strike()` listens to. `_is_boss()`
+sees the `MiniBoss` component on the body and picks the boss array. Watched in the running
+game: a charge thrown with `BossCharge.charge_now()` played
+`Sound/Efect/Boss/Atack (1).mp3` on the swing and
+`Sound/Efect/Boss/BossBladeSwoosh.WAV` on the strike, through the component's own
+`SoundBank`.
 
 ---
 
-## 11. DEATH BUGS STILL TO FIX
+## 11. DEATH / RUN-FAILURE CLEANUP — FIXED
 
-None of these six is recorded as fixed. The seams they would be fixed at do exist —
-`PlayerDeathSequence` empties the carried wallet and resets the streak, `TravelDirector`,
-`AmbushWaveDirector` and `SleepDirector` each follow the player's `Health.died` — but the
-bugs themselves have not been worked or verified:
+All six are fixed and each was reproduced in the running game before the fix and watched
+again after it. `PlayerDeathSequence` is still the authoritative death flow and nothing
+about its beats, its timings or its presentation changed; what changed is what each
+system does when it hears the player fall.
 
-- Weapon unusable after death
-- A Travel Ambush death must cancel Travel cleanly
-- A Camp Ambush death must cancel Camp / Sleep cleanly
-- Carried Blood and Streak must reset correctly
-- The player must return cleanly to Base
-- No stale active states may survive a death
+**The rule the fixes follow:** every system stands *itself* down on the player's own
+`Health.died`, through the method it already had for standing down — the pattern
+`AmbushWaveDirector`, `DangerDirector`, `BossPhases` and `SleepDirector` already used.
+Nothing new was written that a system could already do, and there is no second teardown
+anywhere that could disagree with a system's own.
+
+| Bug | Root cause | Fix |
+|---|---|---|
+| Weapon unusable after death | A picked-up throwable was never given back, so the player woke in the base carrying a knife with their own weapon stowed at the belt behind it and nothing left to draw it. `PlayerDeathSequence` also still named the retired `../../Shotgun` node in `shotgun_path` and `input_blocked_paths`; since weapons are built by `WeaponMount` neither path resolved, so the weapon was never holstered and never silenced — it stayed drawn and fireable on a corpse | The borrow is spent through `WeaponMount.drop_temporary()` on the killing hit — the same call the throw makes. `shotgun_path` is now `weapon_path`, resolved through `WeaponMount` exactly as `PlayerLoadout` does, and the trigger is silenced with it and handed back in `_finish()` |
+| A Travel Ambush death must cancel Travel cleanly | `TravelDirector` had **no** player-death handling at all — its own doc comment referred to an `_on_player_died` that was never written. A death on the road left the state at `IN_EVENT`, the ambush placing men round a body, `Engine.time_scale` at fast travel's 1.5, the day's stop or the black still up, and the session still claiming somebody was travelling — which is a permanently dead TRAVEL button, because `begin_travel()` refuses a journey already under way | `TravelDirector` now follows `Health.died` with the same three-method pattern every other system uses, and puts the ride back through the calls it already makes: the dial handed back, the stop and the screens closed, the ride taken off through `TravelLoading.stop()`, and the journey abandoned through `RunSessionState.abandon_travel()`. The destination stays marked. `travel_cancelled` is deliberately not emitted — it means the player is standing at the waggon again |
+| A Camp Ambush death must cancel Camp / Sleep cleanly | Two faults. `SleepDirector` ended the night by calling `PlayerSleep.get_up()`, which stood the body up with a tween racing the death's own fall on the same `Visual` node, handed the keys back and let `PlayerLoadout` redraw the gun over a corpse; it also wrote `Engine.time_scale` back to 1 on the frame the death was slowing the world down. Separately, `Camp` never learned the player had died, so a death out looking for trouble left the waggon invisible and the whole map answering "press E to whistle" for ever | `PlayerSleep.get_up(rises)` — false lets the night go without touching the body, the keys or the gun, which is what a death passes; every other ending is unchanged. The time-scale write is skipped for `REASON_LOST`. `Camp` now follows `Health.died` and calls its own `end_trouble_search()`, which was completed to put the waggon and the pending whistle back as well as the flag |
+| Carried Blood and Streak must reset correctly | The reset itself was right, but blood is banked the instant it reaches the player, and a death leaves a stream of it — the player's own spray included — already lifting off the ground. Every piece of it landed *after* `BloodWallet.reset()` and was added back on top | `BloodMagnet.release_all()` — which existed for exactly this and had no caller — is asked first, so the pull is empty before the purse is |
+| The player must return cleanly to Base | Two faults. `_travel_home()` called the public `Teleporter.teleport()`, which is the player's *contextual* B key: dying in the pit at the foot of the base took the run-portal branch, raised the map screen over the corpse, moved nobody and never emitted `teleported` — so the sequence waited at `TRAVELLING` for good and the player was left dead on a black screen. And nothing ever ended the run, so the player stood in the base in a world that still believed a run was happening | `teleport()` takes a `use_portal` argument and returns whether a journey home actually began; a body being carried home refuses the portal and falls back to reviving on the spot rather than stranding. `PlayerDeathSequence` ends the run on `RunSessionState` the moment the body is home — the same call the ride home makes |
+| No stale active states may survive a death | The round kept spawning into an arena nobody was in. `AmbushWaveDirector._on_player_died` only wrote off what was owed, and `_check_cleared()` needs an empty field as well as an empty debt — so `cleared` never fired and a dozen men chased a body that had left the world. The bounty fight kept the camera limits and `EnemySpawner.arena_bounds` clamped to the boss's own map | `WaveManager` follows the death and calls its own `stop()`, whose `run_finished` sends the arena home through `RunEndDefeat` exactly as the clock running out does. The ambush now breaks: a public `rout()` completes the existing `rout_fraction` machinery, and `TravelDirector` / `DangerDirector` release the ambush on a death rather than `stop()`ping it, because `stop()` drops the very death watch that plays the break. The bounty fight is closed behind the black, in the death sequence, through `BossArena.unlock()` → `BossDefeat.reset()` → `MiniBossDirector.reset_encounter()` — the same three calls, in the same order, winning the fight makes |
+
+**Why the boss teardown is the one thing the death sequence reaches out for:** unwinding
+an encounter puts the bodies and the player back where they were found and hands the
+camera its old limits back. On the killing hit that is a body dragged across the desert
+in full view; after the arrival it would overwrite the base's own camera limits with a
+rectangle in the middle of nowhere. The only moment it is neither is with the screen
+fully black and the trip home not yet started, and nothing but the death sequence knows
+when that is.
+
+Dying to a bounty target deliberately leaves his contract standing on the board. He is
+still wanted.
+
+**Files changed:** `Scripts/Player/{player_death_sequence,teleporter,player_sleep}.gd`,
+`Scripts/World/{travel_director,camp,sleep_director,danger_director}.gd`,
+`Scripts/Enemy/{ambush_wave_director,wave_manager}.gd`.
+
+### Still owed here
+
+A weapon is drawn again on the lying body when a death interrupts a sleep, because
+`PlayerLoadout` owns "is the weapon drawn" and reads only which zone the player is
+standing in. The trigger stays silenced throughout and the state on arrival is correct,
+so this is cosmetic. The other five paths holster correctly.
 
 ---
 
-## 12. LIVE VERIFICATION STILL OWED
+## 12. LIVE VERIFICATION
 
-These are built and wired. What is missing is watching them run and writing the result down
-here. **Built is not verified**, and this project's standing rule is that behaviour is
-confirmed by running the game, not by the code compiling.
+**Built is not verified**, and this project's standing rule is that behaviour is confirmed
+by running the game, not by the code compiling. What follows separates what has now been
+watched from what has not.
 
-### The Camp Streak stash (§6.1)
+### 12.1 — Verified in play (2026-08-25)
+
+Each of these was driven in the running game and the result read back off the live tree.
+
+- **Sleep screen.** `SleepDirector.begin()` raises `SleepMenu` and puts the night in
+  CHOOSING; `choose_duration(1)` moves it to SLEEPING with the segment count recorded;
+  `wake_up()` returns it to IDLE and takes the screen down.
+- **Sleep Ambush at the real Camp location.** The alarm ends the night first and then opens
+  the ambush around whoever is in the `player` group: with the player standing at
+  (200, −300) the men came down 526 and 700 pixels away and the player never moved a pixel.
+  The night does **not** resume afterwards. (Sprung from the Base, well outside the playable
+  rectangle, the men are placed at its edge instead — the spawner's own clamp, not a fault
+  of this system, and not reachable from a camp inside a region.)
+- **Sleep Bounty interruption.** `_bounty_stops_the_night()` pauses the night, puts the
+  question up on `TravelEventMenu` reading the outlaw's own name — `BONE-SAW MAUDE`,
+  `O ŞEREFSİZ ŞİMDİ BURADA.` — with both answers present. Answering *leave* ended the night
+  and ran `MiniBossDirector.begin()`.
+- **Bounty / Mini Boss encounter map.** The boss was built at Knowledge 3, scale 1.5, with a
+  `MiniBoss`, a `MiniBossAppearance` and a `DestinationMarker` on the body. Walking into him
+  carried the whole encounter into `BossEncounterMap`: player at (−980, −8000),
+  `EnemySpawner.arena_bounds` handed over to the map's own rectangle
+  `[P: (−2400, −9350), S: (4800, 2700)]`, camera limits with it, `BossArena` locked. Dying
+  in there carried everything back out — arena unlocked, phase back to NONE, field cleared,
+  run ended — which is §11's teardown watched again.
+- **Boss 2.5× approach trigger.** `trigger_radius` reads 750 in play and fired from 400.
+- **Boss fight has no zoom-out.** `BossArena.fight_zoom` is 1.0 and `intro_zoom` is still
+  2.0; the camera's zoom-layer table holds only `damage` — there is no fight layer.
+- **Wanted Poster uses the actual Boss appearance.** Board posters carry a
+  `MiniBossPortrait` drawn from the director's own wardrobe and look key
+  (`rider head 14 body 7 weapon 19`, `preacher head 8 body 3 weapon 11`). For the accepted
+  contract the wardrobe answered `(16, 7, 8)` for key `butcher`, and the boss that was
+  actually built carried that same wardrobe and that same key.
+- **Boss HP uses Blood reward + level scaling.** A 1000-blood contract produced 22500 max
+  health — 75× the ordinary enemy's authored 300, which is the curve's 1000 point exactly.
+  `boss_health_per_level` 0.05 at player level 1 is ×1.0; `boss_health_cap` 150.
+- **DangerFinale.** The last man's head came off, `Engine.time_scale` slid down and froze at
+  0, the camera took the severed head, and CONTINUE / STOP came up with the head still
+  visible. Answering it put `time_scale` back to 1.0, left `get_tree().paused` false, closed
+  the question and returned the director to idle with the Danger counted as cleared — no
+  stale slow-motion, camera hold or borrowed pause.
+- **Day Transition Dial.** Hidden at rest; `play(1)` shows it and turns the face through
+  −180° with `has_turned()` true; `stop()` hides it again.
+- **Trouble Ammo Drops.** Opening Danger 1 dropped the promised crate — `has_dropped()`
+  true with a standing `AmmoCrate` in the field.
+- **Travel / Trouble / HUD transitions.** Trouble: camp search → Danger 1 with its men in
+  the field and the HUD on `RoundBar` / `AmmoCounter` / `BloodCounter` / `HeartBar`.
+  Travel: `TravelDirector.request()` → `TravelMenu` → RIDE OUT → `TravelLoading` → the
+  day stop (`HEALTH FULL`, `BUY 10 SHELLS`, `WEAPONS`, `CONTINUE TRAVEL`) → arrival in
+  region B with the player placed in the world, `is_travelling()` false, the HUD back to
+  gameplay and `time_scale` at 1.0.
+- **Test Map.** See §12.3.
+
+### 12.2 — Still owed
+
+#### The Camp Streak stash (§6.1) — none of this has been watched
 
 - The STASH button reads `x<streak>` and the multiplied figure while a Streak is standing
 - A Streak of 3 with 300 of camp room takes 100 out of the player's hands and leaves the
@@ -535,40 +656,55 @@ confirmed by running the game, not by the code compiling.
 - Carried Blood, `CampBlood` and `BloodBank` still sum correctly — nothing minted beyond the
   Streak bonus
 
-### DangerFinale (§4.1)
+#### DangerFinale details
 
-- Final enemy head separation
-- `Engine.time_scale` drops to 0.5
-- Camera follows the detached head at roughly 2×
-- CONTINUE / STOP appears about 3 seconds later
-- The head is still visible when it appears
-- `time_scale` returns to 1.0
-- Camera returns to the player
-- Danger 10 auto-end still works
-- Mid-fight STOP still works
-- No stale finale state survives — no lingering slow-motion, camera follow, borrowed pause or
-  suppressed `TravelEventMenu.pauses_game` after the ending, on any exit path
+- Camera follows the detached head at roughly 2× — the follow itself was seen, the framing
+  was not measurable in the check that was run
+- Danger 10 auto-end
+- Mid-fight STOP
 
-### Sleep (§5)
+#### Sleep details
 
-- The full-screen presentation, the sleeper and the letters
 - 5 seconds per segment, one day stage each, the HUD and the world darkness following
-- WAKE UP at any point, including before a length is chosen
+- WAKE UP before a length is chosen
 - The 4-segment limit and "Uykumu kaçırdı şerefsizler."
-- An ambush waking the player at the exact spot they lay down, wagon present, and **not**
-  resuming afterwards
-- The bounty question, both answers, and a stayed-with night keeping its slept segments
-- The camp panel returning only after the three quiet endings
+- The bounty question's *stay* answer keeping its slept segments
+- The camp panel returning after the three quiet endings
 - A death during sleep leaving nothing asleep behind it
 
-### Also owed
+#### Also owed
 
-- The 2.18C Travel / Trouble / HUD end-to-end pass
-- The 2.20C ammunition drops (§4.3) — the promised crate and the emergency crate
-- The day transition dial (§8.2)
-- The boss encounter map round trip (§7.4) — carried in, fought, carried back out, with the
-  camera limits and `arena_bounds` handed back
-- The boss health curve and region-weighted rewards in play (§7.1, §7.2)
+- The emergency ammunition crate (§4.3) — only the promised crate has been seen
+- The boss health curve across its range, and region-weighted rewards (§7.1, §7.2) — only
+  the 1000 → 75× point has been read in play
+
+### 12.3 — The Test Map (developer tool, verified in play)
+
+`Scenes/World/TestMap.tscn`, instanced in `World.tscn` at (0, 4200) — its own 5000×3000
+walled area between the Desert and the Base, with its own `WorldZone`, floor, `Spawned`
+container, weapon table and return gate. It is a `TeleportDestination` (`test_map`), the
+same mechanism the Base and the boss map already use.
+
+- **In:** the `TestMapGate` at (−880, 700), the bottom-left of the Desert playable
+  rectangle, on E — or the `dev_test_map` shortcut (**U**) from anywhere, which runs the
+  identical `travel()` call. Arrival is (0, 5100).
+- **Out:** the `ReturnGate` inside the map, which goes to `base_pit`.
+- **Placement:** the Spawn Station builds its roster live from the world — the spawner's
+  enemy scene plus `extra_enemy_scenes`, then every `MiniBossDirector` rung crossed with
+  every `BountySettings` outlaw, 18 entries today. Picking one starts click-to-place;
+  everything placed goes through `EnemySpawner.spawn_at`, is reparented under
+  `TestMap/Spawned` and joins `test_spawned`.
+- **Cleanup exemption:** watched, not read — with three test spawns standing and one
+  ordinary enemy beside them, `WorldReset.reset()` freed the ordinary one and left all
+  three. `ZoneEnemyGuard.exempt_group` and `RunEndDefeat.exempt_group` both read
+  `test_spawned`.
+
+**Repaired 2026-08-25.** The `TestMapGate` instance had gone missing from `World.tscn` —
+node and `ext_resource` both — so the Test Map had no way in from the Desert and the
+`dev_test_map` shortcut had nothing to answer it. The instance was put back at (−880, 700)
+with `destination_id = &"test_map"` and `shortcut_action = &"dev_test_map"`, and the round
+trip was walked again. If it disappears a second time, suspect whatever last re-saved
+`World.tscn`; the gate scene itself, `Scenes/World/TestMapGate.tscn`, was never touched.
 
 ---
 
@@ -630,16 +766,18 @@ escape chance, fatigue rate and stamina capacity.
 
 ## 14. NEXT TASKS, IN ORDER
 
-1. **Fix death / run-failure cleanup** — all six bugs (§11)
-2. **Get the dedicated boss swoosh asset in** (§10)
-3. **Work through the live verification list** (§12) and close Milestone 2
-4. Start Milestone 3 with the XP/Level and permanent upgrade foundation
+1. **Watch the Camp Streak stash in play** (§6.1, §12.2) — the one system that has never
+   been run
+2. **Work through the rest of §12.2** and close Milestone 2
+3. Start Milestone 3 with the XP/Level and permanent upgrade foundation
 
 ### Milestone 2 items confirmed unfinished by the current files
 
-- All six death / run-failure cleanup bugs (§11)
-- The dedicated boss swoosh asset (§10)
-- The live verification listed in §12
+- The live verification listed in §12.2. Nothing in Milestone 2 is unbuilt.
+
+**MILESTONE 2 IS NOT YET COMPLETE.** Every system is implemented and every one listed in
+§12.1 has now been watched running, but the §12.2 list — the Camp Streak stash above all —
+has not been, and this document does not mark a system verified on the strength of its code.
 
 **Do not assume any unfinished item above is implemented merely because it was planned. Use
 the current files as the truth.**

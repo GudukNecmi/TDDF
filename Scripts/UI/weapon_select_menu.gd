@@ -48,9 +48,9 @@ const GROUP := &"weapon_select_menu"
 @export var button_pressed: StyleBox
 @export var button_disabled: StyleBox
 @export var font_size: int = 30
-@export var font_colour := Color(0.84, 0.76, 0.73)
-@export var font_hover_colour := Color(1.0, 0.9, 0.87)
-@export var font_disabled_colour := Color(0.4, 0.32, 0.32)
+@export var font_colour := Color(0.16, 0.06, 0.05)
+@export var font_hover_colour := Color(0.45, 0.07, 0.06)
+@export var font_disabled_colour := Color(0.42, 0.36, 0.3)
 ## How an entry with a description under it is written. The weapon's name and its
 ## description are substituted in, in that order.
 @export var described_format: String = "%s\n%s"

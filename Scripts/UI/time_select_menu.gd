@@ -89,11 +89,11 @@ const GROUP := &"time_select_menu"
 ## How large the hour's own picture is drawn on its tile.
 @export var icon_size := Vector2(72.0, 72.0)
 @export var name_font_size: int = 30
-@export var font_colour := Color(0.84, 0.76, 0.73)
+@export var font_colour := Color(0.16, 0.06, 0.05)
 ## Colour the selected tile's name is written in, for a screen where the stage
 ## colours are being used and a second cue is wanted. Only used when
 ## [member tint_name_with_stage_colour] is off.
-@export var font_selected_colour := Color(1.0, 0.93, 0.9)
+@export var font_selected_colour := Color(0.5, 0.08, 0.07)
 ## Whether each hour's name is written in that hour's own colour - see
 ## [member DayStage.icon_colour] - so the word and the picture read as one thing,
 ## the way they already do on the HUD and the round intro. Off writes every name

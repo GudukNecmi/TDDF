@@ -75,6 +75,27 @@ static func global_corners(sprite: Sprite2D) -> PackedVector2Array:
 	])
 
 
+## How high and how low [param sprite]'s opaque artwork reaches in world space when
+## it is standing in [param pose], as (highest y, lowest y).
+##
+## The same measurement [method global_corners] would give, taken without building
+## an array and against a pose handed in rather than read off the node - which is
+## what lets a caller that has already taken a part's transform for the frame ask
+## again for nothing. Every shadow in the world asks this every time it moves, so it
+## is deliberately allocation-free.
+static func world_band(sprite: Sprite2D, pose: Transform2D) -> Vector2:
+	if sprite == null or sprite.texture == null:
+		return Vector2.ZERO
+	var rect := local_rect(sprite)
+	var a := pose * rect.position
+	var b := pose * Vector2(rect.end.x, rect.position.y)
+	var c := pose * rect.end
+	var d := pose * Vector2(rect.position.x, rect.end.y)
+	return Vector2(
+		minf(minf(a.y, b.y), minf(c.y, d.y)),
+		maxf(maxf(a.y, b.y), maxf(c.y, d.y)))
+
+
 ## The lowest point of [param node]'s artwork in world space - the part of it
 ## currently touching the ground.
 ##
@@ -109,3 +130,65 @@ static func lowest_point(node: Node2D) -> Vector2:
 static func local_footing(sprite: Sprite2D) -> Vector2:
 	var rect := local_rect(sprite)
 	return Vector2(rect.position.x + rect.size.x * 0.5, rect.end.y)
+
+
+## The texture [param sprite] actually samples, with an [AtlasTexture] resolved to
+## the sheet behind it.
+##
+## Anything drawing a sprite's artwork with its own geometry rather than with a
+## [Sprite2D] - a shadow's projected mesh - needs the real texture and its own UVs,
+## because an atlas region is applied by the sprite and not by the texture.
+static func source_texture(sprite: Sprite2D) -> Texture2D:
+	if sprite == null or sprite.texture == null:
+		return null
+	var atlas := sprite.texture as AtlasTexture
+	if atlas != null and atlas.atlas != null:
+		return atlas.atlas
+	return sprite.texture
+
+
+## The patch of [method source_texture] that [param sprite] is showing right now,
+## in texture pixels: its atlas region or its own region, cut down to the frame it
+## is on. Everything a sheet-animated or atlased sprite does to pick its picture,
+## answered as one rectangle.
+static func frame_rect(sprite: Sprite2D) -> Rect2:
+	if sprite == null or sprite.texture == null:
+		return Rect2()
+
+	var atlas := sprite.texture as AtlasTexture
+	var rect: Rect2
+	if sprite.region_enabled:
+		rect = sprite.region_rect
+		if atlas != null and atlas.atlas != null:
+			rect.position += atlas.region.position
+	elif atlas != null and atlas.atlas != null:
+		rect = atlas.region
+	else:
+		rect = Rect2(Vector2.ZERO, Vector2(sprite.texture.get_size()))
+
+	var columns := maxi(sprite.hframes, 1)
+	var rows := maxi(sprite.vframes, 1)
+	if columns > 1 or rows > 1:
+		var cell := Vector2(rect.size.x / float(columns), rect.size.y / float(rows))
+		var frame := clampi(sprite.frame, 0, columns * rows - 1)
+		var column := frame % columns
+		# Exact: the remainder has already been taken off, so there is nothing to lose.
+		@warning_ignore("integer_division")
+		var row := (frame - column) / columns
+		rect = Rect2(
+			rect.position + Vector2(float(column) * cell.x, float(row) * cell.y), cell)
+	return rect
+
+
+## Where that frame is drawn in the sprite's own local space, with
+## [member Sprite2D.offset] and [member Sprite2D.centered] taken into account. The
+## quad a [Sprite2D] would put the picture on, for anything that has to put it
+## somewhere else.
+static func frame_draw_rect(sprite: Sprite2D) -> Rect2:
+	if sprite == null or sprite.texture == null:
+		return Rect2()
+	var size := frame_rect(sprite).size
+	var origin := sprite.offset
+	if sprite.centered:
+		origin -= size * 0.5
+	return Rect2(origin, size)

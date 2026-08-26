@@ -25,6 +25,20 @@ extends Node
 ## on the same hit and restores it a moment later, so a single write here would
 ## be undone by that timer; instead the time scale is driven every frame off the
 ## real clock, which also lets it ease back to normal rather than snapping.
+##
+## [b]This is also where a run fails, and the two are the same event.[/b] Dying is the
+## only way a run ends badly, so what the player themselves is carrying is put back
+## here and nowhere else: the borrowed throwable given up, the weapon put away and
+## silenced, the blood still flowing to them dropped before the purse is emptied, the
+## streak lost with it, and the run itself ended on [RunSessionState] the moment the
+## body is home.
+##
+## [b]What it does not do is tear the world down.[/b] The round, the road, the ambush,
+## the search and the night each stand themselves down on the player's own
+## [signal Health.died] - that is the pattern every one of them already follows - so
+## there is no second teardown here that could disagree with theirs. The one exception
+## is the bounty fight, and only because of its timing; see
+## [method _close_the_encounter].
 
 ## Emitted as the killing hit lands and the world slows.
 signal death_started
@@ -51,17 +65,40 @@ enum State { IDLE, DYING, LYING, TRAVELLING, RESTORING, RISING }
 @export var teleporter_path: NodePath = ^"../Teleporter"
 ## Nodes whose input is switched off for the length of the sequence, so no key
 ## press can pull the player out of their own death - the teleport that would
-## otherwise walk them out of it, and the weapon.
-@export var input_blocked_paths: Array[NodePath] = [
-	^"../Teleporter", ^"../../Shotgun"
-]
-## The weapon, put away as the player goes down. It is not parented to them, so
-## without this it hangs in the air over the body while they lie there. It goes
-## through the weapon's own [method Node2D.stow], the same call [PlayerLoadout]
-## uses, so it comes back exactly as ready or as spent as it went away.
-@export var shotgun_path: NodePath = ^"../../Shotgun"
+## otherwise walk them out of it.
+##
+## [b]The weapon is deliberately not in this list.[/b] It is built by [WeaponMount]
+## rather than authored beside the player, so there is no path here that could name
+## it; it is put away and silenced through the mount instead - see
+## [method _stow_weapon] - exactly the way [PlayerSleep] does it.
+@export var input_blocked_paths: Array[NodePath] = [^"../Teleporter"]
+## The weapon put away, when there is no [WeaponMount] in the world to ask.
+##
+## The mount is the ordinary answer - it is what builds whichever weapon the player
+## chose, so asking it is what makes this work for a weapon that did not exist when
+## the player scene was authored. This path is only the fallback, for a test scene
+## with a weapon dropped straight into it, and it is the same arrangement
+## [member PlayerLoadout.weapon_path] uses for the same reason.
+@export var weapon_path: NodePath = ^""
 ## How long the weapon takes to disappear on the killing hit.
 @export var weapon_stow_time: float = 0.35
+## Whether the trigger is silenced as well as the weapon being put away.
+##
+## [b]A stowed weapon is still listening.[/b] Holstering only changes where the
+## weapon is drawn, so without this the player goes on firing while they are lying
+## dead in the sand. It is handed back in [method _finish], so a sequence that ended
+## badly can never leave the player holding a gun that will not fire.
+@export var silences_weapon: bool = true
+## Whether something the player picked up off the ground is given back as they go
+## down, so their own weapon is what comes home with them.
+##
+## [b]A throwable is borrowed, not owned.[/b] [WeaponMount] puts the chosen weapon at
+## the belt while a knife or a bone is in the hand and hands it back the moment the
+## throw goes - so a death with one still in the hand arrives in the base carrying
+## somebody else's knife, with the player's own weapon stowed behind it and nothing
+## left to bring it out. The borrow is spent here through the mount's own
+## [method WeaponMount.drop_temporary], which is the very call the throw makes.
+@export var drops_temporary_weapon: bool = true
 ## The component that owns what the player is holding. It is asked to take the
 ## weapon back over once the player is standing again, rather than this drawing
 ## the weapon itself - so a player revived in the base stays empty-handed and one
@@ -135,6 +172,31 @@ enum State { IDLE, DYING, LYING, TRAVELLING, RESTORING, RISING }
 ## what the player already got home and banked, and nothing here can reach it, so
 ## a death can never touch it however this is retuned.
 @export var carried_wallet_path: NodePath = ^"/root/Blood"
+## Whether the blood still on its way to the player is dropped as the wallet is
+## emptied.
+##
+## [b]Without it the emptying does not hold.[/b] Blood is banked the instant it
+## reaches the player - see [method BloodMagnet._on_specks_arrived] - and the killing
+## hit leaves a stream of it already lifting off the ground, the player's own spray
+## among it. Every piece of that lands [i]after[/i] the wallet has been reset and is
+## added to it, so a man killed in a crowd wakes up in the base with a purse he was
+## meant to have lost. The pull is cleared through the magnet's own
+## [method BloodMagnet.release_all], which exists for exactly this.
+@export var releases_blood_in_flight: bool = true
+
+@export_group("The run")
+## Whether dying ends the run on [RunSessionState].
+##
+## [b]It is the other half of coming home.[/b] The teleport carries the body back to
+## the base, but the session is what says whether the player is out on a run at all -
+## and left standing it leaves them at home in a world that still believes one is
+## happening: the round still owed no resupply, the wounds of the run still
+## remembered, the contracts never re-dealt. It is the same call the ride home makes -
+## see [method CampMenu._ride_in] - so there is one answer to "the run is over"
+## rather than two.
+@export var ends_the_run: bool = true
+## The run's own state - the [code]RunSession[/code] autoload.
+@export var session_path: NodePath = ^"/root/RunSession"
 
 @export_group("Black out")
 ## Whether the trip home is hidden behind a fade to black. The teleport itself is
@@ -167,7 +229,7 @@ enum State { IDLE, DYING, LYING, TRAVELLING, RESTORING, RISING }
 @onready var _visual: Node2D = get_node_or_null(visual_path) as Node2D
 @onready var _eyes: CanvasItem = get_node_or_null(dead_eyes_path) as CanvasItem
 @onready var _teleporter: Teleporter = get_node_or_null(teleporter_path) as Teleporter
-@onready var _shotgun: Node2D = get_node_or_null(shotgun_path) as Node2D
+@onready var _session: Node = get_node_or_null(session_path)
 @onready var _loadout: PlayerLoadout = get_node_or_null(loadout_path) as PlayerLoadout
 @onready var _wallet: BloodWallet = get_node_or_null(carried_wallet_path) as BloodWallet
 @onready var _streak: StreakCounter = get_node_or_null(streak_path) as StreakCounter
@@ -214,6 +276,7 @@ func _on_died() -> void:
 	_state = State.DYING
 	_show_eyes(true)
 	_block_input(true)
+	_hand_back_borrowed_weapon()
 	_stow_weapon()
 	_spill_carried_blood()
 	_start_slow_motion()
@@ -232,6 +295,14 @@ func _on_died() -> void:
 ## two are the same wager - see [StreakCounter] - and nothing else in the game ever
 ## takes either of them away.
 func _spill_carried_blood() -> void:
+	# Dropped before the wallet is emptied, never after: a piece that reaches the
+	# player is banked on the frame it arrives, so anything still in the air when the
+	# reset happens would be added back on top of it.
+	if releases_blood_in_flight:
+		var magnet := BloodMagnet.get_active(self)
+		if magnet != null:
+			magnet.release_all()
+
 	if lose_carried_blood and _wallet != null:
 		_wallet.reset()
 	if lose_streak and _streak != null:
@@ -294,13 +365,29 @@ func _black_out() -> void:
 ## player lands in gets to say where the view rests from then on rather than
 ## fighting a death zoom that has not let go.
 func _travel_home() -> void:
+	_close_the_encounter()
+
 	if _teleporter == null:
 		_begin_restore()
 		return
 
 	# The teleport was one of the nodes silenced above; it is asked directly
 	# rather than through its key, so the player still cannot trigger it.
-	_teleporter.teleport(silent_teleport)
+	#
+	# [b]The run portal is refused, and it has to be.[/b] The B key is contextual -
+	# pressed while standing in the pit at the foot of the base it starts the next run
+	# instead of travelling - and a body being carried home is standing wherever it
+	# fell, which on a death in the base is the pit itself. Taken, that branch raises
+	# the map screen over a corpse, never moves the body and never reports an arrival,
+	# so the sequence waits at [constant State.TRAVELLING] for a signal that is never
+	# coming and the player is left dead on a black screen for good. Carrying a body
+	# home is not the player choosing to leave, so it is never a way to start a run.
+	#
+	# A teleport that could not be made - no destination, or one already under way -
+	# answers false rather than stranding the sequence, and the player is simply put
+	# back together where they fell.
+	if not _teleporter.teleport(silent_teleport, false):
+		_begin_restore()
 
 
 func _on_teleported(_destination: TeleportDestination) -> void:
@@ -314,6 +401,7 @@ func _on_teleported(_destination: TeleportDestination) -> void:
 ## in to a standing character with nothing to explain how they got there.
 func _begin_restore() -> void:
 	_state = State.RESTORING
+	_end_the_run()
 	revive_started.emit()
 
 	var fade := ScreenFade.get_active(self)
@@ -384,6 +472,7 @@ func _rise() -> void:
 func _finish() -> void:
 	_state = State.IDLE
 	_block_input(false)
+	_unsilence_weapon()
 	if _visual != null:
 		_visual.position = _visual_rest
 		_visual.rotation = _visual_rest_rotation
@@ -392,12 +481,123 @@ func _finish() -> void:
 	revive_finished.emit()
 
 
+## The bounty fight called off, if the player died in one.
+##
+## [b]It is here because of when, not because of what.[/b] Every other system stands
+## itself down on the player's own [signal Health.died] - the round, the road, the
+## ambush, the search, the night - but the boss encounter cannot: it is held on a map
+## of its own several thousand pixels away, and unwinding it puts the bodies and the
+## player back where they were found and hands the camera its old limits back. Done on
+## the killing hit that is a body dragged across the desert in full view and a camera
+## chasing it; done after the arrival it would overwrite the base's own limits with a
+## rectangle in the middle of nowhere. The one moment it is neither is this one - the
+## screen is fully black and the trip home has not started - so the death sequence is
+## the only thing that can ask for it.
+##
+## [b]Nothing here is new machinery.[/b] It is the same three calls, in the same order,
+## that winning the fight makes: the fixed screen handed back through
+## [method BossArena.unlock], the fight forgotten through [method BossDefeat.reset],
+## and the encounter taken off the map through
+## [method MiniBossDirector.reset_encounter] - which carries everybody home itself. A
+## world with none of them, which is every world that is not a boss day, does nothing.
+##
+## The contract is deliberately left standing on the board. Dying to the man does not
+## complete his poster and does not tear it up; he is still wanted, and the next run
+## can go after him again.
+func _close_the_encounter() -> void:
+	var director := MiniBossDirector.get_active(self)
+	var arena := BossArena.get_active(self)
+
+	# Asked before anything is touched, so an ordinary death - which is nearly all of
+	# them - writes nothing at all. The arena is asked as well as the director, so a
+	# world holding a locked screen with nobody running it is still handed back.
+	var fighting := director != null and director.is_active()
+	if not fighting and (arena == null or not arena.is_locked()):
+		return
+
+	# In the order winning the fight unwinds it: the screen first, because the camera
+	# limits it hands back are the ones the encounter map is about to hand back its own
+	# on top of - see [method BossDefeat._release_arena].
+	if arena != null:
+		arena.unlock()
+
+	var defeat := BossDefeat.get_active(self)
+	if defeat != null:
+		defeat.reset()
+
+	if fighting:
+		director.reset_encounter()
+
+
+## The run is over, and the session is told so at the moment the body is home.
+##
+## [b]It says nothing about where the player is standing[/b] - the teleport has
+## already done that - only that they are no longer out on a run, which is what a
+## world coming up next, a resupply and the wanted board all read. Ending a session
+## that is already ended does nothing, so the ordinary ride home and a death arriving
+## on top of one another cannot end the same run twice.
+func _end_the_run() -> void:
+	if not ends_the_run:
+		return
+	if _session != null and _session.has_method(&"end"):
+		_session.call(&"end")
+
+
+## Whatever is in the player's hands right now.
+##
+## Asked of the [WeaponMount] rather than held, because the weapon is built from the
+## player's choice and can be replaced - a reference kept here would be stowing a
+## weapon that had already been thrown away. Nothing here knows which weapon it is:
+## this is the same lookup [PlayerLoadout] makes, so the two can never disagree about
+## what is being put away.
+func _get_weapon() -> Node2D:
+	var mount := WeaponMount.get_active(self)
+	if mount != null:
+		var built := mount.get_weapon()
+		if built != null:
+			return built
+	return get_node_or_null(weapon_path) as Node2D
+
+
+## The knife or the bone the player picked up is given back before anything else
+## happens, so the weapon that is put away below and carried home is their own.
+##
+## Nothing is reimplemented: the mount's own [method WeaponMount.drop_temporary] frees
+## the borrowed weapon and brings the chosen one back out of the belt, which is
+## exactly what spending the throw does. Harmless when nothing was borrowed.
+func _hand_back_borrowed_weapon() -> void:
+	if not drops_temporary_weapon:
+		return
+	var mount := WeaponMount.get_active(self)
+	if mount != null and mount.is_carrying_temporary():
+		mount.drop_temporary(0.0)
+
+
 ## The weapon is not parented to the player, so left alone it hangs in the air
 ## over the body. It is asked to holster rather than hidden, so it keeps
-## following, keeps its state, and comes back the way it went away.
+## following, keeps its state, and comes back the way it went away - and it is
+## silenced as well as put away, because a stowed weapon is still listening for the
+## trigger and a dead man does not fire.
 func _stow_weapon() -> void:
-	if _shotgun != null and _shotgun.has_method(&"stow"):
-		_shotgun.call(&"stow", maxf(weapon_stow_time, 0.0))
+	var weapon := _get_weapon()
+	if weapon == null:
+		return
+	if weapon.has_method(&"stow"):
+		weapon.call(&"stow", maxf(weapon_stow_time, 0.0))
+	if silences_weapon:
+		weapon.set_process_unhandled_input(false)
+
+
+## The trigger handed back on the way out. Asked of the mount again rather than
+## remembered, so a weapon swapped or rebuilt during the sequence is the one that
+## gets it back - and it is deliberately separate from [PlayerLoadout], which decides
+## only whether the weapon is [i]drawn[/i] and never whether it is listening.
+func _unsilence_weapon() -> void:
+	if not silences_weapon:
+		return
+	var weapon := _get_weapon()
+	if weapon != null:
+		weapon.set_process_unhandled_input(true)
 
 
 ## The arena track is asked to wind down on the killing hit. It is only the
@@ -475,8 +675,16 @@ func _release_camera() -> void:
 	if _camera_tween != null and _camera_tween.is_running():
 		_camera_tween.kill()
 	var camera := CameraController.get_active(self)
-	if camera != null:
-		camera.set_zoom_multiplier(1.0)
+	if camera == null:
+		return
+	camera.set_zoom_multiplier(1.0)
+	# Anything the camera had been sent after is let go of before the body is moved.
+	# A death can land in the middle of a presentation that borrowed the view - the
+	# head [DangerFinale] follows out of the last man of a Danger - and a camera still
+	# chasing a subject several thousand pixels away is a camera that never finds the
+	# player again in the base.
+	if camera.get_follow_subject() != null:
+		camera.release_follow()
 
 
 func _block_input(blocked: bool) -> void:
@@ -498,3 +706,4 @@ func _exit_tree() -> void:
 		Engine.time_scale = 1.0
 		_slowing = false
 	_block_input(false)
+	_unsilence_weapon()

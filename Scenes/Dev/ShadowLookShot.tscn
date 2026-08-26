@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Dev/shadow_look_shot.gd" id="1_shot"]
+[ext_resource type="PackedScene" uid="uid://bqgtyn0mdbo7d" path="res://Scenes/World/World.tscn" id="2_world"]
+[ext_resource type="PackedScene" uid="uid://cpvswf25xhxh" path="res://Scenes/Enemy/Enemy.tscn" id="3_enemy"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Cactus.tscn" id="4_cactus"]
+[ext_resource type="PackedScene" uid="uid://cvpvthdqu1ii2" path="res://Scenes/Weapons/Revolver.tscn" id="5_revolver"]
+
+[node name="ShadowLookShot" type="Node2D"]
+script = ExtResource("1_shot")
+world_scene = ExtResource("2_world")
+enemy_scene = ExtResource("3_enemy")
+cactus_scene = ExtResource("4_cactus")
+revolver_scene = ExtResource("5_revolver")

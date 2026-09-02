@@ -29,7 +29,7 @@ var kind: Kind = Kind.ENEMY
 ## What the button says. Built by the station from the pieces below.
 var label: String = ""
 ## The scene that is instanced. For a boss this is still the ordinary enemy scene -
-## a mini boss [i]is[/i] an Enemy1, dressed and grown.
+## a mini boss [i]is[/i] an Bandit, dressed and grown.
 var scene: PackedScene
 ## The rung this boss is built at: how big he is, how fast he moves. Null on an
 ## ordinary enemy.

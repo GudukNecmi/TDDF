@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://c0travelportal01"]
+
+[ext_resource type="Script" path="res://Scripts/World/travel_portal.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://cgotikarenaportal" path="res://Scenes/World/ArenaPortal.tscn" id="2_art"]
+[ext_resource type="Texture2D" uid="uid://b5yjrmddijjg3" path="res://Assets/Maps/Desert/WorldMap/placeholder_dot.tres" id="3_icon"]
+
+[node name="TravelPortal" type="Node2D"]
+script = ExtResource("1_script")
+interaction_radius = 190.0
+
+[node name="Icon" type="Sprite2D" parent="."]
+z_index = -8
+scale = Vector2(1.1, 1.1)
+texture = ExtResource("3_icon")
+
+[node name="PortalArt" parent="." instance=ExtResource("2_art")]
+script = null
+
+[node name="Light" parent="PortalArt" index="1"]
+energy = 1.6
+
+[node name="Prompt" parent="PortalArt" index="2"]
+visible = false

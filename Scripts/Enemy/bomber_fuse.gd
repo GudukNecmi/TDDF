@@ -6,7 +6,7 @@ extends Node2D
 ## [b]Nothing stops it once it is lit.[/b] The countdown is a scene tree timer, so
 ## it is not the bomber's to cancel: killing the bomber after it has committed
 ## buys the player a corpse on the floor and three seconds, not a defused bomb.
-## Killing it [i]before[/i] it commits is an ordinary Enemy1 death and this
+## Killing it [i]before[/i] it commits is an ordinary Bandit death and this
 ## component never wakes up at all - which is the whole of the difference between
 ## the two deaths the brief asks for, and it is one flag.
 ##
@@ -185,7 +185,7 @@ func ignite() -> void:
 
 
 ## Whether this bomber has lit itself. The one flag that tells the two deaths
-## apart: false is an ordinary Enemy1 death, true is a corpse with a countdown on
+## apart: false is an ordinary Bandit death, true is a corpse with a countdown on
 ## it.
 func is_lit() -> bool:
 	return _lit

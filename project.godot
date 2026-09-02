@@ -15,6 +15,10 @@ run/main_scene="res://Scenes/UI/TitleScreen.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
+[audio]
+
+buses/default_bus_layout="uid://d2gydhh7i03dm"
+
 [autoload]
 
 Blood="*res://Scripts/Currency/blood_wallet.gd"
@@ -28,12 +32,15 @@ Bounties="*res://Scripts/Bounty/bounty_log.gd"
 Ammo="*res://Scripts/Weapons/ammo_locker.gd"
 DevConfig="*res://Scripts/Dev/dev_balance_store.gd"
 Vitals="*res://Scripts/Run/run_vitals.gd"
-CampBlood="*res://Scripts/Currency/camp_blood.gd"
 Streak="*res://Scripts/Run/run_streak.gd"
 MusicStates="*res://Scenes/Common/MusicStates.tscn"
+WorldClock="*res://Scripts/World/world_time_manager.gd"
+HorseBlood="*res://Scripts/Currency/horse_blood_storage.gd"
+ExtractionUnlocks="*res://Scripts/World/extraction_unlock_state.gd"
 MCPScreenshot="*res://addons/godot_mcp/mcp_screenshot_service.gd"
 MCPInputService="*res://addons/godot_mcp/mcp_input_service.gd"
 MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
+LoadingScreen="*res://Scenes/UI/LoadingScreen.tscn"
 
 [display]
 
@@ -138,6 +145,11 @@ dev_test_map={
 "deadzone": 0.5,
 "events": Array[InputEvent]([Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":85,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 , Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":85,"physical_keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+])
+}
+open_world_map={
+"deadzone": 0.5,
+"events": Array[InputEvent]([Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":77,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ])
 }
 

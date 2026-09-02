@@ -6,7 +6,7 @@ extends Resource
 ## measured against the count [WaveManager] has already decided on - the run's
 ## existing curve is untouched - so an entry can only ever change [i]what[/i] the
 ## wave is made of, never how large it is. Whatever is not claimed by an entry is
-## the spawner's own [member EnemySpawner.enemy_scene], which is why Enemy1 stays
+## the spawner's own [member EnemySpawner.enemy_scene], which is why Bandit stays
 ## the dominant enemy without being listed anywhere.
 ##
 ## The three ways a type can appear are deliberately separate numbers rather than

@@ -72,3 +72,4 @@ script = ExtResource("90_shadow")
 shadow_pull = 24.0
 cast_mode = 1
 source_sprite_path = NodePath("../Sway/Art")
+shadow_softness_override = 0.16

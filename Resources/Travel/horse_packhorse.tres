@@ -1,9 +1,0 @@
-[gd_resource type="Resource" script_class="Horse" format=3 uid="uid://7crpkpg28qcp"]
-
-[ext_resource type="Script" uid="uid://cvgaf7omuaqao" path="res://Scripts/Run/horse.gd" id="1_horse"]
-
-[resource]
-script = ExtResource("1_horse")
-horse_id = &"pack_horse"
-display_name = "PACK HORSE"
-description = "SLOW, SOUR, AND ALL THERE IS"

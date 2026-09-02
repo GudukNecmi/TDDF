@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cgotikmusicstates"]
+[gd_scene load_steps=12 format=3 uid="uid://cgotikmusicstates"]
 
 [ext_resource type="Script" path="res://Scripts/Common/music_state_board.gd" id="1_board"]
 [ext_resource type="Script" path="res://Scripts/Common/music_state.gd" id="2_state"]
@@ -7,8 +7,16 @@
 [ext_resource type="Resource" path="res://Resources/Music/state_camp.tres" id="5_camp"]
 [ext_resource type="Resource" path="res://Resources/Music/state_sleep.tres" id="6_sleep"]
 [ext_resource type="Resource" path="res://Resources/Music/state_trouble.tres" id="7_trouble"]
+[ext_resource type="Resource" path="res://Resources/Music/state_decision.tres" id="8_decision"]
+[ext_resource type="Resource" path="res://Resources/Music/state_combat.tres" id="9_combat"]
+[ext_resource type="Resource" path="res://Resources/Music/state_boss.tres" id="10_boss"]
+[ext_resource type="Script" path="res://Scripts/Common/music_shuffle_watcher.gd" id="11_shuffle"]
+[ext_resource type="Resource" path="res://Resources/Music/state_main_menu.tres" id="12_mainmenu"]
 
 [node name="MusicStates" type="Node"]
 process_mode = 3
 script = ExtResource("1_board")
-states = Array[ExtResource("2_state")]([ExtResource("3_base"), ExtResource("4_travel"), ExtResource("5_camp"), ExtResource("6_sleep"), ExtResource("7_trouble")])
+states = Array[ExtResource("2_state")]([ExtResource("3_base"), ExtResource("4_travel"), ExtResource("5_camp"), ExtResource("6_sleep"), ExtResource("7_trouble"), ExtResource("8_decision"), ExtResource("9_combat"), ExtResource("10_boss"), ExtResource("12_mainmenu")])
+
+[node name="MusicShuffleWatcher" type="Node" parent="."]
+script = ExtResource("11_shuffle")

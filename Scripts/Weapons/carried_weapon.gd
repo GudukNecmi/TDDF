@@ -192,7 +192,21 @@ func _physics_process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _holster > 0.0:
 		return
+	if _fire_blocked_by_zone():
+		return
 	_weapon_input(event)
+
+
+## Whether whichever [WorldZone] the weapon's target is standing in has ruled
+## weapon input inert - the World Map's own zone, so riding across it can never
+## fire, reload or throw a coin by accident. Nothing here holsters the weapon:
+## a zone that wants it visibly carried while mounted still gets to keep it
+## drawn, and only the trigger itself goes dead. A weapon whose target is in no
+## zone at all - or whose target has not resolved yet - is never blocked, which
+## is what leaves ordinary combat exactly as it always was.
+func _fire_blocked_by_zone() -> bool:
+	var zone := WorldZone.get_zone_for(self, _target)
+	return zone != null and zone.blocks_weapon_fire
 
 
 ## What this weapon does with a press. The one thing a subclass has to write, and
@@ -272,6 +286,22 @@ func get_hand_direction() -> Vector2:
 ## is always able to fire.
 func has_ammo() -> bool:
 	return _ammo == null or _ammo.can_fire()
+
+
+## Whether this weapon could actually fire a shot right now - the source of
+## truth [Crosshair] reads to colour the sight, red for ready and yellow for
+## not, and never merely whether the fire key was pressed.
+##
+## [b]The base answer is ammunition alone[/b], which is correct for anything
+## with no action of its own to cycle - and wrong the moment a weapon has a
+## state machine that can refuse a trigger pull even with a full magazine, like
+## a shotgun's open breech or a revolver's empty top chamber. A subclass with
+## one of those overrides this to also read it; everything else - reloading,
+## the stow, the ammo count itself - is untouched by overriding it, since this
+## is a pure readout and nothing here is ever called to decide whether a shot
+## is actually allowed to leave.
+func is_ready_to_fire() -> bool:
+	return has_ammo()
 
 
 ## Spends one shot's worth and reports whether it went through. The reserve

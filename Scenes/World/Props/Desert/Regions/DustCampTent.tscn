@@ -12,17 +12,30 @@
 [ext_resource type="Texture2D" uid="uid://d26pxw06vhlkc" path="res://Assets/Maps/Desert/Dust Camp/Tents (8).PNG" id="11_tent8"]
 [ext_resource type="Texture2D" uid="uid://bkaisry6jufsb" path="res://Assets/Maps/Desert/Dust Camp/Tents (9).PNG" id="12_tent9"]
 [ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="13_shadow"]
+[ext_resource type="Script" uid="uid://bm3ln8gbx37l4" path="res://Scripts/World/prop_sway.gd" id="14_sway"]
+[ext_resource type="Script" uid="uid://dtnfb87bh7qke" path="res://Scripts/World/prop_touch.gd" id="15_touch"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tentbase"]
 resource_local_to_scene = true
 size = Vector2(386, 60)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_tenttouch"]
+radius = 170.0
 
 [node name="DustCampTent" type="StaticBody2D" unique_id=124925796 groups=["desert_prop", "region_prop"]]
 scale = Vector2(0.8, 0.8)
 collision_layer = 32
 collision_mask = 0
 
-[node name="Art" type="Sprite2D" parent="." unique_id=1787808656]
+[node name="Sway" type="Node2D" parent="."]
+script = ExtResource("14_sway")
+idle_degrees = 0.0
+knock_degrees = 4.5
+knock_cycles_per_second = 1.9
+knock_damping = 3.6
+max_degrees = 9.0
+
+[node name="Art" type="Sprite2D" parent="Sway" unique_id=1787808656]
 texture = ExtResource("4_tent1")
 centered = false
 offset = Vector2(-332, -504)
@@ -33,9 +46,27 @@ textures = Array[Texture2D]([ExtResource("4_tent1"), ExtResource("5_tent2"), Ext
 position = Vector2(-6.9999924, -58)
 shape = SubResource("RectangleShape2D_tentbase")
 script = ExtResource("3_footing")
+art_path = NodePath("../Sway/Art")
+
+[node name="Touch" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+script = ExtResource("15_touch")
+body_group = &"player"
+minimum_speed = 0.0
+retrigger_interval = 0.55
+sway_path = NodePath("../Sway")
+knock_strength = 1.0
+speed_multiplier = 0.8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Touch"]
+position = Vector2(-7, -58)
+shape = SubResource("CircleShape2D_tenttouch")
 
 [node name="ShadowCaster" type="Node2D" parent="."]
 script = ExtResource("13_shadow")
 shadow_pull = 36.0
 cast_mode = 1
-source_sprite_path = NodePath("../Art")
+source_sprite_path = NodePath("../Sway/Art")
+shadow_softness_override = 0.16

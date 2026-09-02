@@ -32,7 +32,7 @@ extends Resource
 @export var knowledge: int = 0
 
 @export_group("The boss")
-## How large the boss is drawn and collides, as a multiple of an ordinary Enemy1.
+## How large the boss is drawn and collides, as a multiple of an ordinary Bandit.
 ## Written onto the instance's own [member Node2D.scale], so the artwork, the
 ## hitboxes, the shadow and the knife all grow together.
 @export var scale_multiplier: float = 1.5

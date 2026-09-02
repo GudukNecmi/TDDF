@@ -397,6 +397,7 @@ func surrender(forced: bool = false) -> bool:
 	if stops_escape:
 		_stop_escaping(host)
 	_stop_fighting(host)
+	_lock_out_hostility(host)
 	if drops_weapon and _head_pop != null:
 		_head_pop.drop_knife()
 	if stops_aiming:
@@ -481,6 +482,30 @@ func _leave_the_enemy_container(host: Node) -> void:
 		return
 
 	host.reparent.call_deferred(keeper, true)
+
+
+## Makes the surrender authoritative: this man can never again cost the player a
+## point of damage, for the rest of the encounter, whatever else happens to him.
+##
+## [b]The bug this closes.[/b] [method _stop_fighting] switches the host's whole
+## [method Node._physics_process] off, which is what stops his knife the instant
+## he goes down - but [method stand_up] switches it back on again so he can run,
+## and the ordinary chase-and-swing code in [Enemy] does not know a surrender
+## ever happened. [method Enemy.begin_flight]'s own turn to face away is asked
+## for on a delay - see [member EnemyEscape.escape]'s [code]delay[/code] - so for
+## the length of that delay a man getting up off the floor was, for a moment, an
+## ordinary enemy again: not yet fleeing, attacks never told to stay off, and
+## close enough to the player he had just been talked to by to land a swing on
+## them before he ever turned to run.
+##
+## [method Enemy.lock_attacks_disabled] is the fix: it is not merely switched
+## off, it is switched off *and refused to be switched back on* by anything, for
+## good - see that method's own doc. So the window above no longer matters: his
+## knife is off before he ever stands, before [EnemyEscape] gets a chance to turn
+## him, and nothing that follows can hand it back to him.
+func _lock_out_hostility(host: Node) -> void:
+	if host.has_method(&"lock_attacks_disabled"):
+		host.call(&"lock_attacks_disabled")
 
 
 ## Calls off a retreat this enemy had already begun, so the man on the floor is not

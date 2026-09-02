@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="BountyKnowledgeCategory" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Scripts/Bounty/bounty_knowledge_category.gd" id="1_category"]
+
+[resource]
+script = ExtResource("1_category")
+category_id = &"camp"
+display_name = "CAMP"
+unknown_text = "?"
+reveal_message = "You learned that {who} is holed up at {what}."
+source = 3
+custom_values = Array[StringName]([&"Sunken Wash", &"Cracked Mesa", &"Boothill Camp", &"Dead Man's Draw", &"Widow Rock"])

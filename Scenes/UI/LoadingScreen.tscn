@@ -1,0 +1,50 @@
+[gd_scene load_steps=2 format=3 uid="uid://cgotikloadscreen"]
+
+[ext_resource type="Script" path="res://Scripts/Common/loading_screen.gd" id="1_script"]
+
+[node name="LoadingScreen" type="CanvasLayer"]
+layer = 2
+script = ExtResource("1_script")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0.03, 0.02, 0.02, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Body" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_override_constants/separation = 18
+mouse_filter = 2
+
+[node name="Caption" type="Label" parent="Center/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.16, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 36
+text = "LOADING"
+horizontal_alignment = 1
+
+[node name="Bar" type="ProgressBar" parent="Center/Body"]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0, 0, 0, 0)
+show_percentage = false
+value = 0.0
+
+[node name="Stinger" type="AudioStreamPlayer" parent="."]
+bus = &"Game"

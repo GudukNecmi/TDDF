@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://cyo3lmqvrb6ur"
+path="res://.godot/imported/Ultra-short_happy_we_#4-1788290953264.wav-9eb75e42f2bcaf34d2a4384642fd8cd3.sample"
+
+[deps]
+
+source_file="res://Sound/Efect/Decision Screen/Para aldık/Ultra-short_happy_we_#4-1788290953264.wav"
+dest_files=["res://.godot/imported/Ultra-short_happy_we_#4-1788290953264.wav-9eb75e42f2bcaf34d2a4384642fd8cd3.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -41,6 +41,14 @@ extends Resource
 ## death itself, so returning home any other way still resumes. See
 ## [method MusicStateBoard.play_now].
 @export var always_from_start: bool = false
+## Alternate tracks this state turns over between instead of looping
+## [member stream] - the decision screen's own eight-song pool. Empty for
+## every state that is simply one track; non-empty is read and driven by
+## [code]music_shuffle_watcher.gd[/code], never by the board itself, so a
+## state nobody has wired a watcher to still just plays [member stream] on
+## repeat. See that file's own doc for the whole of how a pool takes its
+## turns.
+@export var shuffle_pool: Array[AudioStream] = []
 
 
 ## Where in the track a fresh start begins, folded back inside the track's own

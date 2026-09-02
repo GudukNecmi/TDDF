@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MusicState" load_steps=3 format=3 uid="uid://cgotikbossstate"]
+
+[ext_resource type="Script" uid="uid://c6ylwt4xp2d23" path="res://Scripts/Common/music_state.gd" id="1_state"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Boss/BossMusic1.WAV" id="2_boss"]
+
+[resource]
+script = ExtResource("1_state")
+state_id = &"boss"
+stream = ExtResource("2_boss")
+volume_db = -3.0
+loops = true
+always_from_start = true

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ScatterLayer" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/scatter_layer.gd" id="1_layer"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Cactus.tscn" id="2_cactus"]
+
+[resource]
+script = ExtResource("1_layer")
+scenes = Array[PackedScene]([ExtResource("2_cactus")])
+count = 420
+enabled = true
+scale_range = Vector2(0.85, 1.2)
+min_separation = 320.0
+min_separation_from_others = 0.0
+max_attempts = 14

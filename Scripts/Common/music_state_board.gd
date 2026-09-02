@@ -75,6 +75,13 @@ const GROUP := &"music_states"
 ## Held to [member exit_time], so asking for more overlap than there is fade simply
 ## starts the new track as the old one begins going.
 @export var overlap: float = 1.0
+## The exit, enter and overlap [method enter_immediate] uses instead of
+## [member exit_time], [member enter_time] and [member overlap] - a handover
+## with the same shape, shrunk to a snap. What a bandit contact's decision
+## screen and its own result both ask for: "stop/fade" and "ends
+## immediately" read as a beat, not as the same two-second crossfade every
+## other change of state gets.
+@export var immediate_transition_time: float = 0.15
 ## Speed a track is dragged down to as it leaves, and opened at as it arrives, as a
 ## fraction of its authored speed.
 @export_range(0.01, 1.0, 0.01) var low_pitch: float = 0.05
@@ -189,6 +196,33 @@ func get_active_player() -> MusicPlayer:
 	return _players.get(_current) as MusicPlayer
 
 
+## The player built for [param state_id], whether or not it is the one
+## currently sounding - null for an unauthored id. What a caller reaches for
+## to change *which track* a state plays before asking to [method enter] it -
+## see [method set_state_track] - rather than reading straight into the
+## board's own private players.
+func get_player(state_id: StringName) -> MusicPlayer:
+	return _players.get(state_id) as MusicPlayer
+
+
+## Swaps the track a state plays, without touching whether it is playing.
+##
+## [b]For a state whose music is picked per encounter rather than authored
+## once.[/b] World Map combat rolls one of three fight tracks and a bandit's
+## decision loop turns over a pool of eight - both still ordinary states on
+## this same board, just with [method enter_immediate] asked for a fresh
+## pick before every fight rather than the same [member MusicState.stream]
+## every time. Safe to call whether or not [param state_id] is the state
+## currently sounding; it only ever changes what the *next* [method enter] of
+## it opens.
+func set_state_track(state_id: StringName, stream: AudioStream) -> void:
+	var player := _players.get(state_id) as MusicPlayer
+	if player == null or stream == null:
+		return
+	player.stream = stream
+	player.loop_stream = stream
+
+
 ## How far into its own track a state was when it was last stowed. 0 for a state
 ## that has never played.
 func get_saved_position(state_id: StringName) -> float:
@@ -213,6 +247,23 @@ func forget(state_id: StringName) -> void:
 ##
 ## Returns whether a handover was actually begun.
 func enter(state_id: StringName) -> bool:
+	return _enter_with_shape(state_id, exit_time, enter_time, overlap)
+
+
+## The same handover, shrunk to [member immediate_transition_time] on every
+## side - what a caller reaches for when the change itself has to read as
+## instant rather than as a crossfade: the World Map's Travel track stopping
+## the moment a bandit decision screen appears, and the decision's own loop
+## ending the moment the player answers it. Still one handover through one
+## board - nothing here is a second way music changes, only a faster shape
+## for the one that already exists.
+func enter_immediate(state_id: StringName) -> bool:
+	var beat := maxf(immediate_transition_time, 0.0)
+	return _enter_with_shape(state_id, beat, beat, beat)
+
+
+func _enter_with_shape(
+		state_id: StringName, exit_s: float, enter_s: float, overlap_s: float) -> bool:
 	if not _players.has(state_id):
 		if state_id != &"":
 			push_warning("MusicStateBoard: no state authored as %s." % state_id)
@@ -226,21 +277,21 @@ func enter(state_id: StringName) -> bool:
 	if leaving == &"":
 		# Nothing to hand over from - the first state of a session, or the first
 		# after a death stopped everything. It simply begins.
-		_open(state_id)
+		_open(state_id, enter_s)
 		return true
 
-	_stow(leaving, exit_time)
+	_stow(leaving, exit_s)
 
-	var lead := maxf(exit_time - maxf(overlap, 0.0), 0.0)
+	var lead := maxf(exit_s - maxf(overlap_s, 0.0), 0.0)
 	if lead <= 0.0:
-		_open(state_id)
+		_open(state_id, enter_s)
 		return true
 
 	# Real time and process-always: the world is frozen behind most of the menus
 	# this is called from, and the length of a handover is not something fast travel
 	# or a hit stop should be able to change.
 	var timer := get_tree().create_timer(lead, true, false, true)
-	timer.timeout.connect(_open_if_pending.bind(state_id))
+	timer.timeout.connect(_open_if_pending.bind(state_id, enter_s))
 	return true
 
 
@@ -306,16 +357,16 @@ func slow_to_silence(seconds: float = -1.0) -> void:
 
 
 ## The incoming half of a handover, one second before the outgoing half finishes.
-func _open_if_pending(state_id: StringName) -> void:
+func _open_if_pending(state_id: StringName, enter_s: float = -1.0) -> void:
 	# Only if it is still what was asked for. A second change of state during the
 	# overlap leaves this timer running with nothing to do, and this is what makes
 	# that harmless.
 	if _pending != state_id or not is_inside_tree():
 		return
-	_open(state_id)
+	_open(state_id, enter_s)
 
 
-func _open(state_id: StringName) -> void:
+func _open(state_id: StringName, enter_s: float = -1.0) -> void:
 	var player := _players.get(state_id) as MusicPlayer
 	var state := _authored.get(state_id) as MusicState
 	if player == null or state == null:
@@ -329,10 +380,11 @@ func _open(state_id: StringName) -> void:
 	player.pitch_scale = low_pitch
 	player.play_from(_opening_position(state_id))
 
+	var seconds := maxf(enter_s if enter_s >= 0.0 else enter_time, 0.0001)
 	var tween := create_tween().set_ignore_time_scale(true)
 	tween.set_parallel(true)
-	tween.tween_property(player, "pitch_scale", 1.0, maxf(enter_time, 0.0001))
-	tween.tween_property(player, "volume_db", state.volume_db, maxf(enter_time, 0.0001))
+	tween.tween_property(player, "pitch_scale", 1.0, seconds)
+	tween.tween_property(player, "volume_db", state.volume_db, seconds)
 	_tweens[state_id] = tween
 
 	state_entered.emit(state_id)

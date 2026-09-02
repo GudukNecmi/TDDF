@@ -83,6 +83,21 @@ signal routed(remaining: int)
 ## Emitted when the last enemy of the ambush is off the field and there are none
 ## left to come. [b]The only thing that ends an ambush.[/b]
 signal cleared()
+## Emitted the instant the killing hit that puts down the last man still
+## fighting lands - [param enemy] is the one who fell. [b]Not the same moment
+## as [signal cleared].[/b] A downed man or two can still be lying on the
+## floor, getting up to run, for [member downed_hold_the_fight] seconds after
+## this fires - see [method _check_cleared] - so this is "nobody is fighting
+## any more" and [signal cleared] is "the whole encounter is finally over".
+## The moment a Kill Cam wants: it should land on the man who just died, not
+## wait on a floor that might still have somebody on it.
+##
+## Fires only for an actual kill. A field that breaks and runs - see
+## [method _rout_the_rest] - empties without this, because nobody in it died
+## on this beat; [signal cleared] still arrives once the last runner is gone,
+## with no Kill Cam moment attached to it, which is correct: nobody was
+## killed by a rout.
+signal last_attacker_defeated(enemy: Node2D)
 
 ## Group the director joins, so anything can find it without a path.
 const GROUP := &"ambush_director"
@@ -699,6 +714,11 @@ func _on_enemy_gone(enemy: Node2D) -> void:
 		_killed += 1
 		if _check_rout():
 			return
+	# The killing hit just landed on the man who leaves nobody else standing
+	# and nobody else owed - the Kill Cam's own moment, ahead of whatever the
+	# floor still has to resolve before [signal cleared] can follow it.
+	if _owed <= 0 and _alive <= 0:
+		last_attacker_defeated.emit(enemy)
 	_check_cleared()
 
 

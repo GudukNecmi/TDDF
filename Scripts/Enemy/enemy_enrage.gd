@@ -102,11 +102,14 @@ const GROUP := &"enraged_enemy"
 @export_group("What he shouts")
 ## The bubble. Left empty he goes berserk in silence.
 @export var bubble_scene: PackedScene
-## What he shouts, drawn at random.
+## What he shouts when there is no specific friend to shout for - see
+## [method _make_him_shout]. Drawn at random.
 ##
-## [b]A list rather than anything written into the code[/b], so adding another name
-## is adding a line in the Inspector. They are names because that is what it is: a
-## man screaming for somebody who is not going to answer.
+## [b]The fallback, not the ordinary case.[/b] An enrage over
+## [constant MoraleDirector.Source.ALLY_DIED] - the whole reason this man is
+## enraged at all, most of the time - shouts that friend's own
+## [BanditIdentity] name instead of anything here. This list is what is left for
+## every other way in: a near miss with nobody's death behind it.
 @export var shouts: PackedStringArray = [
 	"JOOOOHN!",
 	"MAAAAAK!",
@@ -193,7 +196,14 @@ func is_enraged_now() -> bool:
 ## Everything else that must not be overwritten - down, running - is refused a
 ## step earlier, in [method MoraleDirector._can_be_asked], because that is the one
 ## place the whole list of "already something" lives.
-func enrage() -> bool:
+##
+## [param dead_ally] is the friend whose death is *why* - handed straight through
+## from [method MoraleDirector.check]'s own [constant MoraleDirector.Source.ALLY_DIED]
+## roll, and null for every other way in (a near miss, a test calling this
+## directly). See [method _make_him_shout]: with a name to shout it is shouted
+## instead of one drawn from [member shouts], and without one nothing here
+## changes at all.
+func enrage(dead_ally: Node2D = null) -> bool:
 	if _enraged or not can_enrage or not is_inside_tree():
 		return false
 	if _health != null and not _health.is_alive():
@@ -211,7 +221,7 @@ func enrage() -> bool:
 	_make_him_tough()
 	_make_him_direct(host)
 	_make_him_red()
-	_make_him_shout(host)
+	_make_him_shout(host, dead_ally)
 	return true
 
 
@@ -282,8 +292,19 @@ func _collect_materials() -> void:
 ## The bubble, put into the running scene rather than onto the man, so it keeps
 ## hanging in the air at a steady angle while he is knocked about, and survives him
 ## long enough to fade.
-func _make_him_shout(host: Node) -> void:
-	if bubble_scene == null or shouts.is_empty():
+##
+## [b]The line itself has two sources.[/b] [param dead_ally]'s own
+## [BanditIdentity] - the friend this rage is actually about - is asked first,
+## and its name is what gets shouted when he has one: this is the man screaming
+## a name because that is the friend he just watched die, not a line drawn at
+## random. Only when there is no such friend - every enrage that is not
+## [constant MoraleDirector.Source.ALLY_DIED] - does this fall back to
+## [member shouts], exactly as it always did.
+func _make_him_shout(host: Node, dead_ally: Node2D = null) -> void:
+	var line := BanditIdentity.name_for(dead_ally)
+	if line == &"" and not shouts.is_empty():
+		line = shouts[randi() % shouts.size()]
+	if line == &"" or bubble_scene == null:
 		return
 
 	var body := host as Node2D
@@ -304,7 +325,7 @@ func _make_him_shout(host: Node) -> void:
 	keeper.add_child(bubble)
 	bubble.global_position = body.global_position + bubble_offset
 	bubble.set_subject(body)
-	bubble.show_bubble(shouts[randi() % shouts.size()])
+	bubble.show_bubble(String(line))
 	_bubble = bubble
 
 	if bubble_hold > 0.0:

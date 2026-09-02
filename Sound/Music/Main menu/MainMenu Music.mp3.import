@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://ursl141hangw"
+path="res://.godot/imported/MainMenu Music.mp3-7c797eff2b12b50b24bfd00b11990bbf.mp3str"
+
+[deps]
+
+source_file="res://Sound/Music/Main menu/MainMenu Music.mp3"
+dest_files=["res://.godot/imported/MainMenu Music.mp3-7c797eff2b12b50b24bfd00b11990bbf.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

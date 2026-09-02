@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="MusicState" load_steps=10 format=3 uid="uid://cgotikdecisionstate"]
+
+[ext_resource type="Script" uid="uid://c6ylwt4xp2d23" path="res://Scripts/Common/music_state.gd" id="1_state"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#1-1788290581159.wav" id="2_loop1a"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#1-1788290588956.wav" id="3_loop1b"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#2-1788290581159.wav" id="4_loop2a"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#2-1788290588957.wav" id="5_loop2b"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#3-1788290580068.wav" id="6_loop3a"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#3-1788290587979.wav" id="7_loop3b"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#4-1788290578647.wav" id="8_loop4a"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#4-1788290584758.wav" id="9_loop4b"]
+
+[resource]
+script = ExtResource("1_state")
+state_id = &"decision"
+stream = ExtResource("2_loop1a")
+volume_db = -4.0
+loops = false
+always_from_start = true
+shuffle_pool = Array[AudioStream]([ExtResource("2_loop1a"), ExtResource("3_loop1b"), ExtResource("4_loop2a"), ExtResource("5_loop2b"), ExtResource("6_loop3a"), ExtResource("7_loop3b"), ExtResource("8_loop4a"), ExtResource("9_loop4b")])

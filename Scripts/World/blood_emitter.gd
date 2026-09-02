@@ -15,7 +15,7 @@ extends Node
 ##
 ## What a kill is *worth* lives here, on the enemy, as [member blood_value] -
 ## not in the field, not in the magnet and not in the wallet. Those all treat a
-## speck as a speck. This node is the only place that decides an Enemy1 is worth
+## speck as a speck. This node is the only place that decides an Bandit is worth
 ## 30, which is what lets a future enemy be worth more without any of them
 ## changing.
 ##

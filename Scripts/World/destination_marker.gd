@@ -12,7 +12,7 @@ extends Node2D
 ## which is left exactly as it is.
 ##
 ## What this adds is that a destination no longer has to be a portal to be marked.
-## The mini boss is an [Enemy1] standing in the desert, so the mark is dropped onto
+## The mini boss is an [Bandit] standing in the desert, so the mark is dropped onto
 ## it as a child instead of being authored into its scene, and the arrow is pointed
 ## at [member group] rather than at the cart.
 ##

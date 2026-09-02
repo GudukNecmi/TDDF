@@ -18,24 +18,16 @@ extends Node
 ##     nobody is standing.
 ##   * [b]A map chosen.[/b] The player is left in the arena where the scene
 ##     placed them, the round intro is played, and the run is started the moment
-##     it finishes. [b]A world arrived at by travelling is one of these.[/b] A
-##     journey is no longer a world of its own - it happens inside the camp the
-##     player rode out from, and is over by the time anything is rebuilt - so
-##     there is nothing for this to recognise: the region it opens in is simply
-##     the one the ride changed it to. See [TravelDirector].
+##     it finishes. The World Map is the current way a run is actually reached -
+##     see [RunPortal] - and never rebuilds the world to fight, so this branch is
+##     for whichever later phase migrates a map that does not open there.
 ##
-## [b]Two things can take a round away from this node.[/b] Neither of them is a round:
-## neither has a clock and nothing follows either of them, so where an ordinary round
-## would have started its manager, the manager is simply not started. They are asked in
-## order, at the moment the clock would have begun:
+## [b]A boss can take a round away from this node.[/b] It is not a round: it has
+## no clock and nothing follows it, so where an ordinary round would have started
+## its manager, the manager is simply not started.
 ##
 ##   * [b]A boss.[/b] If one of the player's contracts points at this map, this region
-##     and this hour, the man is here - see [method _boss_takes_the_round]. Asked first,
-##     because a boss day is not also an ambush.
-##   * [b]An arrival.[/b] Riding into a region can otherwise mean riding into a fight -
-##     see [method _arrival_takes_the_round]. Where the player is standing on arrival is
-##     that node's business either way, so nothing about the base's own arrival point
-##     below is involved in it.
+##     and this hour, the man is here - see [method _boss_takes_the_round].
 ##
 ## Starting the run is deliberately this node's job rather than the wave
 ## manager's own [member WaveManager.auto_start]: the round has to begin *after*
@@ -244,49 +236,9 @@ func _start_waves() -> void:
 	# frame the world is already running at full speed in.
 	_set_slowed(false)
 
-	if start_run and not _free_run_takes_the_round() \
-			and not _boss_takes_the_round() \
-			and not _arrival_takes_the_round() and _wave_manager != null:
+	if start_run and not _boss_takes_the_round() and _wave_manager != null:
 		_wave_manager.start()
 	world_started.emit(true)
-
-
-## Whether this world belongs to a Free Run, and the endless search has actually
-## begun.
-##
-## [b]Asked first, and it takes the round in exactly the way a boss does.[/b] A
-## Free Run is not a round: there is no clock, no wave and nothing to finish, only
-## one Trouble after another for as long as the player keeps saying CONTINUE. So
-## where an ordinary round would start its manager, the search is started instead
-## and the manager is simply never touched - which is what keeps a Free Run from
-## being a wave and a search happening on top of one another.
-##
-## The refusal matters more than the acceptance, as it does for the two below: a
-## world with no search in it, or a session that is not a Free Run at all, answers
-## false and the round is started exactly as it always was. Being a Free Run can
-## never be the reason a world comes up with neither a clock nor a fight in it.
-func _free_run_takes_the_round() -> bool:
-	if _session == null or not _session.has_method(&"is_free_run"):
-		return false
-	if not bool(_session.call(&"is_free_run")):
-		return false
-
-	var director := DangerDirector.get_active(self)
-	return director != null and director.begin_sequence()
-
-
-## Whether whatever was waiting in the region the player has just ridden into has
-## taken this round over, and has actually been built.
-##
-## [b]The refusal matters more than the acceptance.[/b] A world with no arrival
-## system, a ride that ended quietly, or an encounter that could not be built all
-## answer false, and the round is started exactly as it always was - so an arrival
-## can never be the reason a world comes up with neither a clock nor a fight in it.
-## That is why the encounter is begun here, where its answer can still be acted on,
-## rather than announced and hoped for.
-func _arrival_takes_the_round() -> bool:
-	var arrival := RegionArrival.get_active(self)
-	return arrival != null and arrival.begin_encounter() > 0
 
 
 ## Whether the man on one of the player's posters turns out to be in this region, and

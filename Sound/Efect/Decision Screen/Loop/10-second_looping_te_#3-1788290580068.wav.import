@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://b4qa5lfm7qcq0"
+path="res://.godot/imported/10-second_looping_te_#3-1788290580068.wav-3d9b580afe9b2bb2bd73ef48fbe700b0.sample"
+
+[deps]
+
+source_file="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#3-1788290580068.wav"
+dest_files=["res://.godot/imported/10-second_looping_te_#3-1788290580068.wav-3d9b580afe9b2bb2bd73ef48fbe700b0.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

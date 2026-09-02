@@ -1,12 +1,12 @@
-class_name Enemy1Appearance
+class_name BanditAppearance
 extends Node
-## Dresses one Enemy1 as it spawns: a face, a body and a knife picked out of the
+## Dresses one Bandit as it spawns: a face, a body and a knife picked out of the
 ## sets below, so a crowd of them is visibly a crowd of individuals rather than
 ## one sprite repeated.
 ##
 ## Every variant is an inspector list of textures, so adding a face is dropping a
 ## PNG into the array and nothing else. The legs are deliberately not in here -
-## every Enemy1 shares the same pair, so they stay plain sprites in the scene.
+## every Bandit shares the same pair, so they stay plain sprites in the scene.
 ##
 ## Selection is not uniform random. The three [VariantPicker]s are [code]static[/code],
 ## so they are shared by every enemy in the process and outlive the run: what the
@@ -39,7 +39,7 @@ extends Node
 ## [member VariantPicker.repeat_penalty].
 @export_range(0.0, 1.0) var repeat_penalty: float = 0.3
 
-# Shared by every Enemy1 in the process. That sharing is the whole point - a
+# Shared by every Bandit in the process. That sharing is the whole point - a
 # tally kept per enemy would be a tally of one and could not balance anything.
 static var _head_picker := VariantPicker.new()
 static var _body_picker := VariantPicker.new()

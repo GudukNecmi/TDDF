@@ -236,6 +236,13 @@ func is_lever_down() -> bool:
 	return _state == State.LEVER_DOWN
 
 
+## Ready is READY and nothing else - the same test [method _try_fire] itself
+## makes, so the crosshair can never show red while the lever is still down.
+## See [method CarriedWeapon.is_ready_to_fire].
+func is_ready_to_fire() -> bool:
+	return _state == State.READY and has_ammo()
+
+
 ## One trigger pull, one round - and the lever drops behind it.
 ##
 ## Both refusals - the lever being down and the magazine being empty - are

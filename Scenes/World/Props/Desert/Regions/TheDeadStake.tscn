@@ -7,17 +7,30 @@
 [ext_resource type="Texture2D" uid="uid://bm5sgq2jut1br" path="res://Assets/Maps/Desert/The Dead/Props (3).PNG" id="6_stake3"]
 [ext_resource type="Texture2D" uid="uid://c4v4nwnksc5np" path="res://Assets/Maps/Desert/The Dead/Props (4).PNG" id="7_stake4"]
 [ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
+[ext_resource type="Script" uid="uid://bm3ln8gbx37l4" path="res://Scripts/World/prop_sway.gd" id="91_sway"]
+[ext_resource type="Script" uid="uid://dtnfb87bh7qke" path="res://Scripts/World/prop_touch.gd" id="92_touch"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_stakebase"]
 resource_local_to_scene = true
 size = Vector2(27, 27)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_staketouch"]
+radius = 42.0
 
 [node name="TheDeadStake" type="StaticBody2D" groups=["desert_prop", "region_prop"]]
 scale = Vector2(0.8, 0.8)
 collision_layer = 32
 collision_mask = 0
 
-[node name="Art" type="Sprite2D" parent="."]
+[node name="Sway" type="Node2D" parent="."]
+script = ExtResource("91_sway")
+idle_degrees = 0.0
+knock_degrees = 4.5
+knock_cycles_per_second = 1.9
+knock_damping = 3.6
+max_degrees = 9.0
+
+[node name="Art" type="Sprite2D" parent="Sway"]
 script = ExtResource("2_art")
 textures = Array[Texture2D]([ExtResource("4_stake1"), ExtResource("5_stake2"), ExtResource("6_stake3"), ExtResource("7_stake4")])
 size_mode = 0
@@ -30,11 +43,27 @@ pixels_per_unit = 45.0
 height_units = 0.6
 width_units = 0.6
 width_fraction = 0.8
-art_path = NodePath("../Art")
+art_path = NodePath("../Sway/Art")
 holds_world_size = true
+
+[node name="Touch" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+script = ExtResource("92_touch")
+body_group = &"player"
+minimum_speed = 0.0
+retrigger_interval = 0.55
+sway_path = NodePath("../Sway")
+knock_strength = 1.0
+speed_multiplier = 0.8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Touch"]
+shape = SubResource("CircleShape2D_staketouch")
 
 [node name="ShadowCaster" type="Node2D" parent="."]
 script = ExtResource("90_shadow")
 shadow_pull = 36.0
 cast_mode = 1
-source_sprite_path = NodePath("../Art")
+source_sprite_path = NodePath("../Sway/Art")
+shadow_softness_override = 0.16

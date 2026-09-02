@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WorldBanditDecisionTier" format=3 uid="uid://dasc6hd6xd5j"]
+
+[ext_resource type="Script" uid="uid://q2cbfk7jbet3" path="res://Scripts/World/world_bandit_decision_tier.gd" id="1_tier"]
+[ext_resource type="Script" uid="uid://bpcvdx2kivke" path="res://Scripts/World/world_bandit_decision_choice.gd" id="2_choice"]
+
+[sub_resource type="Resource" id="Choice_fight"]
+script = ExtResource("2_choice")
+label = "Kill them all."
+
+[resource]
+script = ExtResource("1_tier")
+bandit_lines = Array[String](["Give us your blood, and live.", "Hand over some blood. Walk away.", "Your blood buys your life.", "Give us blood. We won't kill you.", "Leave the blood. Keep your life.", "A little blood, and you're free.", "Blood first. Then you walk.", "Give us blood. Nobody dies.", "Your blood is enough for us.", "Pay in blood. Live another day."])
+choices = Array[ExtResource("2_choice")]([SubResource("Choice_fight")])

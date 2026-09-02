@@ -11,6 +11,7 @@
 [ext_resource type="Script" uid="uid://c3d1ekedl15qm" path="res://Scripts/World/world_zone.gd" id="14_zone"]
 [ext_resource type="PackedScene" uid="uid://j0yu70s2kb2l" path="res://Scenes/Base/WantedBoard.tscn" id="15_wanted"]
 [ext_resource type="PackedScene" uid="uid://j03h4b4k5cvm" path="res://Scenes/Base/WeaponTable.tscn" id="16_weapontable"]
+[ext_resource type="PackedScene" uid="uid://82ydqw03lnfu" path="res://Scenes/World/TestMapGate.tscn" id="17_gate"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_basetop"]
 size = Vector2(2300, 64)
@@ -97,6 +98,10 @@ position = Vector2(0, 309)
 [node name="WeaponTable" parent="." unique_id=940716640 instance=ExtResource("16_weapontable")]
 position = Vector2(11, 631)
 
+[node name="WorldMapGate" parent="." unique_id=1754293756 instance=ExtResource("17_gate")]
+position = Vector2(1050, 650)
+destination_id = &"world_map"
+
 [node name="Saloon" parent="." unique_id=647106814 instance=ExtResource("7_saloon")]
 position = Vector2(0, -878)
 
@@ -124,6 +129,11 @@ display_name = "Apothecary"
 position = Vector2(432, 416)
 shop_id = &"undertaker"
 display_name = "Undertaker"
+
+[node name="ShopHorsePrep" parent="Shops" unique_id=1183490994 instance=ExtResource("5_tent")]
+position = Vector2(-950, 540)
+shop_id = &"horse_prep"
+display_name = "Horse Prep"
 
 [node name="Parallax" type="Node2D" parent="." unique_id=597739825]
 

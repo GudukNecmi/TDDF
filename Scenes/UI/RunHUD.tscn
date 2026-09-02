@@ -15,7 +15,9 @@
 [ext_resource type="Texture2D" uid="uid://0ohkmrl7tcof" path="res://Assets/UI/heart_full.PNG" id="8_heartfull"]
 [ext_resource type="Texture2D" uid="uid://15xc2s51huyx" path="res://Assets/UI/heart_empty.PNG" id="9_heartempty"]
 [ext_resource type="Script" uid="uid://on7ifjgrqjmt" path="res://Scripts/UI/blood_screen.gd" id="10_bloodscr"]
+[ext_resource type="Script" uid="uid://e865xe0t7re2" path="res://Scripts/UI/world_map_hud_gate.gd" id="10_qnkkx"]
 [ext_resource type="Script" uid="uid://msbi4a36tng5" path="res://Scripts/UI/blood_stage.gd" id="11_bloodstage"]
+[ext_resource type="Script" uid="uid://bc0ugvgh672hq" path="res://Scripts/UI/world_map_visibility_gate.gd" id="12_ash1p"]
 [ext_resource type="Shader" uid="uid://dakw3o6grlvtx" path="res://Shaders/blood_blur.gdshader" id="12_bloodblur"]
 [ext_resource type="Texture2D" uid="uid://pinb3migapsb" path="res://Assets/Efects/Blood Efects/1b.PNG" id="13_1b"]
 [ext_resource type="Texture2D" uid="uid://ctlffvjii44kn" path="res://Assets/Efects/Blood Efects/1bb.PNG" id="14_1bb"]
@@ -39,48 +41,68 @@
 [ext_resource type="Script" uid="uid://1m555uu7rxqo" path="res://Scripts/UI/map_select_menu.gd" id="32_mapmenu"]
 [ext_resource type="Script" uid="uid://bv6nhbp5t3gts" path="res://Scripts/UI/crosshair.gd" id="33_cross"]
 [ext_resource type="Script" uid="uid://ce732uc2d3dk3" path="res://Scripts/UI/weapon_select_menu.gd" id="33_iqdwl"]
-[ext_resource type="Resource" path="res://Resources/Maps/map_catalog.tres" id="34_catalog"]
+[ext_resource type="Resource" uid="uid://drk6ryrr7ba72" path="res://Resources/Maps/map_catalog.tres" id="34_catalog"]
 [ext_resource type="Resource" uid="uid://dwylkh854xmip" path="res://Resources/Weapons/weapon_catalog.tres" id="34_ko136"]
-[ext_resource type="Script" path="res://Scripts/UI/crosshair_style.gd" id="35_crossstyle"]
-[ext_resource type="Resource" path="res://Resources/Crosshairs/crosshair_revolver.tres" id="35_crossrev"]
-[ext_resource type="Resource" path="res://Resources/Crosshairs/crosshair_lever_action.tres" id="35_crosslev"]
-[ext_resource type="Resource" path="res://Resources/Crosshairs/crosshair_shotgun.tres" id="35_crossshot"]
-[ext_resource type="Script" path="res://Scripts/UI/game_cursor.gd" id="35_cursor"]
-[ext_resource type="Script" path="res://Scripts/UI/crosshair_ammo.gd" id="35_crossammo"]
-[ext_resource type="Texture2D" path="res://Assets/Cursor/DefaultCursor.PNG" id="35_cursorart"]
-[ext_resource type="Texture2D" path="res://Assets/Cursor/OnButtonCursor.PNG" id="35_cursorhover"]
-[ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="200_uipanel"]
-[ext_resource type="Texture2D" uid="uid://b5tbx3ndtm3yn" path="res://Assets/UI/UI Screens/Button1.PNG" id="200_uibtn1"]
-[ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="200_uibtn2"]
+[ext_resource type="Script" uid="uid://dqpmyocltppo5" path="res://Scripts/UI/crosshair_ammo.gd" id="35_crossammo"]
+[ext_resource type="Resource" uid="uid://dt4n1kbxshqei" path="res://Resources/Crosshairs/crosshair_lever_action.tres" id="35_crosslev"]
+[ext_resource type="Resource" uid="uid://c2m6pow1lau2b" path="res://Resources/Crosshairs/crosshair_revolver.tres" id="35_crossrev"]
+[ext_resource type="Resource" uid="uid://dmkl4evy0mlky" path="res://Resources/Crosshairs/crosshair_shotgun.tres" id="35_crossshot"]
+[ext_resource type="Script" uid="uid://b8asfn5wjiu38" path="res://Scripts/UI/crosshair_style.gd" id="35_crossstyle"]
+[ext_resource type="Script" uid="uid://ctgj1gmfcypwl" path="res://Scripts/UI/game_cursor.gd" id="35_cursor"]
+[ext_resource type="Texture2D" uid="uid://b71cpkynfvjln" path="res://Assets/Cursor/DefaultCursor.PNG" id="35_cursorart"]
+[ext_resource type="Texture2D" uid="uid://bn6kkfbwmx54o" path="res://Assets/Cursor/OnButtonCursor.PNG" id="35_cursorhover"]
 [ext_resource type="Script" uid="uid://b0kr6l6fq3exh" path="res://Scripts/UI/wanted_board_menu.gd" id="36_wantedmenu"]
 [ext_resource type="PackedScene" uid="uid://dton60x7yqk5r" path="res://Scenes/UI/WantedPoster.tscn" id="37_poster"]
 [ext_resource type="Script" uid="uid://b2ncgjkts2ivm" path="res://Scripts/UI/dev_settings_menu.gd" id="38_devmenu"]
 [ext_resource type="Script" uid="uid://gc5nx18355rv" path="res://Scripts/UI/region_select_menu.gd" id="39_regionmenu"]
 [ext_resource type="Script" uid="uid://dytw3fsfkwbxi" path="res://Scripts/UI/bounty_debug_menu.gd" id="47_tcleo"]
 [ext_resource type="Script" uid="uid://cb2rouqydiqpa" path="res://Scripts/UI/time_select_menu.gd" id="48_ybf1h"]
-[ext_resource type="Script" uid="uid://b2c8raljsykxs" path="res://Scripts/UI/camp_menu.gd" id="49_bpxjm"]
-[ext_resource type="Script" uid="uid://bkof0btj2x4h6" path="res://Scripts/UI/camp_prompt.gd" id="50_meeu7"]
-[ext_resource type="Script" uid="uid://droj6fwtdfioy" path="res://Scripts/UI/camp_weapon_menu.gd" id="51_027v8"]
-[ext_resource type="Script" uid="uid://djseg0epjvf6c" path="res://Scripts/UI/camp_map_menu.gd" id="52_7pppj"]
-[ext_resource type="Texture2D" uid="uid://cx3jl3owl2kb6" path="res://Assets/UI/Bounty/bounty_marker.png" id="53_14nxi"]
-[ext_resource type="Script" uid="uid://b4hulu5baw1um" path="res://Scripts/UI/travel_menu.gd" id="53_travelmenu"]
 [ext_resource type="Script" uid="uid://cc4s4vbxno5ch" path="res://Scripts/UI/bounty_list_menu.gd" id="54_ab07m"]
 [ext_resource type="Script" uid="uid://4a5m6svv4fcd" path="res://Scripts/UI/destination_arrow.gd" id="54_travelarrow"]
 [ext_resource type="Script" uid="uid://dpyc40ef5tj4k" path="res://Scripts/UI/travel_loading.gd" id="55_travelload"]
 [ext_resource type="Texture2D" uid="uid://8jxpkwqcq7dd" path="res://Assets/UI/Travel/destination_arrow.png" id="56_arrowart"]
 [ext_resource type="Texture2D" uid="uid://6wa4jknyyth2" path="res://Assets/World/Travel/horse_cart.png" id="57_cartart"]
-[ext_resource type="Resource" path="res://Resources/Travel/horse_packhorse.tres" id="58_packhorse"]
-[ext_resource type="Script" uid="uid://ca5rcjrfdpyj3" path="res://Scripts/UI/travel_event_menu.gd" id="59_traveleventmenu"]
 [ext_resource type="Script" uid="uid://b5cx1fx1ylhm7" path="res://Scripts/UI/knowledge_notice.gd" id="60_knownotice"]
 [ext_resource type="Script" uid="uid://mlfi3vus56r" path="res://Scripts/UI/cash_out_screen.gd" id="61_cashout"]
-[ext_resource type="Script" uid="uid://b251ad8sry8kw" path="res://Scripts/UI/travel_day_menu.gd" id="62_travelday"]
 [ext_resource type="Texture2D" uid="uid://bs2qpp3qoxk6n" path="res://Assets/Main Character/Body.PNG" id="63_walkbody"]
 [ext_resource type="Texture2D" uid="uid://cun045ndqijt3" path="res://Assets/Main Character/Head.PNG" id="64_walkhead"]
 [ext_resource type="Texture2D" uid="uid://ciaw5h61v13on" path="res://Assets/Run Start.png" id="66_clxfm"]
-[ext_resource type="Script" uid="uid://bydqyfu3iolnl" path="res://Scripts/UI/day_transition_dial.gd" id="68_swch0"]
-[ext_resource type="Script" path="res://Scripts/UI/sleep_menu.gd" id="69_sleep"]
-[ext_resource type="Script" path="res://Scripts/UI/spin_multiplier.gd" id="70_spinmult"]
+[ext_resource type="Script" uid="uid://df6tlc36nktso" path="res://Scripts/UI/spin_multiplier.gd" id="70_spinmult"]
 [ext_resource type="Script" uid="uid://c3il3h5r4abul" path="res://Scripts/Dev/test_spawn_menu.gd" id="71_testmenu"]
+[ext_resource type="Script" uid="uid://t61seb1tvwyn" path="res://Scripts/UI/world_map_overlay_menu.gd" id="84_yorwd"]
+[ext_resource type="Script" uid="uid://dssrrvuavqjm7" path="res://Scripts/UI/trader_menu.gd" id="85_mm4lu"]
+[ext_resource type="Script" uid="uid://bsepxxjtodmss" path="res://Scripts/UI/run_inventory_toast.gd" id="86_tm2pe"]
+[ext_resource type="Resource" uid="uid://cwqsj28dqr25j" path="res://Resources/Ammo/ammo_shell.tres" id="87_mew4v"]
+[ext_resource type="Resource" uid="uid://q6h0onksryq4" path="res://Resources/Ammo/ammo_revolver_round.tres" id="88_lcsd5"]
+[ext_resource type="Script" uid="uid://l5wae7bhe014" path="res://Scripts/UI/horse_cart_screen.gd" id="88_tm2pe"]
+[ext_resource type="Resource" uid="uid://bmvv4uadff8iq" path="res://Resources/Ammo/ammo_rifle_round.tres" id="89_0n8ik"]
+[ext_resource type="Script" uid="uid://b23f8aucu8nnh" path="res://Scripts/UI/travel_letterbox.gd" id="94_c3dsp"]
+[ext_resource type="Script" uid="uid://bujkit8uh4rih" path="res://Scripts/UI/travel_letterbox_gate.gd" id="95_kkjxy"]
+[ext_resource type="Texture2D" uid="uid://bdmurgfs6xsho" path="res://Assets/UI/HUD/Letterbox.PNG" id="95_rpvh4"]
+[ext_resource type="Script" uid="uid://dl5c4x2bsjq2j" path="res://Scripts/Common/stinger_board.gd" id="97_jkgqu"]
+[ext_resource type="AudioStream" uid="uid://c0wbdscivk6ja" path="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#1-1788289897255.wav" id="98_m7q3r"]
+[ext_resource type="AudioStream" uid="uid://c4xjf3u745c1y" path="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#1-1788289900028.wav" id="99_0s5ly"]
+[ext_resource type="AudioStream" uid="uid://bey2cd6gt2v6x" path="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#2-1788289900028.wav" id="100_xjin7"]
+[ext_resource type="AudioStream" uid="uid://cqddah8xf2ox2" path="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#3-1788289895005.wav" id="101_oiwit"]
+[ext_resource type="AudioStream" uid="uid://dxoq5pllabtk8" path="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#3-1788289906480.wav" id="102_1q0a7"]
+[ext_resource type="AudioStream" uid="uid://8th2uonng0q4" path="res://Sound/Efect/Decision Screen/Para verdik/Ultra-short_western__#3-1788290832494.wav" id="103_jks2j"]
+[ext_resource type="Script" path="res://Scripts/UI/world_map_horse_stamina_hud.gd" id="103_m43cp"]
+[ext_resource type="AudioStream" uid="uid://cyo3lmqvrb6ur" path="res://Sound/Efect/Decision Screen/Para aldÄ±k/Ultra-short_happy_we_#4-1788290953264.wav" id="104_7g8m6"]
+[ext_resource type="AudioStream" uid="uid://swify4xwqnko" path="res://Sound/Efect/Decision Screen/OlaysÄ±z daÄŸÄ±ldÄ±k/Ultra-short_western__#2-1788291007166.wav" id="105_qcafr"]
+[ext_resource type="AudioStream" uid="uid://s21t4sq2tmdd" path="res://Sound/Efect/Decision Screen/Fight/Ultra-short_tense_we_#4-1788291060760.wav" id="106_b7x0h"]
+[ext_resource type="AudioStream" uid="uid://d1hjea0ldowt1" path="res://Sound/Efect/Win/Ultra-short_western__#1-1788289239316.wav" id="107_i2j1e"]
+[ext_resource type="AudioStream" uid="uid://dao7tv4s6n0vo" path="res://Sound/Efect/Win/Ultra-short_western__#2-1788289235838.wav" id="108_12017"]
+[ext_resource type="AudioStream" uid="uid://bgu76h16mqw1e" path="res://Sound/Efect/Win/Ultra-short_western__#3-1788289240415.wav" id="109_ald0n"]
+[ext_resource type="AudioStream" uid="uid://hj3rvd2itlrw" path="res://Sound/Efect/Win/Ultra-short_western__#4-1788289243465.wav" id="110_74nph"]
+[ext_resource type="PackedScene" uid="uid://82ydc1svu2fb" path="res://Scenes/Common/FilmPostProcess.tscn" id="110_m7q3r"]
+[ext_resource type="Script" uid="uid://yxetrm4456uw" path="res://Scripts/UI/world_bandit_decision_menu.gd" id="111_jkgqu"]
+[ext_resource type="Script" uid="uid://duc2mbbnofr2" path="res://Scripts/UI/extraction_result_screen.gd" id="200_extractresult"]
+[ext_resource type="Texture2D" uid="uid://b5tbx3ndtm3yn" path="res://Assets/UI/UI Screens/Button1.PNG" id="200_uibtn1"]
+[ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="200_uibtn2"]
+[ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="200_uipanel"]
+[ext_resource type="AudioStream" uid="uid://drc3k1kfec4qx" path="res://Sound/Music/Ambush/Ambush.WAV" id="201_ambushwav"]
+[ext_resource type="Script" uid="uid://c7wm7iv1m8o32" path="res://Scripts/UI/ambush_banner.gd" id="201_banner"]
+[ext_resource type="Script" uid="uid://dp1gtpx5p6xpn" path="res://Scripts/UI/world_map_wanted_board_menu.gd" id="202_wmwanted"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("29_vignette")
@@ -137,45 +159,37 @@ content_margin_top = 16.0
 content_margin_right = 28.0
 content_margin_bottom = 16.0
 texture = ExtResource("200_uibtn2")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
-texture_margin_left = 26.0
-texture_margin_top = 22.0
-texture_margin_right = 26.0
-texture_margin_bottom = 22.0
+
 [sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_pressed"]
 content_margin_left = 28.0
 content_margin_top = 16.0
 content_margin_right = 28.0
 content_margin_bottom = 16.0
 texture = ExtResource("200_uibtn2")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
-texture_margin_left = 26.0
-texture_margin_top = 22.0
-texture_margin_right = 26.0
-texture_margin_bottom = 22.0
 modulate_color = Color(0.76, 0.7, 0.6, 1)
-[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_sleep_panel"]
-content_margin_left = 34.0
-content_margin_top = 22.0
-content_margin_right = 34.0
-content_margin_bottom = 22.0
-texture = ExtResource("200_uipanel")
-region_rect = Rect2(92, 26, 2800, 2102)
-texture_margin_left = 70.0
-texture_margin_top = 70.0
-texture_margin_right = 70.0
-texture_margin_bottom = 70.0
+
 [sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_normal"]
 content_margin_left = 28.0
 content_margin_top = 16.0
 content_margin_right = 28.0
 content_margin_bottom = 16.0
 texture = ExtResource("200_uibtn1")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
-texture_margin_left = 26.0
-texture_margin_top = 22.0
-texture_margin_right = 26.0
-texture_margin_bottom = 22.0
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_upgradeblur"]
 shader = ExtResource("3_blur")
 shader_parameter/blur_amount = 2.8
@@ -187,119 +201,67 @@ content_margin_top = 32.0
 content_margin_right = 44.0
 content_margin_bottom = 32.0
 texture = ExtResource("200_uipanel")
-region_rect = Rect2(92, 26, 2800, 2102)
 texture_margin_left = 70.0
 texture_margin_top = 70.0
 texture_margin_right = 70.0
 texture_margin_bottom = 70.0
+region_rect = Rect2(92, 26, 2800, 2102)
+
 [sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_disabled"]
 content_margin_left = 28.0
 content_margin_top = 16.0
 content_margin_right = 28.0
 content_margin_bottom = 16.0
 texture = ExtResource("200_uibtn1")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
-texture_margin_left = 26.0
-texture_margin_top = 22.0
-texture_margin_right = 26.0
-texture_margin_bottom = 22.0
 modulate_color = Color(0.55, 0.52, 0.48, 0.8)
+
 [sub_resource type="StyleBoxTexture" id="StyleBoxFlat_region_normal"]
 content_margin_left = 18.0
 content_margin_top = 14.0
 content_margin_right = 18.0
 content_margin_bottom = 14.0
 texture = ExtResource("200_uibtn1")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
-texture_margin_left = 26.0
-texture_margin_top = 22.0
-texture_margin_right = 26.0
-texture_margin_bottom = 22.0
+
 [sub_resource type="StyleBoxTexture" id="StyleBoxFlat_region_hover"]
 content_margin_left = 18.0
 content_margin_top = 14.0
 content_margin_right = 18.0
 content_margin_bottom = 14.0
 texture = ExtResource("200_uibtn2")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
-texture_margin_left = 26.0
-texture_margin_top = 22.0
-texture_margin_right = 26.0
-texture_margin_bottom = 22.0
+
 [sub_resource type="StyleBoxTexture" id="StyleBoxFlat_region_selected"]
 content_margin_left = 18.0
 content_margin_top = 14.0
 content_margin_right = 18.0
 content_margin_bottom = 14.0
 texture = ExtResource("200_uibtn2")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
-texture_margin_left = 26.0
-texture_margin_top = 22.0
-texture_margin_right = 26.0
-texture_margin_bottom = 22.0
 modulate_color = Color(1, 0.84, 0.66, 1)
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_027v8"]
-bg_color = Color(0.1, 0.03, 0.03, 0.18)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.45, 0.12, 0.1, 0.75)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7pppj"]
-bg_color = Color(0.5, 0.14, 0.1, 0.3)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.95, 0.3, 0.2, 0.95)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_14nxi"]
-bg_color = Color(0.72, 0.28, 0.1, 0.4)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(1, 0.5, 0.2, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ab07m"]
-bg_color = Color(0.1, 0.03, 0.03, 0.1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.3, 0.2, 0.18, 0.4)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_88qt6"]
-bg_color = Color(0.62, 0.12, 0.1, 0.45)
-border_width_left = 5
-border_width_top = 5
-border_width_right = 5
-border_width_bottom = 5
-border_color = Color(1, 0.86, 0.42, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
 
 [node name="RunHUD" type="CanvasLayer" unique_id=1615544819]
 process_mode = 3
+layer = 2
+
+[node name="FilmPostProcess" parent="." unique_id=1084295439 instance=ExtResource("110_m7q3r")]
 
 [node name="Vignette" type="ColorRect" parent="." unique_id=957723372]
 material = SubResource("ShaderMaterial_vignette")
@@ -427,7 +389,6 @@ offset_right = -14.0
 offset_bottom = -76.0
 grow_horizontal = 0
 grow_vertical = 0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.85, 0.11, 0.11, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 7
@@ -435,11 +396,6 @@ theme_override_font_sizes/font_size = 40
 horizontal_alignment = 2
 vertical_alignment = 1
 script = ExtResource("70_spinmult")
-charge_group = &"weapon_charge"
-base_scale = 1.0
-pop_scale = 1.3
-grow_speed = 16.0
-fade_speed = 18.0
 
 [node name="RoundBar" type="HBoxContainer" parent="." unique_id=1783402155]
 offset_left = 26.0
@@ -454,6 +410,7 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 0
 alignment = 1
+script = ExtResource("10_qnkkx")
 
 [node name="Icon" type="TextureRect" parent="RoundBar/TimeOfDay" unique_id=1553784201]
 custom_minimum_size = Vector2(46, 46)
@@ -481,6 +438,9 @@ theme_override_font_sizes/font_size = 34
 text = "DUSTY MESA"
 vertical_alignment = 1
 script = ExtResource("28_round")
+
+[node name="WorldMapGate" type="Node" parent="RoundBar/RegionLabel" unique_id=1102725887]
+script = ExtResource("12_ash1p")
 
 [node name="DayStageDisplay" type="Node" parent="." unique_id=1044890166]
 script = ExtResource("30_daydisp")
@@ -1379,40 +1339,31 @@ script = ExtResource("27_fade")
 
 [node name="Crosshair" type="Control" parent="." unique_id=1069229977]
 z_index = 200
+layout_mode = 3
+anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("33_cross")
 styles = Array[ExtResource("35_crossstyle")]([ExtResource("35_crossrev"), ExtResource("35_crosslev"), ExtResource("35_crossshot")])
 fallback_style = ExtResource("35_crossrev")
-crosshair_visible = true
-player_group = &"player"
-charge_group = &"weapon_charge"
 
-[node name="Ammo" type="Label" parent="Crosshair"]
-mouse_filter = 2
+[node name="Ammo" type="Label" parent="Crosshair" unique_id=1704217952]
+layout_mode = 0
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 20
 vertical_alignment = 1
 script = ExtResource("35_crossammo")
-count_methods = Array[StringName]([&"get_loaded_count", &"get_magazine_count"])
-hide_while_stowed = true
-crosshair_path = NodePath("..")
 
 [node name="GameCursor" type="Control" parent="." unique_id=1069229978]
 z_index = 250
+layout_mode = 3
+anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("35_cursor")
 default_texture = ExtResource("35_cursorart")
 hover_texture = ExtResource("35_cursorhover")
 cursor_size = Vector2(46, 46)
-hotspot = Vector2(0.4, 0.27)
-outline_thickness = 1.0
-outline_colour = Color(0, 0, 0, 0.85)
-shown_while_paused = true
-shown_while_unarmed = true
 extra_surface_paths = Array[NodePath]([NodePath("../SleepMenu")])
-hide_system_cursor = true
-crosshair_path = NodePath("../Crosshair")
 
 [node name="BountyDebugMenu" type="Control" parent="." unique_id=1158383090]
 visible = false
@@ -1590,281 +1541,6 @@ theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
 disabled = true
 text = "RIDE OUT"
 
-[node name="CampMenu" type="Control" parent="." unique_id=371773926]
-visible = false
-z_index = 140
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("49_bpxjm")
-
-[node name="Blur" type="ColorRect" parent="CampMenu" unique_id=1738334834]
-material = SubResource("ShaderMaterial_upgradeblur")
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-
-[node name="Panel" type="PanelContainer" parent="CampMenu" unique_id=1992442367]
-layout_mode = 0
-anchor_left = 0.15
-anchor_top = 0.05
-anchor_right = 0.85
-anchor_bottom = 0.95
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
-
-[node name="Body" type="VBoxContainer" parent="CampMenu/Panel" unique_id=1887840719]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Header" type="HBoxContainer" parent="CampMenu/Panel/Body" unique_id=1597155637]
-layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="Title" type="Label" parent="CampMenu/Panel/Body/Header" unique_id=1146634244]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_font_sizes/font_size = 34
-text = "CAMP"
-vertical_alignment = 1
-
-[node name="Blood" type="Label" parent="CampMenu/Panel/Body/Header" unique_id=1860149461]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
-theme_override_font_sizes/font_size = 26
-text = "BLOOD 0"
-horizontal_alignment = 2
-vertical_alignment = 1
-
-[node name="Rule" type="ColorRect" parent="CampMenu/Panel/Body" unique_id=1981597721]
-custom_minimum_size = Vector2(0, 2)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0.42, 0.055, 0.06, 1)
-
-[node name="Status" type="VBoxContainer" parent="CampMenu/Panel/Body" unique_id=2111964340]
-layout_mode = 2
-theme_override_constants/separation = 4
-
-[node name="Health" type="Label" parent="CampMenu/Panel/Body/Status" unique_id=2059084030]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 18
-text = "HEALTH 3 / 3"
-
-[node name="Ammo" type="Label" parent="CampMenu/Panel/Body/Status" unique_id=829180830]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 18
-text = "SHELLS 0 / 0"
-
-[node name="CampBlood" type="Label" parent="CampMenu/Panel/Body/Status" unique_id=698686471]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 18
-text = "CAMP 0 / 300"
-
-[node name="Destination" type="Label" parent="CampMenu/Panel/Body/Status" unique_id=1638095994]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 18
-text = "REGION -"
-
-[node name="Columns" type="HBoxContainer" parent="CampMenu/Panel/Body" unique_id=124312740]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 22
-
-[node name="Camp" type="VBoxContainer" parent="CampMenu/Panel/Body/Columns" unique_id=1454033310]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 1.3
-theme_override_constants/separation = 6
-
-[node name="Heading" type="Label" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1667550247]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
-theme_override_font_sizes/font_size = 22
-text = "CAMP"
-horizontal_alignment = 1
-
-[node name="Rule" type="ColorRect" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1138145676]
-custom_minimum_size = Vector2(0, 2)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0.42, 0.055, 0.06, 1)
-
-[node name="HealButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1856706851]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "HEAL"
-
-[node name="AmmoButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1140317808]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "BUY AMMO"
-
-[node name="DepositButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=1249691896]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "STASH BLOOD"
-
-[node name="WeaponButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=2061670148]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "WEAPONS"
-
-[node name="MapButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=478449925]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "REGIONAL MAP"
-
-[node name="ReturnHomeButton" type="Button" parent="CampMenu/Panel/Body/Columns/Camp" unique_id=913074280]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "RETURN HOME"
-
-[node name="Divider" type="ColorRect" parent="CampMenu/Panel/Body/Columns" unique_id=1785916984]
-custom_minimum_size = Vector2(2, 0)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0.42, 0.055, 0.06, 1)
-
-[node name="Actions" type="VBoxContainer" parent="CampMenu/Panel/Body/Columns" unique_id=1727708487]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 6
-
-[node name="Heading" type="Label" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=22889828]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
-theme_override_font_sizes/font_size = 22
-text = "ACTIONS"
-horizontal_alignment = 1
-
-[node name="Rule" type="ColorRect" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=1187788639]
-custom_minimum_size = Vector2(0, 2)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0.42, 0.055, 0.06, 1)
-
-[node name="SleepButton" type="Button" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=2133315053]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "SLEEP / CAMP"
-
-[node name="TravelButton" type="Button" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=1581212610]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "TRAVEL"
-
-[node name="TroubleButton" type="Button" parent="CampMenu/Panel/Body/Columns/Actions" unique_id=1254531852]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "SEARCH FOR TROUBLE"
-
-[node name="Hint" type="Label" parent="CampMenu/Panel/Body" unique_id=1617321484]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 18
-text = "ESC LEAVES THE WAGON"
-horizontal_alignment = 1
-
 [node name="CashOutScreen" type="Control" parent="." unique_id=470794702 groups=["cash_out_screen"]]
 visible = false
 z_index = 150
@@ -1977,57 +1653,138 @@ theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
 theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
 text = "RIDE IN"
 
-[node name="CampPrompt" type="Control" parent="." unique_id=1159508689]
+[node name="ExtractionResultScreen" type="Control" parent="." unique_id=1159600701 groups=["extraction_result_screen"]]
 visible = false
-z_index = 130
+z_index = 150
 layout_mode = 3
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -340.0
-offset_top = -150.0
-offset_right = -32.0
-offset_bottom = -84.0
-grow_horizontal = 0
-grow_vertical = 0
-mouse_filter = 2
-script = ExtResource("50_meeu7")
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("200_extractresult")
 
-[node name="Panel" type="PanelContainer" parent="CampPrompt" unique_id=680359795]
+[node name="Blur" type="ColorRect" parent="ExtractionResultScreen" unique_id=1159600702]
+material = SubResource("ShaderMaterial_upgradeblur")
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-mouse_filter = 2
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="ExtractionResultScreen" unique_id=1159600703]
+layout_mode = 0
+anchor_left = 0.24
+anchor_top = 0.2
+anchor_right = 0.76
+anchor_bottom = 0.8
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
 
-[node name="Body" type="VBoxContainer" parent="CampPrompt/Panel" unique_id=810517389]
+[node name="Body" type="VBoxContainer" parent="ExtractionResultScreen/Panel" unique_id=1159600704]
 layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 16
 alignment = 1
 
-[node name="Label" type="Label" parent="CampPrompt/Panel/Body" unique_id=412307432]
+[node name="Title" type="Label" parent="ExtractionResultScreen/Panel/Body" unique_id=1159600705]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 42
+text = "EXTRACTED"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="ExtractionResultScreen/Panel/Body" unique_id=1159600706]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Rows" type="VBoxContainer" parent="ExtractionResultScreen/Panel/Body" unique_id=1159600707]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PlayerBlood" type="Label" parent="ExtractionResultScreen/Panel/Body/Rows" unique_id=1159600708]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 22
+text = "PLAYER BLOOD  0"
+horizontal_alignment = 1
+
+[node name="HorseBlood" type="Label" parent="ExtractionResultScreen/Panel/Body/Rows" unique_id=1159600709]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 22
+text = "HORSE BLOOD  0"
+horizontal_alignment = 1
+
+[node name="DepotBlood" type="Label" parent="ExtractionResultScreen/Panel/Body/Rows" unique_id=1159600710]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 22
+text = "DEPOT BLOOD  0"
+horizontal_alignment = 1
+
+[node name="Completed" type="Label" parent="ExtractionResultScreen/Panel/Body/Rows" unique_id=1159600711]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.6, 0.24, 1)
+theme_override_font_sizes/font_size = 22
+text = "BOUNTIES COMPLETED  0   (+0 BLOOD)"
+horizontal_alignment = 1
+
+[node name="Incomplete" type="Label" parent="ExtractionResultScreen/Panel/Body/Rows" unique_id=1159600712]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.2, 0.18, 1)
+theme_override_font_sizes/font_size = 22
+text = "BOUNTIES INCOMPLETE  0   (-0 BLOOD)"
+horizontal_alignment = 1
+
+[node name="Earned" type="Label" parent="ExtractionResultScreen/Panel/Body" unique_id=1159600713]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
 theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 22
-text = "Hold \"E\" at the wagon"
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 48
+text = "FINAL BLOOD  +0"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Track" type="ColorRect" parent="CampPrompt/Panel/Body" unique_id=1030282561]
-custom_minimum_size = Vector2(0, 8)
+[node name="Rule2" type="ColorRect" parent="ExtractionResultScreen/Panel/Body" unique_id=1159600714]
+custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
-color = Color(0.16, 0.03, 0.03, 1)
+color = Color(0.42, 0.055, 0.06, 1)
 
-[node name="Fill" type="ColorRect" parent="CampPrompt/Panel/Body/Track" unique_id=122557412]
-layout_mode = 0
-anchor_bottom = 1.0
-mouse_filter = 2
-color = Color(0.82, 0.1, 0.1, 1)
+[node name="Footer" type="HBoxContainer" parent="ExtractionResultScreen/Panel/Body" unique_id=1159600715]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 2
+
+[node name="Hint" type="Label" parent="ExtractionResultScreen/Panel/Body/Footer" unique_id=1159600716]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "THE RUN IS OVER"
+vertical_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="ExtractionResultScreen/Panel/Body/Footer" unique_id=1159600717]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
+text = "RETURN TO BASE"
 
 [node name="KnowledgeNotice" type="Control" parent="." unique_id=1159508690]
 visible = false
@@ -2078,175 +1835,6 @@ theme_override_font_sizes/font_size = 26
 text = "You learned that James Balada appears at Twilight."
 horizontal_alignment = 1
 autowrap_mode = 3
-
-[node name="CampWeaponMenu" type="Control" parent="." unique_id=518838003]
-visible = false
-z_index = 260
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("51_027v8")
-catalog = ExtResource("34_ko136")
-status_label_path = NodePath("Panel/Body/Hint")
-button_normal = SubResource("StyleBoxFlat_region_normal")
-button_hover = SubResource("StyleBoxFlat_region_hover")
-button_pressed = SubResource("StyleBoxFlat_region_selected")
-button_disabled = SubResource("StyleBoxFlat_button_disabled")
-button_equipped = SubResource("StyleBoxFlat_region_selected")
-
-[node name="Blur" type="ColorRect" parent="CampWeaponMenu" unique_id=2063359712]
-material = SubResource("ShaderMaterial_upgradeblur")
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Panel" type="PanelContainer" parent="CampWeaponMenu" unique_id=574609153]
-layout_mode = 0
-anchor_left = 0.3
-anchor_top = 0.12
-anchor_right = 0.7
-anchor_bottom = 0.88
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
-
-[node name="Body" type="VBoxContainer" parent="CampWeaponMenu/Panel" unique_id=2007163737]
-layout_mode = 2
-theme_override_constants/separation = 22
-
-[node name="Title" type="Label" parent="CampWeaponMenu/Panel/Body" unique_id=1447319487]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_font_sizes/font_size = 44
-text = "WHAT ARE YOU CARRYING"
-horizontal_alignment = 1
-
-[node name="Rule" type="ColorRect" parent="CampWeaponMenu/Panel/Body" unique_id=2092704751]
-custom_minimum_size = Vector2(0, 2)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0.42, 0.055, 0.06, 1)
-
-[node name="Weapons" type="VBoxContainer" parent="CampWeaponMenu/Panel/Body" unique_id=228192651]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 14
-alignment = 1
-
-[node name="Hint" type="Label" parent="CampWeaponMenu/Panel/Body" unique_id=851076958]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 18
-text = "EACH WEAPON KEEPS ITS OWN ROUNDS  -  ESC GOES BACK"
-horizontal_alignment = 1
-
-[node name="CampMapMenu" type="Control" parent="." unique_id=1424170629]
-visible = false
-z_index = 145
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("52_7pppj")
-region_normal = SubResource("StyleBoxFlat_027v8")
-region_hover = SubResource("StyleBoxFlat_7pppj")
-region_selected = SubResource("StyleBoxFlat_14nxi")
-region_disabled = SubResource("StyleBoxFlat_ab07m")
-region_here = SubResource("StyleBoxFlat_88qt6")
-marker_texture = ExtResource("53_14nxi")
-marker_offset = Vector2(0, -0.46)
-
-[node name="Blur" type="ColorRect" parent="CampMapMenu" unique_id=252647017]
-material = SubResource("ShaderMaterial_upgradeblur")
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-
-[node name="Panel" type="PanelContainer" parent="CampMapMenu" unique_id=205297410]
-layout_mode = 0
-anchor_left = 0.06
-anchor_top = 0.08
-anchor_right = 0.94
-anchor_bottom = 0.92
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
-
-[node name="Body" type="VBoxContainer" parent="CampMapMenu/Panel" unique_id=1277008161]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Header" type="HBoxContainer" parent="CampMapMenu/Panel/Body" unique_id=1578169354]
-layout_mode = 2
-
-[node name="Title" type="Label" parent="CampMapMenu/Panel/Body/Header" unique_id=1959075150]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_font_sizes/font_size = 40
-text = "THE COUNTRY"
-
-[node name="Rule" type="ColorRect" parent="CampMapMenu/Panel/Body" unique_id=915229042]
-custom_minimum_size = Vector2(0, 2)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0.42, 0.055, 0.06, 1)
-
-[node name="Split" type="HBoxContainer" parent="CampMapMenu/Panel/Body" unique_id=1602592486]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 18
-
-[node name="Map" type="Control" parent="CampMapMenu/Panel/Body/Split" unique_id=1272737325]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 2.4
-
-[node name="Picture" type="TextureRect" parent="CampMapMenu/Panel/Body/Split/Map" unique_id=1289646691]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Bounties" type="VBoxContainer" parent="CampMapMenu/Panel/Body/Split" unique_id=1699687689]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="Title" type="Label" parent="CampMapMenu/Panel/Body/Split/Bounties" unique_id=326237385]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_font_sizes/font_size = 26
-text = "CONTRACTS"
-
-[node name="Scroll" type="ScrollContainer" parent="CampMapMenu/Panel/Body/Split/Bounties" unique_id=1502772509]
-layout_mode = 2
-size_flags_vertical = 3
-horizontal_scroll_mode = 0
-
-[node name="Rows" type="VBoxContainer" parent="CampMapMenu/Panel/Body/Split/Bounties/Scroll" unique_id=2047856363]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-
-[node name="Footer" type="HBoxContainer" parent="CampMapMenu/Panel/Body" unique_id=1000240585]
-layout_mode = 2
-
-[node name="Status" type="Label" parent="CampMapMenu/Panel/Body/Footer" unique_id=346610272]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 18
-text = "ESC GOES BACK TO THE CAMP"
 
 [node name="BountyListMenu" type="Control" parent="." unique_id=1447627697]
 visible = false
@@ -2346,258 +1934,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
 theme_override_font_sizes/font_size = 18
-
-[node name="TravelMenu" type="Control" parent="." unique_id=1592448850 groups=["travel_menu"]]
-visible = false
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("53_travelmenu")
-default_horse = ExtResource("58_packhorse")
-tile_normal = SubResource("StyleBoxFlat_region_normal")
-tile_hover = SubResource("StyleBoxFlat_region_hover")
-tile_pressed = SubResource("StyleBoxFlat_region_selected")
-tile_disabled = SubResource("StyleBoxFlat_button_disabled")
-tile_selected = SubResource("StyleBoxFlat_region_selected")
-
-[node name="Blur" type="ColorRect" parent="TravelMenu" unique_id=1592448851]
-material = SubResource("ShaderMaterial_upgradeblur")
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Panel" type="PanelContainer" parent="TravelMenu" unique_id=1592448852]
-layout_mode = 0
-anchor_left = 0.2
-anchor_top = 0.18
-anchor_right = 0.8
-anchor_bottom = 0.82
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
-
-[node name="Body" type="VBoxContainer" parent="TravelMenu/Panel" unique_id=1592448853]
-layout_mode = 2
-theme_override_constants/separation = 20
-
-[node name="Header" type="VBoxContainer" parent="TravelMenu/Panel/Body" unique_id=1592448854]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 4
-alignment = 1
-
-[node name="Title" type="Label" parent="TravelMenu/Panel/Body/Header" unique_id=1592448855]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_font_sizes/font_size = 42
-text = "RIDE OUT"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Horse" type="Label" parent="TravelMenu/Panel/Body/Header" unique_id=1592448856]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.36, 0.34, 1)
-theme_override_font_sizes/font_size = 20
-text = "PACK HORSE"
-horizontal_alignment = 1
-
-[node name="Route" type="Label" parent="TravelMenu/Panel/Body/Header" unique_id=1592448863]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_font_sizes/font_size = 28
-text = "REGION A  ->  REGION B"
-horizontal_alignment = 1
-
-[node name="Now" type="Label" parent="TravelMenu/Panel/Body/Header" unique_id=1592448864]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.36, 0.34, 1)
-theme_override_font_sizes/font_size = 20
-text = "SETTING OUT AT DAWN"
-horizontal_alignment = 1
-
-[node name="Rule" type="ColorRect" parent="TravelMenu/Panel/Body" unique_id=1592448857]
-custom_minimum_size = Vector2(0, 2)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0.42, 0.055, 0.06, 1)
-
-[node name="Days" type="GridContainer" parent="TravelMenu/Panel/Body" unique_id=1592448858]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/h_separation = 16
-theme_override_constants/v_separation = 16
-columns = 4
-
-[node name="Rule2" type="ColorRect" parent="TravelMenu/Panel/Body" unique_id=1592448859]
-custom_minimum_size = Vector2(0, 2)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0.42, 0.055, 0.06, 1)
-
-[node name="Footer" type="HBoxContainer" parent="TravelMenu/Panel/Body" unique_id=1592448860]
-layout_mode = 2
-theme_override_constants/separation = 16
-alignment = 2
-
-[node name="Status" type="Label" parent="TravelMenu/Panel/Body/Footer" unique_id=1592448861]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 18
-text = "PICK HOW LONG THE RIDE SHOULD TAKE"
-vertical_alignment = 1
-
-[node name="ConfirmButton" type="Button" parent="TravelMenu/Panel/Body/Footer" unique_id=1592448862]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 30
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-disabled = true
-text = "RIDE OUT"
-
-[node name="CartPrompt" type="Control" parent="." unique_id=1592448870]
-visible = false
-z_index = 130
-layout_mode = 3
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -340.0
-offset_top = -150.0
-offset_right = -32.0
-offset_bottom = -84.0
-grow_horizontal = 0
-grow_vertical = 0
-mouse_filter = 2
-script = ExtResource("50_meeu7")
-source_group = &"horse_cart"
-prompt_text = "Hold \"E\" to Travel"
-menu_group = &"travel_menu"
-
-[node name="Panel" type="PanelContainer" parent="CartPrompt" unique_id=1592448871]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
-
-[node name="Body" type="VBoxContainer" parent="CartPrompt/Panel" unique_id=1592448872]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 8
-alignment = 1
-
-[node name="Label" type="Label" parent="CartPrompt/Panel/Body" unique_id=1592448873]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
-theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 22
-text = "Hold \"E\" to Travel"
-horizontal_alignment = 1
-
-[node name="Track" type="ColorRect" parent="CartPrompt/Panel/Body" unique_id=1592448874]
-custom_minimum_size = Vector2(0, 8)
-layout_mode = 2
-mouse_filter = 2
-color = Color(0.16, 0.03, 0.03, 1)
-
-[node name="Fill" type="ColorRect" parent="CartPrompt/Panel/Body/Track" unique_id=1592448875]
-layout_mode = 0
-anchor_bottom = 1.0
-mouse_filter = 2
-color = Color(0.82, 0.1, 0.1, 1)
-
-[node name="TravelEventMenu" type="Control" parent="." unique_id=1592448890 groups=["travel_event_menu"]]
-visible = false
-z_index = 140
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("59_traveleventmenu")
-
-[node name="Panel" type="PanelContainer" parent="TravelEventMenu" unique_id=1592448891]
-layout_mode = 0
-anchor_left = 0.28
-anchor_top = 0.34
-anchor_right = 0.72
-anchor_bottom = 0.66
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
-
-[node name="Body" type="VBoxContainer" parent="TravelEventMenu/Panel" unique_id=1592448892]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 18
-alignment = 1
-
-[node name="Title" type="Label" parent="TravelEventMenu/Panel/Body" unique_id=1592448893]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_font_sizes/font_size = 38
-text = "A GANG ON THE ROAD"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Description" type="Label" parent="TravelEventMenu/Panel/Body" unique_id=1592448894]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.5, 0.36, 0.34, 1)
-theme_override_font_sizes/font_size = 20
-text = "RIDERS AHEAD."
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="Buttons" type="HBoxContainer" parent="TravelEventMenu/Panel/Body" unique_id=1592448895]
-layout_mode = 2
-theme_override_constants/separation = 24
-alignment = 1
-
-[node name="IgnoreButton" type="Button" parent="TravelEventMenu/Panel/Body/Buttons" unique_id=1592448896]
-custom_minimum_size = Vector2(220, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_font_sizes/font_size = 28
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "IGNORE"
-
-[node name="FightButton" type="Button" parent="TravelEventMenu/Panel/Body/Buttons" unique_id=1592448897]
-custom_minimum_size = Vector2(220, 0)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_font_sizes/font_size = 28
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "FIGHT"
 
 [node name="TravelLoading" type="Control" parent="." unique_id=1592448880 groups=["travel_loading"]]
 process_mode = 3
@@ -2750,337 +2086,10 @@ theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
 theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 40
-text = "Maceraya çıkılıyor"
+text = "Maceraya Ã§Ä±kÄ±lÄ±yor"
 vertical_alignment = 1
 
-[node name="TravelDayMenu" type="Control" parent="." unique_id=1592448920 groups=["travel_day_menu"]]
-visible = false
-z_index = 255
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("62_travelday")
-
-[node name="Actions" type="VBoxContainer" parent="TravelDayMenu" unique_id=1592448921]
-layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 56.0
-offset_top = -168.0
-offset_right = 516.0
-offset_bottom = 168.0
-grow_vertical = 2
-theme_override_constants/separation = 12
-alignment = 1
-
-[node name="Heading" type="Label" parent="TravelDayMenu/Actions" unique_id=1592448922]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 30
-text = "MAKE READY"
-
-[node name="Blood" type="Label" parent="TravelDayMenu/Actions" unique_id=1592448923]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
-theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 22
-text = "BLOOD 0"
-
-[node name="HealButton" type="Button" parent="TravelDayMenu/Actions" unique_id=1592448924]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "HEAL"
-
-[node name="AmmoButton" type="Button" parent="TravelDayMenu/Actions" unique_id=1592448925]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "BUY AMMO"
-
-[node name="WeaponButton" type="Button" parent="TravelDayMenu/Actions" unique_id=1592448926]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_disabled_color = Color(0.42, 0.36, 0.3, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_button_disabled")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "WEAPONS"
-
-[node name="ContinueButton" type="Button" parent="TravelDayMenu" unique_id=1592448927]
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -516.0
-offset_top = -46.0
-offset_right = -56.0
-offset_bottom = 46.0
-grow_horizontal = 0
-grow_vertical = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_font_sizes/font_size = 30
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "CONTINUE TRAVEL"
-
-[node name="SleepMenu" type="Control" parent="." groups=["sleep_menu"]]
-visible = false
-z_index = 138
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("69_sleep")
-button_normal = SubResource("StyleBoxFlat_button_normal")
-button_hover = SubResource("StyleBoxFlat_button_hover")
-button_pressed = SubResource("StyleBoxFlat_button_pressed")
-
-[node name="Backdrop" type="ColorRect" parent="SleepMenu"]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.035, 0.014, 0.016, 1)
-
-[node name="Ground" type="TextureRect" parent="SleepMenu"]
-texture_repeat = 1
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-stretch_mode = 2
-
-[node name="Sleeper" type="Control" parent="SleepMenu"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -190.0
-offset_top = -260.0
-offset_right = 190.0
-offset_bottom = 120.0
-grow_horizontal = 2
-grow_vertical = 2
-rotation = 1.4661
-pivot_offset = Vector2(190, 190)
-mouse_filter = 2
-
-[node name="Body" type="TextureRect" parent="SleepMenu/Sleeper"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("63_walkbody")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Head" type="TextureRect" parent="SleepMenu/Sleeper"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("64_walkhead")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Letters" type="Control" parent="SleepMenu"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Announce" type="Label" parent="SleepMenu"]
-visible = false
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -460.0
-offset_top = 120.0
-offset_right = 460.0
-offset_bottom = 210.0
-grow_horizontal = 2
-mouse_filter = 2
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 9
-theme_override_font_sizes/font_size = 62
-text = "AMBUSH"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="Panel" type="PanelContainer" parent="SleepMenu"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -300.0
-offset_top = -268.0
-offset_right = 300.0
-offset_bottom = -56.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_sleep_panel")
-
-[node name="Body" type="VBoxContainer" parent="SleepMenu/Panel"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="Title" type="Label" parent="SleepMenu/Panel/Body"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 30
-text = "SLEEP"
-horizontal_alignment = 1
-
-[node name="Status" type="Label" parent="SleepMenu/Panel/Body"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
-theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 22
-text = "HOW LONG?"
-horizontal_alignment = 1
-
-[node name="Durations" type="HBoxContainer" parent="SleepMenu/Panel/Body"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="WakeButton" type="Button" parent="SleepMenu/Panel/Body"]
-layout_mode = 2
-focus_mode = 0
-theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
-theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_font_sizes/font_size = 26
-theme_override_styles/normal = SubResource("StyleBoxFlat_button_normal")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
-theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
-theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
-text = "WAKE UP"
-
-[node name="DayTransitionDial" type="Control" parent="." unique_id=164945508]
-process_mode = 3
-visible = false
-z_index = 260
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-script = ExtResource("68_swch0")
-
-[node name="NowFace" type="VBoxContainer" parent="DayTransitionDial" unique_id=3249680]
-custom_minimum_size = Vector2(340, 150)
-layout_mode = 0
-mouse_filter = 2
-alignment = 1
-
-[node name="Icon" type="TextureRect" parent="DayTransitionDial/NowFace" unique_id=1384147128]
-custom_minimum_size = Vector2(0, 92)
-layout_mode = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Name" type="Label" parent="DayTransitionDial/NowFace" unique_id=486831480]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 46
-text = "TWILIGHT"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="NextFace" type="VBoxContainer" parent="DayTransitionDial" unique_id=1628344676]
-custom_minimum_size = Vector2(340, 150)
-layout_mode = 0
-mouse_filter = 2
-alignment = 1
-
-[node name="Icon" type="TextureRect" parent="DayTransitionDial/NextFace" unique_id=1311151605]
-custom_minimum_size = Vector2(0, 92)
-layout_mode = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Name" type="Label" parent="DayTransitionDial/NextFace" unique_id=1717379774]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 46
-text = "NIGHT"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="TestSpawnMenu" type="Control" parent="."]
+[node name="TestSpawnMenu" type="Control" parent="." unique_id=1875444051]
 visible = false
 z_index = 150
 layout_mode = 3
@@ -3096,7 +2105,7 @@ button_hover = SubResource("StyleBoxFlat_button_hover")
 button_pressed = SubResource("StyleBoxFlat_button_pressed")
 button_disabled = SubResource("StyleBoxFlat_button_disabled")
 
-[node name="Blur" type="ColorRect" parent="TestSpawnMenu"]
+[node name="Blur" type="ColorRect" parent="TestSpawnMenu" unique_id=159422858]
 material = SubResource("ShaderMaterial_upgradeblur")
 layout_mode = 0
 anchor_right = 1.0
@@ -3104,7 +2113,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Panel" type="PanelContainer" parent="TestSpawnMenu"]
+[node name="Panel" type="PanelContainer" parent="TestSpawnMenu" unique_id=1298226714]
 layout_mode = 0
 anchor_left = 0.24
 anchor_top = 0.06
@@ -3114,15 +2123,15 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
 
-[node name="Body" type="VBoxContainer" parent="TestSpawnMenu/Panel"]
+[node name="Body" type="VBoxContainer" parent="TestSpawnMenu/Panel" unique_id=1520824244]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Header" type="HBoxContainer" parent="TestSpawnMenu/Panel/Body"]
+[node name="Header" type="HBoxContainer" parent="TestSpawnMenu/Panel/Body" unique_id=2077009617]
 layout_mode = 2
 theme_override_constants/separation = 20
 
-[node name="Title" type="Label" parent="TestSpawnMenu/Panel/Body/Header"]
+[node name="Title" type="Label" parent="TestSpawnMenu/Panel/Body/Header" unique_id=164230228]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
@@ -3130,7 +2139,7 @@ theme_override_font_sizes/font_size = 40
 text = "TEST SPAWN STATION"
 vertical_alignment = 1
 
-[node name="Keys" type="Label" parent="TestSpawnMenu/Panel/Body/Header"]
+[node name="Keys" type="Label" parent="TestSpawnMenu/Panel/Body/Header" unique_id=783661494]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
 theme_override_font_sizes/font_size = 18
@@ -3138,34 +2147,34 @@ text = "ESC CLOSES"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="Rule" type="ColorRect" parent="TestSpawnMenu/Panel/Body"]
+[node name="Rule" type="ColorRect" parent="TestSpawnMenu/Panel/Body" unique_id=1370859609]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.42, 0.055, 0.06, 1)
 
-[node name="Scroll" type="ScrollContainer" parent="TestSpawnMenu/Panel/Body"]
+[node name="Scroll" type="ScrollContainer" parent="TestSpawnMenu/Panel/Body" unique_id=1637106292]
 layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="Entries" type="VBoxContainer" parent="TestSpawnMenu/Panel/Body/Scroll"]
+[node name="Entries" type="VBoxContainer" parent="TestSpawnMenu/Panel/Body/Scroll" unique_id=2122953464]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="Rule2" type="ColorRect" parent="TestSpawnMenu/Panel/Body"]
+[node name="Rule2" type="ColorRect" parent="TestSpawnMenu/Panel/Body" unique_id=855518594]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.42, 0.055, 0.06, 1)
 
-[node name="Footer" type="HBoxContainer" parent="TestSpawnMenu/Panel/Body"]
+[node name="Footer" type="HBoxContainer" parent="TestSpawnMenu/Panel/Body" unique_id=40171862]
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 2
 
-[node name="Hint" type="Label" parent="TestSpawnMenu/Panel/Body/Footer"]
+[node name="Hint" type="Label" parent="TestSpawnMenu/Panel/Body/Footer" unique_id=2080430545]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
@@ -3173,7 +2182,7 @@ theme_override_font_sizes/font_size = 18
 text = "DEVELOPER ONLY  -  NOTHING HERE TOUCHES A RUN"
 vertical_alignment = 1
 
-[node name="ClearButton" type="Button" parent="TestSpawnMenu/Panel/Body/Footer"]
+[node name="ClearButton" type="Button" parent="TestSpawnMenu/Panel/Body/Footer" unique_id=387101065]
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
@@ -3187,9 +2196,9 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_button_normal")
 text = "CLEAR SPAWNED  (0)"
 
-[node name="Banner" type="Control" parent="TestSpawnMenu"]
+[node name="Banner" type="Control" parent="TestSpawnMenu" unique_id=1940020327]
 visible = false
-layout_mode = 3
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -3197,7 +2206,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Panel" type="PanelContainer" parent="TestSpawnMenu/Banner"]
+[node name="Panel" type="PanelContainer" parent="TestSpawnMenu/Banner" unique_id=1840843430]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.14
@@ -3211,9 +2220,8 @@ grow_vertical = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
 
-[node name="Text" type="Label" parent="TestSpawnMenu/Banner/Panel"]
+[node name="Text" type="Label" parent="TestSpawnMenu/Banner/Panel" unique_id=1639879648]
 layout_mode = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.9, 0.32, 0.3, 1)
 theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
 theme_override_constants/outline_size = 8
@@ -3221,3 +2229,375 @@ theme_override_font_sizes/font_size = 24
 text = "PLACING"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="WorldMapOverlayMenu" type="Control" parent="." unique_id=1265992979]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("84_yorwd")
+
+[node name="TraderMenu" type="Control" parent="." unique_id=1333608249]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("85_mm4lu")
+shotgun_ammo = ExtResource("87_mew4v")
+revolver_ammo = ExtResource("88_lcsd5")
+lever_ammo = ExtResource("89_0n8ik")
+
+[node name="RunInventoryToast" type="Label" parent="." unique_id=1617553564]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -140.0
+offset_top = -220.0
+offset_right = 140.0
+offset_bottom = -180.0
+theme_override_colors/font_color = Color(1, 0.82, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.03, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+script = ExtResource("86_tm2pe")
+
+[node name="HorseCartScreen" type="Control" parent="." unique_id=953925636]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("88_tm2pe")
+
+[node name="TravelLetterbox" type="Control" parent="." unique_id=1226891288]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("94_c3dsp")
+
+[node name="TopBar" type="ColorRect" parent="TravelLetterbox" unique_id=968408929]
+layout_mode = 0
+anchor_right = 1.0
+offset_bottom = 64.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0.02, 0.015, 0.02, 1)
+
+[node name="Art" type="TextureRect" parent="TravelLetterbox/TopBar" unique_id=1515702909]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("95_rpvh4")
+expand_mode = 1
+
+[node name="BottomBar" type="ColorRect" parent="TravelLetterbox" unique_id=2113508241]
+layout_mode = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -64.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.02, 0.015, 0.02, 1)
+
+[node name="Art" type="TextureRect" parent="TravelLetterbox/BottomBar" unique_id=2096563152]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("95_rpvh4")
+expand_mode = 1
+
+[node name="Loading" type="Control" parent="TravelLetterbox" unique_id=1604243225]
+visible = false
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Row" type="HBoxContainer" parent="TravelLetterbox/Loading" unique_id=57765123]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Label" type="Label" parent="TravelLetterbox/Loading/Row" unique_id=373245138]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.87, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 44
+text = "Loading"
+vertical_alignment = 1
+
+[node name="DotOrbit" type="Control" parent="TravelLetterbox/Loading/Row" unique_id=1732266480]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Dot" type="ColorRect" parent="TravelLetterbox/Loading/Row/DotOrbit" unique_id=926244151]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+mouse_filter = 2
+color = Color(0.85, 0.11, 0.11, 1)
+
+[node name="Gate" type="Node" parent="TravelLetterbox" unique_id=2131985065]
+script = ExtResource("95_kkjxy")
+
+[node name="StingerBoard" type="Node" parent="." unique_id=2059733503]
+script = ExtResource("97_jkgqu")
+variant_sets = {
+&"ambush": [ExtResource("201_ambushwav")],
+&"bandit_encounter": [ExtResource("98_m7q3r"), ExtResource("99_0s5ly"), ExtResource("100_xjin7"), ExtResource("101_oiwit"), ExtResource("102_1q0a7")],
+&"boss_discovery": [],
+&"decision_fight": [ExtResource("106_b7x0h")],
+&"decision_paid": [ExtResource("103_jks2j")],
+&"decision_start": [ExtResource("98_m7q3r"), ExtResource("99_0s5ly"), ExtResource("100_xjin7"), ExtResource("101_oiwit"), ExtResource("102_1q0a7")],
+&"decision_taken": [ExtResource("104_7g8m6")],
+&"decision_walk": [ExtResource("105_qcafr")],
+&"extraction": [],
+&"win": [ExtResource("107_i2j1e"), ExtResource("108_12017"), ExtResource("109_ald0n"), ExtResource("110_74nph")]
+}
+voice_count = 6
+
+[node name="WorldBanditDecisionMenu" type="Control" parent="." unique_id=1138616601]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("111_jkgqu")
+
+[node name="Blur" type="ColorRect" parent="WorldBanditDecisionMenu" unique_id=1641392556]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="WorldBanditDecisionMenu" unique_id=2144795549]
+layout_mode = 0
+anchor_left = 0.24
+anchor_top = 0.3
+anchor_right = 0.76
+anchor_bottom = 0.7
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="WorldBanditDecisionMenu/Panel" unique_id=1481253957]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Title" type="Label" parent="WorldBanditDecisionMenu/Panel/Body" unique_id=1089130953]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 40
+text = "TROUBLE"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="WorldBanditDecisionMenu/Panel/Body" unique_id=1806664620]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Line" type="Label" parent="WorldBanditDecisionMenu/Panel/Body" unique_id=1615603530]
+custom_minimum_size = Vector2(0, 90)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.86, 0.8, 1)
+theme_override_font_sizes/font_size = 26
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Buttons" type="VBoxContainer" parent="WorldBanditDecisionMenu/Panel/Body" unique_id=1510336065]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Choice1" type="Button" parent="WorldBanditDecisionMenu/Panel/Body/Buttons" unique_id=885529183]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_hover")
+text = "Choice 1"
+
+[node name="Choice2" type="Button" parent="WorldBanditDecisionMenu/Panel/Body/Buttons" unique_id=1008798575]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_hover")
+text = "Choice 2"
+
+[node name="Choice3" type="Button" parent="WorldBanditDecisionMenu/Panel/Body/Buttons" unique_id=1336393044]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_hover")
+text = "Choice 3"
+
+[node name="AmbushBanner" type="Control" parent="." unique_id=300100001]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("201_banner")
+
+[node name="Label" type="Label" parent="AmbushBanner" unique_id=300100002]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -260.0
+offset_top = 90.0
+offset_right = 260.0
+offset_bottom = 160.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.86, 0.08, 0.06, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 12
+theme_override_font_sizes/font_size = 64
+text = "AMBUSH"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WorldMapWantedBoardMenu" type="Control" parent="." unique_id=300100010 groups=["world_map_wanted_board_menu"]]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("202_wmwanted")
+poster_scene = ExtResource("37_poster")
+
+[node name="Blur" type="ColorRect" parent="WorldMapWantedBoardMenu" unique_id=300100011]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="WorldMapWantedBoardMenu" unique_id=300100012]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -220.0
+offset_right = 220.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="WorldMapWantedBoardMenu/Panel" unique_id=300100013]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="WorldMapWantedBoardMenu/Panel/Body" unique_id=300100014]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 30
+text = "LOCAL WANTED POSTER"
+horizontal_alignment = 1
+
+[node name="EmptyLabel" type="Label" parent="WorldMapWantedBoardMenu/Panel/Body" unique_id=300100015]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "NO CONTRACTS ARE POSTED HERE"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="PosterSlot" type="CenterContainer" parent="WorldMapWantedBoardMenu/Panel/Body" unique_id=300100016]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CloseButton" type="Button" parent="WorldMapWantedBoardMenu/Panel/Body" unique_id=300100017]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_button_hover")
+text = "CLOSE"
+
+[node name="WorldMapHorseStaminaHUD" type="Control" parent="." unique_id=339804442]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 45.0
+offset_top = -108.0
+offset_right = 265.0
+offset_bottom = -78.0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("103_m43cp")

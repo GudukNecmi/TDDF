@@ -337,13 +337,20 @@ func get_active_enemy_count() -> int:
 ## [b]A man who is already something is not asked at all.[/b] Down, running,
 ## berserk, dead or not yet in the world - see [method _can_be_asked]. That guard
 ## is the whole of "do not roll a second state onto somebody who already has one".
-func check(enemy: Node2D, source: Source = Source.UNKNOWN) -> bool:
+##
+## [param dead_ally] is who this is about when [param source] is
+## [constant Source.ALLY_DIED] - passed straight through to
+## [method EnemyEnrage.enrage] so a man who goes berserk over it can scream that
+## friend's own name rather than a line picked at random. Every other source
+## leaves it null, which [EnemyEnrage] already reads as "shout the ordinary way".
+func check(enemy: Node2D, source: Source = Source.UNKNOWN,
+		dead_ally: Node2D = null) -> bool:
 	if not enabled or not _can_be_asked(enemy):
 		return false
 
 	_asked[enemy.get_instance_id()] = _now()
 
-	if _can_enrage(source) and randf() < get_enrage_chance() and _enrage(enemy):
+	if _can_enrage(source) and randf() < get_enrage_chance() and _enrage(enemy, dead_ally):
 		enraged.emit(enemy, source)
 		return true
 
@@ -362,15 +369,19 @@ func check(enemy: Node2D, source: Source = Source.UNKNOWN) -> bool:
 ## The dead man himself is excluded, which he already is by being dead, and the cap
 ## is applied to who is asked rather than to who reacts - so a death in a crowd is
 ## one event with a fixed number of rolls in it however thick the crowd is.
+##
+## [param dead_ally] is threaded straight through to every [method check] this
+## makes - see that method's own doc. [method _check_around_deferred] is the one
+## caller today, and it is always the man who just died.
 func check_around(around: Vector2, source: Source = Source.ALLY_DIED,
-		exclude: Array = []) -> int:
+		exclude: Array = [], dead_ally: Node2D = null) -> int:
 	if not enabled:
 		return 0
 
 	var reacted := 0
 	for enemy: Node2D in EnemyTargeting.nearest_many(
 			self, around, maxi(max_neighbours, 0), ally_radius, exclude):
-		if check(enemy, source):
+		if check(enemy, source, dead_ally):
 			reacted += 1
 	return reacted
 
@@ -409,10 +420,11 @@ func _break(enemy: Node2D) -> bool:
 
 
 ## Sends one man berserk. An enemy carrying no [EnemyEnrage] simply cannot, which
-## leaves the surrender roll to be made as normal.
-func _enrage(enemy: Node2D) -> bool:
+## leaves the surrender roll to be made as normal. [param dead_ally] is passed
+## straight through - see [method check]'s own doc.
+func _enrage(enemy: Node2D, dead_ally: Node2D = null) -> bool:
 	var component := EnemyEnrage.find_on(enemy)
-	return component != null and component.enrage()
+	return component != null and component.enrage(dead_ally)
 
 
 ## Follows every enemy the world builds to its death, so a death anywhere can shake
@@ -475,9 +487,14 @@ func _on_enemy_died(enemy: Node2D) -> void:
 
 func _check_around_deferred(around: Vector2, dead: Node2D) -> void:
 	var skip: Array = []
-	if dead != null and is_instance_valid(dead):
+	var still_here := dead != null and is_instance_valid(dead)
+	if still_here:
 		skip.append(dead)
-	check_around(around, Source.ALLY_DIED, skip)
+	# The corpse is still in the tree at this point - it fades rather than being
+	# freed on the spot - so its own [BanditIdentity] is still there to be read
+	# for whoever is enraged by watching him go down. Handed in only while that
+	# holds; a dead man's own name is exactly what a friend's rage is about.
+	check_around(around, Source.ALLY_DIED, skip, dead if still_here else null)
 
 
 func _find_health(enemy: Node) -> Health:

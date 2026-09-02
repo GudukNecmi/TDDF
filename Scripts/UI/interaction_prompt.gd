@@ -17,9 +17,22 @@ extends Node2D
 ##
 ## It is [member CanvasItem.top_level] so that whatever it is parented to can be
 ## grown, spun or hidden without dragging the prompt along with it.
+##
+## [b]Its wording is optional, not required.[/b] Every existing instance -
+## [ArenaPortal]'s, [WantedBoard]'s, the return gate's - simply authors
+## [member Label.text] on its own [code]Label[/code] child once in the scene
+## and never calls [method set_text], because a portal that only ever offers
+## one thing needs nothing more. [method set_text] exists for a caller that
+## shares one prompt between many different things it could be offering -
+## [WorldMapLocationDirector], choosing among 62 locations - and is otherwise
+## simply unused.
 
 ## Group the prompt follows. The player.
 @export var follow_group: StringName = &"player"
+## The line of text this shows. Optional: left disconnected, whatever
+## [member Label.text] was authored onto [member label_path] in the scene is
+## left exactly as it is - see [method set_text].
+@export var label_path: NodePath = ^"Label"
 ## Where it sits relative to the body's origin, which is at their feet - so this
 ## is up beside the head.
 @export var head_offset := Vector2(30.0, -70.0)
@@ -41,12 +54,22 @@ var _shown: bool = false
 var _time: float = 0.0
 var _fade_tween: Tween
 
+@onready var _label: Label = get_node_or_null(label_path) as Label
+
 
 func _ready() -> void:
 	top_level = true
 	modulate.a = 0.0
 	visible = false
 	scale = Vector2.ONE * prompt_scale
+
+
+## Rewrites what the prompt says, for a caller offering more than one thing
+## through the same instance. Left alone, the prompt keeps whatever text its
+## [code]Label[/code] was authored with.
+func set_text(text: String) -> void:
+	if _label != null:
+		_label.text = text
 
 
 ## Whether the prompt is up. Called by whoever owns the interaction; guarded, so

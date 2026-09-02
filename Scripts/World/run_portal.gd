@@ -1,14 +1,17 @@
 class_name RunPortal
 extends Node2D
-## The pit at the foot of the base: stand in the middle of it, press B, and the
+## The pit at the foot of the base: stand in the middle of it, press E, and the
 ## next run begins.
 ##
-## B does two different things and this node is the difference between them.
-## [Teleporter] asks the portal whether the player is already standing in it
-## before it does anything: if they are not, B teleports them here as it always
-## did; if they are, the teleport is skipped and this starts the run instead.
-## There is no second key and no menu - where the player is standing *is* the
-## choice.
+## [b]E is its own key here, not a second meaning borrowed from B.[/b] The portal
+## used to be the far side of the same press [Teleporter] answers - stand in it and
+## B started a run instead of teleporting home. B no longer teleports home at all
+## - see [member Teleporter.input_enabled] - and rather than leave the portal
+## waiting on a key that has been turned off elsewhere, it listens for
+## [member interact_action] itself, exactly as [ArenaPortal] already does for its
+## own E. Nothing about what starting a run *does* changed: [method start_run] is
+## the same chain of questions it always was, only reached by a press this node
+## hears directly instead of one relayed through the Teleporter's portal check.
 ##
 ## [member radius] is deliberately generous. "In the centre of the pit" has to
 ## mean somewhere the player can casually walk to, not a pixel they have to find,
@@ -82,11 +85,39 @@ const GROUP := &"run_portal"
 ##
 ## A world with no time screen in it behaves as though this were off, so the
 ## portal still works on its own.
+##
+## [b]Ignored while [member enters_world_map] is on.[/b] The World Map keeps its
+## own continuous clock and is never rebuilt around a chosen hour, so there is
+## nothing this question could be asked about on that path - see
+## [method _enter_world_map].
 @export var asks_for_time: bool = true
+
+@export_group("World Map")
+## Whether the run that has just been chosen sets out onto the World Map rather
+## than into the old world-rebuild-and-arrive flow below.
+##
+## [b]On, and this is the entry flow now.[/b] Once the map (and, if asked, the
+## region) is chosen, the portal skips [member asks_for_time] and the old
+## departure screen entirely and instead hands the player's own [Teleporter] to
+## [member world_map_destination_id] - the exact journey [code]WorldMapGate[/code]
+## already makes, so the mount, the camera limits and the World Map's own HUD all
+## come from Phase 1's existing machinery rather than anything new. Nothing about
+## the old flow below is deleted: switching this off restores it exactly, for
+## whichever later phase migrates a map that does not open on the World Map.
+@export var enters_world_map: bool = true
+## Which [TeleportDestination] the run departs to when [member enters_world_map]
+## is on. The World Map's own id, so a second map's own destination is one export
+## away from working the same way.
+@export var world_map_destination_id: StringName = &"world_map"
 ## The E-style hint shown by the player's head while they are standing in the
-## portal, so it is visible that B means something here. Optional, and purely a
+## portal, so it is visible that E means something here. Optional, and purely a
 ## hint - [member radius] is what decides, not this.
 @export var prompt_path: NodePath = ^"Prompt"
+
+@export_group("Interaction")
+## Key that starts the run. The same action [ArenaPortal] already answers E with,
+## so the portal picks it up for free rather than inventing a second name for it.
+@export var interact_action: StringName = &"interact"
 
 @export_group("Transition")
 ## Gap between the key press and the departure screen going up. The camera closes
@@ -173,6 +204,23 @@ func is_starting() -> bool:
 	return _starting
 
 
+## Marked handled, so the press that starts a run cannot also reach whatever is
+## standing behind the player - the same guard [ArenaPortal] puts on its own E.
+##
+## Read straight off [method is_inside] rather than off [member _in_reach]: the
+## glow and the prompt both follow that same test every frame, so this is not a
+## second notion of "close enough", just the same one asked at the moment of the
+## key press instead of being cached for drawing.
+func _unhandled_input(event: InputEvent) -> void:
+	if _starting or not event.is_action_pressed(interact_action):
+		return
+	var body := get_tree().get_first_node_in_group(body_group) as Node2D
+	if body == null or not is_inside(body):
+		return
+	start_run()
+	get_viewport().set_input_as_handled()
+
+
 ## Runs the transition. Ignored while one is already under way, so a second press
 ## during the delay cannot stack reloads.
 func start_run() -> void:
@@ -192,6 +240,13 @@ func start_run() -> void:
 		return
 
 	if asks_for_region and not _region_chosen and _open_region_menu():
+		return
+
+	if enters_world_map:
+		_starting = true
+		run_starting.emit()
+		_hand_music_over()
+		_enter_world_map()
 		return
 
 	if asks_for_time and not _time_chosen and _open_time_menu():
@@ -422,6 +477,85 @@ func _release_teleporters() -> void:
 	for node: Node in body.find_children("*", "Teleporter", true, false):
 		if node.has_method(&"cancel"):
 			node.call(&"cancel")
+
+
+# --- Entering the World Map -----------------------------------------------------
+
+## The World Map entry itself: the player's own [Teleporter] is sent to
+## [member world_map_destination_id], exactly the journey [code]WorldMapGate[/code]
+## already makes - so the mount, the camera limits and the World Map's own clock
+## are Phase 1's machinery running unchanged, and nothing about the World Map
+## itself is touched here.
+##
+## [b]No arrival-time question, no departure screen, and no scene reload.[/b] The
+## World Map is a permanent sibling of the base in the one persistent world scene
+## - see [WorldMapDestination]'s own notes - so reaching it is a journey, not a
+## rebuild: [method Teleporter.teleport] moves the body directly, and the world
+## the player was just standing in is still there behind it.
+func _enter_world_map() -> void:
+	var teleporter := _find_player_teleporter()
+	if teleporter == null:
+		push_warning("RunPortal: no Teleporter on the player - cannot enter the World Map.")
+		_starting = false
+		return
+
+	# The key press that opened this whole flow already told the Teleporter a
+	# journey was under way - see [member Teleporter.portal_starts_run] - and
+	# left its in-progress flag set, waiting for a transition that was never
+	# going to arrive on its own; the old flow never noticed because it always
+	# ended in a scene reload, which quietly rebuilt the Teleporter fresh. This
+	# one does not reload anything, so the flag has to be let go of by hand
+	# first - the same release backing out of a screen already asks for - or
+	# the real journey below is refused before it starts.
+	teleporter.cancel()
+
+	# The ordinary journey hands the soundtrack to the base track - what coming
+	# home means - which is backwards for a journey leaving it. Suppressed only for
+	# this one call; [method Teleporter.teleport] reads it synchronously, so it is
+	# safe to restore immediately after.
+	var restore_music := teleporter.drive_music
+	teleporter.drive_music = false
+	var began := teleporter.teleport(true, false, world_map_destination_id)
+	teleporter.drive_music = restore_music
+
+	if not began:
+		push_warning("RunPortal: no '%s' destination to enter." % world_map_destination_id)
+		_starting = false
+		return
+
+	if not teleporter.teleported.is_connected(_on_world_map_entered):
+		teleporter.teleported.connect(_on_world_map_entered, CONNECT_ONE_SHOT)
+
+
+## The journey has landed. Lets go of [member _starting], and of every question
+## already answered, so a later visit back to this pit - the World Map's own
+## return journey exists for exactly that - asks fresh rather than silently
+## repeating the last answer.
+##
+## [b]This is what a scene reload used to do for free.[/b] The old flow only
+## ever left the pit once, into a rebuild that tore this very node down and
+## made a new one with every flag at its own default; this path leaves the node
+## standing, so the reset that reload gave away for nothing has to be done by
+## hand here instead.
+func _on_world_map_entered(_destination: TeleportDestination) -> void:
+	_starting = false
+	_weapon_chosen = false
+	_map_chosen = false
+	_region_chosen = false
+	_time_chosen = false
+
+
+## The player's own [Teleporter], found on the body rather than wired up - the
+## same lookup [method _release_teleporters] already makes.
+func _find_player_teleporter() -> Teleporter:
+	var body := get_tree().get_first_node_in_group(body_group) as Node
+	if body == null:
+		return null
+	for node: Node in body.find_children("*", "Teleporter", true, false):
+		var teleporter := node as Teleporter
+		if teleporter != null:
+			return teleporter
+	return null
 
 
 func _process(delta: float) -> void:

@@ -175,7 +175,7 @@ enum Phase {
 
 @export_group("Difficulty")
 ## What the boss's walk is multiplied by, for the rungs that do not override it.
-## Above 1 is faster than an ordinary Enemy1, which is the whole of "faster than a
+## Above 1 is faster than an ordinary Bandit, which is the whole of "faster than a
 ## normal enemy" - the base speed itself stays on the enemy scene where every other
 ## enemy reads it.
 @export var boss_speed_multiplier: float = 1.35
@@ -283,7 +283,7 @@ enum Phase {
 @export_group("What he looks like")
 ## The parts a mini boss is dressed out of - see [MiniBossWardrobe].
 ##
-## [b]It is the whole of "a mini boss does not look like an Enemy1".[/b] Left unset,
+## [b]It is the whole of "a mini boss does not look like an Bandit".[/b] Left unset,
 ## the boss is built and fought exactly as before and simply wears the enemy scene's
 ## own artwork, so a world with no wardrobe authored is playable rather than broken.
 ##
@@ -848,7 +848,7 @@ func _build_boss(
 ## [b]It is artwork and nothing else.[/b] The component added here writes textures
 ## onto the sprites the enemy scene already has - see [MiniBossAppearance] - so the
 ## boss keeps the ordinary enemy's chase, aim, swing, idle, legs, flash and hitboxes,
-## and a mini boss moves and animates like an Enemy1 because it is one.
+## and a mini boss moves and animates like an Bandit because it is one.
 ##
 ## Nothing is rolled at this point. The look is derived from [method look_key_for], so
 ## a boss rebuilt for the same contract tomorrow is the same man - and a boss whose

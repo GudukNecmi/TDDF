@@ -108,6 +108,9 @@ extends Control
 ## The mount the player's weapon is read from, for [method is_unarmed]. Left
 ## unresolved it is found by group, so this needs no path across the scene.
 @export var mount_path: NodePath
+## Group the player is found in, for [method _is_weapon_fire_blocked]. The same
+## lookup [Crosshair] already uses for its own spread.
+@export var player_group: StringName = &"player"
 
 ## The eight directions a dark copy of the pointer is thrown in. Eight rather than
 ## four so a one-pixel outline has no gaps at its corners.
@@ -159,10 +162,12 @@ func _process(_delta: float) -> void:
 	_apply_hover()
 
 
-## Whether the pointer should be up at all: a menu owning the screen, or the player
-## holding nothing. The one question the sight's visibility is the answer to.
+## Whether the pointer should be up at all: a menu owning the screen, the player
+## holding nothing, or wherever they are standing having ruled the weapon inert.
+## The one question the sight's visibility is the answer to.
 func is_pointer_wanted() -> bool:
-	return always_shown or is_ui_mode() or (shown_while_unarmed and is_unarmed())
+	return always_shown or is_ui_mode() or (shown_while_unarmed and is_unarmed()) \
+		or _is_weapon_fire_blocked()
 
 
 ## Whether a menu currently owns the screen. Public so a test - or a later
@@ -192,6 +197,18 @@ func is_unarmed() -> bool:
 		return false
 	var weapon := mount.get_weapon()
 	return weapon == null or weapon.is_stowed()
+
+
+## Whether whichever [WorldZone] the player is standing in has ruled weapon
+## input inert - the World Map's own zone. A sight for a gun that cannot fire is
+## exactly the lie [method is_unarmed] already refuses to tell, so the same
+## question is asked here of the zone rather than of the weapon: the World Map
+## can leave the weapon drawn - see [member WorldZone.blocks_weapon_fire] - and
+## the pointer still comes up in place of it.
+func _is_weapon_fire_blocked() -> bool:
+	var player := get_tree().get_first_node_in_group(player_group) as Node2D
+	var zone := WorldZone.get_zone_for(self, player)
+	return zone != null and zone.blocks_weapon_fire
 
 
 ## Swaps to the hover artwork while the mouse is over a button. Asked of the

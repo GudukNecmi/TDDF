@@ -75,6 +75,28 @@ const GROUP := &"day_cycle"
 ## before anything moved the clock mid-round.
 @export var clock_path: NodePath = ^"/root/DayCycle"
 
+@export_group("World time")
+## The continuous clock this map prefers, when it can be found - the same
+## [code]WorldClock[/code] autoload [SunController] already follows. A fixed
+## path rather than a group, because an autoload has exactly one address and
+## it never moves. Left empty, or pointing at nothing that answers
+## [method WorldTimeManager.get_time_period_index], this falls back to
+## [member clock_path] above exactly as it always did.
+@export var world_time_path: NodePath = ^"/root/WorldClock"
+## Whether the continuous clock is actually followed when it is found. Off
+## keeps this map on the old round-based [code]DayCycle[/code] behaviour even
+## with the autoload present - for a scene that wants to prove the old path
+## still works.
+##
+## On - the default - is what makes the world's darkness, [SunController]'s
+## sun and every shadow on it read the identical hour continuously: the ambient
+## colour is no longer only written once as the map loads or once a round is
+## won, it is re-blended every frame between the same two authored
+## [member DayStage.ambient_colour] neighbours [SunController] is already
+## blending its own [SunStage] pair between - see [method get_world_time_ambient_colour],
+## the shared formula both now read.
+@export var follow_world_time: bool = true
+
 @export_group("Ambient")
 ## Whether the stage's colour is written to the world's ambient light at all.
 @export var apply_ambient: bool = true
@@ -92,6 +114,19 @@ const GROUP := &"day_cycle"
 var _stage: DayStage
 var _stage_index: int = -1
 var _resolved: bool = false
+## The [WorldTimeManager] this map is following, or null when none was found -
+## resolved once, in [method _ready], the same node [SunController] resolves
+## it by, and it never moves once the game is running.
+var _world_time: Node
+## Whether something outside this class currently owns the ambient
+## [CanvasModulate] outright - see [method apply_ambient_color]. While true,
+## [method _apply_ambient] writes nothing, so a stage change the session's
+## clock announces in the meantime - [method DayClock.advance_stages] mid-fight,
+## say - cannot silently paint over a colour a caller pushed on purpose.
+## [method get_stage] and everything built on it are untouched by this and go
+## on reading the session's real hour throughout; only this class's own one
+## write to the [CanvasModulate] is ever held back.
+var _ambient_overridden: bool = false
 
 
 ## Joined here rather than in [method Node._ready] because the scatter asks for
@@ -103,10 +138,21 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	_world_time = _resolve_world_time()
 	_follow_clock()
+	_follow_world_time_signal()
 	apply()
 	_spawn_extra_scenes()
 	stage_applied.emit(get_stage(), get_stage_index())
+	set_process(_follows_world_time())
+
+
+## Re-blends the ambient colour every frame while [method _follows_world_time]
+## is true - see [member follow_world_time]'s own doc for why a single write
+## as the map loads is no longer enough once the hour turns continuously
+## rather than only between rounds.
+func _process(_delta: float) -> void:
+	_apply_ambient()
 
 
 ## Writes the hour to the world's ambient light. Called as the map loads, and
@@ -114,6 +160,85 @@ func _ready() -> void:
 ## being rebuilt around it.
 func apply() -> void:
 	_apply_ambient()
+
+
+## Writes [param color] straight to the world's ambient [CanvasModulate],
+## bypassing [method get_stage] entirely - for a caller that has already
+## worked out a colour finer-grained than a single stage, such as
+## [WorldMapCombatBridge] blending between two adjacent [member stages]' own
+## [member DayStage.ambient_colour] by how far a continuous clock has turned
+## between them. The authored colours are still the only colours involved;
+## this only skips *which one* of them [method get_stage] would have picked.
+##
+## Reads [member ambient_group] and respects [member apply_ambient] exactly as
+## [method apply] does, so this is the same one write target every other path
+## in this class already uses rather than a second ambient system - and a map
+## with ambient turned off stays untouched by this too.
+##
+## Also marks [member _ambient_overridden], so the colour just written holds
+## until [method release_ambient_override] is called even if the session's own
+## clock announces an hour change in between - see that member's own doc.
+func apply_ambient_color(color: Color) -> void:
+	_ambient_overridden = true
+	if not apply_ambient:
+		return
+	var ambient := get_tree().get_first_node_in_group(ambient_group) as CanvasModulate
+	if ambient == null:
+		return
+	ambient.color = color
+
+
+## Gives the ambient [CanvasModulate] back to this class's own hour. Lifts
+## [member _ambient_overridden] only - a caller that wants the colour actually
+## repainted right away still has to ask [method apply] or [method refresh]
+## for it afterwards, which [method WorldMapCombatBridge._restore_combat_ambient]
+## always does.
+func release_ambient_override() -> void:
+	_ambient_overridden = false
+
+
+## Whether [method apply_ambient_color] currently owns the ambient
+## [CanvasModulate]. Public so another writer of the same one node - today
+## only [WorldZone], which blends its own colour onto it as the player crosses
+## in and out - can ask before it paints over a colour a caller pushed on
+## purpose, the same reason [method _apply_ambient] itself checks this first.
+func is_ambient_overridden() -> bool:
+	return _ambient_overridden
+
+
+## Where [param clock] currently sits between two neighbouring [member stages]
+## of this map's own authored colours - the same continuous read
+## [SunController] already takes of the matching [SunStage] pair. Nothing here
+## invents a colour: [member stages] is read exactly as authored and only the
+## two neighbours [param clock] currently sits between are ever touched.
+##
+## Public so every caller that wants the World Map's actual hour rather than
+## the discrete one [method get_stage] snaps to reads the identical formula
+## instead of keeping a second copy of it - today that is
+## [method WorldMapCombatBridge._match_combat_ambient_to_world_time], which
+## freezes this once for a fight's length, and [WorldZone], which writes it
+## fresh every frame the World Map's own zone is stood in.
+##
+## [param fallback] is handed back untouched when this map has no stages, or
+## [param clock] cannot answer [method WorldTimeManager.get_time_period_index] -
+## a map or a clock that is not there yet leaves the caller with whatever
+## colour it already had rather than a guess.
+func get_world_time_ambient_colour(clock: Node, fallback: Color = Color.WHITE) -> Color:
+	if clock == null or not clock.has_method(&"get_time_period_index") or stages.is_empty():
+		return fallback
+
+	var count := stages.size()
+	var index := posmod(int(clock.call(&"get_time_period_index")), count)
+	var next_index := posmod(index + 1, count)
+	var from_stage := stages[index]
+	var to_stage := stages[next_index]
+	if from_stage == null or to_stage == null:
+		return fallback
+
+	var progress := 0.0
+	if clock.has_method(&"get_period_progress"):
+		progress = clampf(clock.call(&"get_period_progress"), 0.0, 1.0)
+	return from_stage.ambient_colour.lerp(to_stage.ambient_colour, progress)
 
 
 ## Asks the clock again, and pushes whatever it now says.
@@ -187,6 +312,8 @@ func get_stage_at_offset(offset: int) -> DayStage:
 ## the hour the HUD is showing. [param fallback] is returned by a map with no day
 ## cycle, so a world without one keeps whatever darkness it was authored with.
 func get_ambient_colour(fallback: Color = Color.WHITE) -> Color:
+	if _follows_world_time():
+		return get_world_time_ambient_colour(_world_time, fallback)
 	var stage := get_stage()
 	return fallback if stage == null else stage.ambient_colour
 
@@ -227,6 +354,8 @@ func _resolve() -> void:
 ## being rebuilt between rounds. A project without the autoload stays on the first
 ## stage rather than failing, so the map still opens on its own.
 func _get_clock_stage_index() -> int:
+	if _follows_world_time():
+		return posmod(int(_world_time.call(&"get_time_period_index")), stages.size())
 	var clock := _resolve_clock()
 	if clock == null or not clock.has_method(&"get_stage_index"):
 		return 0
@@ -253,18 +382,61 @@ func _resolve_clock() -> Node:
 	return get_node_or_null(clock_path)
 
 
-## The one thing an hour currently changes. Written once as the map loads rather
-## than every frame, so the base's own darkness blend still owns the ambient light
-## from the moment the player walks into it.
-func _apply_ambient() -> void:
-	if not apply_ambient:
-		return
-	var stage := get_stage()
-	if stage == null:
-		return
+## Whether this map should be reading [WorldTimeManager] right now rather than
+## the round-based [code]DayCycle[/code] clock: a continuous clock was
+## actually found, following it is switched on, and [member stage_override] is
+## not pinning the map to one hour by hand - the same three conditions
+## [method SunController._follows_world_time] checks, so the ambient colour
+## and the sun agree on which clock is authoritative at every instant, and a
+## stage pinned for tuning stays pinned rather than drifting with the clock.
+func _follows_world_time() -> bool:
+	return _world_time != null and follow_world_time and stage_override < 0 \
+			and not stages.is_empty()
 
+
+func _resolve_world_time() -> Node:
+	if world_time_path.is_empty():
+		return null
+	var node := get_node_or_null(world_time_path)
+	if node == null or not node.has_method(&"get_time_period_index"):
+		return null
+	return node
+
+
+## Hangs the map off the continuous clock's own announcement, so the HUD's
+## name label and icon - both only refreshed on [signal stage_applied] - move
+## with every period the world clock crosses rather than waiting for a round
+## to end. [method DayClock]'s own [signal DayClock.stage_forced] is still
+## followed too - see [method _follow_clock] - so a map with the continuous
+## clock switched off keeps refreshing exactly as it always did.
+func _follow_world_time_signal() -> void:
+	if _world_time == null or not _world_time.has_signal(&"period_changed"):
+		return
+	if not _world_time.is_connected(&"period_changed", _on_world_time_period_changed):
+		_world_time.connect(&"period_changed", _on_world_time_period_changed)
+
+
+func _on_world_time_period_changed(_period: int, _period_index: int) -> void:
+	refresh()
+
+
+## The one thing an hour currently changes. Written once as the map loads when
+## [member follow_world_time] is off - so the base's own darkness blend still
+## owns the ambient light from the moment the player walks into it - or every
+## frame, continuously blended between two authored neighbours, when it is on.
+func _apply_ambient() -> void:
+	if not apply_ambient or _ambient_overridden:
+		return
 	var ambient := get_tree().get_first_node_in_group(ambient_group) as CanvasModulate
 	if ambient == null:
+		return
+
+	if _follows_world_time():
+		ambient.color = get_world_time_ambient_colour(_world_time, ambient.color)
+		return
+
+	var stage := get_stage()
+	if stage == null:
 		return
 	ambient.color = stage.ambient_colour
 

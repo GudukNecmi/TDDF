@@ -8,7 +8,7 @@ extends Resource
 ## changes nothing about how one moves, aims, swings, bleeds or goes down. All it
 ## carries is artwork and where on the enemy's existing rig each piece is drawn,
 ## which is why a boss dressed out of it idles, walks and attacks exactly like an
-## Enemy1: it [i]is[/i] one, wearing different clothes.
+## Bandit: it [i]is[/i] one, wearing different clothes.
 ##
 ## [b]The combination is derived rather than rolled.[/b] Nothing here remembers
 ## anything and nothing is written back into a save. [method indices_for] seeds a
@@ -44,8 +44,8 @@ extends Resource
 @export_group("Legs")
 ## The boots every boss in this set wears. Deliberately not part of the draw - the
 ## legs are the one pair of parts an enemy does not vary, the same way
-## [Enemy1Appearance] leaves them out - but they are still replaced, so a boss is
-## not a MiniBoss1 body standing on Enemy1 legs.
+## [BanditAppearance] leaves them out - but they are still replaced, so a boss is
+## not a MiniBoss1 body standing on Bandit legs.
 ##
 ## Left empty the enemy keeps the legs its scene shipped with.
 @export var left_leg_texture: Texture2D
@@ -65,7 +65,7 @@ extends Resource
 ## Added to the head sprite's authored [member Sprite2D.offset], in source texture
 ## pixels.
 ##
-## [b]Zero is correct while this set is drawn on the Enemy1 rig[/b], which it is:
+## [b]Zero is correct while this set is drawn on the Bandit rig[/b], which it is:
 ## the MiniBoss1 heads and bodies sit on the same thousand-pixel canvas, in the
 ## same place on it, as the faces and bodies the enemy scene was built around - so
 ## swapping the texture cannot move anything and the head cannot come off the neck.
@@ -83,7 +83,7 @@ extends Resource
 @export_group("Weapon placement")
 ## Added to the weapon sprite's authored offset, in source texture pixels.
 ##
-## [b]This one is not zero and cannot be.[/b] The Enemy1 knife is a small blade
+## [b]This one is not zero and cannot be.[/b] The Bandit knife is a small blade
 ## drawn lying on its side; the MiniBoss1 weapons are long ones drawn standing
 ## upright on a narrower canvas, so the pixel the sprite turns about - its origin,
 ## which is where the hand is - is somewhere else entirely on the art. The shift is
@@ -93,7 +93,7 @@ extends Resource
 ## What the weapon sprite's authored scale is multiplied by.
 ##
 ## Below 1 for a set drawn larger than the enemy's own knife, which MiniBoss1 is -
-## its blades are a little over twice the length of an Enemy1 knife on the same
+## its blades are a little over twice the length of an Bandit knife on the same
 ## canvas, and a boss is already scaled up by its rung on top of that.
 @export var weapon_scale_multiplier: float = 1.0
 ## Which way this set's blades point in their own art, in degrees, at zero
@@ -107,7 +107,7 @@ extends Resource
 ## [KnifeSlash] writes that every physics frame for the idle sway and the swing
 ## arc, so a static angle parked there would be wiped on the first frame.
 ##
-## The default is the angle the Enemy1 knife is drawn at, so a wardrobe that has
+## The default is the angle the Bandit knife is drawn at, so a wardrobe that has
 ## not been told otherwise writes the enemy scene's own number back and changes
 ## nothing.
 @export var weapon_art_angle_degrees: float = -158.4

@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgotikfilmpost"]
+
+[ext_resource type="Material" uid="uid://d3e4irw5iatn1" path="res://Resources/World/film_post_process_material.tres" id="1_material"]
+[ext_resource type="Script" uid="uid://bqik2s0ut3ync" path="res://Scripts/World/film_post_process.gd" id="2_script"]
+
+[node name="FilmPostProcess" type="CanvasLayer"]
+layer = 3
+
+[node name="Effect" type="ColorRect" parent="."]
+material = ExtResource("1_material")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("2_script")

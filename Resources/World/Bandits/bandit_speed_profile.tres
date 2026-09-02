@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WorldBanditSpeedProfile" format=3 uid="uid://fms2ku7a8ccx"]
+
+[ext_resource type="Script" uid="uid://3tpuxmy1p40h" path="res://Scripts/World/world_bandit_speed_profile.gd" id="1_h8gqu"]
+
+[sub_resource type="Curve" id="Curve_u0363"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.2, 0), 0.0, 0.0, 0, 0, Vector2(0.4, 0.5), 0.0, 0.0, 0, 0, Vector2(0.8, 0.5), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 5
+
+[resource]
+script = ExtResource("1_h8gqu")
+fastest_speed = 314.6
+slowest_speed = 217.8
+speed_curve = SubResource("Curve_u0363")

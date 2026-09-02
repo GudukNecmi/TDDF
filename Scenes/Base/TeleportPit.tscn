@@ -41,7 +41,7 @@ theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
 theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
 theme_override_constants/outline_size = 10
 theme_override_font_sizes/font_size = 44
-text = "B"
+text = "E"
 horizontal_alignment = 1
 vertical_alignment = 1
 

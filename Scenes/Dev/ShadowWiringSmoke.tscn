@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://cgotikbomber" path="res://Scenes/Enemy/Bomber.tscn" id="4_bomber"]
 [ext_resource type="PackedScene" uid="uid://cvpvthdqu1ii2" path="res://Scenes/Weapons/Revolver.tscn" id="5_revolver"]
 [ext_resource type="PackedScene" uid="uid://ctxjyl7xbxk4k" path="res://Scenes/World/Props/Desert/Regions/DustCampTent.tscn" id="6_tent"]
-[ext_resource type="PackedScene" uid="uid://doswnextrckl" path="res://Scenes/World/RewardChest.tscn" id="7_chest"]
 
 [node name="ShadowWiringSmoke" type="Node2D"]
 script = ExtResource("1_smoke")
@@ -15,4 +14,3 @@ enemy_scene = ExtResource("3_enemy")
 bomber_scene = ExtResource("4_bomber")
 revolver_scene = ExtResource("5_revolver")
 tent_scene = ExtResource("6_tent")
-chest_scene = ExtResource("7_chest")

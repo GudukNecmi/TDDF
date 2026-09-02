@@ -77,6 +77,12 @@ var _outlines: Array[TextureRect] = []
 var _spacing: float = 0.0
 var _charge: float = 0.0
 var _flash: float = 0.0
+## 0 to 1: how far towards [member CrosshairStyle.ready_colour] the sight is
+## currently blended, from [member CrosshairStyle.not_ready_colour] - see
+## [method _advance_readiness]. Started at 1 rather than 0, so a weapon that
+## is in fact ready the instant it is drawn does not read yellow for the first
+## fraction of a second before its own state has been asked.
+var _readiness: float = 1.0
 var _mount: WeaponMount
 var _weapon: CarriedWeapon
 
@@ -106,6 +112,7 @@ func _process(delta: float) -> void:
 
 	_advance_spacing(delta)
 	_advance_charge(delta)
+	_advance_readiness(delta)
 	_advance_flash(delta)
 	_place_pieces()
 
@@ -152,6 +159,10 @@ func _use_style(style: CrosshairStyle) -> void:
 	_style = style
 	_charge = 0.0
 	_flash = 0.0
+	# Ready rather than not, so a newly-drawn weapon that is in fact ready does
+	# not flash yellow for the first fraction of a second before its own state
+	# has been asked - see [member _readiness].
+	_readiness = 1.0
 	if _style == null:
 		return
 
@@ -230,6 +241,21 @@ func _advance_charge(delta: float) -> void:
 		_charge, wanted, 1.0 - exp(-maxf(_style.charge_fade_speed, 0.01) * delta))
 
 
+## Slides towards [member CrosshairStyle.ready_colour] while the weapon in
+## hand could actually fire right now, and towards
+## [member CrosshairStyle.not_ready_colour] while it could not - read straight
+## off [method CarriedWeapon.is_ready_to_fire], never off whether the fire key
+## was pressed, so a shotgun mid-pump reads yellow for exactly as long as it
+## is genuinely unable to fire and not a moment longer or shorter.
+func _advance_readiness(delta: float) -> void:
+	var ready := true
+	if _weapon != null and is_instance_valid(_weapon):
+		ready = _weapon.is_ready_to_fire()
+	var wanted := 1.0 if ready else 0.0
+	_readiness = lerpf(
+		_readiness, wanted, 1.0 - exp(-maxf(_style.readiness_fade_speed, 0.01) * delta))
+
+
 func _advance_flash(delta: float) -> void:
 	if _flash <= 0.0:
 		return
@@ -240,7 +266,8 @@ func _advance_flash(delta: float) -> void:
 ## say they belong. One place writes position and colour, so the three can never
 ## drift out of step.
 func _place_pieces() -> void:
-	var tint := _style.normal_colour.lerp(_style.charged_colour, _charge)
+	var ready_tint := _style.not_ready_colour.lerp(_style.ready_colour, _readiness)
+	var tint := ready_tint.lerp(_style.charged_colour, _charge)
 	if _flash > 0.0:
 		tint = tint * lerpf(1.0, maxf(_style.flash_gain, 1.0), _flash)
 		tint.a = 1.0

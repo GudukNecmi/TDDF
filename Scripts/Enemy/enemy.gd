@@ -8,7 +8,7 @@ extends CharacterBody2D
 ## [Health] plus [Hitbox] for taking damage.
 
 ## Movement speed in pixels per second.
-@export var speed: float = 90.0
+@export var speed: float = 99.0
 ## Node to chase.
 @export var target_path: NodePath
 
@@ -45,7 +45,7 @@ extends CharacterBody2D
 ## crowd, the hit reaction, the world's slow motion, the swing and the retreat are
 ## all the same code either way.
 ##
-## Left unset - which is every ordinary Enemy1 - the chase is taken exactly as it
+## Left unset - which is every ordinary Bandit - the chase is taken exactly as it
 ## was computed, so nothing about an enemy without one is changed by this being
 ## here. See [BomberSway], which is what a bomber's wobbling approach is made of.
 @export var steering_path: NodePath
@@ -134,6 +134,18 @@ var _passive: bool = false
 ## slow motion exactly as they were. See [BlastReaction], which holds a man's knife
 ## down while he is running from a lit bomber and gives it straight back afterwards.
 var _attacks_enabled: bool = true
+## Whether [method set_attacks_enabled] is still allowed to turn attacks back on.
+##
+## [b]This is what makes a surrender permanent.[/b] [EnemySurrender] calls
+## [method lock_attacks_disabled] the instant a man gives up, and a man who
+## later stands back up to run gets his physics and his retreat back but must
+## never get his knife back - see [method EnemySurrender.stand_up]. Without this
+## a caller elsewhere re-enabling attacks for its own reason - [BlastReaction]
+## giving a panic back, say - would undo a surrender it knows nothing about, and
+## a bandit who had already given up could be found swinging again a moment
+## after standing up to flee. Once set there is no public way to clear it: a
+## surrendered man's attacks are off for the rest of the encounter, full stop.
+var _attacks_locked: bool = false
 var _hop_time: float = 0.0
 var _hop_node: Node2D
 ## The hop's resting spot, captured the first time it is needed, so releasing an
@@ -261,6 +273,11 @@ func end_charge() -> void:
 ## time to a cooldown that ran while the man was busy running. Whatever turned it
 ## off is responsible for turning it back on.
 func set_attacks_enabled(enabled: bool) -> void:
+	# A locked-off enemy refuses to be turned back on by anybody. See
+	# [member _attacks_locked] and [method lock_attacks_disabled] - this is the
+	# whole of what keeps a surrendered man's knife down for good.
+	if enabled and _attacks_locked:
+		return
 	if enabled == _attacks_enabled:
 		return
 	_attacks_enabled = enabled
@@ -271,6 +288,14 @@ func set_attacks_enabled(enabled: bool) -> void:
 ## Whether this enemy is currently allowed to swing.
 func attacks_enabled() -> bool:
 	return _attacks_enabled
+
+
+## Turns this enemy's attacks off and refuses every future attempt to turn them
+## back on. Called once, by [EnemySurrender] the instant a man gives up - see
+## [member _attacks_locked] for why nothing else in the file may undo it.
+func lock_attacks_disabled() -> void:
+	_attacks_locked = true
+	set_attacks_enabled(false)
 
 
 ## Whether this enemy is running at a place rather than at the player.

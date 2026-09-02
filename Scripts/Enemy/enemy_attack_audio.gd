@@ -11,7 +11,7 @@ extends Node
 ## a hit that may never connect. Nothing in the enemy's own script is involved.
 ##
 ## [b]A boss is the same enemy with different recordings.[/b] There is no boss enemy
-## and no boss scene - see [MiniBoss] - so this component is on every Enemy1 and
+## and no boss scene - see [MiniBoss] - so this component is on every Bandit and
 ## simply looks for the boss component beside it as it swings. Both sets of sounds
 ## are [code]@export[/code] arrays: the man on the poster is louder because his
 ## array holds his own attack, and dropping a boss swoosh into
@@ -33,7 +33,7 @@ extends Node
 ## moment of a swing rather than on ready.
 @export var boss_component_path: NodePath = ^"../MiniBoss"
 
-@export_group("Enemy1")
+@export_group("Bandit")
 ## What the man says as he swings. One is picked at random, so four recordings are
 ## four exports and no two swings in a row have to match.
 @export var attack_sounds: Array[AudioStream] = []
@@ -47,7 +47,7 @@ extends Node
 ## The same two things for the man on the poster, played instead of the ordinary
 ## ones whenever this enemy is carrying a [MiniBoss] component.
 ##
-## An empty array falls back to the Enemy1 sound, so a boss with no recording of his
+## An empty array falls back to the Bandit sound, so a boss with no recording of his
 ## own is heard swinging exactly like the men with him rather than falling silent.
 @export var boss_attack_sounds: Array[AudioStream] = []
 @export var boss_swoosh_sounds: Array[AudioStream] = []

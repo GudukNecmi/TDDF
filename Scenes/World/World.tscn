@@ -41,17 +41,9 @@
 [ext_resource type="Script" uid="uid://kllt3nm2ftc4" path="res://Scripts/World/prop_scale.gd" id="42_propscale"]
 [ext_resource type="Script" uid="uid://bu7o0u8lvwbvd" path="res://Scripts/Common/hit_stop.gd" id="43_s0y1m"]
 [ext_resource type="Script" uid="uid://cf4vccmf2uygu" path="res://Scripts/Run/world_slowdown.gd" id="43_slowdown"]
-[ext_resource type="PackedScene" uid="uid://cgotikcamp" path="res://Scenes/World/Camp.tscn" id="44_brbxp"]
 [ext_resource type="Script" uid="uid://b4n3j010vaxwm" path="res://Scripts/Weapons/coin_strike.gd" id="44_coinstrike"]
-[ext_resource type="Script" uid="uid://o3m2vmslkb4g" path="res://Scripts/World/travel_director.gd" id="45_traveldir"]
 [ext_resource type="Script" uid="uid://bbohy3dnswlqu" path="res://Scripts/Enemy/ambush_wave_director.gd" id="46_ambushdir"]
-[ext_resource type="Script" uid="uid://bi5tmlt21tmao" path="res://Scripts/World/travel_event.gd" id="47_travelevent"]
 [ext_resource type="Texture2D" uid="uid://csjgn5fjkuc5d" path="res://Assets/Efects/Blood/BloodPiece.PNG" id="48_bloodpiece"]
-[ext_resource type="Resource" path="res://Resources/Travel/Events/event_nothing.tres" id="48_evnothing"]
-[ext_resource type="Resource" path="res://Resources/Travel/Events/event_ambush.tres" id="49_evambush"]
-[ext_resource type="Script" uid="uid://d0ykbehyvhkvc" path="res://Scripts/World/danger_finale.gd" id="49_lc1us"]
-[ext_resource type="Resource" path="res://Resources/Travel/Events/event_gang.tres" id="50_evgang"]
-[ext_resource type="Script" uid="uid://db1hcxfwh3yvl" path="res://Scripts/World/region_arrival.gd" id="51_arrival"]
 [ext_resource type="Script" uid="uid://dp4qfob70btr7" path="res://Scripts/Enemy/gunshot_surrender.gd" id="52_scare"]
 [ext_resource type="Script" uid="uid://c8ux2l5kw27b2" path="res://Scripts/World/boss_arena.gd" id="55_bossarena"]
 [ext_resource type="Script" uid="uid://dgu4eksk8cjud" path="res://Scripts/Enemy/mini_boss_director.gd" id="56_bossdir"]
@@ -73,23 +65,12 @@
 [ext_resource type="Script" uid="uid://dnqr7if5kif0q" path="res://Scripts/Enemy/boss_defeat.gd" id="70_bossdefeat"]
 [ext_resource type="Resource" uid="uid://c5peirn18gayw" path="res://Resources/Enemy/mini_boss1_wardrobe.tres" id="71_bosslook"]
 [ext_resource type="Script" uid="uid://cbs3aovfsnlef" path="res://Scripts/World/music_state_watcher.gd" id="71_bvw2n"]
-[ext_resource type="Script" uid="uid://ci0rnt8fswpdg" path="res://Scripts/World/danger_director.gd" id="72_dangerdir"]
-[ext_resource type="Script" uid="uid://c88h37exe028n" path="res://Scripts/World/trouble_reward_director.gd" id="74_ckdsk"]
-[ext_resource type="PackedScene" uid="uid://doswnextrckl" path="res://Scenes/World/RewardChest.tscn" id="75_lc1us"]
-[ext_resource type="Script" uid="uid://marjjmnwh50t" path="res://Scripts/World/trouble_reward_tier.gd" id="76_7foer"]
-[ext_resource type="Resource" uid="uid://dq6o7w6v4f5j1" path="res://Resources/Trouble/reward_tier_1.tres" id="77_kwmhw"]
-[ext_resource type="Resource" uid="uid://dq6o7w6v4f5j2" path="res://Resources/Trouble/reward_tier_2.tres" id="78_41wwn"]
-[ext_resource type="Resource" uid="uid://dq6o7w6v4f5j3" path="res://Resources/Trouble/reward_tier_3.tres" id="79_th182"]
-[ext_resource type="Script" uid="uid://q74l51wsm4wk" path="res://Scripts/World/trouble_ammo_drop.gd" id="81_7foer"]
 [ext_resource type="PackedScene" uid="uid://cgotikbossmap" path="res://Scenes/World/BossEncounterMap.tscn" id="82_bossmap"]
-[ext_resource type="Script" uid="uid://pdc3ixgyh1jb" path="res://Scripts/World/sleep_director.gd" id="82_sleep"]
 [ext_resource type="Script" uid="uid://fvulc80yy0fo" path="res://Scripts/World/cloud_shadows.gd" id="83_clouds"]
 [ext_resource type="Texture2D" uid="uid://cngd3kl30325i" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2293.PNG" id="84_cloud1"]
 [ext_resource type="Texture2D" uid="uid://cc1manbel7o26" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2294.PNG" id="85_cloud2"]
 [ext_resource type="Texture2D" uid="uid://77sodi61ihdd" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2295.PNG" id="86_cloud3"]
 [ext_resource type="Texture2D" uid="uid://dveuyhjjvmrmd" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2296.PNG" id="87_cloud4"]
-[ext_resource type="PackedScene" uid="uid://cgotiktestmap" path="res://Scenes/World/TestMap.tscn" id="88_testmap"]
-[ext_resource type="PackedScene" uid="uid://82ydqw03lnfu" path="res://Scenes/World/TestMapGate.tscn" id="89_testgate"]
 [ext_resource type="Script" uid="uid://bataexivlv50x" path="res://Scripts/World/world_reset.gd" id="90_worldreset"]
 [ext_resource type="Script" uid="uid://c2jlpn0dbyaks" path="res://Scripts/Enemy/morale_director.gd" id="91_morale"]
 [ext_resource type="Script" uid="uid://c8cl7pocjoaaw" path="res://Scripts/Enemy/boss_charge.gd" id="92_bosscharge"]
@@ -105,12 +86,30 @@
 [ext_resource type="Resource" uid="uid://b27dmcnnb5tcn" path="res://Resources/Enemy/wave_entry_bomber.tres" id="102_bomberentry"]
 [ext_resource type="Script" uid="uid://dwy8cjxd0mae4" path="res://Scripts/World/Sun/sun_controller.gd" id="103_sun"]
 [ext_resource type="Script" uid="uid://dcedosoc4shi5" path="res://Scripts/World/Sun/sun_stage.gd" id="104_sunstage"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/1_dawn.tres" id="105_shdawn"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/2_morning.tres" id="106_shmorning"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/3_noon.tres" id="107_shnoon"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/4_evening.tres" id="108_shevening"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/5_twilight.tres" id="109_shtwilight"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/6_night.tres" id="110_shnight"]
+[ext_resource type="Resource" uid="uid://dxssoclugc33x" path="res://Resources/Maps/Desert/Sun/1_dawn.tres" id="105_shdawn"]
+[ext_resource type="Resource" uid="uid://cvfihhwnl555j" path="res://Resources/Maps/Desert/Sun/2_morning.tres" id="106_shmorning"]
+[ext_resource type="Resource" uid="uid://btrm4654rsy7l" path="res://Resources/Maps/Desert/Sun/3_noon.tres" id="107_shnoon"]
+[ext_resource type="Resource" uid="uid://uonnwa52mhtw" path="res://Resources/Maps/Desert/Sun/4_evening.tres" id="108_shevening"]
+[ext_resource type="Resource" uid="uid://blif7c5qgogy5" path="res://Resources/Maps/Desert/Sun/5_twilight.tres" id="109_shtwilight"]
+[ext_resource type="Resource" uid="uid://bqhjryn3pm8ig" path="res://Resources/Maps/Desert/Sun/6_night.tres" id="110_shnight"]
+[ext_resource type="PackedScene" uid="uid://82ydt7yuiyu6" path="res://Scenes/World/WorldMap.tscn" id="111_worldmap"]
+[ext_resource type="Script" uid="uid://b7tnw5e5fqtun" path="res://Scripts/World/world_map_combat_bridge.gd" id="113_evici"]
+[ext_resource type="Script" uid="uid://xnqwid0muwdp" path="res://Scripts/World/world_bounty_boss_director.gd" id="114_1cq84"]
+[ext_resource type="Resource" uid="uid://dasc6hd6xd5j" path="res://Resources/World/Decision/tier_stronger.tres" id="114_opkmv"]
+[ext_resource type="Script" uid="uid://bec21p4rbymi1" path="res://Scripts/World/world_map_extraction_service.gd" id="115_ru2km"]
+[ext_resource type="Resource" uid="uid://82ydawjnv7u2" path="res://Resources/World/Decision/tier_equal.tres" id="115_vxrmv"]
+[ext_resource type="Resource" uid="uid://c5pekg65005sn" path="res://Resources/World/Decision/tier_weaker.tres" id="116_gwtoe"]
+[ext_resource type="AudioStream" uid="uid://bbknkcl22x2mk" path="res://Sound/Music/Trouble/fight1.WAV" id="117_y1hj3"]
+[ext_resource type="AudioStream" uid="uid://dhfluo2nbtccm" path="res://Sound/Music/Trouble/fight2.WAV" id="118_35lvp"]
+[ext_resource type="AudioStream" uid="uid://dquedn5hnl2k3" path="res://Sound/Music/Trouble/fight3.mp3" id="119_0vryg"]
+[ext_resource type="Script" uid="uid://cjf7fc6mep5vy" path="res://Scripts/Common/kill_cam.gd" id="122_ke0ol"]
+[ext_resource type="Script" uid="uid://42bmm6326dff" path="res://Scripts/Enemy/kill_cam_watcher.gd" id="123_wesyx"]
+[ext_resource type="Script" uid="uid://cwmurlwh5oq7u" path="res://Scripts/World/combat_loot_director.gd" id="124_vxrmv"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_ambush_director.gd" id="130_ambushdir"]
+[ext_resource type="Script" path="res://Scripts/World/combat_ammo_box_director.gd" id="131_ammobox"]
+[ext_resource type="PackedScene" path="res://Scenes/World/WorldMapWantedBoard.tscn" id="132_wmboard"]
+[ext_resource type="Script" uid="uid://c216akut81opx" path="res://Scripts/World/world_map_interaction_camera.gd" id="125_y1hj3"]
+[ext_resource type="Script" uid="uid://bf21mhrq25mpr" path="res://Scripts/World/world_map_location_interaction_camera.gd" id="126_35lvp"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xf6vi"]
 size = Vector2(2048, 64)
@@ -205,10 +204,10 @@ script = ExtResource("83_clouds")
 textures = Array[Texture2D]([ExtResource("84_cloud1"), ExtResource("85_cloud2"), ExtResource("86_cloud3"), ExtResource("87_cloud4")])
 scale_range = Vector2(0.35, 0.85)
 
-[node name="Sun" type="Node2D" parent="Arena" groups=["sun"]]
+[node name="Sun" type="Node2D" parent="Arena" unique_id=746016131 groups=["sun"]]
 script = ExtResource("103_sun")
 stages = Array[ExtResource("104_sunstage")]([ExtResource("105_shdawn"), ExtResource("106_shmorning"), ExtResource("107_shnoon"), ExtResource("108_shevening"), ExtResource("109_shtwilight"), ExtResource("110_shnight")])
-transition_duration = 1.6
+projection_mode = 1
 
 [node name="Base" parent="." unique_id=1285401608 instance=ExtResource("17_base")]
 z_index = -1
@@ -284,26 +283,12 @@ number_scene = ExtResource("25_dmgnum")
 [node name="WorldSlowdown" type="Node" parent="." unique_id=902085865 groups=["world_slowdown"]]
 script = ExtResource("43_slowdown")
 
-[node name="TravelDirector" type="Node" parent="." unique_id=1592448834 groups=["travel_director"]]
-process_mode = 3
-script = ExtResource("45_traveldir")
-travel_events = Array[ExtResource("47_travelevent")]([ExtResource("48_evnothing"), ExtResource("49_evambush"), ExtResource("50_evgang")])
-
 [node name="AmbushDirector" type="Node" parent="." unique_id=1592448899 groups=["ambush_director"]]
 script = ExtResource("46_ambushdir")
 
 [node name="WaveRoster" type="Node" parent="AmbushDirector" unique_id=1592448951]
 script = ExtResource("100_roster")
 entries = Array[ExtResource("101_entryscript")]([ExtResource("102_bomberentry")])
-
-[node name="DangerDirector" type="Node" parent="." unique_id=1592448905 groups=["danger_director"]]
-script = ExtResource("72_dangerdir")
-
-[node name="DangerFinale" type="Node" parent="." unique_id=318384528]
-script = ExtResource("49_lc1us")
-
-[node name="RegionArrival" type="Node" parent="." unique_id=1592448900 groups=["region_arrival"]]
-script = ExtResource("51_arrival")
 
 [node name="BossEncounterMap" parent="." unique_id=1592448906 instance=ExtResource("82_bossmap")]
 z_index = -1
@@ -348,30 +333,14 @@ max_duration = 0.5
 [node name="CoinStrike" type="Node" parent="." unique_id=1130592028 groups=["coin_strike"]]
 script = ExtResource("44_coinstrike")
 
-[node name="Camp" parent="." unique_id=1025486039 instance=ExtResource("44_brbxp")]
-menu_path = NodePath("../RunHUD/CampMenu")
-
 [node name="MusicStateWatcher" type="Node" parent="." unique_id=977416575]
 script = ExtResource("71_bvw2n")
 
-[node name="TroubleReward" type="Node" parent="." unique_id=609147480]
-script = ExtResource("74_ckdsk")
-chest_scene = ExtResource("75_lc1us")
-tiers = Array[ExtResource("76_7foer")]([ExtResource("77_kwmhw"), ExtResource("78_41wwn"), ExtResource("79_th182")])
+[node name="WorldMap" parent="." unique_id=141076097 instance=ExtResource("111_worldmap")]
+position = Vector2(7000, 0)
 
-[node name="TroubleAmmoDrop" type="Node" parent="." unique_id=1060338413]
-script = ExtResource("81_7foer")
-
-[node name="SleepDirector" type="Node" parent="." unique_id=1488325647]
-script = ExtResource("82_sleep")
-
-[node name="TestMap" parent="." unique_id=1592448930 instance=ExtResource("88_testmap")]
-position = Vector2(0, 4200)
-
-[node name="TestMapGate" parent="." unique_id=1592448931 instance=ExtResource("89_testgate")]
-position = Vector2(-880, 700)
-destination_id = &"test_map"
-shortcut_action = &"dev_test_map"
+[node name="WorldMapWantedBoard" parent="WorldMap" unique_id=141076098 instance=ExtResource("132_wmboard")]
+position = Vector2(-2500, 550)
 
 [node name="WorldReset" type="Node" parent="." unique_id=1592448932 groups=["world_reset"]]
 script = ExtResource("90_worldreset")
@@ -391,3 +360,37 @@ step_volume_db = -4.0
 script = ExtResource("67_1fesm")
 bus = &"Game"
 pitch_variation = 0.07
+
+[node name="WorldMapCombatBridge" type="Node" parent="." unique_id=791092820]
+script = ExtResource("113_evici")
+stronger_tier = ExtResource("114_opkmv")
+equal_tier = ExtResource("115_vxrmv")
+weaker_tier = ExtResource("116_gwtoe")
+fight_tracks = Array[AudioStream]([ExtResource("117_y1hj3"), ExtResource("118_35lvp"), ExtResource("119_0vryg")])
+
+[node name="WorldMapAmbushDirector" type="Node" parent="." unique_id=791092821]
+script = ExtResource("130_ambushdir")
+
+[node name="CombatAmmoBoxDirector" type="Node" parent="." unique_id=791092822]
+script = ExtResource("131_ammobox")
+
+[node name="WorldBountyBossDirector" type="Node" parent="." unique_id=1125725810]
+script = ExtResource("114_1cq84")
+
+[node name="WorldMapExtractionService" type="Node" parent="." unique_id=51447099]
+script = ExtResource("115_ru2km")
+
+[node name="KillCam" type="Node" parent="." unique_id=1106958234]
+script = ExtResource("122_ke0ol")
+
+[node name="KillCamWatcher" type="Node" parent="." unique_id=1027587695]
+script = ExtResource("123_wesyx")
+
+[node name="CombatLootDirector" type="Node" parent="." unique_id=1144560538]
+script = ExtResource("124_vxrmv")
+
+[node name="WorldMapInteractionCamera" type="Node" parent="." unique_id=1651415873]
+script = ExtResource("125_y1hj3")
+
+[node name="WorldMapLocationInteractionCamera" type="Node" parent="." unique_id=1658095693]
+script = ExtResource("126_35lvp")

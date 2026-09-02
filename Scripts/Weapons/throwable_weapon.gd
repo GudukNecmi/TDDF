@@ -80,6 +80,14 @@ func is_spent() -> bool:
 	return _spent
 
 
+## A throwable is ready for exactly as long as it has not already left the
+## hand - see [member CarriedWeapon.is_ready_to_fire]. There is no reload to
+## wait on: the instant it is spent the weapon it replaced is already on its
+## way back out, so this only matters for the single frame between the two.
+func is_ready_to_fire() -> bool:
+	return not _spent
+
+
 func _weapon_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"fire"):
 		throw()

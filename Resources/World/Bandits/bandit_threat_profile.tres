@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="WorldBanditThreatProfile" format=3 uid="uid://d2ka6vtyuug0d"]
+
+[ext_resource type="Script" uid="uid://dg87biwcrfelk" path="res://Scripts/World/world_bandit_threat_profile.gd" id="1_y1tg7"]
+
+[resource]
+script = ExtResource("1_y1tg7")

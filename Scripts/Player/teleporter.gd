@@ -29,6 +29,19 @@ signal teleported(destination: TeleportDestination)
 ## Emitted when the world's audio comes back.
 signal audio_restored
 
+## Whether the key below can start a journey at all right now.
+##
+## [b]Off suspends the escape without touching anything else about it.[/b] The
+## snap, the silence, the camera, the destination lookup and [method teleport]
+## itself are all left exactly as they are - a caller with a specific place to
+## send the player, such as [TestMapGate], still calls [method teleport]
+## directly and is entirely unaffected by this. Only the ordinary key press in
+## [method _unhandled_input] is refused, which is the whole of what "the B key
+## must not teleport the player during normal gameplay, for now" means: turn
+## this back on - or leave it on for wherever it should keep working, such as a
+## future item that presses B on the player's behalf - and B does exactly what
+## it always did, with nothing here to restore.
+@export var input_enabled: bool = true
 ## Action that fires the teleport.
 @export var action: StringName = &"teleport"
 ## Body that gets moved. Defaults to this component's parent.
@@ -114,6 +127,8 @@ func cancel() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not input_enabled:
+		return
 	if event.is_action_pressed(action):
 		teleport()
 

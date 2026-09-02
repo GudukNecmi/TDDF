@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://lqp3pmoo7xj2" path="res://Assets/Maps/Desert/2- Props/Bone/IMG_2285.PNG" id="10_skull2"]
 [ext_resource type="Script" path="res://Scripts/World/prop_lizard.gd" id="11_lizard"]
 [ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Lizard.tscn" id="12_lizardscene"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_touch"]
 radius = 50.0
@@ -78,3 +79,10 @@ one_roll_per_contact = true
 max_active = 3
 emerge_height = 4.0
 emerge_spread = 6.0
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("90_shadow")
+shadow_pull = 8.0
+cast_mode = 1
+source_sprite_path = NodePath("../Sway/Art")
+shadow_softness_override = 0.16

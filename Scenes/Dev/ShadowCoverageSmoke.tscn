@@ -13,10 +13,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Bush.tscn" id="11_bush"]
 [ext_resource type="PackedScene" uid="uid://ctxjyl7xbxk4k" path="res://Scenes/World/Props/Desert/Regions/DustCampTent.tscn" id="12_tent"]
 [ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Regions/TheDeadStake.tscn" id="13_stake"]
-[ext_resource type="PackedScene" uid="uid://c5peorm102u6p" path="res://Scenes/World/HorseCart.tscn" id="14_cart"]
-[ext_resource type="PackedScene" uid="uid://cgotikcamp" path="res://Scenes/World/Camp.tscn" id="15_camp"]
 [ext_resource type="PackedScene" uid="uid://c5pehphwyiu8a" path="res://Scenes/World/AmmoCrate.tscn" id="16_crate"]
-[ext_resource type="PackedScene" uid="uid://doswnextrckl" path="res://Scenes/World/RewardChest.tscn" id="17_chest"]
 [ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Lizard.tscn" id="18_lizard"]
 [ext_resource type="PackedScene" path="res://Scenes/World/Pickups/KnifePickup.tscn" id="19_knifepick"]
 [ext_resource type="PackedScene" path="res://Scenes/World/Pickups/BonePickup.tscn" id="20_bonepick"]
@@ -38,10 +35,7 @@ shadowed_scenes = Dictionary[StringName, PackedScene]({
 &"Bush": ExtResource("11_bush"),
 &"Dust Camp tent": ExtResource("12_tent"),
 &"The Dead stake": ExtResource("13_stake"),
-&"Wagon": ExtResource("14_cart"),
-&"Camp wagon": ExtResource("15_camp"),
-&"Ammo crate": ExtResource("16_crate"),
-&"Reward chest": ExtResource("17_chest")
+&"Ammo crate": ExtResource("16_crate")
 })
 shadowless_scenes = Dictionary[StringName, PackedScene]({
 &"Lizard": ExtResource("18_lizard"),

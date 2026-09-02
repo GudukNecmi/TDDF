@@ -41,9 +41,15 @@
 [ext_resource type="Script" uid="uid://cgo3bx4j0dm0x" path="res://Scripts/Common/ambient_light_dimmer.gd" id="39_dimmer"]
 [ext_resource type="Script" uid="uid://ds3nvbup5byic" path="res://Scripts/Player/character_light.gd" id="40_charlight"]
 [ext_resource type="Texture2D" uid="uid://csjgn5fjkuc5d" path="res://Assets/Efects/Blood/BloodPiece.PNG" id="41_bloodpiece"]
-[ext_resource type="Script" path="res://Scripts/Player/player_sleep.gd" id="42_sleep"]
 [ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="41_shadow"]
-[ext_resource type="Script" path="res://Scripts/World/Shadows/shadow_group.gd" id="43_shadowgroup"]
+[ext_resource type="Script" uid="uid://cs7jqyft2qr28" path="res://Scripts/Player/player_sleep.gd" id="42_sleep"]
+[ext_resource type="Script" uid="uid://b8onw55m5xw3k" path="res://Scripts/World/Shadows/shadow_group.gd" id="43_shadowgroup"]
+[ext_resource type="Script" uid="uid://0c7o22jcwsxr" path="res://Scripts/World/world_map_horse.gd" id="44_worldmaphorse"]
+[ext_resource type="Script" uid="uid://cohs5rfonxxk8" path="res://Scripts/World/run_inventory.gd" id="46_w4oha"]
+[ext_resource type="Script" uid="uid://d33nrnlm535qo" path="res://Scripts/Player/extraction_hold.gd" id="47_4ribq"]
+[ext_resource type="Script" path="res://Scripts/Player/travel_hold.gd" id="50_travelhold"]
+[ext_resource type="AudioStream" uid="uid://b6gxvueefltur" path="res://Sound/Efect/Horse/Gallop/HorseGallop.WAV" id="48_1nex2"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_horse_gallop.gd" id="49_tgfvv"]
 
 [sub_resource type="Gradient" id="Gradient_smokepuff"]
 offsets = PackedFloat32Array(0, 0.45, 1)
@@ -85,7 +91,7 @@ collision_mask = 33
 motion_mode = 1
 wall_min_slide_angle = 0.0
 script = ExtResource("1_ft8w5")
-speed_modifier_paths = Array[NodePath]([NodePath("DeathSequence"), NodePath("TerrainSlow"), NodePath("PlayerSleep")])
+speed_modifier_paths = Array[NodePath]([NodePath("DeathSequence"), NodePath("TerrainSlow"), NodePath("PlayerSleep"), NodePath("WorldMapHorse"), NodePath("ExtractionHold"), NodePath("TravelHold")])
 
 [node name="Visual" type="Node2D" parent="." unique_id=1788891943]
 scale = Vector2(1.2, 1.2)
@@ -182,6 +188,12 @@ scale_amount_min = 0.32
 scale_amount_max = 0.68
 scale_amount_curve = SubResource("Curve_smoke")
 color_ramp = SubResource("Gradient_smoke")
+
+[node name="ShadowCaster" type="Node2D" parent="Visual/Head" unique_id=1325715850]
+script = ExtResource("41_shadow")
+source_sprite_path = NodePath("..")
+ground_root_path = NodePath("../../..")
+auto_ground_anchor = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2003829022]
 position = Vector2(0, -18)
@@ -306,6 +318,7 @@ suck_loop_path = NodePath("../SuckLoop")
 
 [node name="Teleporter" type="Node" parent="." unique_id=1309149067]
 script = ExtResource("22_tele")
+input_enabled = false
 destination_id = "base_pit"
 
 [node name="SnapSounds" type="Node" parent="Teleporter" unique_id=1973055928]
@@ -336,18 +349,35 @@ minimum_multiplier = 0.5
 script = ExtResource("37_prints")
 foot_paths = Array[NodePath]([NodePath("../Visual/Legs/LeftLeg"), NodePath("../Visual/Legs/RightLeg")])
 
-[node name="PlayerSleep" type="Node" parent="."]
+[node name="PlayerSleep" type="Node" parent="." unique_id=1756577001]
 script = ExtResource("42_sleep")
 
-[node name="ShadowGroup" type="Node2D" parent="."]
+[node name="WorldMapHorse" type="Node" parent="." unique_id=372226939]
+script = ExtResource("44_worldmaphorse")
+
+[node name="ShadowGroup" type="Node2D" parent="." unique_id=586756181]
 script = ExtResource("43_shadowgroup")
 
-[node name="ShadowCaster" type="Node2D" parent="."]
+[node name="ShadowCaster" type="Node2D" parent="." unique_id=338264848]
 script = ExtResource("41_shadow")
 source_sprite_path = NodePath("../Visual/Body")
 
-[node name="ShadowCaster" type="Node2D" parent="Visual/Head"]
-script = ExtResource("41_shadow")
-source_sprite_path = NodePath("..")
-ground_root_path = NodePath("../../..")
-auto_ground_anchor = false
+[node name="RunInventory" type="Node" parent="." unique_id=2053097734]
+script = ExtResource("46_w4oha")
+
+[node name="ExtractionHold" type="Node" parent="." unique_id=2046572486 groups=["extraction_hold"]]
+script = ExtResource("47_4ribq")
+
+[node name="TravelHold" type="Node" parent="." unique_id=2046572487 groups=["travel_hold"]]
+script = ExtResource("50_travelhold")
+
+[node name="GallopLoop" type="AudioStreamPlayer" parent="." unique_id=1429158644]
+stream = ExtResource("48_1nex2")
+bus = &"Game"
+script = ExtResource("18_loop")
+max_volume_db = -6.0
+fade_in_speed = 12.0
+fade_out_speed = 12.0
+
+[node name="WorldMapHorseGallop" type="Node" parent="." unique_id=706594697]
+script = ExtResource("49_tgfvv")

@@ -7,8 +7,8 @@ extends Node
 ## ordinary enemy has - its chase, its head and knife pivots, its idle squash, its
 ## leg animator, its hit flash, its footprints, its hitboxes - so it idles, walks,
 ## aims, swings, flashes, bleeds and goes down through exactly the same code an
-## Enemy1 does. There is no second movement system and no second animation system
-## anywhere in this, which is the whole point: a mini boss is an Enemy1 in different
+## Bandit does. There is no second movement system and no second animation system
+## anywhere in this, which is the whole point: a mini boss is an Bandit in different
 ## clothes.
 ##
 ## [b]The same outlaw is always the same man.[/b] Which parts are worn is not rolled
@@ -45,7 +45,7 @@ extends Node
 
 @export_group("Targets")
 ## The sprites each kind of part is drawn on. They are the enemy scene's own nodes,
-## named the same way [Enemy1Appearance] names them.
+## named the same way [BanditAppearance] names them.
 @export var head_path: NodePath = ^"../HeadAim/Head"
 @export var body_path: NodePath = ^"../Visual/Body"
 @export var weapon_path: NodePath = ^"../KnifeAim/KnifeHand/Knife"
@@ -169,7 +169,7 @@ func _remeasure_the_head_rig() -> void:
 ##
 ## Both halves are written because both of them ask the question: the pivot turns
 ## the weapon so its art points at the player, and the swing works out the rotation
-## that would put the blade on them. Leaving either one on the Enemy1 number would
+## that would put the blade on them. Leaving either one on the Bandit number would
 ## have the boss aiming a blade that is drawn ninety degrees away from where the rig
 ## thinks it is - the handle pointing at the player, and a swing that misses with a
 ## weapon that visibly passed straight through them.

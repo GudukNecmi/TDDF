@@ -282,6 +282,107 @@ func refill_all() -> int:
 	return added
 
 
+## Tops the weapon currently in the player's hands up from the run's own
+## Horse Inventory - see [RunInventory] - and returns how many rounds actually
+## moved.
+##
+## [b]Only ever the missing amount, never a fixed refill.[/b] What is asked
+## for is [method AmmoReserve.get_max] minus [method AmmoReserve.get_current] -
+## a weapon already sitting at 45/60 asks for 15, one already full asks for
+## nothing at all - and what is actually taken off [param inventory] is
+## whatever its own ammo stacks for that exact [AmmoType] can cover, through
+## the same [method RunInventory.remove_item] a Heart or a treasure map would
+## be spent through. A reserve that cannot be topped up in full is simply
+## topped up by however much the inventory had: nothing here manufactures a
+## round that was not already sitting in a stack, and nothing here ever
+## touches a Heart or any other category - nothing about this call reaches
+## for anything but the one [AmmoType] the equipped weapon actually feeds on.
+##
+## [b]What "entering a new combat" calls.[/b] The weapon that comes out of a
+## fight sitting on 20/60 goes into the next one at 60/60 - not for free, the
+## Horse Inventory is charged exactly the 40 that closed the gap - so ammo
+## carried home from one fight is what the next one is actually fought with.
+## This is deliberately not [method refill_all]: that one is the *free*
+## resupply a Base round or a road [DangerDirector] encounter already grants
+## on setting out, and stays exactly as it was: this only ever spends what the
+## player is carrying.
+func resupply_equipped_from_inventory(inventory: RunInventory) -> int:
+	if inventory == null:
+		return 0
+	var reserve := get_equipped_reserve()
+	if reserve == null:
+		return 0
+	var missing := reserve.get_max() - reserve.get_current()
+	if missing <= 0:
+		return 0
+	var type := reserve.get_type()
+	if type == null or type.id == &"":
+		return 0
+
+	var taken := inventory.remove_item(type.id, missing)
+	if taken <= 0:
+		return 0
+
+	var added := reserve.add(taken)
+	# add() can only ever hand back less than what was just taken off the
+	# inventory if something else changed the reserve's own ceiling in
+	# between the two calls - vanishingly unlikely, but a round taken off the
+	# player is handed straight back rather than risking it vanish, per the
+	# class doc's "the count can never be driven below zero" - the identical
+	# carefulness this file already affords every other spend.
+	if added < taken:
+		inventory.add_ammo(type, taken - added)
+	return added
+
+
+## The World Map ambush's own twin of [method resupply_equipped_from_inventory] -
+## identical in every other way, but what can move is additionally held to
+## [param cap_fraction] of the weapon's own [method AmmoReserve.get_max],
+## worked out fresh from that ceiling rather than from whatever the reserve
+## happens to be carrying. [WorldMapCombatBridge] calls this instead of the
+## ordinary resupply only for the three groups an actual ambush caught the
+## player with - see [member WorldBandit.in_ambush] - never for a group simply
+## walked into.
+##
+## [b]The cap is on the capacity, not on the reserve.[/b] A thousand rounds
+## sitting in the Horse Inventory still only ever hands over 60% of the gun's
+## own maximum the instant an ambush closes - see the worked examples on the
+## feature's own design note - so a deep reserve can never buy a fully loaded
+## gun at the one moment the game means to punish being caught unprepared.
+## Still never more than what is actually missing and still never more than
+## what the inventory actually holds, exactly like the ordinary resupply -
+## this only ever narrows what [method AmmoReserve.get_max] minus
+## [method AmmoReserve.get_current] would otherwise ask for.
+func resupply_equipped_from_inventory_ambush(inventory: RunInventory, cap_fraction: float = 0.6) -> int:
+	if inventory == null:
+		return 0
+	var reserve := get_equipped_reserve()
+	if reserve == null:
+		return 0
+	var missing := reserve.get_max() - reserve.get_current()
+	if missing <= 0:
+		return 0
+	var type := reserve.get_type()
+	if type == null or type.id == &"":
+		return 0
+
+	var cap := int(floor(float(reserve.get_max()) * clampf(cap_fraction, 0.0, 1.0)))
+	var wanted := mini(missing, cap)
+	if wanted <= 0:
+		return 0
+
+	var taken := inventory.remove_item(type.id, wanted)
+	if taken <= 0:
+		return 0
+
+	var added := reserve.add(taken)
+	# See [method resupply_equipped_from_inventory]'s identical note - the
+	# same vanishingly unlikely safeguard, kept for the same reason.
+	if added < taken:
+		inventory.add_ammo(type, taken - added)
+	return added
+
+
 ## Re-announces every capacity, for when the authored ceilings themselves have
 ## moved underneath the reserves - which today is the developer balance panel
 ## retuning [member AmmoType.max_ammo]. A reserve already reads the new number; this

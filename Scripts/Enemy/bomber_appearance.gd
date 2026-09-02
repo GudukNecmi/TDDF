@@ -3,7 +3,7 @@ extends Node
 ## Dresses one bomber as it spawns, and puts the broken lamp on it when its head
 ## comes off.
 ##
-## [b]It is [Enemy1Appearance] with the sets tied together.[/b] Same idea, same
+## [b]It is [BanditAppearance] with the sets tied together.[/b] Same idea, same
 ## shared [VariantPicker] weighting - what the last bomber wore makes the next one
 ## less likely to wear it, so a crowd spreads itself across the colourways instead
 ## of clumping - and the same rule that only [member Sprite2D.texture] is ever
@@ -12,9 +12,9 @@ extends Node
 ## independent rolls.
 ##
 ## [b]The broken lamp is not a second death.[/b] The head comes off through the
-## enemy's own [EnemyHeadPop], exactly as an Enemy1's does; this listens for that
+## enemy's own [EnemyHeadPop], exactly as an Bandit's does; this listens for that
 ## and swaps the picture on the way past. So a bomber killed before it lit itself
-## dies an ordinary Enemy1 death whose only visible difference is its own artwork -
+## dies an ordinary Bandit death whose only visible difference is its own artwork -
 ## which is precisely what the brief asks for - and a bomber killed after it lit
 ## itself loses its head the same way, on the same beat, through the same code.
 
@@ -38,7 +38,7 @@ extends Node
 ## [member VariantPicker.repeat_penalty].
 @export_range(0.0, 1.0) var repeat_penalty: float = 0.3
 
-# Shared by every bomber in the process, for the same reason Enemy1's pickers are:
+# Shared by every bomber in the process, for the same reason Bandit's pickers are:
 # a tally kept per enemy would be a tally of one and could not balance anything.
 static var _outfit_picker := VariantPicker.new()
 

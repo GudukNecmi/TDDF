@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://k0swlkqd3hwn"]
+
+[ext_resource type="Script" path="res://Scripts/World/world_map_wanted_board.gd" id="1_board"]
+[ext_resource type="Texture2D" uid="uid://de750a36qhvvp" path="res://Assets/Base/WantedBoard/wanted_board.png" id="2_art"]
+[ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="3_prompt"]
+
+[node name="WorldMapWantedBoard" type="Node2D"]
+script = ExtResource("1_board")
+
+[node name="Art" type="Node2D" parent="."]
+
+[node name="Board" type="Sprite2D" parent="Art"]
+modulate = Color(0.82, 0.78, 0.86, 1)
+texture = ExtResource("2_art")
+
+[node name="Prompt" type="Node2D" parent="."]
+top_level = true
+script = ExtResource("3_prompt")
+
+[node name="Label" type="Label" parent="Prompt"]
+offset_left = -22.0
+offset_top = -26.0
+offset_right = 22.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 44
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -21,8 +21,17 @@ extends Projectile
 ## fact whether that has happened catches the pair of them, and there is no ending
 ## that can quietly leave an unbroken knife lying in the air.
 
-## Emitted as it comes apart, carrying the pieces.
+## Emitted as it comes apart, carrying the pieces. Fires for both endings a
+## throw can have - landing on somebody or running out of range - so anything
+## that only cares that it broke, whichever way, can hang off this alone.
 signal broke(pieces: Array)
+## The narrower half of [signal broke]: fires only when this throw comes apart
+## on its own, having reached the end of its range without ever landing on
+## anybody - never when it broke because it hit something. [ThrowableAudio] is
+## what this exists for: a throw that lands already has [signal Projectile.landed]
+## to hang a break sound off, and playing one again here as well would double
+## it up - see the class doc's own note on why the two endings are told apart.
+signal broke_without_hit(pieces: Array)
 
 ## How it breaks. Left unset it simply disappears, which is what any ordinary round
 ## does.
@@ -79,4 +88,12 @@ func _break_apart() -> void:
 
 	# Thrown out along the way it was travelling, so the pieces visibly break away
 	# from the flight rather than dropping straight down out of it.
-	broke.emit(break_profile.shatter(_art, container, transform.x))
+	var pieces := break_profile.shatter(_art, container, transform.x)
+	broke.emit(pieces)
+	# [member Projectile._spent] is only ever set by a landing - see
+	# [method Projectile._land] and [method Projectile._retire] - never by
+	# reaching the end of the range, which frees this outright without touching
+	# it. So a throw that is not spent when it comes apart is one that broke on
+	# its own, and this is the one moment worth a break sound of its own.
+	if not _spent:
+		broke_without_hit.emit(pieces)

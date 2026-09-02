@@ -69,8 +69,11 @@ extends Resource
 @export var spread_speed: float = 22.0
 
 @export_group("Colour")
-## What the sight is normally. The revolver and the rifle are yellow, the shotgun
-## red - the colours the concept art was drawn in.
+## What the sight is normally, before [member ready_colour] and
+## [member not_ready_colour] below are blended over it. Kept as a fallback for
+## a weapon that never answers [method CarriedWeapon.is_ready_to_fire] at all -
+## every weapon in the game does, so this is not ordinarily seen - and for
+## whatever share of the two firing colours below happens to be left over.
 @export var normal_colour := Color(1.0, 0.66, 0.0)
 ## What it becomes while the weapon is charged. Only a weapon that has a charge
 ## ever shows it - see [RevolverSpin] - so for the others this is simply unused.
@@ -78,6 +81,19 @@ extends Resource
 ## How quickly the sight crosses between the two, in the same smoothing units.
 ## Low, because the charge fading back is meant to be seen as a fade.
 @export var charge_fade_speed: float = 6.0
+
+@export_group("Readiness")
+## What the sight is while the weapon could actually fire right now. Red by
+## default - see [method CarriedWeapon.is_ready_to_fire], which is the one
+## thing this is read against. Never the fire key having been pressed.
+@export var ready_colour := Color(1.0, 0.12, 0.05)
+## What the sight is while it could not - a spent shotgun waiting on the pump,
+## an empty top chamber, a lever still down. Yellow by default.
+@export var not_ready_colour := Color(1.0, 0.82, 0.05)
+## How quickly the sight crosses between the two above, in the same smoothing
+## units as [member charge_fade_speed]. High enough that pulling the trigger
+## reads as an immediate colour change rather than a lingering fade.
+@export var readiness_fade_speed: float = 16.0
 
 @export_group("Outline")
 ## How far the outline is thrown out behind the sight, in pixels.

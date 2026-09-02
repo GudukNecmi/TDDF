@@ -33,6 +33,13 @@ const GROUP := &"bounty_list_menu"
 @export var close_action: StringName = &"pause_menu"
 ## The contracts - the [code]Bounties[/code] autoload.
 @export var ledger_path: NodePath = ^"/root/Bounties"
+## The World Map's own [WorldZone]. TAB opens [WorldMapOverlayMenu] there
+## instead - a multi-panel screen with its own BOUNTIES tab reading the same
+## [BountyLedger] through the run inventory's posters - so this same key is
+## suppressed rather than fighting it for the press. Everywhere else in the
+## game - the arena, the base, the road - TAB still opens this exactly as it
+## always has.
+@export var suppressed_zone_id: StringName = &"world_map"
 ## Whether the world is frozen while it is up. [b]Off[/b] - see the class notes.
 @export var pauses_game: bool = false
 
@@ -140,6 +147,8 @@ func close() -> void:
 ## way, so the key cannot also reach whatever is standing behind the list.
 func _unhandled_input(event: InputEvent) -> void:
 	if not InputMap.has_action(open_action):
+		return
+	if not visible and _on_suppressed_zone():
 		return
 
 	if event.is_action_pressed(open_action):
@@ -276,3 +285,14 @@ func _drop_focus() -> void:
 	var viewport := get_viewport()
 	if viewport != null:
 		viewport.gui_release_focus()
+
+
+## Whether the player is standing in [member suppressed_zone_id] right now -
+## the World Map, where [WorldMapOverlayMenu] answers TAB instead. Asked
+## fresh each press rather than cached, the same way every other zone check in
+## the project is.
+func _on_suppressed_zone() -> bool:
+	if suppressed_zone_id == &"":
+		return false
+	var zone := WorldZone.get_by_id(self, suppressed_zone_id)
+	return zone != null and zone.is_player_inside()

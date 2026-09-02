@@ -66,6 +66,8 @@
 [ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="64_shadow"]
 [ext_resource type="Script" uid="uid://b8onw55m5xw3k" path="res://Scripts/World/Shadows/shadow_group.gd" id="65_shadowgroup"]
 [ext_resource type="Script" uid="uid://cbiv72obcequn" path="res://Scripts/Enemy/blast_reaction.gd" id="70_blast"]
+[ext_resource type="Script" path="res://Scripts/Enemy/bandit_formation.gd" id="71_formation"]
+[ext_resource type="Script" path="res://Scripts/Enemy/bandit_identity.gd" id="72_identity"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_02vxf"]
 radius = 18.0
@@ -304,6 +306,13 @@ pitch_variation = 0.06
 [node name="BlastReaction" type="Node" parent="." unique_id=1764565854]
 script = ExtResource("70_blast")
 bubble_scene = ExtResource("62_bubble")
+inner_steering_path = NodePath("../BanditFormation")
+
+[node name="BanditFormation" type="Node" parent="."]
+script = ExtResource("71_formation")
+
+[node name="BanditIdentity" type="Node" parent="."]
+script = ExtResource("72_identity")
 
 [node name="ShadowGroup" type="Node2D" parent="." unique_id=1237692113]
 script = ExtResource("65_shadowgroup")

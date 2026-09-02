@@ -183,6 +183,12 @@ enum State { IDLE, DYING, LYING, TRAVELLING, RESTORING, RISING }
 ## meant to have lost. The pull is cleared through the magnet's own
 ## [method BloodMagnet.release_all], which exists for exactly this.
 @export var releases_blood_in_flight: bool = true
+## The horse's protected run storage - the [code]HorseBlood[/code] autoload.
+## Told about the death, never emptied by it: see
+## [method HorseBloodStorage.on_player_death], which is the single place that
+## guarantees blood already moved onto the horse at a World Map Blood Depot is
+## never touched by what happens here, however this file is retuned.
+@export var horse_blood_path: NodePath = ^"/root/HorseBlood"
 
 @export_group("The run")
 ## Whether dying ends the run on [RunSessionState].
@@ -233,6 +239,7 @@ enum State { IDLE, DYING, LYING, TRAVELLING, RESTORING, RISING }
 @onready var _loadout: PlayerLoadout = get_node_or_null(loadout_path) as PlayerLoadout
 @onready var _wallet: BloodWallet = get_node_or_null(carried_wallet_path) as BloodWallet
 @onready var _streak: StreakCounter = get_node_or_null(streak_path) as StreakCounter
+@onready var _horse_blood: HorseBloodStorage = get_node_or_null(horse_blood_path) as HorseBloodStorage
 
 var _state: State = State.IDLE
 var _visual_rest := Vector2.ZERO
@@ -307,6 +314,12 @@ func _spill_carried_blood() -> void:
 		_wallet.reset()
 	if lose_streak and _streak != null:
 		_streak.reset()
+
+	# Reports rather than changes anything: the horse's own storage is a
+	# separate wallet this never reaches into, so it is already safe by the
+	# time this runs. See [method HorseBloodStorage.on_player_death].
+	if _horse_blood != null:
+		_horse_blood.on_player_death()
 
 
 ## Up, over, and down. The turn is split across the two halves rather than run as

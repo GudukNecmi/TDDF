@@ -209,6 +209,13 @@ func is_locked() -> bool:
 	return _lock_left > 0.0
 
 
+## Ready is a loaded top chamber, no reload lock and a reserve that can still
+## cover the shot - the same three refusals [method _try_fire] itself checks.
+## See [method CarriedWeapon.is_ready_to_fire].
+func is_ready_to_fire() -> bool:
+	return not is_locked() and is_top_loaded() and has_ammo()
+
+
 ## One trigger pull, one round out of the top chamber.
 ##
 ## Three things can refuse it, and they are deliberately the same refusal to the

@@ -298,6 +298,21 @@ class Part:
 	set(value):
 		projection_detail_scale = value
 		mark_dirty()
+## Overrides the hour's own shadow edge softness - see [member SunStage.shadow_softness]
+## - for just this one object, 0 to 1. Below 0, the default, follows the sun
+## exactly like everything else in the map.
+##
+## [b]This is the whole of the prop-versus-character distinction.[/b] Every
+## shadow in a map shares one sun and, through it, one softness, which is right
+## for a crowd of identical men and wrong the moment a hard-edged prop and a
+## soft-edged character are meant to read differently on the same ground. A
+## character's shadow is left alone - soft, and following the hour like the
+## rest of the world - and a prop that wants to read a little harder without
+## ever becoming a sharp cut-out sets this instead, once, in its own scene.
+@export_range(-1.0, 1.0, 0.01) var softness_override: float = -1.0:
+	set(value):
+		softness_override = value
+		mark_dirty()
 ## Where the shadow sits in the draw order. Above the floor and the marks on it,
 ## below everything standing on it. Absolute, never relative, and never y-sorted: a
 ## shadow is on the ground whatever its own y happens to be as it passes a cactus.
@@ -931,7 +946,16 @@ func get_caster_alpha_scale() -> float:
 func get_edge_padding() -> float:
 	if _state == null:
 		return 0.0
-	return ceilf(_state.shadow_softness * SOFTNESS_TEXELS) + 1.0
+	return ceilf(_effective_softness() * SOFTNESS_TEXELS) + 1.0
+
+
+## The softness this object's shadow is actually drawn with - see
+## [member softness_override].
+func _effective_softness() -> float:
+	if _state == null:
+		return 0.0
+	return _state.shadow_softness if softness_override < 0.0 \
+		else clampf(softness_override, 0.0, 1.0)
 
 
 ## Builds one contributor's geometry: its artwork cut into a grid and every corner
@@ -1052,7 +1076,7 @@ func apply(caster: ShadowCaster, world: Transform2D, alpha: float) -> bool:
 		part.material_frame = frame_uv
 		part.material_in_group = in_group
 		item.material = ShadowGroup.get_shared_material(
-			_state.shadow_softness, _state.shadow_fade, _state.shadow_color, frame_uv,
+			_effective_softness(), _state.shadow_fade, _state.shadow_color, frame_uv,
 			false, in_group)
 	item.visible = true
 	probe[5] += Time.get_ticks_usec() - _t1
@@ -1341,7 +1365,7 @@ func _apply_composite_look() -> void:
 		if _composite_look != _look_serial:
 			_composite_look = _look_serial
 			_active.material = ShadowGroup.get_shared_material(
-				_state.shadow_softness, _state.shadow_fade, _state.shadow_color,
+				_effective_softness(), _state.shadow_fade, _state.shadow_color,
 				Rect2(), true)
 	else:
 		if _composite_alpha != 1.0:

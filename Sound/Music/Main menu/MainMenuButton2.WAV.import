@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://ch1nbs13avqs2"
+path="res://.godot/imported/MainMenuButton2.WAV-d7ec02c0f6fe7253aa4feda1e803101a.sample"
+
+[deps]
+
+source_file="res://Sound/Music/Main menu/MainMenuButton2.WAV"
+dest_files=["res://.godot/imported/MainMenuButton2.WAV-d7ec02c0f6fe7253aa4feda1e803101a.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

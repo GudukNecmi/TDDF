@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://dxoq5pllabtk8"
+path="res://.godot/imported/Ultra-short_tense_we_#3-1788289906480.wav-45bb2092d71613b19f0ff9c080bc2414.sample"
+
+[deps]
+
+source_file="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#3-1788289906480.wav"
+dest_files=["res://.godot/imported/Ultra-short_tense_we_#3-1788289906480.wav-45bb2092d71613b19f0ff9c080bc2414.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MusicState" load_steps=3 format=3 uid="uid://cgotikmainmenu"]
+
+[ext_resource type="Script" uid="uid://c6ylwt4xp2d23" path="res://Scripts/Common/music_state.gd" id="1_state"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Main menu/MainMenu Music.mp3" id="2_track"]
+
+[resource]
+script = ExtResource("1_state")
+state_id = &"main_menu"
+stream = ExtResource("2_track")
+volume_db = -6.0
+loops = true

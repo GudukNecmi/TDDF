@@ -251,6 +251,18 @@ const GROUP := &"shadow_caster"
 ## Scales how solid this part is inside its group's silhouette. Left at 1 - which is
 ## what a part of an assembled object wants - the whole object fades as one.
 @export_range(0.0, 1.0, 0.01) var opacity_multiplier: float = 1.0
+## Overrides the hour's own shadow edge softness for the group this caster
+## makes for itself - see [member ShadowGroup.softness_override], which this
+## simply hands to that group the moment it is made.
+##
+## [b]Only reaches a group this caster made on its own.[/b] Nearly every small
+## prop in the game is exactly that - one [ShadowCaster], no [ShadowGroup] of
+## its own in the scene - so this is the one field a prop's own scene sets to
+## read a little harder than a character's soft-edged shadow without ever
+## becoming a sharp cut-out. A caster that joins somebody else's group - a
+## part of an assembled character - leaves this at -1 and reads that group's
+## own value instead, set directly on the [ShadowGroup] node when one exists.
+@export_range(-1.0, 1.0, 0.01) var shadow_softness_override: float = -1.0
 ## Whether the silhouette fades with its source. On, a piece being faded out - or
 ## hidden, or stowed - takes its share of the shadow with it even when the shadow is
 ## drawn somewhere else in the tree.
@@ -862,6 +874,7 @@ func _make_own_group() -> ShadowGroup:
 	group.name = "ShadowGroup"
 	group.shadow_z_index = shadow_z_index
 	group.sun_path = sun_path
+	group.softness_override = shadow_softness_override
 	_own_group = group
 	add_child(group)
 	return group

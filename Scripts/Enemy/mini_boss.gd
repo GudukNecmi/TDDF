@@ -1,6 +1,6 @@
 class_name MiniBoss
 extends Node
-## What makes one Enemy1 in the arena the man on the poster: a name, the contract
+## What makes one Bandit in the arena the man on the poster: a name, the contract
 ## it belongs to, and a red outline round it.
 ##
 ## [b]There is no boss enemy and no boss scene.[/b] A mini boss is the game's
@@ -24,7 +24,7 @@ extends Node
 ##     and a test can reach the boss without being wired to whatever container it
 ##     was spawned into.
 ##
-## Taking this node off an enemy leaves a large, tough, fast Enemy1 with no outline
+## Taking this node off an enemy leaves a large, tough, fast Bandit with no outline
 ## and no name - which is exactly what it should leave.
 
 ## Group the boss's marker component joins, for [DestinationArrow] to point at.
@@ -51,7 +51,7 @@ const GROUP := &"mini_boss"
 @export var outline_color := Color(1.0, 0.11, 0.11, 1.0)
 ## How thick it is drawn, in *source texture* pixels.
 ##
-## The Enemy1 art is authored around a thousand pixels tall and drawn at 0.113
+## The Bandit art is authored around a thousand pixels tall and drawn at 0.113
 ## scale, so this is roughly nine times thinner on screen than the number suggests -
 ## and thinner again for the arena's zoomed-out view. A boss scaled up by its rung
 ## draws the same texture larger, so the outline grows with the man for free, which

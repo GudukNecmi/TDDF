@@ -63,7 +63,7 @@ signal shouted(line: String)
 @export_group("Panic")
 ## Whether this man runs from a lit bomber at all.
 ##
-## On for an ordinary Enemy1, which is the whole of the reaction the brief asks
+## On for an ordinary Bandit, which is the whole of the reaction the brief asks
 ## for. [b]Off for a bomber[/b], which keeps its objective and only routes around
 ## the danger - see [member safety_radius_scale]. Off is not immunity: a bomber
 ## standing in another one's blast is caught by it exactly as anybody else is.

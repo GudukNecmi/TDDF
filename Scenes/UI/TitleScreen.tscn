@@ -1,15 +1,16 @@
-[gd_scene format=3 uid="uid://cgotiktitlescreen"]
+[gd_scene format=3 uid="uid://dqwtx1et2b5f"]
 
-[ext_resource type="Script" path="res://Scripts/UI/title_screen.gd" id="1_title"]
-[ext_resource type="Script" path="res://Scripts/UI/title_settings.gd" id="2_settings"]
-[ext_resource type="Script" path="res://Scripts/UI/hover_scale.gd" id="3_hover"]
-[ext_resource type="Script" path="res://Scripts/UI/game_cursor.gd" id="4_cursor"]
+[ext_resource type="Script" uid="uid://bkuiqd8igiy6l" path="res://Scripts/UI/title_screen.gd" id="1_title"]
+[ext_resource type="Script" uid="uid://cjh6xxv8yejxw" path="res://Scripts/UI/title_settings.gd" id="2_settings"]
+[ext_resource type="Script" uid="uid://bc3syq82jr0jw" path="res://Scripts/UI/hover_scale.gd" id="3_hover"]
+[ext_resource type="Script" uid="uid://ctgj1gmfcypwl" path="res://Scripts/UI/game_cursor.gd" id="4_cursor"]
 [ext_resource type="Texture2D" uid="uid://ciaw5h61v13on" path="res://Assets/Run Start.png" id="5_backdrop"]
 [ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="6_uipanel"]
 [ext_resource type="Texture2D" uid="uid://b5tbx3ndtm3yn" path="res://Assets/UI/UI Screens/Button1.PNG" id="7_uibtn1"]
 [ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="8_uibtn2"]
-[ext_resource type="Texture2D" path="res://Assets/Cursor/DefaultCursor.PNG" id="9_cursorart"]
-[ext_resource type="Texture2D" path="res://Assets/Cursor/OnButtonCursor.PNG" id="10_cursorhover"]
+[ext_resource type="Texture2D" uid="uid://b71cpkynfvjln" path="res://Assets/Cursor/DefaultCursor.PNG" id="9_cursorart"]
+[ext_resource type="Texture2D" uid="uid://bn6kkfbwmx54o" path="res://Assets/Cursor/OnButtonCursor.PNG" id="10_cursorhover"]
+[ext_resource type="PackedScene" uid="uid://82ydc1svu2fb" path="res://Scenes/Common/FilmPostProcess.tscn" id="11_o00x8"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_panel"]
 content_margin_left = 54.0
@@ -17,11 +18,11 @@ content_margin_top = 46.0
 content_margin_right = 54.0
 content_margin_bottom = 46.0
 texture = ExtResource("6_uipanel")
-region_rect = Rect2(92, 26, 2800, 2102)
 texture_margin_left = 70.0
 texture_margin_top = 70.0
 texture_margin_right = 70.0
 texture_margin_bottom = 70.0
+region_rect = Rect2(92, 26, 2800, 2102)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_normal"]
 content_margin_left = 30.0
@@ -29,23 +30,11 @@ content_margin_top = 16.0
 content_margin_right = 30.0
 content_margin_bottom = 16.0
 texture = ExtResource("7_uibtn1")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
-texture_margin_left = 26.0
-texture_margin_top = 22.0
-texture_margin_right = 26.0
-texture_margin_bottom = 22.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_hover"]
-content_margin_left = 30.0
-content_margin_top = 16.0
-content_margin_right = 30.0
-content_margin_bottom = 16.0
-texture = ExtResource("8_uibtn2")
-region_rect = Rect2(20, 14, 994, 208)
-texture_margin_left = 26.0
-texture_margin_top = 22.0
-texture_margin_right = 26.0
-texture_margin_bottom = 22.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_pressed"]
 content_margin_left = 30.0
@@ -53,14 +42,26 @@ content_margin_top = 16.0
 content_margin_right = 30.0
 content_margin_bottom = 16.0
 texture = ExtResource("8_uibtn2")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
-texture_margin_left = 26.0
-texture_margin_top = 22.0
-texture_margin_right = 26.0
-texture_margin_bottom = 22.0
 modulate_color = Color(0.76, 0.7, 0.6, 1)
 
-[node name="TitleScreen" type="Control"]
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_hover"]
+content_margin_left = 30.0
+content_margin_top = 16.0
+content_margin_right = 30.0
+content_margin_bottom = 16.0
+texture = ExtResource("8_uibtn2")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+
+[node name="TitleScreen" type="Control" unique_id=1994950444]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -70,7 +71,7 @@ grow_vertical = 2
 mouse_filter = 1
 script = ExtResource("1_title")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=673603068]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -82,7 +83,7 @@ texture = ExtResource("5_backdrop")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Shade" type="ColorRect" parent="."]
+[node name="Shade" type="ColorRect" parent="." unique_id=1439928472]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -92,7 +93,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.02, 0.006, 0.008, 0.32)
 
-[node name="Layout" type="Control" parent="."]
+[node name="Layout" type="Control" parent="." unique_id=2135092485]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -101,110 +102,176 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
-[node name="Menu" type="CenterContainer" parent="Layout"]
+[node name="Menu" type="CenterContainer" parent="Layout" unique_id=748897063]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = -1
 anchor_top = 0.2
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
 
-[node name="Frame" type="PanelContainer" parent="Layout/Menu"]
+[node name="Frame" type="PanelContainer" parent="Layout/Menu" unique_id=666185820]
 custom_minimum_size = Vector2(470, 0)
 layout_mode = 2
 mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
 
-[node name="Body" type="VBoxContainer" parent="Layout/Menu/Frame"]
+[node name="Body" type="VBoxContainer" parent="Layout/Menu/Frame" unique_id=1895364216]
 layout_mode = 2
-mouse_filter = 1
 theme_override_constants/separation = 20
 
-[node name="Buttons" type="VBoxContainer" parent="Layout/Menu/Frame/Body"]
+[node name="Buttons" type="VBoxContainer" parent="Layout/Menu/Frame/Body" unique_id=329498033]
 layout_mode = 2
-mouse_filter = 1
 theme_override_constants/separation = 14
 
-[node name="StoryButton" type="Button" parent="Layout/Menu/Frame/Body/Buttons"]
+[node name="StoryButton" type="Button" parent="Layout/Menu/Frame/Body/Buttons" unique_id=1448547471]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
 theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 32
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
 text = "STORY"
 
-[node name="FreeRunButton" type="Button" parent="Layout/Menu/Frame/Body/Buttons"]
+[node name="FreeRunButton" type="Button" parent="Layout/Menu/Frame/Body/Buttons" unique_id=946033630]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
 theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 32
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
 text = "FREE RUN"
 
-[node name="SettingsButton" type="Button" parent="Layout/Menu/Frame/Body/Buttons"]
+[node name="SettingsButton" type="Button" parent="Layout/Menu/Frame/Body/Buttons" unique_id=831152223]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
 theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 32
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
 text = "SETTINGS"
 
-[node name="ExitButton" type="Button" parent="Layout/Menu/Frame/Body/Buttons"]
+[node name="CreditsButton" type="Button" parent="Layout/Menu/Frame/Body/Buttons" unique_id=2129341449]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
 theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 32
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
+text = "CREDITS"
+
+[node name="ExitButton" type="Button" parent="Layout/Menu/Frame/Body/Buttons" unique_id=2129341448]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
 text = "EXIT"
 
-[node name="Settings" type="CenterContainer" parent="Layout"]
+[node name="Credits" type="CenterContainer" parent="Layout" unique_id=289045676]
 visible = false
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = -1
 anchor_top = 0.2
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 1
-script = ExtResource("2_settings")
 
-[node name="Frame" type="PanelContainer" parent="Layout/Settings"]
+[node name="Frame" type="PanelContainer" parent="Layout/Credits" unique_id=1070290118]
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
 mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
 
-[node name="Body" type="VBoxContainer" parent="Layout/Settings/Frame"]
+[node name="Body" type="VBoxContainer" parent="Layout/Credits/Frame" unique_id=1474719659]
 layout_mode = 2
-mouse_filter = 1
 theme_override_constants/separation = 20
 
-[node name="Title" type="Label" parent="Layout/Settings/Frame/Body"]
+[node name="Title" type="Label" parent="Layout/Credits/Frame/Body" unique_id=330794443]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.16, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 46
+text = "CREDITS"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="Layout/Credits/Frame/Body" unique_id=1816819409]
+custom_minimum_size = Vector2(0, 3)
 layout_mode = 2
 mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Names" type="Label" parent="Layout/Credits/Frame/Body" unique_id=1922354360]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 24
+text = "GOTIK
+
+Design, code & art - the Gotik team"
+horizontal_alignment = 1
+
+[node name="BackButton" type="Button" parent="Layout/Credits/Frame/Body" unique_id=845043200]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 28
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
+text = "BACK"
+
+[node name="Settings" type="CenterContainer" parent="Layout" unique_id=289045675]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.2
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_settings")
+
+[node name="Frame" type="PanelContainer" parent="Layout/Settings" unique_id=1070290117]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+
+[node name="Body" type="VBoxContainer" parent="Layout/Settings/Frame" unique_id=1474719658]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Layout/Settings/Frame/Body" unique_id=330794442]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.93, 0.16, 0.14, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
@@ -212,20 +279,18 @@ theme_override_font_sizes/font_size = 46
 text = "SETTINGS"
 horizontal_alignment = 1
 
-[node name="Rule" type="ColorRect" parent="Layout/Settings/Frame/Body"]
+[node name="Rule" type="ColorRect" parent="Layout/Settings/Frame/Body" unique_id=1816819408]
 custom_minimum_size = Vector2(0, 3)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.42, 0.055, 0.06, 1)
 
-[node name="Volume" type="HBoxContainer" parent="Layout/Settings/Frame/Body"]
+[node name="Volume" type="HBoxContainer" parent="Layout/Settings/Frame/Body" unique_id=867923773]
 layout_mode = 2
-mouse_filter = 1
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Layout/Settings/Frame/Body/Volume"]
+[node name="Label" type="Label" parent="Layout/Settings/Frame/Body/Volume" unique_id=1922354359]
 layout_mode = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
@@ -233,7 +298,7 @@ theme_override_font_sizes/font_size = 26
 text = "VOLUME"
 vertical_alignment = 1
 
-[node name="Slider" type="HSlider" parent="Layout/Settings/Frame/Body/Volume"]
+[node name="Slider" type="HSlider" parent="Layout/Settings/Frame/Body/Volume" unique_id=1570966553]
 custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -242,10 +307,9 @@ max_value = 1.0
 step = 0.01
 value = 1.0
 
-[node name="Value" type="Label" parent="Layout/Settings/Frame/Body/Volume"]
+[node name="Value" type="Label" parent="Layout/Settings/Frame/Body/Volume" unique_id=416024330]
 custom_minimum_size = Vector2(76, 0)
 layout_mode = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.93, 0.16, 0.14, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
@@ -254,53 +318,73 @@ text = "100%"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="FullscreenButton" type="Button" parent="Layout/Settings/Frame/Body"]
+[node name="FullscreenButton" type="Button" parent="Layout/Settings/Frame/Body" unique_id=51079706]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
 theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 28
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
 text = "FULLSCREEN: OFF"
 
-[node name="BackButton" type="Button" parent="Layout/Settings/Frame/Body"]
+[node name="BackButton" type="Button" parent="Layout/Settings/Frame/Body" unique_id=845043199]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
 theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
-theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
 theme_override_font_sizes/font_size = 28
-theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
 text = "BACK"
 
-[node name="HoverScale" type="Node" parent="."]
+[node name="ComingSoonLabel" type="Label" parent="Layout" unique_id=1857441987]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.87
+anchor_right = 1.0
+anchor_bottom = 0.95
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.93, 0.16, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
+text = "COMING SOON"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ButtonSound" type="AudioStreamPlayer" parent="." unique_id=1968523249]
+bus = &"Game"
+
+[node name="HoverScale" type="Node" parent="." unique_id=1968523248]
 script = ExtResource("3_hover")
 root_path = NodePath("../Layout")
-hover_scale = 1.06
-grow_time = 0.12
-settle_time = 0.16
-scales_disabled_buttons = false
 
-[node name="GameCursor" type="Control" parent="."]
+[node name="GameCursor" type="Control" parent="." unique_id=1279378090]
 z_index = 250
 layout_mode = 1
+anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("4_cursor")
 default_texture = ExtResource("9_cursorart")
 hover_texture = ExtResource("10_cursorhover")
 cursor_size = Vector2(46, 46)
-hotspot = Vector2(0.4, 0.27)
-outline_thickness = 1.0
-outline_colour = Color(0, 0, 0, 0.85)
 always_shown = true
-shown_while_paused = true
 shown_while_unarmed = false
-hide_system_cursor = true
 crosshair_path = NodePath("")
+
+[node name="FilmPostProcess" parent="." unique_id=259021614 instance=ExtResource("11_o00x8")]
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+grow_horizontal = 1
+grow_vertical = 1

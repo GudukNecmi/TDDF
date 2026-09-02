@@ -287,11 +287,21 @@ func zoom_kick(
 ## punches the camera having to know it happened.
 ##
 ## [param immediate] skips the ease, for a transition that has already hidden the
-## cut - an arrival, a scene rebuild.
+## cut - an arrival, a scene rebuild. [b]It writes [member Camera2D.zoom] itself,
+## not only [member _zoom_multiplier].[/b] The multiplier alone is only ever
+## turned into a zoom inside [method _physics_process], once a physics frame has
+## actually run - so a caller that reads [member Camera2D.zoom] in the same call
+## this was asked from, before the tree has ticked again, would otherwise still
+## find whatever zoom was resting there before. See
+## [method EnemySpawner.get_view_rect], which is exactly such a reader: it is
+## asked to say what the player can see the instant a fight opens, synchronously,
+## from the same call that hands the camera to the Arena.
 func set_zoom_multiplier(value: float, immediate: bool = false) -> void:
 	zoom_multiplier = maxf(value, 0.01)
-	if immediate:
-		_zoom_multiplier = zoom_multiplier
+	if not immediate:
+		return
+	_zoom_multiplier = zoom_multiplier
+	zoom = _base_zoom * _zoom_multiplier * lerpf(1.0, _weapon_zoom, _weapon_scale) * (1.0 + _zoom_offset)
 
 
 func get_zoom_multiplier() -> float:

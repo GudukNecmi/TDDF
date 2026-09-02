@@ -46,13 +46,25 @@ const GROUP := &"world_zone"
 ## whole canvas, so the zone borrows it rather than adding a second one - two
 ## would simply cancel each other out.
 @export var ambient_group: StringName = &"ambient_modulate"
-## Colour the ambient light is taken to while the player is in here. Darker than
-## the world's own colour makes the zone darker.
+## The zone's own dim, atmospheric colour - what the ambient light is mixed
+## down towards while the player is in here. Darker than the world's own
+## colour makes the zone darker.
 ##
 ## This dims the *unlit* world only: every light inside the zone is untouched, so
 ## the torches, the pit and the player's own lamp keep their brightness and the
 ## place reads as lit by them rather than as a screen turned down.
 @export var ambient_colour := Color(0.06, 0.055, 0.09)
+## How much of the current day colour's own hue and brightness still reaches
+## the zone once the player is fully inside it, 0 to 1. 0 replaces the day
+## outright with [member ambient_colour] and never moves again regardless of
+## the hour - which is what used to leave a moody interior's own atmosphere
+## disagreeing with the HUD's reading of the hour the instant the blend had
+## landed. 1 lets the day back through entirely and the zone stops darkening
+## the room at all. The low default keeps the room reading as the same dim,
+## authored place at every hour while still letting dawn, noon and night
+## visibly tint it differently, exactly the way [SunController]'s own shadows
+## never stop moving just because a room is dim.
+@export_range(0.0, 1.0) var ambient_day_influence: float = 0.35
 ## How quickly the ambient light crosses between the two colours.
 @export var ambient_blend_speed: float = 2.2
 ## Whether the colour the zone blends *away* from is asked of the map's
@@ -69,6 +81,22 @@ const GROUP := &"world_zone"
 ## Off falls back to the captured colour, for a zone in a world with no day cycle
 ## to ask.
 @export var ambient_follows_day_cycle: bool = true
+## Whether this zone shows [DayCycleDirector]'s own continuous blend of the
+## current hour - [method DayCycleDirector.get_world_time_ambient_colour] -
+## for as long as the player stands in it, instead of blending towards
+## [member ambient_colour] on the way in and away from it on the way out.
+##
+## This is what the World Map's own zone wants and no other zone does: the
+## base and the tutorial map are places whose own darkness the day does not
+## reach, so they still blend to their one authored colour, but the World Map
+## is the day itself and had nothing continuously repainting it before this -
+## [DayCycleDirector] only ever wrote its ambient once, as the world loaded,
+## or when the old round-based clock announced a stage change, so the map's
+## own hour kept turning underneath a colour that had stopped following it.
+@export var follows_world_time: bool = false
+## The continuous clock read while [member follows_world_time] is on - the
+## same [code]WorldClock[/code] autoload [SunController] already follows.
+@export var world_time_path: NodePath = ^"/root/WorldClock"
 
 @export_group("Camera")
 ## Whether the zone moves the camera's resting zoom.
@@ -91,6 +119,16 @@ const GROUP := &"world_zone"
 ## in, and removes any enemy that gets inside the rectangle afterwards. This node
 ## never touches an enemy itself.
 @export var bars_enemies: bool = true
+## Whether a weapon in here is inert - read by [CarriedWeapon], which simply
+## never dispatches an input event to its own [method CarriedWeapon._weapon_input]
+## while it is true. Distinct from [member holster_weapons]: that puts the
+## weapon away at the belt, and a presentation that wants it visibly carried -
+## the World Map, riding rather than fighting - can leave it drawn and still
+## have this refuse to fire it. [GameCursor] reads the same flag to decide
+## whether the pointer belongs up instead of the sight, for the same reason it
+## already gives the pointer to an unarmed player: a sight for a gun that
+## cannot fire is exactly that same lie.
+@export var blocks_weapon_fire: bool = false
 
 var _inside: bool = false
 var _amount: float = 0.0
@@ -177,8 +215,23 @@ func _push_camera() -> void:
 ## when they leave. The write is skipped entirely once the blend has landed back
 ## on nothing, so a zone the player is nowhere near stops touching the world's
 ## light rather than reasserting the same colour forever.
+##
+## [b]Also skipped outright while [DayCycleDirector] is holding the ambient
+## for something else[/b] - a World Map fight in progress, say. Without this a
+## zone only just left keeps easing its own blend down for a couple of seconds
+## after the player has gone, and every one of those frames writes straight
+## over whatever combat forced onto the same [CanvasModulate] - the zone and
+## the fight both think they are the only thing touching it, and only one of
+## them is right while the fight holds. [method DayCycleDirector.is_ambient_overridden]
+## is the one question that settles who currently is.
 func _blend_ambient(delta: float) -> void:
 	if not affects_ambient:
+		return
+	if _ambient_is_held_elsewhere():
+		return
+
+	if follows_world_time and _inside:
+		_apply_world_time_ambient()
 		return
 
 	var goal := 1.0 if _inside else 0.0
@@ -193,7 +246,9 @@ func _blend_ambient(delta: float) -> void:
 	if ambient == null:
 		return
 
-	ambient.color = _get_outside_colour(ambient).lerp(ambient_colour, _amount)
+	var outside := _get_outside_colour(ambient)
+	var target := ambient_colour.lerp(outside, ambient_day_influence)
+	ambient.color = outside.lerp(target, _amount)
 
 
 ## The colour outside this zone - what the world looks like when the player is not
@@ -214,6 +269,36 @@ func _get_outside_colour(ambient: CanvasModulate) -> Color:
 
 	var day := DayCycleDirector.get_active(self)
 	return _outside_colour if day == null else day.get_ambient_colour(_outside_colour)
+
+
+## Writes [DayCycleDirector]'s own continuous blend of the current hour
+## straight onto the shared ambient [CanvasModulate] - see
+## [member follows_world_time]. Called every frame the player stands in a
+## zone marked for it, so the World Map's darkness turns with
+## [WorldTimeManager] exactly as [SunController]'s own shadows already do,
+## rather than sitting wherever [DayCycleDirector] last wrote it.
+##
+## A map with no [DayCycleDirector], or a clock that cannot be found, leaves
+## the [CanvasModulate] exactly as it already was - the same "nothing to add"
+## every other lookup in this class falls back to.
+func _apply_world_time_ambient() -> void:
+	var day := DayCycleDirector.get_active(self)
+	if day == null:
+		return
+	var ambient := _get_ambient()
+	if ambient == null:
+		return
+	var clock := get_node_or_null(world_time_path)
+	ambient.color = day.get_world_time_ambient_colour(clock, ambient.color)
+
+
+## Whether something else has claimed the shared ambient [CanvasModulate]
+## outright right now. A map with no [DayCycleDirector] at all reads this as
+## "no", exactly as [method _get_outside_colour] already falls back when one
+## is missing.
+func _ambient_is_held_elsewhere() -> bool:
+	var day := DayCycleDirector.get_active(self)
+	return day != null and day.is_ambient_overridden()
 
 
 ## Looked up lazily and re-looked-up if it goes away, the same way [BloodField]

@@ -6,7 +6,7 @@ extends Node
 ## enemies wave N is worth exactly as it always has - the base count, the
 ## per-wave multiplier and the round's own growth - and then hands that number
 ## here to be filled in. This returns one entry per body, and a null entry means
-## "the spawner's own enemy", which is why Enemy1 remains the dominant population
+## "the spawner's own enemy", which is why Bandit remains the dominant population
 ## without appearing in the list at all.
 ##
 ## Every type is one [WaveRosterEntry] in [member entries]. Adding a third enemy

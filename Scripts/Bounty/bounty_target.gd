@@ -21,3 +21,17 @@ extends Resource
 ## The face. A placeholder silhouette for now; the real artwork drops in here
 ## without anything else changing.
 @export var portrait: Texture2D
+
+## Which [constant MapLocation.LocationType.BOUNTY_CAMP] locations this
+## outlaw is willing to hole up in, by [member MapLocation.location_id].
+## Read by [WorldBountyBossDirector] once a contract naming this target has
+## been rolled a region, and filtered down to whichever of these actually
+## sit inside that region - so the same outlaw can be authored with camps
+## across several regions and only ever use the one his poster points at.
+##
+## Left empty - true of every target today - and the director falls back to
+## any of that region's three bounty camps, picked by the contract's own id
+## so a given contract always uses the same one for the run rather than a
+## fresh roll each cycle. Naming camps here only narrows that choice; it is
+## never required to give an outlaw somewhere to go.
+@export var possible_camps: Array[StringName] = []

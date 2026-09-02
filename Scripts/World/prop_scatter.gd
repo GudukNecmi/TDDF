@@ -82,6 +82,19 @@ extends Node2D
 ## Further rectangles nothing may be placed in, in local space.
 @export var keep_clear: Array[Rect2] = []
 
+@export_group("Impassable clearance")
+## Group a large, manually placed obstacle - a mountain, a building, a cliff -
+## joins to be automatically kept clear of scenery, on top of whatever
+## [member keep_clear] is hand-authored. Read once per layout, off the
+## obstacle's own existing collision shape - never a second, per-pixel map of
+## the ground - so tagging a new obstacle into this group is the whole of
+## teaching every [PropScatter] in the scene to leave room around it. See
+## [method _collect_auto_clear].
+@export var impassable_group: StringName = &"impassable_terrain"
+## How much room is left around an [member impassable_group] obstacle's own
+## collision footprint, in pixels, past the footprint itself.
+@export var impassable_clearance_margin: float = 80.0
+
 @export_group("Randomness")
 ## Seed the arrangement is rolled from. 0 rolls a different desert every run,
 ## which is what a run-based game wants; any other value pins it, for looking at
@@ -142,6 +155,12 @@ var _container: Node
 var _all_points: PointGrid
 var _layer_points: PointGrid
 var _count: int = 0
+## Every [member impassable_group] obstacle's own footprint, converted into
+## this node's own local space and grown by [member impassable_clearance_margin] -
+## recomputed once at the top of every [method _lay_out], the same "asked
+## fresh, kept for the one pass" lifetime [member _all_points] already has.
+## Checked by [method _is_allowed] the same way [member keep_clear] is.
+var _auto_keep_clear: Array[Rect2] = []
 ## Everything this scatter has put down, so a re-roll takes away exactly what it
 ## placed and nothing else. The container is shared with whatever else the map
 ## parents into it - a region's own extras, a prop dropped in by hand - and those
@@ -204,6 +223,7 @@ func _lay_out() -> void:
 	_layer_points = PointGrid.new(grid_cell_size)
 	_rng.seed = random_seed if random_seed != 0 else randi()
 	_count = 0
+	_auto_keep_clear = _collect_auto_clear()
 
 	for layer: ScatterLayer in _all_layers():
 		_place_layer(layer)
@@ -356,4 +376,83 @@ func _is_allowed(point: Vector2) -> bool:
 	for box: Rect2 in keep_clear:
 		if box.has_point(point):
 			return false
+	for box: Rect2 in _auto_keep_clear:
+		if box.has_point(point):
+			return false
 	return true
+
+
+# --- Automatic clearance around impassable terrain --------------------------
+
+## The footprint of every [member impassable_group] obstacle currently in the
+## tree, expanded by [member impassable_clearance_margin] and converted into
+## this node's own local space - the same space [member region] and
+## [member keep_clear] are already authored in. Empty for a scene with no
+## obstacles tagged into the group, or before this node is in the tree, which
+## every caller reads as "nothing extra is kept clear this pass."
+func _collect_auto_clear() -> Array[Rect2]:
+	var boxes: Array[Rect2] = []
+	if impassable_group == &"" or not is_inside_tree():
+		return boxes
+
+	for node: Node in get_tree().get_nodes_in_group(impassable_group):
+		var obstacle := node as Node2D
+		if obstacle == null:
+			continue
+		var world_rect: Variant = _collision_world_rect(obstacle)
+		if world_rect == null:
+			continue
+		var grown: Rect2 = (world_rect as Rect2).grow(impassable_clearance_margin)
+		var a := to_local(grown.position)
+		var b := to_local(grown.end)
+		boxes.append(Rect2(a, Vector2.ZERO).expand(b))
+	return boxes
+
+
+## The world-space bounding rectangle of every [CollisionShape2D] and
+## [CollisionPolygon2D] under [param node], or null when it has none - read
+## off whichever collision this obstacle was already authored with for
+## physics, never a second footprint invented for scenery alone. A disabled
+## shape is skipped, the same as the physics engine itself would skip it.
+func _collision_world_rect(node: Node2D) -> Variant:
+	var found := false
+	var rect := Rect2()
+
+	for shape_node: Node in node.find_children("*", "CollisionShape2D", true, false):
+		var collision := shape_node as CollisionShape2D
+		if collision == null or collision.disabled or collision.shape == null:
+			continue
+		var world_rect := _transform_rect(collision, collision.shape.get_rect())
+		rect = world_rect if not found else rect.merge(world_rect)
+		found = true
+
+	for poly_node: Node in node.find_children("*", "CollisionPolygon2D", true, false):
+		var polygon := poly_node as CollisionPolygon2D
+		if polygon == null or polygon.disabled or polygon.polygon.is_empty():
+			continue
+		var world_rect := _transform_rect(polygon, _polygon_local_rect(polygon.polygon))
+		rect = world_rect if not found else rect.merge(world_rect)
+		found = true
+
+	return rect if found else null
+
+
+func _polygon_local_rect(points: PackedVector2Array) -> Rect2:
+	var rect := Rect2(points[0], Vector2.ZERO)
+	for point: Vector2 in points:
+		rect = rect.expand(point)
+	return rect
+
+
+## [param local_rect], authored in [param shape_node]'s own local space,
+## converted through its full [member Node2D.global_transform] - every corner,
+## not just the two opposite ones - so a rotated or scaled collision shape
+## still clears the ground it actually occupies rather than its own unrotated
+## bounding box.
+func _transform_rect(shape_node: Node2D, local_rect: Rect2) -> Rect2:
+	var xform := shape_node.global_transform
+	var rect := Rect2(xform * local_rect.position, Vector2.ZERO)
+	rect = rect.expand(xform * Vector2(local_rect.end.x, local_rect.position.y))
+	rect = rect.expand(xform * Vector2(local_rect.position.x, local_rect.end.y))
+	rect = rect.expand(xform * local_rect.end)
+	return rect

@@ -13,10 +13,12 @@
 [ext_resource type="Resource" path="res://Resources/Bounty/Knowledge/knowledge_map.tres" id="6_kmap"]
 [ext_resource type="Resource" path="res://Resources/Bounty/Knowledge/knowledge_region.tres" id="7_kregion"]
 [ext_resource type="Resource" path="res://Resources/Bounty/Knowledge/knowledge_time.tres" id="8_ktime"]
+[ext_resource type="Resource" path="res://Resources/Bounty/Knowledge/knowledge_camp.tres" id="8_kcamp"]
 [ext_resource type="Resource" path="res://Resources/Bounty/Rewards/reward_0_knowledge.tres" id="9_reward0"]
 [ext_resource type="Resource" path="res://Resources/Bounty/Rewards/reward_1_knowledge.tres" id="10_reward1"]
 [ext_resource type="Resource" path="res://Resources/Bounty/Rewards/reward_2_knowledge.tres" id="11_reward2"]
 [ext_resource type="Resource" path="res://Resources/Bounty/Rewards/reward_3_knowledge.tres" id="12_reward3"]
+[ext_resource type="Resource" path="res://Resources/Bounty/Rewards/reward_4_knowledge.tres" id="12_reward4"]
 [ext_resource type="Resource" path="res://Resources/Bounty/Targets/target_hangman.tres" id="13_hangman"]
 [ext_resource type="Resource" path="res://Resources/Bounty/Targets/target_preacher.tres" id="14_preacher"]
 [ext_resource type="Resource" path="res://Resources/Bounty/Targets/target_butcher.tres" id="15_butcher"]
@@ -31,8 +33,8 @@
 
 [resource]
 script = ExtResource("1_settings")
-knowledge_categories = Array[ExtResource("2_category")]([ExtResource("6_kmap"), ExtResource("7_kregion"), ExtResource("8_ktime")])
-reward_tiers = Array[ExtResource("3_tier")]([ExtResource("9_reward0"), ExtResource("10_reward1"), ExtResource("11_reward2"), ExtResource("12_reward3")])
+knowledge_categories = Array[ExtResource("2_category")]([ExtResource("6_kmap"), ExtResource("7_kregion"), ExtResource("8_ktime"), ExtResource("8_kcamp")])
+reward_tiers = Array[ExtResource("3_tier")]([ExtResource("9_reward0"), ExtResource("10_reward1"), ExtResource("11_reward2"), ExtResource("12_reward3"), ExtResource("12_reward4")])
 rarities = Array[ExtResource("24_rarity")]([ExtResource("25_common"), ExtResource("26_uncommon"), ExtResource("27_rare"), ExtResource("28_legendary")])
 reward_step = 100
 poster_count = 5
@@ -44,4 +46,4 @@ map_catalog = ExtResource("17_catalog")
 only_unlocked_maps = true
 fallback_regions = Array[StringName]([&"A", &"B", &"C", &"D"])
 fallback_day_stages = Array[ExtResource("5_stage")]([ExtResource("18_dawn"), ExtResource("19_morning"), ExtResource("20_noon"), ExtResource("21_evening"), ExtResource("22_twilight"), ExtResource("23_night")])
-knowledge_weights = Array[float]([0.35, 0.3, 0.25, 0.1])
+knowledge_weights = Array[float]([0.35, 0.3, 0.25, 0.1, 0.0])

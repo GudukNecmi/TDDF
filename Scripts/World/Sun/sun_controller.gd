@@ -13,16 +13,29 @@ extends Node2D
 ##
 ## [b]It is not a day cycle and must never become one.[/b] Which hour it is belongs
 ## to [DayClock] - the session's position - and to [DayCycleDirector] - the map's
-## list of stages and what they are called. This node asks the existing director
-## which stage is being played and looks up the [SunStage] at that index. Adding a
-## seventh hour is adding a stage there and a sun here; there is no second list of
-## stage names anywhere and nothing here decides what time it is.
+## list of stages and what they are called; or, now, to [WorldTimeManager] - the
+## [code]WorldClock[/code] autoload - which owns a continuous position in the same
+## six hours. This node still only asks and looks up the [SunStage] at whichever
+## index it is given; adding a seventh hour is adding a stage here and nowhere
+## else, and there is no second list of stage names anywhere.
 ##
-## [b]The sun travels.[/b] The stage itself changes in one step - a round ends, or
-## a Trouble is cleared and [method DayClock.advance_stages] moves it - but the sun
-## crosses the sky over the seconds after it, and because every shadow is derived
-## from where it is now, every shadow in the world swings and lengthens together
-## without being told anything.
+## [b]The sun travels.[/b] Following [WorldTimeManager] - the ordinary case, since
+## it is a project-wide autoload - the sun's position is derived directly from the
+## continuous degree every frame: see [method _update_from_world_time]. Failing
+## that, it falls back to the way it always travelled: the stage changes in one
+## step - a round ends, or a Trouble is cleared and [method DayClock.advance_stages]
+## moves it - and the sun eases across the sky over [member transition_duration]
+## seconds after it. Either way every shadow is derived from where the sun is now,
+## so every shadow in the world swings and lengthens together without being told
+## anything.
+##
+## [b]A caller that takes the sun by hand is never overridden.[/b]
+## [method snap_to_stage] and [method force_stage] mark the sun manually driven the
+## moment either is called - see [member _manual] - and from then on it holds
+## exactly where it was put, following neither clock, until [method refresh] is
+## called again. This is what lets a debug tool step through the hours one at a
+## time without the World Map's own clock immediately overwriting the frame it
+## just asked for.
 ##
 ## [b]It holds the light but does not own the ambience.[/b] Each stage carries the
 ## colour of the light and what lamps should scale their energy by, and both are
@@ -89,9 +102,22 @@ const GROUP := &"sun"
 ## caster.
 @export_range(-512.0, 512.0, 1.0) var ground_plane_height: float = 0.0
 
+@export_group("World time")
+## The continuous clock this sun prefers, when it can be found - the
+## [code]WorldClock[/code] autoload. A fixed path rather than a group, because an
+## autoload has exactly one address and it never moves. Left empty, or pointing at
+## nothing that answers [method WorldTimeManager.get_time_period_index], the sun
+## falls back to [member day_cycle_path] below exactly as it always did.
+@export var world_time_path: NodePath = ^"/root/WorldClock"
+## Whether the continuous clock is actually followed when it is found. Off keeps
+## this sun on the old day-cycle-driven behaviour even with the autoload present -
+## for a scene that wants to prove the old path still works.
+@export var follow_world_time: bool = true
+
 @export_group("Day cycle")
-## The map's [DayCycleDirector], found by group when left unresolved. This is the
-## only thing here that knows what time it is, and it is asked rather than copied.
+## The map's [DayCycleDirector], found by group when left unresolved. Only
+## consulted when [member follow_world_time] is off, or no [WorldTimeManager] can
+## be found.
 @export var day_cycle_path: NodePath
 ## Group the map's day cycle is found in when [member day_cycle_path] is empty.
 @export var day_cycle_group: StringName = &"day_cycle"
@@ -121,6 +147,14 @@ var _state := SunState.new()
 var _stage_index: int = -1
 var _elapsed: float = 0.0
 var _duration: float = 0.0
+## The [WorldTimeManager] this sun is following, or null when none was found.
+## Resolved once, in [method _ready] - the same node the World Map's own systems
+## resolve it by, and it never moves once the game is running.
+var _world_time: Node
+## Whether a caller took the sun by hand - see [method snap_to_stage] and
+## [method force_stage] - and so neither clock should touch it until
+## [method refresh] is called again.
+var _manual: bool = false
 ## Authored energy of each opted-in lamp, so the hour scales the artist's number.
 var _light_energies: Dictionary = {}
 
@@ -135,11 +169,20 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	set_process(false)
+	_world_time = _resolve_world_time()
+	if _follows_world_time():
+		_snap_to_world_time()
+		set_process(not stages.is_empty())
+		return
 	_follow_day_cycle()
 	_snap_to_current_stage()
 
 
 func _process(delta: float) -> void:
+	if not _manual and _follows_world_time():
+		_update_from_world_time()
+		return
+
 	_elapsed += delta
 	var t := 1.0 if _duration <= 0.0 else clampf(_elapsed / _duration, 0.0, 1.0)
 	# Eased so the sun arrives rather than stops.
@@ -214,10 +257,18 @@ func get_ambient_intensity() -> float:
 	return _state.ambient_intensity
 
 
-## Asks the day cycle again and sends the sun to whatever it now says. Public so a
-## debug key or a system that forces an hour can push the change without the world
-## being rebuilt around it.
+## Lets go of a manual hold - see [member _manual] - and sends the sun back to
+## whichever clock it should be following: the continuous [WorldTimeManager] when
+## one can be found and [member follow_world_time] is on, the day cycle otherwise.
+## Public so a debug key or a system that forced an hour can hand the sun back
+## without the world being rebuilt around it.
 func refresh() -> void:
+	_manual = false
+	if _follows_world_time():
+		_snap_to_world_time()
+		set_process(not stages.is_empty())
+		return
+
 	var index := _resolve_stage_index()
 	if index == _stage_index:
 		return
@@ -225,20 +276,29 @@ func refresh() -> void:
 
 
 ## Sends the sun to [param stage_index] over [param duration] seconds, ignoring
-## what the day cycle says. For a debug panel stepping through the hours; ordinary
-## play never calls it.
+## whichever clock it was following - see [member _manual]. For a debug panel
+## stepping through the hours; ordinary play never calls it.
 func force_stage(stage_index: int, duration: float = -1.0) -> void:
 	if stages.is_empty():
 		return
+	_manual = true
 	_begin_transition(posmod(stage_index, stages.size()), duration)
 
 
-## Puts the sun straight at the current hour with no journey at all. What the map
-## does as it loads: the world is being built, so there is nowhere for the sun to
-## have come from.
-func snap_to_stage(stage_index: int) -> void:
+## Puts the sun straight at [param stage_index] with no journey at all. What the
+## map does as it loads: the world is being built, so there is nowhere for the sun
+## to have come from.
+##
+## [param mark_manual] is what makes an outside caller's snap hold there until
+## [method refresh] is asked for - see [member _manual]. The continuous clock's
+## own bootstrap snap - see [method _snap_to_world_time] - is the one caller that
+## passes false, since it is the clock placing the sun at its own answer rather
+## than someone taking it away from the clock.
+func snap_to_stage(stage_index: int, mark_manual: bool = true) -> void:
 	if stages.is_empty():
 		return
+	if mark_manual:
+		_manual = true
 	_stage_index = posmod(stage_index, stages.size())
 	_to = stages[_stage_index]
 	if _to == null:
@@ -309,6 +369,65 @@ func _publish() -> void:
 func _read_state() -> void:
 	_state.read_from(
 		_live, get_sun_anchor(), projection_mode == ProjectionMode.SUN_DIRECTIONAL)
+
+
+## Whether this sun should be reading [WorldTimeManager] right now rather than the
+## day cycle: a continuous clock was actually found, following it is switched on,
+## and [member stage_override] is not pinning the sun to one hour by hand - the
+## override wins over either clock, exactly as it always won over the day cycle
+## alone.
+func _follows_world_time() -> bool:
+	return _world_time != null and follow_world_time and stage_override < 0
+
+
+func _resolve_world_time() -> Node:
+	if world_time_path.is_empty():
+		return null
+	var node := get_node_or_null(world_time_path)
+	if node == null or not node.has_method(&"get_time_period_index"):
+		return null
+	return node
+
+
+## The world clock's current period, as an index into [member stages] - clamped to
+## however many stages are actually authored, so a sun with fewer than six of them
+## still shows something rather than reading past the end of its own array.
+func _world_time_index() -> int:
+	return posmod(int(_world_time.call(&"get_time_period_index")), stages.size())
+
+
+## Puts the sun straight at the world clock's current hour with no journey at all -
+## what [method _ready] and [method refresh] do to hand the sun to the continuous
+## clock. See [method snap_to_stage]'s own [code]mark_manual[/code]: this is the
+## clock placing the sun at its own answer, not someone taking it away from the
+## clock, so it must not itself count as a manual hold.
+func _snap_to_world_time() -> void:
+	if stages.is_empty():
+		_stage_index = -1
+		return
+	snap_to_stage(_world_time_index(), false)
+
+
+## Blends the sun directly between the world clock's current period and the next
+## one, by how far through the current period the clock has turned - continuous
+## by construction, since the blend reaches exactly the next anchor stage the same
+## frame the clock's own period changes and starts from exactly this one's the
+## frame after. There is no eased transition to run here and nothing to hold once
+## it "arrives": the sun is always exactly as far along as the clock is.
+func _update_from_world_time() -> void:
+	if stages.is_empty():
+		return
+
+	var index := _world_time_index()
+	var next_index := posmod(index + 1, stages.size())
+	var progress: float = _world_time.call(&"get_period_progress")
+
+	if index != _stage_index:
+		_stage_index = index
+		sun_stage_changed.emit(_state, _stage_index)
+
+	SunStage.blend(stages[index], stages[next_index], clampf(progress, 0.0, 1.0), _live)
+	_publish()
 
 
 ## Which hour is being played, asked of the map's existing day cycle. The override

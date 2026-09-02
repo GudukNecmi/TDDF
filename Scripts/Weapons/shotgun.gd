@@ -181,6 +181,13 @@ func reload_to_ready() -> void:
 	_set_state(State.READY)
 
 
+## Ready is READY and nothing else - the same test [method _try_fire] itself
+## makes, so the crosshair can never show red while a pulled trigger would
+## still only click. See [method CarriedWeapon.is_ready_to_fire].
+func is_ready_to_fire() -> bool:
+	return _state == State.READY and has_ammo()
+
+
 ## The ammunition check sits beside the state check and nowhere else: an empty
 ## gun is refused exactly as an open one is, leaving the state, the fore-end and
 ## the artwork untouched, so running dry never disturbs the pump rhythm. The

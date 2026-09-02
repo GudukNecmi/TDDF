@@ -351,6 +351,15 @@ func _drop_knife_now(sideways: float, intact: bool) -> void:
 	if container == null or knife == null or not is_instance_valid(knife):
 		return
 
+	# A dropped or thrown knife casts no shadow of its own - small ground props
+	# are undecorated in this game - and cutting it loose here rather than
+	# merely disabling it is what stops it: left in place, [ShadowCaster]
+	# would find no group to join the instant this knife is reparented into
+	# its own [DeathDebris] a few lines down and simply make one of its own -
+	# see [method ShadowCaster.resolve_group] - which is exactly the shadow
+	# this is meant to prevent from ever appearing.
+	_strip_knife_shadow(knife)
+
 	if not intact:
 		_break_knife(container, knife, sideways)
 		return
@@ -358,7 +367,8 @@ func _drop_knife_now(sideways: float, intact: bool) -> void:
 	var carrier := _throw(container, knife, "DroppedKnife",
 		knife_separation_force, knife_force_variation,
 		sideways, knife_force_variation,
-		gravity, bounce, knife_ground_friction, knife_drop_min, knife_drop_max)
+		gravity, bounce, knife_ground_friction, knife_drop_min, knife_drop_max,
+		false)
 	if carrier == null:
 		return
 
@@ -369,6 +379,24 @@ func _drop_knife_now(sideways: float, intact: bool) -> void:
 	carrier.fade_time = 0.0
 	if knife_pickup_scene != null:
 		carrier.add_child(knife_pickup_scene.instantiate())
+
+
+## Cuts loose whatever shadow the knife was casting while it was still in a
+## hand, before it is ever reparented into a [DeathDebris] of its own.
+##
+## [b]It is freed rather than merely disabled[/b], because a disabled
+## [ShadowCaster] still resolves a group for itself the moment it re-enters the
+## tree under its new parent - and finding none to join there, since a lone
+## knife on the ground stands under nothing but its own [DeathDebris], it would
+## make one of its own regardless of whether it draws into it. Freeing it
+## outright is what stops that group from ever being made at all, which is the
+## whole of "do not generate a new shadow for the dropped knife".
+func _strip_knife_shadow(knife: Node2D) -> void:
+	for child: Node in knife.get_children():
+		var caster := child as ShadowCaster
+		if caster != null:
+			knife.remove_child(caster)
+			caster.queue_free()
 
 
 ## The knife hits the sand and comes apart. The pieces are its own artwork cut up
@@ -411,7 +439,8 @@ func _throw(
 	piece_bounce: float,
 	friction: float,
 	drop_low: float,
-	drop_high: float
+	drop_high: float,
+	cools_hit_flash: bool = true
 ) -> DeathDebris:
 	if piece == null or not is_instance_valid(piece):
 		return null
@@ -441,7 +470,10 @@ func _throw(
 	piece.rotation = turn
 	piece.scale = size
 	piece.modulate = head_tint
-	_cool_hit_flash(piece, carrier)
+	if cools_hit_flash:
+		_cool_hit_flash(piece, carrier)
+	else:
+		_clear_hit_flash_immediately(piece)
 	carrier.reset_physics_interpolation()
 
 	var lift := -lift_force * (1.0 + randf_range(-lift_variation, lift_variation))
@@ -486,6 +518,22 @@ func _cool_hit_flash(piece: Node2D, carrier: DeathDebris) -> void:
 		func(amount: float) -> void:
 			material.set_shader_parameter(&"flash", amount),
 		1.0, 0.0, maxf(impact_flash_fade, 0.0001))
+
+
+## Wipes the killing blow's white off a piece outright, with no hold and no
+## fade - [param cools_hit_flash] false's alternative to [method _cool_hit_flash].
+##
+## [b]For a piece that must never be seen wearing it at all.[/b] A dropped
+## knife is a prop lying in the sand from the instant it lands, not a wound
+## reading as an impact the way a severed head is, and it must always show its
+## own normal colours - never the enemy's temporary white hit-flash, however
+## the enemy happened to die or however recently it had been shot. Where
+## [method _cool_hit_flash] deliberately forces the flash on before easing it
+## off, this only ever takes it down.
+func _clear_hit_flash_immediately(piece: Node2D) -> void:
+	var material := piece.material as ShaderMaterial
+	if material != null:
+		material.set_shader_parameter(&"flash", 0.0)
 
 
 ## The body falls the same way the head went, so the two read as one event rather

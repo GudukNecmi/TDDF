@@ -35,8 +35,31 @@ signal player_exited
 ## Emitted when the gate is actually used and the journey began.
 signal used
 
+## Where a door leads when the place it names is not standing in this scene.
+##
+## [b]Some doors lead out of the scene now.[/b] The base, the five region maps
+## and the arenas used to be one scene, so every door was a teleport across it
+## and there was always a [TeleportDestination] in the tree to be carried to.
+## They are separate scenes now, so the two doors that cross between them - the
+## base's gate onto the map, and the map's gate home - say so here and the trip
+## becomes a real change of scene through [WorldRegionRouter].
+##
+## [constant LeaveTo.NONE] is every other door: one whose destination genuinely
+## is in the same scene, which travels exactly as it always did.
+enum LeaveTo {
+	## The destination is in this scene. Nothing changes.
+	NONE,
+	## Out onto the World Map, in whichever region the run is in.
+	REGION,
+	## Home to the base.
+	BASE,
+}
+
 ## Which [TeleportDestination] this door leads to.
 @export var destination_id: StringName = &"test_map"
+## Where this door leads when [member destination_id] names nothing in this
+## scene - see [enum LeaveTo].
+@export var leaves_scene_to: LeaveTo = LeaveTo.NONE
 ## How close the player has to stand for the prompt to appear and the key to work,
 ## in pixels.
 @export var interaction_radius: float = 170.0
@@ -102,12 +125,12 @@ func use() -> bool:
 func travel() -> bool:
 	var teleporter := _find_teleporter()
 	if teleporter == null:
-		return false
+		return _ride_out()
 
 	# Silent, and with the contextual run-portal branch refused. See this class's
 	# own notes for why both.
 	if not teleporter.teleport(true, false, destination_id):
-		return false
+		return _ride_out()
 
 	if _prompt != null:
 		_prompt.set_prompt_visible(false)
@@ -165,3 +188,57 @@ func _find_teleporter() -> Teleporter:
 		if teleporter != null:
 			return teleporter
 	return null
+
+
+## The way out when there is no destination by that name standing in this scene.
+##
+## [b]The place on the other side is not in this scene any more.[/b] These gates
+## used to be teleports across the one world scene, to a destination a few
+## thousand pixels away. The base and the five region maps are separate scenes
+## now, so a gate that crosses between them says where it leads through
+## [member leaves_scene_to] and the trip is a real change of scene, made by
+## [WorldRegionRouter] behind the same curtain every other journey uses.
+##
+## A gate whose destination genuinely is in this scene never reaches here, and one
+## that has not been told it leads anywhere else refuses rather than guessing.
+func _ride_out() -> bool:
+	if leaves_scene_to == LeaveTo.NONE:
+		return false
+
+	var router := WorldRegionRouter.get_active(self)
+	if router == null or router.is_travelling():
+		return false
+
+	var went := false
+	if leaves_scene_to == LeaveTo.BASE:
+		went = router.go_to_base()
+	else:
+		went = router.go_to_region(_run_region())
+
+	if not went:
+		return false
+
+	if _prompt != null:
+		_prompt.set_prompt_visible(false)
+	used.emit()
+	return true
+
+
+## The region the run is in, or the map's own way in when nothing has been
+## chosen - so a gate onto the World Map still leads somewhere on a run that
+## never asked which region it was for.
+func _run_region() -> StringName:
+	var session := get_node_or_null(^"/root/RunSession")
+	if session == null:
+		return &""
+	if session.has_method(&"get_region_id"):
+		var chosen: StringName = session.call(&"get_region_id")
+		if not chosen.is_empty():
+			return chosen
+	if not session.has_method(&"get_map"):
+		return &""
+	var map: MapDefinition = session.call(&"get_map")
+	if map == null:
+		return &""
+	var entry := map.get_entry_region()
+	return &"" if entry == null else entry.region_id

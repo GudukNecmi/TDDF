@@ -75,9 +75,6 @@ var _loading: bool = false
 var _resource_ready: bool = false
 var _min_time_elapsed: bool = false
 var _switched: bool = false
-## Set only while a [method begin_transition] is running, rather than a real
-## [method SceneTree.change_scene_to_packed] - see that method's own doc.
-var _manual_ready: Callable
 
 
 func _ready() -> void:
@@ -146,69 +143,6 @@ func begin(scene_path: String, caption: String = "LOADING", stinger: AudioStream
 
 	var timer := get_tree().create_timer(maxf(min_display_time, 0.0), true, false, true)
 	timer.timeout.connect(_on_min_time_elapsed)
-
-
-## The same curtain, for a transition that never leaves the current scene - a
-## Travel Portal's own fast-travel jump across one already-loaded World Map,
-## not a real [method SceneTree.change_scene_to_file]. Raised exactly like
-## [method begin], held for [param duration] real seconds, and lowered
-## through the identical [method _finish] - only the middle differs: instead
-## of a threaded scene load, the whole tree is paused the instant the curtain
-## is up, [param on_ready] is called once behind it - the caller's own chance
-## to move the player and reset anything about the destination, without a
-## single frame of it ever being visible or simulated - and only unpaused
-## again as [method _finish] begins lowering the curtain. See the class doc's
-## own "the gate on gameplay is the tree's own pause, not a bespoke lock": a
-## Travel Portal wants the identical guarantee - the player cannot move, the
-## World Map does not simulate, no enemy acts - and this is what lets it ask
-## for that without a second pause system of its own.
-func begin_transition(
-		caption: String, duration: float, on_ready: Callable, stinger: AudioStream = null) -> void:
-	if _loading:
-		return
-	_loading = true
-	_manual_ready = on_ready
-	_scene_path = ""
-
-	if _caption != null:
-		_caption.text = caption
-	if _bar != null:
-		_bar.value = 0.0
-	if _backdrop != null:
-		_backdrop.mouse_filter = Control.MOUSE_FILTER_STOP
-	visible = true
-
-	if stinger != null and _stinger != null:
-		_stinger.stream = stinger
-		_stinger.bus = stinger_bus
-		_stinger.play()
-
-	await get_tree().process_frame
-	await get_tree().process_frame
-	if not is_instance_valid(self) or not _loading:
-		return
-
-	# A steadily filling bar rather than a frozen one, even with no real
-	# resource load behind it - "loading/initialization" reads as something
-	# happening, the same way the threaded path's own real progress does.
-	if _bar != null:
-		var fill := create_tween()
-		fill.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
-		fill.tween_property(_bar, ^"value", 100.0, maxf(duration, 0.0001))
-
-	get_tree().paused = true
-
-	var hold := get_tree().create_timer(maxf(duration, 0.0), true, false, true)
-	await hold.timeout
-	if not is_instance_valid(self) or not _loading:
-		return
-
-	if _manual_ready.is_valid():
-		_manual_ready.call()
-	_manual_ready = Callable()
-
-	get_tree().paused = false
-	_finish()
 
 
 func _on_min_time_elapsed() -> void:

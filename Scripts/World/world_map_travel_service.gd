@@ -12,13 +12,14 @@ extends Node
 ## decides where, the existing [LoadingCurtain] owns the load, and this owns the
 ## ceremony at either end.
 ##
-## [b]Nothing has to be held still any more, and that is the point.[/b] Holding
-## every roaming [WorldBandit] inactive for the length of a jump, and putting
-## them back exactly as they were, only existed because they were still standing
-## in the same scene the player was being moved across. They are freed with the
-## map now. What each group was doing is written to [WorldMapState] as it leaves
-## the tree and read back when its region is next built, so the memory outlives
-## the jump instead of the nodes having to.
+## [b]Nothing has to be put back any more, and that is the point.[/b] Every
+## roaming [WorldBandit] is still held still for the length of a departure - a
+## jump costs no world time, so it must not cost the region's groups a couple of
+## seconds of walking either - but nothing hands them back afterwards, because
+## there is no afterwards: they are freed with the map. What each group was doing
+## is written to [WorldMapState] as it leaves the tree and read back when its
+## region is next built, so the memory outlives the jump instead of the nodes
+## having to.
 ##
 ## [b]What still freezes.[/b] [WorldClock] is an autoload and keeps turning
 ## through a scene load, so it is stopped as the jump begins and started again
@@ -33,8 +34,13 @@ const GROUP := &"world_map_travel_service"
 ## Group every [TravelHold] joins - the reversible player-freeze component on
 ## the Player, mirroring [ExtractionHold]'s own "extraction_hold".
 const TRAVEL_HOLD_GROUP := &"travel_hold"
+## Group every [WorldBandit] joins - held still for the length of a departure,
+## never to change what any of them is individually doing.
+const BANDIT_GROUP := &"world_bandit"
 
 @export var body_group: StringName = &"player"
+## Group the World Map's own horse joins - mounted again as a map opens.
+@export var horse_group: StringName = &"world_map_horse"
 @export var world_clock_path: NodePath = ^"/root/WorldClock"
 ## The shared cinematic bars - see [TravelLetterbox]. Optional: a world with
 ## none travels exactly as it would with one, just without the bars framing it.
@@ -103,6 +109,7 @@ func travel_through(from: Node) -> void:
 	_leaving = true
 	_set_player_frozen(true)
 	_freeze_world_clock(_resolve_world_clock())
+	_hold_bandits()
 
 	var letterbox := _resolve_letterbox()
 	if letterbox != null:
@@ -161,9 +168,24 @@ func _arrive() -> void:
 	if camera != null:
 		camera.reset_smoothing()
 
+	_mount_horse()
+
 	var letterbox := _resolve_letterbox()
 	if letterbox != null:
 		letterbox.play_destination_reveal()
+
+
+## Puts the player back on the horse as a region's map opens.
+##
+## [b]It used to hang off the teleport that reached the map.[/b] The World Map
+## was a [WorldMapDestination] a few thousand pixels from the base, and arriving
+## at it mounted the horse. Nothing teleports to a map any more - each one is its
+## own scene - so the mounting belongs to arriving, which is what this is. The
+## player is on the map; on the map they ride.
+func _mount_horse() -> void:
+	var horse := get_tree().get_first_node_in_group(horse_group) as WorldMapHorse
+	if horse != null and not horse.is_mounted():
+		horse.set_mounted(true)
 
 
 # --- The pieces either end uses ---------------------------------------------
@@ -206,3 +228,23 @@ func _unfreeze_world_clock(clock: Node) -> void:
 	if clock.has_method(&"unfreeze_after_combat"):
 		clock.call(&"unfreeze_after_combat", 0.0)
 	clock.set_process(true)
+
+
+## Holds every group in this region still for the length of the departure.
+##
+## [b]It is about time, not about tidiness.[/b] A portal jump never advances the
+## world's own hour - that is why the clock is frozen either side of it - so the
+## couple of seconds the curtain is up must not be seconds the region's groups
+## spend walking. They are freed with the map a moment later either way; what
+## this stops is them drifting along their routes first and being written down
+## somewhere they should not have got to.
+##
+## Nothing puts them back, and nothing needs to: [member WorldBandit.active] is
+## deliberately not part of what a group remembers - see
+## [method WorldBandit._write_record] - so the region is rebuilt with every group
+## patrolling again.
+func _hold_bandits() -> void:
+	for node: Node in get_tree().get_nodes_in_group(BANDIT_GROUP):
+		var bandit := node as WorldBandit
+		if bandit != null:
+			bandit.active = false

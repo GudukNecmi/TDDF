@@ -1,134 +1,118 @@
 class_name WorldMapCombatBridge
 extends Node
-## World Map encounter → existing Combat → World Map, and nothing in between.
+## World Map encounter -> the region's own Arena scene -> back to that same map,
+## and nothing in between.
 ##
 ## [b]This is the adapter, not a second combat system.[/b] It watches every
-## [WorldBandit] for the player walking into it, and when one is reached it
-## hands the fight whole to [AmbushWaveDirector] - the same director an
-## ordinary road ambush and a Trouble Danger already fight through, built on
-## the world's own [EnemySpawner] and its ordinary enemies. Nothing about how a
-## fight is spawned, paced or ended is written here; this only decides *when*
-## one starts, *how big* it is, and *where the player was standing* so they can
-## be put back there.
+## [WorldBandit] for the player walking into it, and when one is reached it hands
+## the fight whole to [AmbushWaveDirector] - the same director an ordinary road
+## ambush and a Trouble Danger already fight through, built on the world's own
+## [EnemySpawner] and its ordinary enemies. Nothing about how a fight is spawned,
+## paced or ended is written here; this only decides [i]when[/i] one starts,
+## [i]how big[/i] it is, and [i]where on the map[/i] to put the player back.
 ##
-## [b]The fight is held in the Arena[/b] - the same rectangle a round is
-## already fought in, sitting quiet and unused for as long as the player is out
-## on the World Map (nothing starts [WaveManager] for a World Map run - see
-## [WorldBoot]). So there is no second map to build and no second
-## [member EnemySpawner.arena_bounds] to swap in and out, unlike
-## [BossEncounterMap]'s own dedicated ground: the player is simply set down in
-## the Arena that was already there, exactly the way [DangerDirector] already
-## fights a Danger wherever the player happens to be standing.
+## [b]One class, two scenes.[/b] The fight used to be held in a rectangle a few
+## thousand pixels from the map in the same scene, so a bandit could simply be
+## kept in a variable from the moment of contact until the moment the fight ended.
+## Each region's arena is its own scene now, and the map is freed to build it, so
+## the two halves of an encounter are two builds of this same node:
+##
+##   * [b]On the map[/b] - [method _begin_encounter] and
+##     [method try_begin_boss_encounter] decide what the fight is: how many men,
+##     in which region, at what hour, and the spot to come back to. That record
+##     goes to [method WorldMapState.stage_combat] and [WorldRegionRouter] is
+##     asked to change scene.
+##   * [b]In the arena[/b] - [method _open_staged_fight], from this node's own
+##     [method Node._ready], takes the same record back and opens the fight on it.
+##     [method _finish_combat_cleared] ends it and asks the router for the way
+##     home.
+##
+## It is one class rather than two because everything a fight is tuned by - the
+## enemy count scale, the decision tiers, the combat time advance, the music
+## states - is one set of numbers, and splitting the file would have split those
+## across two Inspectors that could disagree.
 ##
 ## [b]Group strength becomes an enemy count by the smallest reading there is[/b]
 ## - [member WorldBandit.group_strength] scaled by [member enemy_count_scale],
-## rounded and clamped, is the number handed to [method AmbushWaveDirector.begin_with].
-## [member enemy_count_scale] is the one and only place that conversion is
-## tuned - a group's own [member WorldBandit.group_strength], its movement and
-## the World Map's own bandit population are never touched by it, only how
-## many enemies a contacted group turns into. No difficulty curve is invented
-## here; the ambush's own opening group, arrival pacing and breaking point are
-## all left at whatever this world already has them authored to.
+## rounded and clamped, is the number handed to
+## [method AmbushWaveDirector.begin_with]. [member enemy_count_scale] is the one
+## and only place that conversion is tuned. No difficulty curve is invented here;
+## the ambush's own opening group, arrival pacing and breaking point are all left
+## at whatever the arena scene has them authored to.
 ##
-## [b]What carries through untouched.[/b] The player is never rebuilt and
-## nothing about them is read or written here beyond where they are standing
-## and whether they are mounted - [RunInventory], carried Blood, [HorseBlood]
-## and the run's own Streak are exactly as persistent through a fight as they
-## already are through anything else that moves the player around the
-## persistent world, because moving the player around the persistent world is
-## all this does. [WorldMapHorse] is explicitly dismounted for the fight and
-## remounted exactly as it was found - see [method _begin_encounter] - because
-## nothing else stands between the World Map and here to do that the way
-## [WorldMapDestination] does for an ordinary journey; every other flag on it
-## is left alone.
+## [b]Nothing is hidden, because nothing is left behind.[/b] Hiding the map's
+## formations, its fog, its hover tooltip and its screen-space HUD behind a fight
+## used to be this node's job, and had to be: the map was still in the tree,
+## still simulating and still drawing straight through the arena. A scene change
+## frees it, so there is nothing to hide and nothing to give back.
 ##
-## [b]World time freezes for the fight and catches up on the way out.[/b]
-## [WorldClock] - the [WorldTimeManager] autoload - is simply asked to stop
-## ticking ([method Node.set_process]) the moment combat opens, which is also
-## what freezes [SunController] and every shadow reading it, since both already
-## read nothing but that one clock. On a win, the seconds the fight actually
-## took are handed to [method WorldTimeManager.advance_seconds] - the same
-## conversion the World Map already turns real seconds into degrees with - and
-## only then is the clock let run again. See [method _end_encounter].
+## [b]The arena is clean by construction.[/b] It used to be swept - twice, once
+## as a fight opened and once after a win - because the same rectangle was fought
+## in over and over and last fight's blood, brass and bodies were still lying in
+## it. A fresh arena scene is built for every fight and thrown away at the end of
+## it, so no corpse, dropped gun, casing, blood patch or scattered prop can reach
+## the next one. Nothing clears the floor because nothing survives to be cleared.
+##
+## [b]What carries through.[/b] The player is rebuilt with each scene, so what
+## survives a fight is what survives any scene change: the autoloads.
+## [RunInventory], carried Blood, [HorseBlood], the run's own Streak, the
+## ammunition locker and [WorldMapState]'s memory of every region are all
+## untouched by this. [WorldMapHorse] is dismounted as a fight opens and the
+## player is put back on it as the map opens again - see
+## [method WorldMapTravelService._arrive].
+##
+## [b]World time freezes for the fight and is paid on the way out.[/b]
+## [WorldClock] - the [WorldTimeManager] autoload - is stopped as the fight is
+## staged and stopped again as the arena opens, since it is an autoload and would
+## otherwise keep turning through the load. That is also what freezes
+## [SunController] and every shadow reading it, so the combat shadow holds the
+## angle the map was at. On a win the clock is handed back advanced by the fight's
+## own size - see [member combat_time_advance_base] - never by how long it took in
+## real seconds.
 ##
 ## [b]The Combat Map's darkness is blended onto the same hour for the same
-## reason.[/b] [SunController] and its shadows need nothing extra - they
-## already read only [WorldTimeManager] and freeze the instant it does, on the
-## exact same continuous blend between two [SunStage] anchors this borrows the
-## pattern from - but [DayCycleDirector]'s own ambient tint reads the
-## round-based [code]DayCycle[/code] clock instead, per that class's own doc.
-## [method _match_combat_ambient_to_world_time] works out where [WorldClock]
-## currently sits between two of [DayCycleDirector]'s own authored
-## [member DayStage.ambient_colour] values - the same colours [DayCycleDirector]
-## always shows, never a colour invented here - and pushes that blend straight
-## through [method DayCycleDirector.apply_ambient_color] for the fight's
-## length; [method _restore_combat_ambient] simply asks the map for its own
-## colour back on every way out, so an ordinary Base round fought before or
-## after is never touched by this at all.
-##
-## [b]The Arena is swept clean both as a fight opens and after a win.[/b]
-## [WorldReset] - the same node "Looking for Trouble" already resets the
-## world through without a scene rebuild - is asked for a reset the instant
-## this starts and again once the player is back on the World Map, so the
-## next encounter never opens onto last encounter's blood, brass and bodies
-## whichever of the two sweeps actually catches them - see
-## [method _reset_combat_instance]. World Map state is never in its sweep -
-## see that class's own doc for what it touches and what it never does.
+## reason.[/b] [SunController] and its shadows need nothing extra - they already
+## read only [WorldTimeManager] and freeze the instant it does - but
+## [DayCycleDirector]'s own ambient tint reads the round-based [code]DayCycle[/code]
+## clock instead. [method _match_combat_ambient_to_world_time] works out where
+## [WorldClock] sits between two of [DayCycleDirector]'s own authored
+## [member DayStage.ambient_colour] values - never a colour invented here - and
+## pushes that blend through for the fight's length.
 ##
 ## [b]A won fight is not over the instant the last man falls.[/b] A final kill
-## opens the world's own [KillCam] - see [method AmbushWaveDirector.last_attacker_defeated]
-## and [signal KillCam.trigger] - and [method _on_combat_cleared] holds every bit of
-## winding the fight down behind [signal KillCam.ended] rather than beginning the
-## moment [signal AmbushWaveDirector.cleared] itself arrives: the music, the clock
-## catching up, the player and the horse going back to the World Map, and
-## [signal encounter_ended] itself - the signal [HorseCartScreen] opens on - all wait
-## for the mandatory hold to finish. A fight that ends by routing rather than by a
-## kill never opens a [KillCam] moment at all, so it is wound down exactly as soon as
-## it always was; only an ending with a body to hold the camera on is held back. See
-## [method _finish_combat_cleared].
+## opens the world's own [KillCam], and [method _on_combat_cleared] holds the
+## whole wind-down behind [signal KillCam.ended]: the music, the clock catching
+## up, the ride home and [signal encounter_ended] itself all wait for the
+## mandatory hold to finish. A fight that ends by routing rather than by a kill
+## never opens a [KillCam] moment at all.
 ##
-## [b]The World Map is handed back at normal speed, always.[/b] The instant the
-## hold is over and a win's own wind-down begins, [member Engine.time_scale] is
-## set back to 1 outright - see [method _finish_combat_cleared] - so nothing an
-## Arena fight did to it, on top of whatever [KillCam]'s own brief [HitStop] already
-## put back on its own, can ever cross into the World Map. Nothing about ending on
-## a death touches this: [PlayerDeathSequence] owns that slow motion on its own
-## timeline and this never cuts it short.
+## [b]The map is handed back at normal speed, always.[/b] [member Engine.time_scale]
+## is set back to 1 outright as a win's wind-down begins, so nothing an arena
+## fight did to it can cross into the map.
 ##
 ## [b]What a win hands the player is not decided here.[/b] [method get_combat_loot]
-## is a fresh, empty [CombatLoot] for every encounter, opened for
-## [HorseCartScreen] to read once the fight is over - the container a later pass
-## fills in, never this one. Nothing here rolls a gem, a heart, a round of ammunition
-## or a boss's own knowledge; that is deliberately left for the loot-generation work
-## still to come.
+## is a fresh, empty [CombatLoot] for every encounter, opened for [HorseCartScreen]
+## to read once the fight is over.
 ##
-## [b]A death is not this node's ending to play.[/b] [AmbushWaveDirector]
-## already breaks and empties itself on the player's own [signal Health.died],
-## the same way every other fight in the game does, and
-## [PlayerDeathSequence] already owns carrying a beaten player home - see its
-## own class doc. This only follows the death long enough to tell the two
-## endings apart when [signal AmbushWaveDirector.cleared] finally arrives: a
-## win puts the player back on the World Map exactly where they were
-## contacted; a death lets the existing flow decide where they end up and
-## touches nothing about the World Map at all.
+## [b]A death is not this node's ending to play.[/b] [AmbushWaveDirector] already
+## breaks and empties itself on the player's own [signal Health.died], and
+## [PlayerDeathSequence] already owns carrying a beaten player home - which is
+## itself a change of scene to the base now, since home is another scene. This
+## only follows the death long enough to tell the two endings apart.
 ##
 ## [b]A bounty boss opens the identical fight through a second door.[/b]
-## [method try_begin_boss_encounter] is [WorldBountyBossDirector]'s way in -
-## see that class's own doc - and shares every piece of this machinery
-## (camera, clock, horse, death-following, placement) with the bandit path
-## above; the only things that differ are where the enemy count comes from
-## and what happens to the thing that was contacted on a win. See
-## [signal boss_encounter_started] and [signal boss_encounter_ended].
+## [method try_begin_boss_encounter] is [WorldBountyBossDirector]'s way in and
+## shares every piece of this machinery with the bandit path above; the only
+## things that differ are where the enemy count comes from and what happens to
+## the thing that was contacted on a win. The boss node itself is freed with the
+## map, so the contract is carried across as its bounty id and closed on the
+## ledger from the arena - which is all the ledger ever needed.
 ##
-## [b]The whole hand-off happens behind [TravelLetterbox].[/b] Both entry
-## points open its loading transition before anything about the player, the
-## camera or the world is touched, and only reveal the Arena once the ambush
-## has actually been placed - see [method _open_loading_transition] and
-## [method _schedule_destination_reveal]. Nothing here builds a second
-## presentation for the World Map's own cinematic bars: this is the one real
-## transition the reusable letterbox controller is wired into today, and a
-## world with none in it fights exactly as it did before that controller
-## existed.
+## [b]The whole hand-off happens behind the loading curtain.[/b] Both entry points
+## open [TravelLetterbox]'s loading transition before anything is touched, and the
+## scene change itself goes through the same [LoadingCurtain] the title screen has
+## always used. Nothing here builds a second presentation, and nothing here loads
+## anything.
 
 ## Emitted as a fight opens, with what it was fought over.
 signal encounter_started(payload: WorldBanditEncounter)
@@ -304,6 +288,9 @@ var _combat_enemy_count: int = 0
 ## the map to put the player back when it is over. Empty on a World Map scene,
 ## where the fight has not been staged yet, and on an arena opened on its own.
 var _staged: Dictionary = {}
+## Whether the player was on the horse when a fight was opened, so a departure
+## that turns out to have nowhere to go puts them back on it.
+var _horse_mounted_before: bool = false
 
 @export_group("Combat time")
 ## Degrees the World Map clock advances the instant an ordinary fight ends,
@@ -646,6 +633,7 @@ func _begin_encounter(bandit: WorldBandit) -> void:
 
 	var horse := _resolve_horse()
 	var mounted := horse != null and horse.is_mounted()
+	_horse_mounted_before = mounted
 	if horse != null:
 		horse.set_mounted(false)
 
@@ -801,6 +789,7 @@ func try_begin_boss_encounter(boss: WorldBountyBoss) -> bool:
 
 	var horse := _resolve_horse()
 	var mounted := horse != null and horse.is_mounted()
+	_horse_mounted_before = mounted
 	if horse != null:
 		horse.set_mounted(false)
 
@@ -875,7 +864,7 @@ func _abort_encounter() -> void:
 		_boss.set_engaged(false)
 
 	var horse := _resolve_horse()
-	if horse != null and _staged.get(&"horse_mounted", false):
+	if horse != null and _horse_mounted_before:
 		horse.set_mounted(true)
 
 	var clock := _resolve_world_clock()
@@ -1177,10 +1166,7 @@ func _finish_combat_cleared() -> void:
 	# the map was freed - see [method _begin_encounter] - so there is no group
 	# left standing to free and no reinforcement left to hand back.
 
-	if horse != null:
-		horse.set_mounted(_staged.get(&"horse_mounted", false))
 
-	_reset_combat_instance()
 
 	_running = false
 	_bandit = null
@@ -1248,27 +1234,6 @@ func _restore_combat_ambient() -> void:
 		return
 	day.release_ambient_override()
 	day.refresh()
-
-
-## Puts the Arena back to how it was found - see [WorldReset]'s own doc for
-## what this sweeps and what it never touches. Nothing here builds a second
-## reset: this is the identical node "Looking for Trouble" already resets the
-## world through without the scene being rebuilt around it, asked for the
-## identical thing a second time.
-##
-## Called twice for the same fight, deliberately: once as a win hands the
-## player back to the World Map, so the ground reads clean immediately rather
-## than however long it takes the player to wander back near it, and once
-## again as the [i]next[/i] encounter opens - rule 2's own "every time a
-## World Map combat starts, the combat environment must begin clean" - which
-## is what catches a death effect from the last kill that had not finished
-## spawning its own debris in time for the first sweep. By the time another
-## fight can start at all the player has had to walk there, which is far
-## longer than any death effect takes to finish.
-func _reset_combat_instance() -> void:
-	var reset := WorldReset.get_active(self)
-	if reset != null:
-		reset.reset()
 
 
 # --- Following the player's own death ---------------------------------------

@@ -101,6 +101,7 @@ position = Vector2(11, 631)
 [node name="WorldMapGate" parent="." unique_id=1754293756 instance=ExtResource("17_gate")]
 position = Vector2(1050, 650)
 destination_id = &"world_map"
+leaves_scene_to = 1
 
 [node name="Saloon" parent="." unique_id=647106814 instance=ExtResource("7_saloon")]
 position = Vector2(0, -878)

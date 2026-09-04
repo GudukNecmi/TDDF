@@ -882,18 +882,19 @@ func _restore() -> bool:
 	group_strength = record.get("group_strength", group_strength)
 	current_route_index = record.get("route_index", current_route_index)
 	_route_direction = record.get("route_direction", _route_direction)
-	active = record.get("active", active)
 	return false
 
 
 ## Writes down what this group is doing, so the next build of this region picks
 ## it up mid-patrol rather than back at the spot it was authored at.
 ##
-## [b]Behaviour is deliberately not kept.[/b] A chase, an investigation or a
-## flight is a reaction to a player who is no longer there - the map has been
-## left - so a group is always found patrolling again, from wherever it had
-## actually got to. Position and strength are the facts worth keeping; being
-## halfway through hunting somebody is not.
+## [b]Behaviour is deliberately not kept, and neither is [member active].[/b] A
+## chase, an investigation or a flight is a reaction to a player who is no longer
+## there - the map has been left - so a group is always found patrolling again,
+## from wherever it had actually got to. Being stood down is the same kind of
+## fact: a group is held still for the length of a journey out of the region, and
+## coming back to find it still frozen would be remembering the transition rather
+## than the world. Position and strength are what is worth keeping.
 func _write_record() -> void:
 	if not remembers_across_scenes or region_id.is_empty():
 		return
@@ -910,7 +911,6 @@ func _write_record() -> void:
 		"group_strength": group_strength,
 		"route_index": current_route_index,
 		"route_direction": _route_direction,
-		"active": active,
 	})
 
 

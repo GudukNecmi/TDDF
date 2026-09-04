@@ -23,8 +23,10 @@ extends Node2D
 ##
 ## Spacing is checked against a coarse grid of the points already placed rather
 ## than against all of them, so the whole arrangement stays close to linear in
-## how many props there are. A map with a thousand of them is laid out in one
-## frame at load rather than being something the player waits for.
+## how many props there are - deciding where a thousand of them go costs almost
+## nothing. Building them is the expensive half, and a map large enough for that
+## to be felt as a freeze at load hands it to [member stream_enabled] instead of
+## paying for it all in the frame the map is built in.
 
 ## Where scenery may go, in this node's own local space. Normally the whole
 ## playable rectangle.
@@ -108,6 +110,82 @@ extends Node2D
 ## any layer asks for.
 @export var grid_cell_size: float = 160.0
 
+@export_group("Staged spawning")
+## Whether the props this scatter decided on are built a few at a time over the
+## frames after load rather than all at once.
+##
+## [b]This changes nothing about what is placed, or where, or what it looks
+## like.[/b] The whole arrangement is still worked out in one pass, from the
+## same seed, in the same order, and every random choice a prop needs - which of
+## its layer's scenes it is, what it is scaled to - is rolled at that moment and
+## written down. A prop built a second later stands exactly where it would have
+## stood otherwise. Nothing here is a level-of-detail system: everything queued
+## is built, near or far, and nothing is ever thrown away for being distant.
+##
+## [b]Why it is worth deferring.[/b] Deciding where a thousand props go is a few
+## milliseconds; building a thousand small scenes is most of a second, and all
+## of it lands in the one frame the map enters the tree in - a freeze the player
+## sees as the world arriving. Spreading it over the frames after that trades a
+## stall nobody can miss for a few milliseconds a frame nobody can see. Off
+## builds the lot immediately, which is what a map small enough to afford it
+## wants, and is what every map did before this existed.
+@export var stream_enabled: bool = false
+## Side of one streaming cell, in pixels. Props are built a cell at a time,
+## nearest cell to the player first, so this is only how coarsely "near" is
+## measured - never which props exist or where they stand. It wants to be
+## roughly a screen across: much smaller and the nearest cell is found more
+## often for less work each time, much larger and the first cell built covers
+## more ground than anyone can see.
+@export var stream_cell_size: float = 1000.0
+## How long, in milliseconds, one frame may spend building queued props. Checked
+## between props rather than inside one, so a frame always makes progress and
+## can overrun by the cost of the single prop that crossed the line.
+@export var stream_budget_ms: float = 3.0
+## How long the frame the map is built in may spend, in milliseconds - the one
+## chance to have some of the scenery standing before anybody has looked at the
+## map at all. Everything past it waits for the frames after. 0 defers the lot.
+@export var stream_first_frame_budget_ms: float = 8.0
+
+@export_group("Distance culling")
+## Whether scenery far enough away that no camera can see it is hidden.
+##
+## [b]This changes nothing about what is placed, only about what is drawn.[/b]
+## Every prop this scatter laid out stays in the tree, keeps its collision, its
+## touch area and its script exactly as before - [member CanvasItem.visible] is
+## the only thing touched, and it is put back the moment the prop is in reach
+## again. Nothing here is a level-of-detail system and nothing is ever removed.
+##
+## [b]Why hiding the root is what pays.[/b] A prop is not one drawn thing but a
+## small tree of them - artwork, collision shapes, a touch area, a shadow caster -
+## and the renderer walks every visible one of them once per camera per frame to
+## decide what to draw, whether or not it is anywhere near the screen. Hiding the
+## prop's root skips that whole subtree in a single test. On a map large enough
+## that most of its scenery is always off screen this is the difference between
+## paying for the props in front of the player and paying for all of them; on a
+## map small enough that everything is on screen at once it saves nothing, which
+## is why this is off unless a map asks for it.
+@export var cull_enabled: bool = false
+## Smallest radius, in world units, that is always kept drawn regardless of what
+## the main camera can see - for a map with a [b]second[/b] camera looking at the
+## same world, such as a minimap, which may see further than the main one does.
+##
+## This node has no way to discover such a camera and deliberately does not try:
+## the map that owns both says how far the wider of the two reaches, and that is
+## the whole of what has to be kept in step. Left at 0 the main camera's own view
+## is the only thing considered.
+@export var cull_minimum_radius: float = 0.0
+## Extra world units kept drawn past whatever the cameras actually reach, so a
+## prop is already there rather than appearing as the view arrives at it.
+@export var cull_margin: float = 400.0
+## How often, in seconds, which props are near enough is worked out again. Props
+## do not move, so this only has to keep up with the camera rather than with the
+## frame.
+@export var cull_interval: float = 0.15
+## Node the cull is measured from when the viewport has no current [Camera2D] -
+## normally the player. Found by group, and allowed not to exist, in which case
+## nothing is culled and the map draws exactly as it did before.
+@export var cull_viewer_group: StringName = &"player"
+
 
 ## A coarse bucketed grid of points, so "how close is the nearest thing to here"
 ## is answered by looking at a handful of neighbouring cells instead of at every
@@ -150,6 +228,24 @@ class PointGrid:
 		return Vector2i(int(floor(point.x / cell)), int(floor(point.y / cell)))
 
 
+## One prop this scatter has decided on and not yet built - where it goes, which
+## of its layer's scenes it rolled, and what it was scaled to. Every random
+## choice is already made and written down by the time one of these exists, so
+## building it later cannot come out differently to building it now.
+class PendingProp:
+	var scene: PackedScene
+	var point: Vector2
+	## The scale rolled for it, or [constant Vector2.ZERO] for a layer that asked
+	## for no variation - which leaves the prop at whatever its own scene was
+	## authored at, exactly as an unqueued spawn does.
+	var scale := Vector2.ZERO
+
+	func _init(from_scene: PackedScene, at: Vector2, sized: Vector2) -> void:
+		scene = from_scene
+		point = at
+		scale = sized
+
+
 var _rng := RandomNumberGenerator.new()
 var _container: Node
 var _all_points: PointGrid
@@ -166,6 +262,17 @@ var _auto_keep_clear: Array[Rect2] = []
 ## parents into it - a region's own extras, a prop dropped in by hand - and those
 ## are none of this node's business to remove.
 var _placed: Array[Node] = []
+## Counts down to the next [method _apply_cull]. Only ever ticked while
+## [member cull_enabled] is on - see [method _refresh_processing].
+var _cull_timer: float = 0.0
+## Props decided on and not yet built, bucketed by streaming cell so the ones
+## nearest the player can be found without walking the whole queue - see
+## [member stream_enabled]. Always empty for a scatter that is not streaming,
+## and empty again the moment the last queued prop is in the world.
+var _pending: Dictionary = {}
+## How many props are still queued across every cell of [member _pending], kept
+## as a running total rather than counted, so asking costs nothing.
+var _pending_count: int = 0
 
 
 func _ready() -> void:
@@ -177,6 +284,38 @@ func _ready() -> void:
 		_container = self
 
 	_lay_out()
+	# Straight away rather than on the first tick, so a map never shows a frame of
+	# every prop it owns before the first cull takes the far ones back off again.
+	_apply_cull()
+	# Whatever of the queue this map is willing to pay for in the frame it is
+	# built in - see [member stream_first_frame_budget_ms]. A map that is not
+	# streaming has no queue and this does nothing at all.
+	_pump_stream(stream_first_frame_budget_ms)
+	_refresh_processing()
+
+
+## Only ever running while this map actually has something to do every frame -
+## culling, or a queue still being built - so a scatter that wants neither costs
+## exactly what it always did, not even an empty callback.
+func _refresh_processing() -> void:
+	set_process(cull_enabled or _pending_count > 0)
+
+
+func _process(delta: float) -> void:
+	if _pending_count > 0:
+		_pump_stream(stream_budget_ms)
+		# The frame the queue drains is the frame this stops being a reason to
+		# keep processing, so a map that only ever streamed goes quiet again.
+		if _pending_count <= 0:
+			_refresh_processing()
+
+	if not cull_enabled:
+		return
+	_cull_timer -= delta
+	if _cull_timer > 0.0:
+		return
+	_cull_timer = maxf(cull_interval, 0.0)
+	_apply_cull()
 
 
 ## Takes away what this scatter put down and strews the map again.
@@ -206,12 +345,20 @@ func rescatter(around := Vector2.INF) -> int:
 		if is_instance_valid(prop):
 			prop.queue_free()
 	_placed.clear()
+	# Thrown away along with what was built from it: a re-roll replaces the whole
+	# arrangement, and a prop still waiting to be built belongs to the
+	# arrangement being replaced.
+	_pending.clear()
+	_pending_count = 0
 
 	var kept := clear_centre
 	if around != Vector2.INF:
 		clear_centre = to_local(around)
 	_lay_out()
 	clear_centre = kept
+	_apply_cull()
+	_pump_stream(stream_first_frame_budget_ms)
+	_refresh_processing()
 	return _count
 
 
@@ -281,6 +428,10 @@ func _region_layers() -> Array[ScatterLayer]:
 ## How many things this scatter actually put down. For a map being tuned - the
 ## numbers in the inspector are what was *asked* for, and a crowded region or a
 ## large clearing can fall short of them.
+##
+## This counts what the arrangement decided on, which on a streaming map is
+## ahead of what is standing yet - see [method get_spawned_count] and
+## [method get_pending_count].
 func get_placed_count() -> int:
 	return _count
 
@@ -337,16 +488,15 @@ func _place_one(layer: ScatterLayer) -> bool:
 	return true
 
 
+## Rolls everything about one prop and then either builds it or writes it down
+## to be built shortly - see [member stream_enabled]. The rolls happen here
+## either way, in the same order, so which desert a seed lays out does not
+## depend on whether the map streams.
 func _spawn(layer: ScatterLayer, point: Vector2) -> void:
 	var scene := layer.scenes[_rng.randi() % layer.scenes.size()]
 	if scene == null:
 		return
 
-	var prop := scene.instantiate() as Node2D
-	if prop == null:
-		return
-
-	prop.position = point
 	# A layer asking for no variation is left strictly alone rather than being
 	# assigned a scale of one: the prop then keeps whatever its own scene was
 	# authored at, and the scatter cannot quietly resize artwork that was drawn to
@@ -355,15 +505,34 @@ func _spawn(layer: ScatterLayer, point: Vector2) -> void:
 	# When a range is given, the roll is applied to the whole instance rather than
 	# to its artwork, so the collision shape, the touch area and the shadow all
 	# grow with the picture. Uniform, so nothing is sheared.
+	var sized := Vector2.ZERO
 	if not _is_fixed_scale(layer):
 		var size := _rng.randf_range(layer.scale_range.x, layer.scale_range.y)
-		prop.scale = Vector2(size, size)
+		sized = Vector2(size, size)
+
+	if stream_enabled:
+		_queue(PendingProp.new(scene, point, sized))
+		return
+	_build(scene, point, sized)
+
+
+## Turns one decided prop into nodes standing in the world. The single place a
+## prop is ever instantiated, whether it waited in the queue first or not.
+func _build(scene: PackedScene, point: Vector2, sized: Vector2) -> Node2D:
+	var prop := scene.instantiate() as Node2D
+	if prop == null:
+		return null
+
+	prop.position = point
+	if sized != Vector2.ZERO:
+		prop.scale = sized
 	# The map's own scale rides on top of whatever the layer decided, so how large
 	# this map draws its scenery stays one number in one place - see [PropScale] -
 	# rather than something every layer would have to be told about.
 	PropScale.apply_to(prop, self)
 	_container.add_child(prop)
 	_placed.append(prop)
+	return prop
 
 
 func _is_fixed_scale(layer: ScatterLayer) -> bool:
@@ -456,3 +625,159 @@ func _transform_rect(shape_node: Node2D, local_rect: Rect2) -> Rect2:
 	rect = rect.expand(xform * Vector2(local_rect.position.x, local_rect.end.y))
 	rect = rect.expand(xform * local_rect.end)
 	return rect
+
+
+# --- Distance culling ------------------------------------------------------
+
+## Hides whatever this scatter placed that no camera can currently reach, and
+## shows again whatever it can. Cheap enough to run on a timer rather than on a
+## frame: props do not move, so the only thing that changes between passes is
+## where the camera is.
+##
+## [method CanvasItem.set_visible] returns immediately when the value is already
+## what it was, so a pass over a settled map costs the distance tests alone and
+## nothing else.
+func _apply_cull() -> void:
+	if not cull_enabled:
+		return
+	var anchor: Variant = _cull_anchor()
+	if anchor == null:
+		return
+
+	var centre: Vector2 = anchor
+	var radius := _cull_radius()
+	var radius_sq := radius * radius
+	for prop: Node in _placed:
+		var item := prop as Node2D
+		if item == null or not is_instance_valid(item):
+			continue
+		item.visible = item.global_position.distance_squared_to(centre) <= radius_sq
+
+
+## Where the cull is measured from - the viewport's current [Camera2D] when it
+## has one, since that and not the player is what actually decides what is on
+## screen, and the viewer otherwise. Null when there is neither, which
+## [method _apply_cull] reads as "leave everything drawn".
+func _cull_anchor() -> Variant:
+	var viewport := get_viewport()
+	if viewport != null:
+		var camera := viewport.get_camera_2d()
+		if camera != null:
+			return camera.get_screen_center_position()
+	var viewer := get_tree().get_first_node_in_group(cull_viewer_group) as Node2D
+	return null if viewer == null else viewer.global_position
+
+
+## How far from [method _cull_anchor] scenery is kept drawn: whatever the main
+## camera actually reaches at the zoom it is currently at, never less than
+## [member cull_minimum_radius], plus [member cull_margin].
+##
+## Read off the live viewport rather than from a number in the inspector, so a
+## window resize, a different display or a zone that zooms the camera out cannot
+## leave the map culling scenery the player can see.
+func _cull_radius() -> float:
+	var radius := cull_minimum_radius
+	var viewport := get_viewport()
+	if viewport != null:
+		var camera := viewport.get_camera_2d()
+		if camera != null:
+			var zoom := camera.zoom
+			var half := viewport.get_visible_rect().size * 0.5
+			if zoom.x > 0.0 and zoom.y > 0.0:
+				radius = maxf(radius, Vector2(half.x / zoom.x, half.y / zoom.y).length())
+	return radius + maxf(cull_margin, 0.0)
+
+
+# --- Staged spawning -------------------------------------------------------
+
+## How many props this scatter has decided on and not yet built. 0 for a scatter
+## that is not streaming, and 0 again once the queue has drained - which is what
+## "this map has finished arriving" means to anything watching.
+func get_pending_count() -> int:
+	return _pending_count
+
+
+## How many of the props this scatter decided on are standing in the world right
+## now. Reaches [method get_placed_count] once the queue has drained, and is
+## always equal to it on a map that does not stream.
+func get_spawned_count() -> int:
+	return _placed.size()
+
+
+func _queue(pending: PendingProp) -> void:
+	var key := _stream_key(pending.point)
+	var bucket: Array = _pending.get(key, [])
+	bucket.append(pending)
+	_pending[key] = bucket
+	_pending_count += 1
+
+
+func _stream_key(point: Vector2) -> Vector2i:
+	var cell := maxf(stream_cell_size, 1.0)
+	return Vector2i(int(floor(point.x / cell)), int(floor(point.y / cell)))
+
+
+## Builds as much of the queue as [param budget_ms] allows, nearest cell to the
+## player first, and leaves the rest for the frame after.
+##
+## [b]Nearest cell, not nearest prop.[/b] Sorting a thousand props by distance
+## every frame would cost more than building a handful of them, and there are
+## only ever a hundred or so cells - so the nearest cell is found by walking
+## them, and the props inside it are built in whatever order they were decided.
+## That is what [member stream_cell_size] is really choosing: how closely the
+## order props arrive in follows where the player actually is.
+##
+## Whatever is built is handed the cull's own answer on the spot, so a prop that
+## streams in behind the player is never drawn for the frame or two before the
+## next cull pass would have taken it away again.
+func _pump_stream(budget_ms: float) -> void:
+	if _pending_count <= 0 or budget_ms <= 0.0:
+		return
+
+	var deadline := Time.get_ticks_usec() + int(budget_ms * 1000.0)
+	var anchor: Variant = _cull_anchor()
+	# Where "near" is measured from. A map with no camera and no viewer to ask
+	# simply builds itself outwards from the middle of its own region.
+	var centre := region.get_center()
+	if anchor != null:
+		var here: Vector2 = anchor
+		centre = to_local(here)
+
+	var culling := cull_enabled and anchor != null
+	var cull_centre := Vector2.ZERO
+	var cull_radius_sq := 0.0
+	if culling:
+		var here: Vector2 = anchor
+		cull_centre = here
+		var radius := _cull_radius()
+		cull_radius_sq = radius * radius
+
+	while _pending_count > 0 and not _pending.is_empty():
+		var key := _nearest_pending_cell(centre)
+		var bucket: Array = _pending[key]
+		while not bucket.is_empty():
+			var pending: PendingProp = bucket.pop_back()
+			_pending_count -= 1
+			var prop := _build(pending.scene, pending.point, pending.scale)
+			if prop != null and culling:
+				prop.visible = prop.global_position.distance_squared_to(
+					cull_centre) <= cull_radius_sq
+			if Time.get_ticks_usec() >= deadline:
+				if bucket.is_empty():
+					_pending.erase(key)
+				return
+		_pending.erase(key)
+
+
+## The queued cell nearest [param centre], both in this node's own local space.
+func _nearest_pending_cell(centre: Vector2) -> Vector2i:
+	var cell := maxf(stream_cell_size, 1.0)
+	var nearest := Vector2i.ZERO
+	var nearest_distance := INF
+	for key: Vector2i in _pending:
+		var middle := (Vector2(key) + Vector2(0.5, 0.5)) * cell
+		var distance := middle.distance_squared_to(centre)
+		if distance < nearest_distance:
+			nearest_distance = distance
+			nearest = key
+	return nearest

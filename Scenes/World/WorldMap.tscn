@@ -2961,6 +2961,11 @@ include_region_layers = false
 clear_radius = 0.0
 keep_clear = Array[Rect2]([Rect2(-5000, -90, 10000, 180), Rect2(-1675, 1690, 1250, 120), Rect2(425, -1810, 1250, 120), Rect2(-3400, -250, 500, 500), Rect2(-3100, -250, 500, 500), Rect2(-1400, -250, 500, 500), Rect2(-1100, -250, 500, 500), Rect2(600, -250, 500, 500), Rect2(1950, -250, 500, 500), Rect2(2900, -250, 500, 500)])
 grid_cell_size = 260.0
+stream_enabled = true
+stream_budget_ms = 3.0
+stream_first_frame_budget_ms = 4.0
+cull_enabled = true
+cull_minimum_radius = 2000.0
 
 [node name="DustCampScatter" type="Node2D" parent="Scenery"]
 script = ExtResource("200_scatter")
@@ -2972,6 +2977,11 @@ clear_radius = 0.0
 keep_clear = Array[Rect2]([Rect2(-5000, -90, 2000, 180), Rect2(-3400, -250, 500, 500)])
 random_seed = 1001
 grid_cell_size = 300.0
+stream_enabled = true
+stream_budget_ms = 1.0
+stream_first_frame_budget_ms = 1.0
+cull_enabled = true
+cull_minimum_radius = 2000.0
 
 [node name="DeadScatter" type="Node2D" parent="Scenery"]
 script = ExtResource("200_scatter")
@@ -2983,6 +2993,11 @@ clear_radius = 0.0
 keep_clear = Array[Rect2]([Rect2(3000, -90, 2000, 180), Rect2(2900, -250, 500, 500)])
 random_seed = 1002
 grid_cell_size = 260.0
+stream_enabled = true
+stream_budget_ms = 1.0
+stream_first_frame_budget_ms = 1.0
+cull_enabled = true
+cull_minimum_radius = 2000.0
 
 [node name="TravelPortals" type="Node2D" parent="."]
 

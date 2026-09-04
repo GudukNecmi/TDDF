@@ -1,60 +1,69 @@
 class_name WorldMapTravelService
 extends Node
-## Carries the player from one [TravelPortal] to its paired destination,
-## behind the same Loading Screen and Letterbox every other heavy World Map
-## transition already uses.
+## Both ends of a journey between regions: stepping into a [TravelPortal] and
+## leaving, and standing the player where they belong when a region's map opens.
 ##
-## [b]There is no second map to load.[/b] The whole desert chain - Dust Camp,
-## Old Mine, Ghost Town, Red River, The Dead - is one persistent
-## [code]WorldMap.tscn[/code], the same way [WorldMapCombatBridge] already
-## moves the player into the Arena without ever reloading a scene. A Travel
-## Portal jump is a reposition within that one scene, dressed to read as a
-## real journey rather than an instant snap - see [method LoadingCurtain.begin_transition],
-## added alongside [method LoadingCurtain.begin] for exactly this kind of
-## transition, never a second loading system of this file's own.
+## [b]A jump is a real scene change now.[/b] The desert used to be one persistent
+## [code]WorldMap.tscn[/code] with all five regions in it, so travelling was a
+## reposition inside a scene that was already built - a curtain over a teleport.
+## Each region is its own scene, so a jump is a
+## [method SceneTree.change_scene_to_packed] through [WorldRegionRouter] and the
+## region being left is genuinely freed. Nothing here loads anything: the router
+## decides where, the existing [LoadingCurtain] owns the load, and this owns the
+## ceremony at either end.
 ##
-## [b]What freezes, and how.[/b] The player is held through [TravelHold] -
-## the reversible twin of [ExtractionHold], both driving nothing but
-## [method Player.get_speed_multiplier] - and [WorldClock] is stopped and
-## resumed through the identical [method WorldTimeManager.freeze_for_combat] /
-## [method WorldTimeManager.unfreeze_after_combat] pair
-## [WorldMapCombatBridge] already calls for its own Arena hand-off, so a
-## Travel Portal jump is "controlled consistently with the existing loading
-## system" by literally sharing its two calls rather than a second freeze of
-## this file's own. Every roaming [WorldBandit] is also held inactive for the
-## length of the jump - "no enemies act" - and returned to exactly the set
-## that was active before, never assumed.
+## [b]Nothing has to be held still any more, and that is the point.[/b] Holding
+## every roaming [WorldBandit] inactive for the length of a jump, and putting
+## them back exactly as they were, only existed because they were still standing
+## in the same scene the player was being moved across. They are freed with the
+## map now. What each group was doing is written to [WorldMapState] as it leaves
+## the tree and read back when its region is next built, so the memory outlives
+## the jump instead of the nodes having to.
+##
+## [b]What still freezes.[/b] [WorldClock] is an autoload and keeps turning
+## through a scene load, so it is stopped as the jump begins and started again
+## on arrival, through the identical [method WorldTimeManager.freeze_for_combat]
+## / [method WorldTimeManager.unfreeze_after_combat] pair
+## [WorldMapCombatBridge] already uses. A portal jump is travel across the map,
+## not across time, so it always hands the clock back with zero degrees
+## advanced - unlike a fight, which is worth hours.
 
 ## Group used by [method get_active].
 const GROUP := &"world_map_travel_service"
-## Group every [TravelHold] joins - the reversible player-freeze component
-## on the Player, mirroring [ExtractionHold]'s own [code]"extraction_hold"[/code].
+## Group every [TravelHold] joins - the reversible player-freeze component on
+## the Player, mirroring [ExtractionHold]'s own "extraction_hold".
 const TRAVEL_HOLD_GROUP := &"travel_hold"
-## Group every [WorldBandit] joins - watched here only to hold every one of
-## them still for the length of a jump, never to change what any of them are
-## individually doing.
-const BANDIT_GROUP := &"world_bandit"
 
 @export var body_group: StringName = &"player"
 @export var world_clock_path: NodePath = ^"/root/WorldClock"
 ## The shared cinematic bars - see [TravelLetterbox]. Optional: a world with
-## none jumps exactly as it would with one, just without the bars framing it.
-@export var letterbox_path: NodePath = ^"../RunHUD/TravelLetterbox"
-## How long the curtain is held up before the player arrives on the far
-## side - see [method LoadingCurtain.begin_transition].
-@export var transition_duration: float = 1.6
+## none travels exactly as it would with one, just without the bars framing it.
+@export var letterbox_path: NodePath = ^"../../RunHUD/TravelLetterbox"
 @export var loading_caption: String = "LOADING"
+## Where the player is stood when a map opens with nobody having named a point -
+## the region's own authored spawn marker.
+@export var spawn_point_path: NodePath = ^"../Player/SpawnPoint"
+## Whether opening this map stands the player at the arrival point at all. Off
+## leaves them wherever the scene placed them, which is what a map opened on its
+## own in the editor wants.
+@export var places_player_on_arrival: bool = true
 
-var _traveling: bool = false
-var _held_bandits: Array[WorldBandit] = []
+var _leaving: bool = false
 
 
 func _enter_tree() -> void:
 	add_to_group(GROUP)
 
 
-## The service in this world, or null when it has none - which a
-## [TravelPortal] reads as "nowhere for this jump to go".
+func _ready() -> void:
+	# Deferred by one frame: the player, the camera and the region's own zone all
+	# come up in their own _ready, and where the player is standing is only
+	# meaningful once they all have.
+	_arrive.call_deferred()
+
+
+## The service in this world, or null when it has none - which a [TravelPortal]
+## reads as "nowhere for this jump to go".
 static func get_active(from_node: Node) -> WorldMapTravelService:
 	if from_node == null or not from_node.is_inside_tree():
 		return null
@@ -62,78 +71,102 @@ static func get_active(from_node: Node) -> WorldMapTravelService:
 
 
 func is_traveling() -> bool:
-	return _traveling
+	return _leaving
 
+
+# --- Leaving ----------------------------------------------------------------
 
 ## Starts the jump [param from] portal is offering. Ignored while a jump is
-## already under way, or when [param from] has no [member TravelPortal.destination]
-## to send anyone to - the seam a portal with nothing wired up yet reads as
-## "does nothing", the same way an unfinished [ArenaPortal.menu_path] already
-## does.
+## already under way, or when the portal has no destination wired up - the seam
+## a portal with nothing on the far side reads as "does nothing", the same way an
+## unfinished [member ArenaPortal.menu_path] already does.
 ##
-## [param from] is untyped [Node] rather than [TravelPortal] deliberately -
-## see that class's own note on why neither file names the other's
-## [code]class_name[/code]. [method Object.call] reads exactly the two
-## methods [TravelPortal] promises, [code]get_destination()[/code] and
-## [code]get_arrival_position()[/code], the same "found and called, never
-## typed" seam every cross-system call here already uses.
+## [param from] is untyped [Node] rather than [TravelPortal] deliberately - see
+## that class's own note on why neither file names the other's
+## [code]class_name[/code].
 func travel_through(from: Node) -> void:
-	if _traveling or from == null or not from.has_method(&"get_destination"):
+	if _leaving or from == null or not from.has_method(&"get_destination_region"):
 		return
-	var destination: Node = from.call(&"get_destination")
-	if destination == null or not destination.has_method(&"get_arrival_position"):
+
+	var region_id: StringName = from.call(&"get_destination_region")
+	if region_id.is_empty():
 		push_warning("WorldMapTravelService: %s has no destination wired up." % from.name)
+		return
+
+	var router := WorldRegionRouter.get_active(self)
+	if router == null:
+		push_warning("WorldMapTravelService: no router to travel through.")
+		return
+
+	var at: Vector2 = from.call(&"get_destination_position")
+
+	_leaving = true
+	_set_player_frozen(true)
+	_freeze_world_clock(_resolve_world_clock())
+
+	var letterbox := _resolve_letterbox()
+	if letterbox != null:
+		letterbox.play_loading_transition(loading_caption)
+
+	if not router.go_to_region(region_id, at):
+		# Nothing to travel to after all - put everything back rather than
+		# leaving the player frozen in front of a portal that did not open.
+		_leaving = false
+		_unfreeze_world_clock(_resolve_world_clock())
+		_set_player_frozen(false)
+
+
+# --- Arriving ---------------------------------------------------------------
+
+## Stands the player where whatever sent them here said they should be, and
+## starts the world's clock again.
+##
+## [b]It runs on every build of a map, not only after a portal.[/b] Coming back
+## out of a fight, riding out from the base and stepping through a portal all
+## arrive the same way: something named a point in [WorldMapState] and this is
+## what reads it. A map built with nobody having named one - opened on its own,
+## or entered for the first time - falls back to the region's own spawn marker.
+func _arrive() -> void:
+	if not is_inside_tree():
+		return
+
+	var clock := _resolve_world_clock()
+	_unfreeze_world_clock(clock)
+	_set_player_frozen(false)
+
+	if not places_player_on_arrival:
 		return
 
 	var player := _resolve_player()
 	if player == null:
 		return
 
-	_traveling = true
-	_set_player_frozen(true)
-	_hold_bandits()
-	var clock := _resolve_world_clock()
-	_freeze_world_clock(clock)
+	var state := WorldMapState.get_active(self)
+	var region_id: StringName = state.get_region_id() if state != null else &""
+	var at := Vector2.INF
+	if state != null and not region_id.is_empty():
+		at = state.take_arrival(region_id)
+	if at == Vector2.INF:
+		var marker := get_node_or_null(spawn_point_path) as Node2D
+		if marker == null:
+			return
+		at = marker.global_position
 
-	var letterbox := _resolve_letterbox()
-	if letterbox != null:
-		letterbox.play_loading_transition(loading_caption)
-
-	var curtain := LoadingCurtain.get_active(self)
-	if curtain == null:
-		# No curtain in this build - arrive at once rather than stranding the
-		# player mid-jump forever, the same fallback every optional path here
-		# already takes.
-		_arrive(player, destination, clock, letterbox)
-		return
-
-	curtain.begin_transition(
-		loading_caption, transition_duration, _arrive.bind(player, destination, clock, letterbox))
-
-
-## The far side of the jump - called once, from behind [LoadingCurtain]'s own
-## curtain, so none of this is ever seen happening. Everything after this is
-## the ordinary reveal: the curtain lifts on its own, [method _end_travel]
-## gives the player, the clock and every held bandit back the instant this
-## returns.
-func _arrive(
-		player: Node2D, destination: Node, clock: Node, letterbox: TravelLetterbox
-) -> void:
-	player.global_position = destination.call(&"get_arrival_position")
+	player.global_position = at
+	# Physics interpolation is on project-wide; without this the player is
+	# visibly smeared in from wherever the scene placed them.
 	player.reset_physics_interpolation()
 
 	var camera := CameraController.get_active(self)
 	if camera != null:
 		camera.reset_smoothing()
 
-	_unfreeze_world_clock(clock)
-	_release_bandits()
-	_set_player_frozen(false)
+	var letterbox := _resolve_letterbox()
 	if letterbox != null:
 		letterbox.play_destination_reveal()
 
-	_traveling = false
 
+# --- The pieces either end uses ---------------------------------------------
 
 func _resolve_player() -> Node2D:
 	return get_tree().get_first_node_in_group(body_group) as Node2D
@@ -155,8 +188,7 @@ func _set_player_frozen(value: bool) -> void:
 
 
 ## Stopped and locked to the World Map's current lighting the exact way
-## [method WorldMapCombatBridge._freeze_world_clock] already does - see this
-## file's own class doc.
+## [method WorldMapCombatBridge._freeze_world_clock] already does.
 func _freeze_world_clock(clock: Node) -> void:
 	if clock == null:
 		return
@@ -166,32 +198,11 @@ func _freeze_world_clock(clock: Node) -> void:
 
 
 ## A jump never advances the World Map's own hour, unlike a fight - a Travel
-## Portal is instant travel across the [i]map[/i], not across time - so this
-## always hands the clock back at 0 degrees advanced.
+## Portal is instant travel across the map, not across time - so this always
+## hands the clock back at 0 degrees advanced.
 func _unfreeze_world_clock(clock: Node) -> void:
 	if clock == null:
 		return
 	if clock.has_method(&"unfreeze_after_combat"):
 		clock.call(&"unfreeze_after_combat", 0.0)
 	clock.set_process(true)
-
-
-## Holds every currently-active [WorldBandit] still for the length of the
-## jump - "no enemies act" - recording only the ones this actually touched,
-## so [method _release_bandits] can never hand activity back to a group some
-## other system had already stood down for its own reasons.
-func _hold_bandits() -> void:
-	_held_bandits = []
-	for node: Node in get_tree().get_nodes_in_group(BANDIT_GROUP):
-		var bandit := node as WorldBandit
-		if bandit == null or not bandit.active:
-			continue
-		bandit.active = false
-		_held_bandits.append(bandit)
-
-
-func _release_bandits() -> void:
-	for bandit: WorldBandit in _held_bandits:
-		if bandit != null and is_instance_valid(bandit):
-			bandit.active = true
-	_held_bandits = []

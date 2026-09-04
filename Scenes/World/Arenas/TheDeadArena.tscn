@@ -1,0 +1,9 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/World/ArenaBase.tscn" id="0_base"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Regions/region_e.tres" id="1_region"]
+
+[node name="TheDeadArena" instance=ExtResource("0_base")]
+
+[node name="ArenaRegion" parent="."]
+region = ExtResource("1_region")

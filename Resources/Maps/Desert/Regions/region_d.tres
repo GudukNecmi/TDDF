@@ -15,3 +15,5 @@ enemy_base_health = 450.0
 start_position = Vector2(-1870, 1090)
 map_position = Vector2(0.24, 0.76)
 map_size = Vector2(0.222, 0.25)
+world_map_scene_path = "res://Scenes/World/Regions/RedRiverMap.tscn"
+arena_scene_path = "res://Scenes/World/Arenas/RedRiverArena.tscn"

@@ -9,7 +9,8 @@ extends Node2D
 ## this points at - so a wanted poster, a difficulty curve or anything else
 ## that already understands a [MapRegion] understands whatever this zone is
 ## standing on. All this adds is a physical rectangle in the World Map's own
-## space and the crossing that tells [WorldMapState] about it.
+## space, and telling [WorldMapState] which region the map that has just been
+## built is.
 ##
 ## Placing a sixth region, or redrawing where the five sit, is dragging this
 ## node's [member area] around the editor and pointing [member region] at a
@@ -47,21 +48,17 @@ func is_inside(body: Node2D) -> bool:
 	return get_world_area().has_point(body.global_position)
 
 
-## Only tells [WorldMapState] on the way in. Leaving one zone for an
-## adjoining one is the next zone's own crossing telling it the new answer;
-## leaving every zone at once simply stops updating it, which for this
-## foundation is close enough - a region readout that holds the last region
-## the player was actually standing in.
-func _process(_delta: float) -> void:
-	var body := get_tree().get_first_node_in_group(body_group) as Node2D
-	var inside := is_inside(body)
-	if inside == _inside:
-		return
-
-	_inside = inside
-	if not _inside:
-		return
-
+## Tells [WorldMapState] which region this map is, the moment it is built.
+##
+## [b]It is no longer a crossing.[/b] This used to watch the player every frame
+## and announce a region as they walked into the rectangle, because five of these
+## shared one ten-thousand-pixel map and which one the player stood in was a
+## question only their position could answer. Each region is its own scene now,
+## so there is exactly one zone in the tree and the answer is known before the
+## player has moved at all - which matters, because everything that opens a map
+## needs the region settled before it can ask what this place remembers.
+func _ready() -> void:
+	_inside = true
 	var state := WorldMapState.get_active(self)
-	if state != null:
+	if state != null and region != null:
 		state.set_region(region)

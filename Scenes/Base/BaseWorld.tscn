@@ -1,0 +1,138 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/Base/Base.tscn" id="1_fxh5h"]
+[ext_resource type="PackedScene" path="res://Scenes/Player/Player.tscn" id="2_6722f"]
+[ext_resource type="Script" path="res://Scripts/Player/player.gd" id="3_t4x4a"]
+[ext_resource type="Script" path="res://Scripts/World/camera_bounds.gd" id="4_nsqb1"]
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_mount.gd" id="5_deds1"]
+[ext_resource type="Resource" path="res://Resources/Weapons/weapon_catalog.tres" id="6_63008"]
+[ext_resource type="PackedScene" path="res://Scenes/Weapons/Shotgun.tscn" id="7_i6und"]
+[ext_resource type="AudioStream" path="res://Sound/Music/The Devil Draws Fast Base Music.WAV" id="8_sphbc"]
+[ext_resource type="Script" path="res://Scripts/Common/music_player.gd" id="9_8j0a5"]
+[ext_resource type="Script" path="res://Scripts/Common/music_director.gd" id="10_egrge"]
+[ext_resource type="Script" path="res://Scripts/Enemy/run_end_defeat.gd" id="11_2rxim"]
+[ext_resource type="Script" path="res://Scripts/World/zone_enemy_guard.gd" id="12_bsoya"]
+[ext_resource type="Script" path="res://Scripts/Enemy/gunshot_surrender.gd" id="13_xsemb"]
+[ext_resource type="Script" path="res://Scripts/UI/damage_numbers.gd" id="14_eu6hs"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/DamageNumber.tscn" id="15_xfh4q"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/RunHUD.tscn" id="16_ikf2n"]
+[ext_resource type="Script" path="res://Scripts/Run/world_slowdown.gd" id="17_5dcid"]
+[ext_resource type="Script" path="res://Scripts/World/world_boot.gd" id="18_qgux3"]
+[ext_resource type="Script" path="res://Scripts/Common/hit_stop.gd" id="19_k443v"]
+[ext_resource type="Script" path="res://Scripts/Weapons/coin_strike.gd" id="20_tiix0"]
+[ext_resource type="Script" path="res://Scripts/World/music_state_watcher.gd" id="21_vsyv5"]
+[ext_resource type="Script" path="res://Scripts/World/world_reset.gd" id="22_ibio3"]
+[ext_resource type="Script" path="res://Scripts/World/combat_loot_director.gd" id="23_cpeqn"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_extraction_service.gd" id="24_aw21f"]
+[ext_resource type="Script" path="res://Scripts/World/Sun/sun_controller.gd" id="25_osutw"]
+[ext_resource type="Script" path="res://Scripts/World/Sun/sun_stage.gd" id="26_wraqq"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/1_dawn.tres" id="27_68ucs"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/2_morning.tres" id="28_yqwvp"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/3_noon.tres" id="29_fot1m"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/4_evening.tres" id="30_7bb5q"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/5_twilight.tres" id="31_k1htc"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/6_night.tres" id="32_v41eo"]
+[ext_resource type="Script" path="res://Scripts/World/day_cycle_director.gd" id="33_ts40x"]
+[ext_resource type="Script" path="res://Scripts/World/day_stage.gd" id="34_8v5ru"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/1_dawn.tres" id="35_ivfw3"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/2_morning.tres" id="36_bs4bf"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/3_noon.tres" id="37_ich5u"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/4_evening.tres" id="38_0sxne"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/5_twilight.tres" id="39_h0v6m"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/6_night.tres" id="40_a4a5v"]
+
+[node name="BaseWorld" type="Node2D" unique_id=1602493755]
+y_sort_enabled = true
+
+[node name="Darkness" type="CanvasModulate" parent="." unique_id=1100277015 groups=["ambient_modulate"]]
+color = Color(1, 0.8666667, 0.30588236, 1)
+
+[node name="Base" type="Node2D" parent="." unique_id=1285401608 instance=ExtResource("1_fxh5h")]
+z_index = -1
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=1731179406 groups=["player"] instance=ExtResource("2_6722f")]
+collision_mask = 33
+motion_mode = 1
+wall_min_slide_angle = 0.0
+script = ExtResource("3_t4x4a")
+speed_modifier_paths = Array[NodePath]([NodePath("DeathSequence"), NodePath("TerrainSlow"), NodePath("PlayerSleep"), NodePath("WorldMapHorse"), NodePath("ExtractionHold"), NodePath("TravelHold")])
+
+[node name="CameraBounds" type="Node2D" parent="." unique_id=1705884162]
+script = ExtResource("4_nsqb1")
+region = Rect2(-1449.6, -815.4, 2899.2, 1630.8)
+
+[node name="WeaponMount" type="Node2D" parent="." unique_id=1217776971]
+script = ExtResource("5_deds1")
+catalog = ExtResource("6_63008")
+target_path = NodePath("../Player")
+fallback_scene = ExtResource("7_i6und")
+
+[node name="Enemies" type="Node2D" parent="." unique_id=725638046]
+y_sort_enabled = true
+
+[node name="BaseMusic" type="AudioStreamPlayer" parent="." unique_id=192906175]
+process_mode = 3
+stream = ExtResource("8_sphbc")
+volume_db = -60.0
+bus = &"Game"
+script = ExtResource("9_8j0a5")
+tempo_ramp_enabled = false
+remember_across_rounds = false
+
+[node name="MusicDirector" type="Node" parent="." unique_id=1330861437 groups=["music_director"]]
+process_mode = 3
+script = ExtResource("10_egrge")
+
+[node name="RunEndDefeat" type="Node" parent="." unique_id=796127387]
+script = ExtResource("11_2rxim")
+
+[node name="BaseEnemyGuard" type="Node" parent="." unique_id=87930026]
+script = ExtResource("12_bsoya")
+
+[node name="GunshotSurrender" type="Node" parent="." unique_id=87930027]
+script = ExtResource("13_xsemb")
+mount_path = NodePath("../WeaponMount")
+
+[node name="DamageNumbers" type="Node2D" parent="." unique_id=1983049173 groups=["damage_numbers"]]
+z_index = 20
+script = ExtResource("14_eu6hs")
+number_scene = ExtResource("15_xfh4q")
+
+[node name="RunHUD" type="CanvasLayer" parent="." unique_id=1330291175 instance=ExtResource("16_ikf2n")]
+process_mode = 3
+layer = 2
+
+[node name="WorldSlowdown" type="Node" parent="." unique_id=902085865 groups=["world_slowdown"]]
+script = ExtResource("17_5dcid")
+
+[node name="WorldBoot" type="Node" parent="." unique_id=1592448833]
+script = ExtResource("18_qgux3")
+opens_in = 1
+
+[node name="HitStop" type="Node" parent="." unique_id=1130592027]
+script = ExtResource("19_k443v")
+max_duration = 0.5
+
+[node name="CoinStrike" type="Node" parent="." unique_id=1130592028 groups=["coin_strike"]]
+script = ExtResource("20_tiix0")
+
+[node name="MusicStateWatcher" type="Node" parent="." unique_id=977416575]
+script = ExtResource("21_vsyv5")
+
+[node name="WorldReset" type="Node" parent="." unique_id=1592448932 groups=["world_reset"]]
+script = ExtResource("22_ibio3")
+
+[node name="CombatLootDirector" type="Node" parent="." unique_id=1144560538]
+script = ExtResource("23_cpeqn")
+
+[node name="WorldMapExtractionService" type="Node" parent="." unique_id=51447099]
+script = ExtResource("24_aw21f")
+
+[node name="Sun" type="Node2D" parent="." unique_id=746016131 groups=["sun"]]
+script = ExtResource("25_osutw")
+stages = Array[ExtResource("26_wraqq")]([ExtResource("27_68ucs"), ExtResource("28_yqwvp"), ExtResource("29_fot1m"), ExtResource("30_7bb5q"), ExtResource("31_k1htc"), ExtResource("32_v41eo")])
+projection_mode = 1
+
+[node name="DayCycle" type="Node" parent="." unique_id=1367528904 groups=["day_cycle"]]
+script = ExtResource("33_ts40x")
+stages = Array[ExtResource("34_8v5ru")]([ExtResource("35_ivfw3"), ExtResource("36_bs4bf"), ExtResource("37_ich5u"), ExtResource("38_0sxne"), ExtResource("39_h0v6m"), ExtResource("40_a4a5v")])

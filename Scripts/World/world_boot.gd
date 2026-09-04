@@ -51,9 +51,28 @@ extends Node
 ## [WorldSlowdown] owns the multiplier and both the player and the enemies read
 ## it, so there is one number and nothing is left slow behind us.
 
+## What a freshly built world is for, when the scene itself already knows.
+##
+## [b]DECIDE is what this node used to be, and only that.[/b] The base and the
+## arena were two ends of a single scene, so which one a build was for could only
+## be answered by asking [RunSessionState]. They are separate scenes now, and a
+## scene that is the base is the base whatever the session has been told - so the
+## base's own scene states it outright and the question is not asked at all.
+enum Opening {
+	## Ask the session, as this always did.
+	DECIDE,
+	## The player is home. No intro, no clock, no waves.
+	BASE,
+	## A run, whatever the session says.
+	RUN,
+}
+
 ## Emitted once the world is ready to be played - after the intro on a run, and
 ## immediately when opening in the base.
 signal world_started(running: bool)
+
+## What this particular world was built for - see [enum Opening].
+@export var opens_in: Opening = Opening.DECIDE
 
 ## The session's memory of which map was chosen, if any.
 @export var session_path: NodePath = ^"/root/RunSession"
@@ -134,8 +153,14 @@ func _ready() -> void:
 
 
 ## Whether this world was built for a run. False on the very first launch, and
-## any time the player is at home with no map chosen.
+## any time the player is at home with no map chosen. A scene that states its own
+## purpose through [member opens_in] is taken at its word and the session is not
+## asked.
 func is_running() -> bool:
+	if opens_in == Opening.BASE:
+		return false
+	if opens_in == Opening.RUN:
+		return true
 	if _session == null or not _session.has_method(&"is_running"):
 		# No session to ask - a world opened on its own, from the editor. Behaves
 		# as it always did and plays.

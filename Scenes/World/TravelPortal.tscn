@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://c0travelportal01"]
+[gd_scene format=3 uid="uid://c7lj6xrpkxku7"]
 
 [ext_resource type="Script" path="res://Scripts/World/travel_portal.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://cgotikarenaportal" path="res://Scenes/World/ArenaPortal.tscn" id="2_art"]

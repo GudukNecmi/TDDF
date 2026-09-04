@@ -96,19 +96,26 @@ const GROUP := &"run_portal"
 ## Whether the run that has just been chosen sets out onto the World Map rather
 ## than into the old world-rebuild-and-arrive flow below.
 ##
-## [b]On, and this is the entry flow now.[/b] Once the map (and, if asked, the
-## region) is chosen, the portal skips [member asks_for_time] and the old
-## departure screen entirely and instead hands the player's own [Teleporter] to
-## [member world_map_destination_id] - the exact journey [code]WorldMapGate[/code]
-## already makes, so the mount, the camera limits and the World Map's own HUD all
-## come from Phase 1's existing machinery rather than anything new. Nothing about
-## the old flow below is deleted: switching this off restores it exactly, for
-## whichever later phase migrates a map that does not open on the World Map.
+## [b]On, and this is the entry flow now.[/b] Once the map and the region are
+## chosen, the portal skips [member asks_for_time] and the old departure screen
+## entirely and changes scene to the chosen region's own World Map, through
+## [WorldRegionRouter] and the existing loading curtain. Nothing about the old
+## flow below is deleted: switching this off restores it exactly, for whichever
+## later phase migrates a map that does not open on the World Map.
 @export var enters_world_map: bool = true
-## Which [TeleportDestination] the run departs to when [member enters_world_map]
-## is on. The World Map's own id, so a second map's own destination is one export
-## away from working the same way.
-@export var world_map_destination_id: StringName = &"world_map"
+## Whether setting out refills every reserve the player owns and hands them a
+## weapon that is ready to fire.
+##
+## [b]It happens here because this is where leaving happens now.[/b] It used to
+## be [WorldBoot]'s, on the far side of a scene rebuild, because every way into an
+## arena came through a world being built. The base, the map and the arena are
+## three scenes now and the arena is reached mid-run, so the one moment that means
+## "setting out" is this one. It is still taken from the session through
+## [method RunSessionState.take_outfit], so it is owed exactly once per run and
+## can never become a way to top up between fights.
+@export var resupplies_on_departure: bool = true
+## The ammunition locker the reserves are filled through.
+@export var locker_path: NodePath = ^"/root/Ammo"
 ## The E-style hint shown by the player's head while they are standing in the
 ## portal, so it is visible that E means something here. Optional, and purely a
 ## hint - [member radius] is what decides, not this.
@@ -481,81 +488,89 @@ func _release_teleporters() -> void:
 
 # --- Entering the World Map -----------------------------------------------------
 
-## The World Map entry itself: the player's own [Teleporter] is sent to
-## [member world_map_destination_id], exactly the journey [code]WorldMapGate[/code]
-## already makes - so the mount, the camera limits and the World Map's own clock
-## are Phase 1's machinery running unchanged, and nothing about the World Map
-## itself is touched here.
+## The World Map entry itself: a real change of scene to the chosen region's own
+## map, behind the loading curtain, through [WorldRegionRouter].
 ##
-## [b]No arrival-time question, no departure screen, and no scene reload.[/b] The
-## World Map is a permanent sibling of the base in the one persistent world scene
-## - see [WorldMapDestination]'s own notes - so reaching it is a journey, not a
-## rebuild: [method Teleporter.teleport] moves the body directly, and the world
-## the player was just standing in is still there behind it.
+## [b]It used to be a teleport, and could only ever have been one.[/b] The World
+## Map was a permanent sibling of the base in a single persistent world scene, so
+## reaching it meant moving the body a few thousand pixels and leaving the base
+## standing behind it. Each region is its own scene now, so setting out genuinely
+## leaves: the base is freed, one region is built, and the four the player did not
+## ride into are never built at all.
+##
+## Which region is the one the player picked at the pit - see
+## [member asks_for_region]. A run with no region chosen falls back to the map's
+## own entry region, so a map whose regions are not selectable still sets out
+## somewhere rather than nowhere.
 func _enter_world_map() -> void:
-	var teleporter := _find_player_teleporter()
-	if teleporter == null:
-		push_warning("RunPortal: no Teleporter on the player - cannot enter the World Map.")
+	var router := WorldRegionRouter.get_active(self)
+	if router == null:
+		push_warning("RunPortal: no router - cannot enter the World Map.")
 		_starting = false
 		return
 
-	# The key press that opened this whole flow already told the Teleporter a
-	# journey was under way - see [member Teleporter.portal_starts_run] - and
-	# left its in-progress flag set, waiting for a transition that was never
-	# going to arrive on its own; the old flow never noticed because it always
-	# ended in a scene reload, which quietly rebuilt the Teleporter fresh. This
-	# one does not reload anything, so the flag has to be let go of by hand
-	# first - the same release backing out of a screen already asks for - or
-	# the real journey below is refused before it starts.
-	teleporter.cancel()
-
-	# The ordinary journey hands the soundtrack to the base track - what coming
-	# home means - which is backwards for a journey leaving it. Suppressed only for
-	# this one call; [method Teleporter.teleport] reads it synchronously, so it is
-	# safe to restore immediately after.
-	var restore_music := teleporter.drive_music
-	teleporter.drive_music = false
-	var began := teleporter.teleport(true, false, world_map_destination_id)
-	teleporter.drive_music = restore_music
-
-	if not began:
-		push_warning("RunPortal: no '%s' destination to enter." % world_map_destination_id)
+	var region_id := _departure_region()
+	if region_id.is_empty():
+		push_warning("RunPortal: no region to set out for.")
 		_starting = false
 		return
 
-	if not teleporter.teleported.is_connected(_on_world_map_entered):
-		teleporter.teleported.connect(_on_world_map_entered, CONNECT_ONE_SHOT)
+	# Filled up before leaving rather than on arrival, so the map is ridden into
+	# with the pouches the base sold and nothing tops them up again mid-run.
+	_resupply()
+
+	if not router.go_to_region(region_id):
+		_starting = false
 
 
-## The journey has landed. Lets go of [member _starting], and of every question
-## already answered, so a later visit back to this pit - the World Map's own
-## return journey exists for exactly that - asks fresh rather than silently
-## repeating the last answer.
+## The region a departure is bound for: the one chosen at the pit, or the map's
+## own way in when nothing was chosen.
+func _departure_region() -> StringName:
+	var session := get_node_or_null(^"/root/RunSession")
+	if session == null:
+		return &""
+	if session.has_method(&"get_region_id"):
+		var chosen: StringName = session.call(&"get_region_id")
+		if not chosen.is_empty():
+			return chosen
+	if not session.has_method(&"get_map"):
+		return &""
+	var map: MapDefinition = session.call(&"get_map")
+	if map == null:
+		return &""
+	var entry := map.get_entry_region()
+	return &"" if entry == null else entry.region_id
+
+
+## Fills the pouches and closes the action, in that order - a weapon made ready
+## before the resupply would fill its magazine out of the count the player came
+## home with rather than the one they are leaving with.
 ##
-## [b]This is what a scene reload used to do for free.[/b] The old flow only
-## ever left the pit once, into a rebuild that tore this very node down and
-## made a new one with every flag at its own default; this path leaves the node
-## standing, so the reset that reload gave away for nothing has to be done by
-## hand here instead.
-func _on_world_map_entered(_destination: TeleportDestination) -> void:
-	_starting = false
-	_weapon_chosen = false
-	_map_chosen = false
-	_region_chosen = false
-	_time_chosen = false
+## Neither half knows which weapon it is dealing with: the locker fills every
+## reserve it is keeping, and the weapon is asked for the state a fight should
+## begin in through [method CarriedWeapon.reload_to_ready], which each weapon
+## answers for itself. Taken from the session so it is owed once per run - see
+## [member resupplies_on_departure].
+func _resupply() -> void:
+	if not resupplies_on_departure:
+		return
 
+	var session := get_node_or_null(^"/root/RunSession")
+	var owed := true
+	if session != null and session.has_method(&"take_outfit"):
+		owed = session.call(&"take_outfit")
 
-## The player's own [Teleporter], found on the body rather than wired up - the
-## same lookup [method _release_teleporters] already makes.
-func _find_player_teleporter() -> Teleporter:
-	var body := get_tree().get_first_node_in_group(body_group) as Node
-	if body == null:
-		return null
-	for node: Node in body.find_children("*", "Teleporter", true, false):
-		var teleporter := node as Teleporter
-		if teleporter != null:
-			return teleporter
-	return null
+	if owed:
+		var locker := get_node_or_null(locker_path) as AmmoLocker
+		if locker != null:
+			locker.refill_all()
+
+	var mount := WeaponMount.get_active(self)
+	if mount == null:
+		return
+	var weapon := mount.get_weapon()
+	if weapon != null:
+		weapon.reload_to_ready()
 
 
 func _process(delta: float) -> void:

@@ -1,0 +1,354 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/1- Ground/DesertFloor.PNG" id="1_4aphd"]
+[ext_resource type="Script" path="res://Scripts/World/tiled_surface.gd" id="2_qvsve"]
+[ext_resource type="Script" path="res://Scripts/World/region_ground.gd" id="3_5olwe"]
+[ext_resource type="Script" path="res://Scripts/World/footprint_field.gd" id="4_shct6"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Blood/BloodPiece.PNG" id="5_w3pkh"]
+[ext_resource type="Script" path="res://Scripts/World/blood_field.gd" id="6_oldm1"]
+[ext_resource type="Script" path="res://Scripts/World/blood_spray.gd" id="7_krnm7"]
+[ext_resource type="Script" path="res://Scripts/World/day_cycle_director.gd" id="8_auwoa"]
+[ext_resource type="Script" path="res://Scripts/World/day_stage.gd" id="9_o4bjw"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/1_dawn.tres" id="10_mgppw"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/2_morning.tres" id="11_v7mci"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/3_noon.tres" id="12_v2n40"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/4_evening.tres" id="13_mvxfa"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/5_twilight.tres" id="14_eg5h2"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/6_night.tres" id="15_glpvu"]
+[ext_resource type="Script" path="res://Scripts/World/prop_scale.gd" id="16_43rgc"]
+[ext_resource type="Script" path="res://Scripts/World/prop_scatter.gd" id="17_csnm1"]
+[ext_resource type="Script" path="res://Scripts/World/scatter_layer.gd" id="18_31ui7"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/scatter_cacti.tres" id="19_n2dk3"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/scatter_bushes.tres" id="20_ul1v3"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/scatter_bones.tres" id="21_u0vns"]
+[ext_resource type="Script" path="res://Scripts/World/cloud_shadows.gd" id="22_cba8x"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2293.PNG" id="23_shmsp"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2294.PNG" id="24_ebqql"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2295.PNG" id="25_mw21k"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2296.PNG" id="26_hnwxg"]
+[ext_resource type="Script" path="res://Scripts/World/Sun/sun_controller.gd" id="27_bhnp5"]
+[ext_resource type="Script" path="res://Scripts/World/Sun/sun_stage.gd" id="28_tiia4"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/1_dawn.tres" id="29_0jrkt"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/2_morning.tres" id="30_xwopf"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/3_noon.tres" id="31_q0cdg"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/4_evening.tres" id="32_gqxw4"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/5_twilight.tres" id="33_rp4ck"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/6_night.tres" id="34_m1j2a"]
+[ext_resource type="PackedScene" path="res://Scenes/Player/Player.tscn" id="35_el56v"]
+[ext_resource type="Script" path="res://Scripts/Player/player.gd" id="36_01eqx"]
+[ext_resource type="Script" path="res://Scripts/World/camera_bounds.gd" id="37_m48v8"]
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_mount.gd" id="38_hbugh"]
+[ext_resource type="Resource" path="res://Resources/Weapons/weapon_catalog.tres" id="39_ydtm3"]
+[ext_resource type="PackedScene" path="res://Scenes/Weapons/Shotgun.tscn" id="40_oyvmf"]
+[ext_resource type="Script" path="res://Scripts/Common/music_director.gd" id="41_8nune"]
+[ext_resource type="Script" path="res://Scripts/Enemy/enemy_spawner.gd" id="42_elinb"]
+[ext_resource type="PackedScene" path="res://Scenes/Enemy/Enemy.tscn" id="43_2ue0h"]
+[ext_resource type="Script" path="res://Scripts/Enemy/round_scaling.gd" id="44_05wwk"]
+[ext_resource type="Script" path="res://Scripts/Enemy/wave_manager.gd" id="45_f7a6m"]
+[ext_resource type="Script" path="res://Scripts/Enemy/wave_roster.gd" id="46_s1mpq"]
+[ext_resource type="Script" path="res://Scripts/Enemy/wave_roster_entry.gd" id="47_8nc51"]
+[ext_resource type="Resource" path="res://Resources/Enemy/wave_entry_bomber.tres" id="48_fpd6j"]
+[ext_resource type="Script" path="res://Scripts/Enemy/run_end_defeat.gd" id="49_7612g"]
+[ext_resource type="Script" path="res://Scripts/Enemy/gunshot_surrender.gd" id="50_uhib3"]
+[ext_resource type="Script" path="res://Scripts/UI/damage_numbers.gd" id="51_ui26s"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/DamageNumber.tscn" id="52_2ao6q"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/RunHUD.tscn" id="53_h61t7"]
+[ext_resource type="Script" path="res://Scripts/Run/world_slowdown.gd" id="54_yswb5"]
+[ext_resource type="Script" path="res://Scripts/Enemy/ambush_wave_director.gd" id="55_u6xlk"]
+[ext_resource type="Script" path="res://Scripts/World/boss_arena.gd" id="56_i8yke"]
+[ext_resource type="Script" path="res://Scripts/Enemy/mini_boss_director.gd" id="57_4w3os"]
+[ext_resource type="Script" path="res://Scripts/Enemy/mini_boss_tier.gd" id="58_60kgb"]
+[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_tier_3.tres" id="59_wn0fg"]
+[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_tier_2.tres" id="60_4ol6r"]
+[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_tier_1.tres" id="61_gnsgb"]
+[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_tier_0.tres" id="62_pyo2h"]
+[ext_resource type="PackedScene" path="res://Scenes/World/DestinationMarker.tscn" id="63_jb2n0"]
+[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss1_wardrobe.tres" id="64_d1wce"]
+[ext_resource type="Script" path="res://Scripts/Enemy/boss_phases.gd" id="65_qwk4c"]
+[ext_resource type="Script" path="res://Scripts/Enemy/mini_boss_phase.gd" id="66_dpkfc"]
+[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_phase_1_opening.tres" id="67_ryxi3"]
+[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_phase_2_pressed.tres" id="68_k7lo5"]
+[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_phase_3_enraged.tres" id="69_au7h4"]
+[ext_resource type="Script" path="res://Scripts/World/ammo_crate_spawner.gd" id="70_aeiko"]
+[ext_resource type="PackedScene" path="res://Scenes/World/AmmoCrate.tscn" id="71_ouujn"]
+[ext_resource type="Script" path="res://Scripts/Enemy/boss_defeat.gd" id="72_p0bau"]
+[ext_resource type="Script" path="res://Scripts/Common/sound_bank.gd" id="73_04ncn"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Boss/BossDefeatSound.mp3" id="74_n6wrn"]
+[ext_resource type="Script" path="res://Scripts/Common/hit_stop.gd" id="75_pc2mf"]
+[ext_resource type="Script" path="res://Scripts/Weapons/coin_strike.gd" id="76_46gt6"]
+[ext_resource type="Script" path="res://Scripts/World/music_state_watcher.gd" id="77_ak4we"]
+[ext_resource type="Script" path="res://Scripts/World/world_reset.gd" id="78_sw1ke"]
+[ext_resource type="Script" path="res://Scripts/Enemy/morale_director.gd" id="79_s3q3m"]
+[ext_resource type="Script" path="res://Scripts/Enemy/boss_charge.gd" id="80_2pgyy"]
+[ext_resource type="Script" path="res://Scripts/Enemy/boss_footsteps.gd" id="81_0el0k"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Boss/Steps/Step1.WAV" id="82_qldfk"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Boss/Steps/Step2.WAV" id="83_5imic"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Boss/Steps/Step3.WAV" id="84_mnvw0"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Boss/Steps/Step4.WAV" id="85_j10c8"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Boss/Steps/Step5.WAV" id="86_y4bda"]
+[ext_resource type="AudioStream" path="res://Sound/Efect/Boss/Steps/Step6.WAV" id="87_t5823"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_combat_bridge.gd" id="88_cabry"]
+[ext_resource type="Resource" path="res://Resources/World/Decision/tier_stronger.tres" id="89_x1roy"]
+[ext_resource type="Resource" path="res://Resources/World/Decision/tier_equal.tres" id="90_l2itd"]
+[ext_resource type="Resource" path="res://Resources/World/Decision/tier_weaker.tres" id="91_foca0"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Trouble/fight1.WAV" id="92_1p4l0"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Trouble/fight2.WAV" id="93_rpth1"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Trouble/fight3.mp3" id="94_4d85r"]
+[ext_resource type="Script" path="res://Scripts/World/combat_ammo_box_director.gd" id="95_m0b0m"]
+[ext_resource type="Script" path="res://Scripts/Common/kill_cam.gd" id="96_hhxn1"]
+[ext_resource type="Script" path="res://Scripts/Enemy/kill_cam_watcher.gd" id="97_mx2ek"]
+[ext_resource type="Script" path="res://Scripts/World/combat_loot_director.gd" id="98_a2h04"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_interaction_camera.gd" id="99_acs7o"]
+[ext_resource type="Script" path="res://Scripts/World/arena_region.gd" id="100_0ujmy"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xf6vi"]
+size = Vector2(2048, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ouhkt"]
+size = Vector2(2048, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5jr8x"]
+size = Vector2(64, 1208)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_27jhl"]
+size = Vector2(64, 1208)
+
+[node name="ArenaBase" type="Node2D" unique_id=215883345]
+y_sort_enabled = true
+
+[node name="Darkness" type="CanvasModulate" parent="." unique_id=1100277015 groups=["ambient_modulate"]]
+color = Color(1, 0.8666667, 0.30588236, 1)
+
+[node name="Arena" type="Node2D" parent="." unique_id=1152188719]
+y_sort_enabled = true
+
+[node name="Bounds" type="StaticBody2D" parent="Arena" unique_id=374701808]
+scale = Vector2(1.51, 1.51)
+
+[node name="TopWall" type="CollisionShape2D" parent="Arena/Bounds" unique_id=864121590]
+position = Vector2(0, -572)
+shape = SubResource("RectangleShape2D_xf6vi")
+
+[node name="BottomWall" type="CollisionShape2D" parent="Arena/Bounds" unique_id=1395062113]
+position = Vector2(0, 572)
+shape = SubResource("RectangleShape2D_ouhkt")
+
+[node name="LeftWall" type="CollisionShape2D" parent="Arena/Bounds" unique_id=1300784863]
+position = Vector2(-992, 0)
+shape = SubResource("RectangleShape2D_5jr8x")
+
+[node name="RightWall" type="CollisionShape2D" parent="Arena/Bounds" unique_id=110723480]
+position = Vector2(992, 0)
+shape = SubResource("RectangleShape2D_27jhl")
+
+[node name="Floor" type="Polygon2D" parent="Arena" unique_id=1104287218]
+z_index = -13
+texture_filter = 4
+texture_repeat = 2
+position = Vector2(-2080, -1240)
+texture = ExtResource("1_4aphd")
+texture_scale = Vector2(4, 4)
+polygon = PackedVector2Array(0, 0, 4160, 0, 4160, 2480, 0, 2480)
+script = ExtResource("2_qvsve")
+surface_size = Vector2(4160, 2480)
+tile_size = 1000.0
+
+[node name="RegionGround" type="Node" parent="Arena" unique_id=1509338900 groups=["region_ground"]]
+script = ExtResource("3_5olwe")
+session_path = NodePath("../../ArenaRegion")
+
+[node name="Footprints" type="MultiMeshInstance2D" parent="Arena" unique_id=1849302011 groups=["footprint_field"]]
+z_index = -12
+script = ExtResource("4_shct6")
+capacity = 2600
+
+[node name="BloodField" type="MultiMeshInstance2D" parent="Arena" unique_id=410898711]
+z_index = -11
+texture = ExtResource("5_w3pkh")
+script = ExtResource("6_oldm1")
+colours = PackedColorArray(0.44, 0.03, 0.04, 1, 0.32, 0.02, 0.03, 1, 0.53, 0.06, 0.05, 1, 0.24, 0.01, 0.02, 1)
+
+[node name="BloodSpray" type="MultiMeshInstance2D" parent="Arena" unique_id=1116043804]
+z_index = -10
+script = ExtResource("7_krnm7")
+
+[node name="Props" type="Node2D" parent="Arena" unique_id=1509338826]
+y_sort_enabled = true
+
+[node name="DayCycle" type="Node" parent="Arena" unique_id=1367528904 groups=["day_cycle"]]
+script = ExtResource("8_auwoa")
+stages = Array[ExtResource("9_o4bjw")]([ExtResource("10_mgppw"), ExtResource("11_v7mci"), ExtResource("12_v2n40"), ExtResource("13_mvxfa"), ExtResource("14_eg5h2"), ExtResource("15_glpvu")])
+extras_container_path = NodePath("../Props")
+
+[node name="PropScale" type="Node" parent="Arena" unique_id=879624999 groups=["prop_scale"]]
+script = ExtResource("16_43rgc")
+scale_multiplier = 0.4
+
+[node name="PropScatter" type="Node2D" parent="Arena" unique_id=624013287]
+script = ExtResource("17_csnm1")
+region = Rect2(-2040, -1200, 4080, 2400)
+layers = Array[ExtResource("18_31ui7")]([ExtResource("19_n2dk3"), ExtResource("20_ul1v3"), ExtResource("21_u0vns")])
+container_path = NodePath("../Props")
+session_path = NodePath("../../ArenaRegion")
+clear_radius = 320.0
+
+[node name="CloudShadows" type="Node2D" parent="Arena" unique_id=1031732130]
+script = ExtResource("22_cba8x")
+textures = Array[Texture2D]([ExtResource("23_shmsp"), ExtResource("24_ebqql"), ExtResource("25_mw21k"), ExtResource("26_hnwxg")])
+scale_range = Vector2(0.35, 0.85)
+
+[node name="Sun" type="Node2D" parent="Arena" unique_id=746016131 groups=["sun"]]
+script = ExtResource("27_bhnp5")
+stages = Array[ExtResource("28_tiia4")]([ExtResource("29_0jrkt"), ExtResource("30_xwopf"), ExtResource("31_q0cdg"), ExtResource("32_gqxw4"), ExtResource("33_rp4ck"), ExtResource("34_m1j2a")])
+projection_mode = 1
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=1731179406 groups=["player"] instance=ExtResource("35_el56v")]
+collision_mask = 33
+motion_mode = 1
+wall_min_slide_angle = 0.0
+script = ExtResource("36_01eqx")
+speed_modifier_paths = Array[NodePath]([NodePath("DeathSequence"), NodePath("TerrainSlow"), NodePath("PlayerSleep"), NodePath("WorldMapHorse"), NodePath("ExtractionHold"), NodePath("TravelHold")])
+
+[node name="CameraBounds" type="Node2D" parent="." unique_id=1705884162]
+script = ExtResource("37_m48v8")
+region = Rect2(-1449.6, -815.4, 2899.2, 1630.8)
+
+[node name="WeaponMount" type="Node2D" parent="." unique_id=1217776971]
+script = ExtResource("38_hbugh")
+catalog = ExtResource("39_ydtm3")
+target_path = NodePath("../Player")
+fallback_scene = ExtResource("40_oyvmf")
+
+[node name="Enemies" type="Node2D" parent="." unique_id=725638046]
+y_sort_enabled = true
+
+[node name="MusicDirector" type="Node" parent="." unique_id=1330861437 groups=["music_director"]]
+process_mode = 3
+script = ExtResource("41_8nune")
+
+[node name="EnemySpawner" type="Node2D" parent="." unique_id=419631653]
+script = ExtResource("42_elinb")
+enemy_scene = ExtResource("43_2ue0h")
+target_path = NodePath("../Player")
+container_path = NodePath("../Enemies")
+arena_bounds = Rect2(-1449.6, -815.4, 2899.2, 1630.8)
+
+[node name="RoundScaling" type="Node" parent="." unique_id=1503819863]
+script = ExtResource("44_05wwk")
+
+[node name="WaveManager" type="Node" parent="." unique_id=1184385414]
+script = ExtResource("45_f7a6m")
+auto_start = false
+
+[node name="WaveRoster" type="Node" parent="WaveManager" unique_id=131058205]
+script = ExtResource("46_s1mpq")
+entries = Array[ExtResource("47_8nc51")]([ExtResource("48_fpd6j")])
+
+[node name="RunEndDefeat" type="Node" parent="." unique_id=796127387]
+script = ExtResource("49_7612g")
+
+[node name="GunshotSurrender" type="Node" parent="." unique_id=87930027]
+script = ExtResource("50_uhib3")
+mount_path = NodePath("../WeaponMount")
+
+[node name="DamageNumbers" type="Node2D" parent="." unique_id=1983049173 groups=["damage_numbers"]]
+z_index = 20
+script = ExtResource("51_ui26s")
+number_scene = ExtResource("52_2ao6q")
+
+[node name="RunHUD" type="CanvasLayer" parent="." unique_id=1330291175 instance=ExtResource("53_h61t7")]
+process_mode = 3
+layer = 2
+
+[node name="WorldSlowdown" type="Node" parent="." unique_id=902085865 groups=["world_slowdown"]]
+script = ExtResource("54_yswb5")
+
+[node name="AmbushDirector" type="Node" parent="." unique_id=1592448899 groups=["ambush_director"]]
+script = ExtResource("55_u6xlk")
+
+[node name="WaveRoster" type="Node" parent="AmbushDirector" unique_id=1592448951]
+script = ExtResource("46_s1mpq")
+entries = Array[ExtResource("47_8nc51")]([ExtResource("48_fpd6j")])
+
+[node name="BossArena" type="Node2D" parent="." unique_id=1592448901 groups=["boss_arena"]]
+script = ExtResource("56_i8yke")
+
+[node name="MiniBossDirector" type="Node" parent="." unique_id=1592448902 groups=["mini_boss_director"]]
+script = ExtResource("57_4w3os")
+tiers = Array[ExtResource("58_60kgb")]([ExtResource("59_wn0fg"), ExtResource("60_4ol6r"), ExtResource("61_gnsgb"), ExtResource("62_pyo2h")])
+marker_scene = ExtResource("63_jb2n0")
+wardrobe = ExtResource("64_d1wce")
+
+[node name="BossPhases" type="Node" parent="." unique_id=1592448903 groups=["boss_phases"]]
+script = ExtResource("65_qwk4c")
+phases = Array[ExtResource("66_dpkfc")]([ExtResource("67_ryxi3"), ExtResource("68_k7lo5"), ExtResource("69_au7h4")])
+
+[node name="AmmoCrates" type="Node" parent="." unique_id=1592448904 groups=["ammo_crate_spawner"]]
+script = ExtResource("70_aeiko")
+crate_scene = ExtResource("71_ouujn")
+
+[node name="BossDefeat" type="Node" parent="." unique_id=231225627 groups=["boss_defeat"]]
+script = ExtResource("72_p0bau")
+camp_marker_scene = ExtResource("63_jb2n0")
+
+[node name="SoundBank" type="Node" parent="BossDefeat" unique_id=2076197803]
+script = ExtResource("73_04ncn")
+sounds = {
+&"defeat": ExtResource("74_n6wrn")
+}
+voice_count = 2
+bus = &"Game"
+
+[node name="HitStop" type="Node" parent="." unique_id=1130592027]
+script = ExtResource("75_pc2mf")
+max_duration = 0.5
+
+[node name="CoinStrike" type="Node" parent="." unique_id=1130592028 groups=["coin_strike"]]
+script = ExtResource("76_46gt6")
+
+[node name="MusicStateWatcher" type="Node" parent="." unique_id=977416575]
+script = ExtResource("77_ak4we")
+
+[node name="WorldReset" type="Node" parent="." unique_id=1592448932 groups=["world_reset"]]
+script = ExtResource("78_sw1ke")
+
+[node name="MoraleDirector" type="Node" parent="." unique_id=1592448933 groups=["morale_director"]]
+script = ExtResource("79_s3q3m")
+
+[node name="BossCharge" type="Node" parent="." unique_id=1592448934 groups=["boss_charge"]]
+script = ExtResource("80_2pgyy")
+
+[node name="BossFootsteps" type="Node" parent="." unique_id=1592448935 groups=["boss_footsteps"]]
+script = ExtResource("81_0el0k")
+steps = Array[AudioStream]([ExtResource("82_qldfk"), ExtResource("83_5imic"), ExtResource("84_mnvw0"), ExtResource("85_j10c8"), ExtResource("86_y4bda"), ExtResource("87_t5823")])
+step_volume_db = -4.0
+
+[node name="SoundBank" type="Node" parent="BossFootsteps" unique_id=1592448936]
+script = ExtResource("73_04ncn")
+bus = &"Game"
+pitch_variation = 0.07
+
+[node name="WorldMapCombatBridge" type="Node" parent="." unique_id=791092820]
+script = ExtResource("88_cabry")
+stronger_tier = ExtResource("89_x1roy")
+equal_tier = ExtResource("90_l2itd")
+weaker_tier = ExtResource("91_foca0")
+fight_tracks = Array[AudioStream]([ExtResource("92_1p4l0"), ExtResource("93_rpth1"), ExtResource("94_4d85r")])
+
+[node name="CombatAmmoBoxDirector" type="Node" parent="." unique_id=791092822]
+script = ExtResource("95_m0b0m")
+
+[node name="KillCam" type="Node" parent="." unique_id=1106958234]
+script = ExtResource("96_hhxn1")
+
+[node name="KillCamWatcher" type="Node" parent="." unique_id=1027587695]
+script = ExtResource("97_mx2ek")
+
+[node name="CombatLootDirector" type="Node" parent="." unique_id=1144560538]
+script = ExtResource("98_a2h04")
+
+[node name="WorldMapInteractionCamera" type="Node" parent="." unique_id=1651415873]
+script = ExtResource("99_acs7o")
+
+[node name="ArenaRegion" type="Node" parent="." unique_id=1568383242]
+script = ExtResource("100_0ujmy")

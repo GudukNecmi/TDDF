@@ -34,6 +34,22 @@ extends Node2D
 ## What is strewn about, in the order it is placed. These are the map's shared
 ## props - the ones that are there at every hour of the day.
 @export var layers: Array[ScatterLayer] = []
+## How much of each layer's authored count this scatter actually lays down.
+##
+## [b]It is for a scatter covering less ground than its layers were authored
+## for.[/b] The desert's shared scenery - its cacti, bushes and bones - is
+## authored as a count for the whole map, and the map used to be one scene: one
+## scatter strewing 1220 props across all of it. The map is five region scenes
+## now, each covering a fifth of that ground, so a scatter left at the full count
+## would put the whole map's worth of scenery into one region and the desert
+## would be five times as cluttered as it was drawn to be. A fifth of the ground
+## asks for a fifth of the count and the density is exactly what it always was.
+##
+## Scaled rather than re-authored so the counts stay in one place: retuning how
+## dense the desert is is still one edit to the shared layer, and every region
+## follows it. A scatter whose region is the ground its layers were authored for
+## leaves this at 1.
+@export_range(0.0, 4.0, 0.01) var count_scale: float = 1.0
 ## Whether the map's [DayCycleDirector], if it has one, is asked for scenery
 ## belonging to the hour currently being played - a dawn's birds, a night's
 ## fireflies - which is then strewn about after the shared layers by exactly this
@@ -441,7 +457,7 @@ func _place_layer(layer: ScatterLayer) -> void:
 		return
 
 	_layer_points.clear()
-	for i: int in maxi(layer.count, 0):
+	for i: int in maxi(int(round(float(layer.count) * maxf(count_scale, 0.0))), 0):
 		_place_one(layer)
 
 

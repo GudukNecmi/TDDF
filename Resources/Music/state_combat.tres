@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="MusicState" load_steps=3 format=3 uid="uid://cgotikcombatstate"]
+[gd_resource type="Resource" script_class="MusicState" format=3 uid="uid://c83mnwgb37k5"]
 
 [ext_resource type="Script" uid="uid://c6ylwt4xp2d23" path="res://Scripts/Common/music_state.gd" id="1_state"]
 [ext_resource type="AudioStream" path="res://Sound/Music/Trouble/fight1.WAV" id="2_fallback"]

@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://cgotikloadscreen"]
+[gd_scene format=3 uid="uid://b2610pm4ybwcj"]
 
 [ext_resource type="Script" path="res://Scripts/Common/loading_screen.gd" id="1_script"]
 

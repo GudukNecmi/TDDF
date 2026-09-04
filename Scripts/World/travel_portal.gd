@@ -29,14 +29,28 @@ extends WorldMapLocation
 ## place too, small and tinted [constant MapLocation.LocationType.TRAVEL_PORTAL]'s
 ## own colour, since it is what the World Map's own minimap actually reads.
 ##
-## [b]No portal is its own destination's editor.[/b] [member destination]
-## only ever names the paired [TravelPortal] this one sends a traveller to;
-## building the desert's own chain of them - which portal answers to which -
-## is entirely a matter of what each instance's [member destination] is
-## pointed at in the World Map scene, never a branch in this file.
+## [b]No portal is its own destination's editor.[/b]
+## [member destination_region] and [member destination_position] only ever
+## name where this one sends a traveller; building the desert's own chain of
+## them - which portal answers to which - is entirely a matter of what each
+## instance is pointed at in its own region scene, never a branch in this file.
+##
+## [b]The far side is a region and a point, not a path to a sibling.[/b] Every
+## region is its own scene now, so the portal on the other side of a jump is
+## not in the tree to be pointed at - it does not exist until the jump has
+## happened. Naming the destination as data instead is what lets a portal in
+## the Dust Camp send someone to the Old Mine at all.
 
-## The paired [TravelPortal] a traveller stepping into this one is sent to.
-@export var destination: NodePath
+## Which region a traveller stepping into this portal comes out in - the
+## [member MapRegion.region_id] of the place on the far side. Empty means this
+## portal goes nowhere yet, which [WorldMapTravelService] reads as "does
+## nothing" rather than as an error.
+@export var destination_region: StringName = &""
+## Where in that region they come out, in the destination map's own space.
+## Authored as the far portal's own position plus its
+## [member arrival_offset], so a traveller lands beside the portal they
+## stepped out of rather than on top of it.
+@export var destination_position: Vector2 = Vector2.ZERO
 ## Where a traveller lands, relative to this portal's own position, when
 ## they arrive [i]through[/i] it - a little clear of the art itself, so
 ## arriving never stacks them on the portal's own icon or its light.
@@ -85,15 +99,26 @@ func _process(delta: float) -> void:
 		_light.energy = light_energy * (1.0 + sin(_time * pulse_speed * TAU) * light_pulse)
 
 
-## The portal this one is paired with, or null when [member destination]
-## points at nothing - which [WorldMapTravelService] reads as "this portal
-## goes nowhere yet".
-func get_destination() -> TravelPortal:
-	return get_node_or_null(destination) as TravelPortal
+## The region on the far side of this portal, or empty when it is wired up to
+## nowhere - which [WorldMapTravelService] reads as "this portal goes nowhere
+## yet" and declines rather than treating as an error.
+func get_destination_region() -> StringName:
+	return destination_region
+
+
+## Where in that region a traveller comes out.
+func get_destination_position() -> Vector2:
+	return destination_position
+
+
+## Whether this portal actually leads anywhere.
+func has_destination() -> bool:
+	return not destination_region.is_empty()
 
 
 ## Where a traveller arriving [i]through[/i] this portal should be placed -
-## see [member arrival_offset].
+## see [member arrival_offset]. This is what the portal on the other side is
+## authored to send them to.
 func get_arrival_position() -> Vector2:
 	return global_position + arrival_offset
 

@@ -169,17 +169,6 @@ const BANDIT_GROUP := &"world_bandit"
 @export var letterbox_path: NodePath = ^"../RunHUD/TravelLetterbox"
 @export var player_group: StringName = &"player"
 @export var horse_group: StringName = &"world_map_horse"
-## The World Map's own root - everything a fight must never let show through:
-## every [WorldBandit] and its formation, the fog, the hover tooltip, the
-## wanted board. See [method _set_world_map_presentation_visible].
-@export var world_map_path: NodePath = ^"../WorldMap"
-## The World Map's own screen-space HUD - see [code]WorldMap.tscn[/code]'s own
-## [code]UI[/code] [CanvasLayer]. Held apart from [member world_map_path]
-## because a [CanvasLayer] draws on its own layer regardless of an ancestor
-## [CanvasItem]'s own [member CanvasItem.visible] - hiding [member world_map_path]
-## alone would leave the World Map's clock and minimap drawn straight over the
-## Arena. See [method _set_world_map_presentation_visible].
-@export var world_map_ui_path: NodePath = ^"../WorldMap/UI"
 
 @export_group("Sizing")
 ## [member WorldBandit.group_strength], scaled by [member enemy_count_scale]
@@ -274,13 +263,9 @@ var _payload: WorldBanditEncounter
 var _encounter_kind: StringName = &"bandit"
 var _boss: WorldBountyBoss
 var _boss_payload: WorldBountyEncounter
-var _saved_world_position: Vector2 = Vector2.ZERO
-var _saved_horse_mounted: bool = false
 var _combat_start_msec: int = 0
 var _died: bool = false
 var _player_health: Health
-var _camera_limits_saved: Vector4i = Vector4i.ZERO
-var _camera_limits_taken: bool = false
 ## Whether this fight actually pushed a blended colour through
 ## [method DayCycleDirector.apply_ambient_color] - see
 ## [method _match_combat_ambient_to_world_time] - so [method _restore_combat_ambient]
@@ -314,6 +299,11 @@ var _loot: CombatLoot = CombatLoot.new()
 ## time progression from the real size of the fight rather than from how long
 ## it happened to take. See [member combat_time_advance_base].
 var _combat_enemy_count: int = 0
+## The fight this scene was built for, taken from [WorldMapState] as the arena
+## opens and kept for the whole of it - what it is a fight against, and where on
+## the map to put the player back when it is over. Empty on a World Map scene,
+## where the fight has not been staged yet, and on an arena opened on its own.
+var _staged: Dictionary = {}
 
 @export_group("Combat time")
 ## Degrees the World Map clock advances the instant an ordinary fight ends,
@@ -332,6 +322,13 @@ var _combat_enemy_count: int = 0
 
 func _enter_tree() -> void:
 	add_to_group(GROUP)
+
+
+func _ready() -> void:
+	# An arena scene is built for a fight that has already been decided on the
+	# map it was picked up from. Deferred by one frame so the ambush director,
+	# the spawner and the player are all up before the crowd is asked for.
+	_open_staged_fight.call_deferred()
 
 
 ## The bridge in this world, or null when it has none - which every caller
@@ -601,11 +598,33 @@ func _resolve_decision_into_fight(bandit: WorldBandit) -> void:
 
 # --- Opening the fight -----------------------------------------------------
 
+## Takes a contacted group off the map and into its region's arena.
+##
+## [b]The fight is another scene now, and that is the whole shape of this.[/b]
+## The arena used to stand a few thousand pixels from the map in the same scene,
+## so opening a fight meant hiding the map, carrying the camera and the player
+## across to it and spawning the crowd - all in one function, all inside one
+## tree. The arena is its own scene, so this half only decides what the fight
+## [i]is[/i] - how many men, in which region, at what hour, and where on the map
+## to come back to - writes it down through [method WorldMapState.stage_combat],
+## and asks [WorldRegionRouter] to change scene. The other half of this same
+## class picks it up on the far side; see [method _open_staged_fight].
+##
+## [b]Nothing is hidden, because nothing is left behind.[/b] Hiding the map's
+## formations, fog and HUD behind the fight existed only because they were still
+## drawing. The map is freed by the scene change, so there is nothing to hide and
+## nothing to give back.
 func _begin_encounter(bandit: WorldBandit) -> void:
-	var ambush := _resolve_ambush()
-	var spawner := _resolve_spawner()
 	var player := _resolve_player()
-	if ambush == null or spawner == null or player == null or not ambush.can_begin():
+	var router := WorldRegionRouter.get_active(self)
+	if bandit == null or player == null or router == null:
+		return
+
+	var region_id := bandit.region_id
+	if region_id.is_empty():
+		region_id = router.get_current_region_id()
+	if region_id.is_empty():
+		push_warning("WorldMapCombatBridge: no region to open a fight in.")
 		return
 
 	_open_loading_transition()
@@ -615,76 +634,134 @@ func _begin_encounter(bandit: WorldBandit) -> void:
 	_died = false
 	_encounter_kind = &"bandit"
 	_bandit = bandit
-	_loot = CombatLoot.new()
-	_reset_combat_instance()
 	# Marked engaged and hidden on the spot, so nothing else can reach this same
-	# group while it is mid-transition and it reads as gone rather than as a
-	# duplicate standing beside the fight it started.
+	# group in the frames before the curtain is up.
 	bandit.active = false
 	bandit.visible = false
-	# Every reinforcement gathered for this contact - see
-	# [method _gather_reinforcements] - goes the same way: it is about to be
-	# folded into the very same fight, not left standing on the World Map
-	# beside a bandit that just vanished into one.
-	for reinforcement: WorldBandit in _reinforcements:
-		if reinforcement != null and is_instance_valid(reinforcement):
-			reinforcement.active = false
-			reinforcement.visible = false
-	# The whole of the World Map's own presentation - every group's formation,
-	# the fog, the hover tooltip, its own screen-space HUD - goes with it. See
-	# [method _set_world_map_presentation_visible]: hiding the one contacted
-	# bandit above is not enough on its own to keep the rest of the World Map
-	# from showing straight through the fight that follows.
-	_set_world_map_presentation_visible(false)
 
-	_payload = WorldBanditEncounter.new()
-	_payload.bandit = bandit
-	# The reinforced total, not just this one contact's own - see section 16
-	# and [method _combined_strength]. Read once here, before anything below
-	# can free a reinforcement, so the payload and the enemy count it feeds
-	# the Arena can never end up disagreeing about how big the fight was.
+	# The reinforced total, not just this one contact's own - see section 16 and
+	# [method _combined_strength]. Read before anything below can free a
+	# reinforcement, so the payload and the enemy count can never disagree.
 	var combined_strength := _combined_strength(bandit)
-	_payload.group_strength = combined_strength
-	_payload.region_id = bandit.region_id
-	_payload.world_position = player.global_position
-	_payload.encounter_type = &"bandit"
 
-	_saved_world_position = player.global_position
 	var horse := _resolve_horse()
-	_saved_horse_mounted = horse != null and horse.is_mounted()
+	var mounted := horse != null and horse.is_mounted()
 	if horse != null:
 		horse.set_mounted(false)
 
-	_take_camera_to_arena(spawner)
-	_place(player, spawner.arena_bounds.get_center())
-
+	var world_day := 0
+	var world_degree := 0.0
 	var clock := _resolve_world_clock()
 	if clock != null:
 		if clock.has_method(&"get_world_day"):
-			_payload.world_day = clock.call(&"get_world_day")
+			world_day = clock.call(&"get_world_day")
 		if clock.has_method(&"get_world_degree"):
-			_payload.world_degree = clock.call(&"get_world_degree")
+			world_degree = clock.call(&"get_world_degree")
 		_freeze_world_clock(clock)
-		_match_combat_ambient_to_world_time(clock)
-	_combat_start_msec = Time.get_ticks_msec()
-	_follow_player_death()
 
 	var count := clampi(
 		int(round(combined_strength * enemy_count_scale)),
 		mini(min_enemy_count, max_enemy_count), max_enemy_count)
-	_combat_enemy_count = count
-	if not ambush.cleared.is_connected(_on_combat_cleared):
-		ambush.cleared.connect(_on_combat_cleared, CONNECT_ONE_SHOT)
 
-	var placed := ambush.begin_with(count)
-	if placed <= 0:
-		if ambush.cleared.is_connected(_on_combat_cleared):
-			ambush.cleared.disconnect(_on_combat_cleared)
+	var payload := {
+		&"kind": &"bandit",
+		&"group_strength": combined_strength,
+		&"enemy_count": count,
+		&"region_id": region_id,
+		&"world_day": world_day,
+		&"world_degree": world_degree,
+		&"horse_mounted": mounted,
+		&"return_region": region_id,
+		&"return_position": player.global_position,
+	}
+
+	if not router.go_to_combat(region_id, payload):
+		_unfreeze_world_clock(clock, 0.0)
 		_cancel_loading_transition()
 		_abort_encounter()
 		return
 
+	# Only once the journey has actually been accepted: every group folded into
+	# this fight is gone from the map for good, and is written down as gone. The
+	# map is freed either way, so what has to survive is the fact that these
+	# groups are not standing here any more. A refused departure above leaves
+	# them exactly as they were found.
+	bandit.mark_defeated()
+	for reinforcement: WorldBandit in _reinforcements:
+		if reinforcement != null and is_instance_valid(reinforcement):
+			reinforcement.mark_defeated()
+	_reinforcements.clear()
+
+
+## The far side of [method _begin_encounter]: the arena scene has been built and
+## the fight it was built for is picked up here.
+##
+## Called from [method _ready], so an arena opened with nothing staged - one run
+## on its own for tuning - simply does nothing and leaves the scene as authored.
+func _open_staged_fight() -> void:
+	var state := WorldMapState.get_active(self)
+	if state == null or not state.has_staged_combat():
+		return
+
+	var ambush := _resolve_ambush()
+	var player := _resolve_player()
+	if ambush == null or player == null or not ambush.can_begin():
+		return
+
+	# Taken rather than read, so this fight can only ever be opened once.
+	_staged = state.take_staged_combat()
+
+	_running = true
+	_died = false
+	_encounter_kind = _staged.get(&"kind", &"bandit")
+	_loot = CombatLoot.new()
+	_combat_enemy_count = _staged.get(&"enemy_count", 0)
+	_combat_start_msec = Time.get_ticks_msec()
+
+	# The hour the fight was picked up at, held still for its whole length. The
+	# clock is an autoload and would otherwise keep turning through the load, so
+	# it is stopped again here - the map froze it as it left, and this is the
+	# scene that owns it now.
+	var clock := _resolve_world_clock()
+	if clock != null:
+		_freeze_world_clock(clock)
+		_match_combat_ambient_to_world_time(clock)
+
+	_follow_player_death()
+	if not ambush.cleared.is_connected(_on_combat_cleared):
+		ambush.cleared.connect(_on_combat_cleared, CONNECT_ONE_SHOT)
+
+	var placed := ambush.begin_with(_combat_enemy_count)
+	if placed <= 0:
+		if ambush.cleared.is_connected(_on_combat_cleared):
+			ambush.cleared.disconnect(_on_combat_cleared)
+		_abort_encounter()
+		return
+
 	_resupply_equipped_weapon()
+
+	if _encounter_kind == &"bounty_boss":
+		_start_boss_music()
+		_boss_payload = WorldBountyEncounter.new()
+		_boss_payload.region_id = _staged.get(&"region_id", &"")
+		_boss_payload.camp_location_id = _staged.get(&"camp_location_id", &"")
+		_boss_payload.world_position = _staged.get(&"return_position", Vector2.ZERO)
+		_boss_payload.world_day = _staged.get(&"world_day", 0)
+		_boss_payload.world_degree = _staged.get(&"world_degree", 0.0)
+		boss_encounter_started.emit(_boss_payload)
+	else:
+		_start_combat_music()
+
+	# Rebuilt from the record rather than carried across, because what it used to
+	# carry - the [WorldBandit] node itself - was freed with the map. Nothing
+	# listening reads that field; both listeners read the group's strength.
+	_payload = WorldBanditEncounter.new()
+	_payload.group_strength = _staged.get(&"group_strength", 0.0)
+	_payload.region_id = _staged.get(&"region_id", &"")
+	_payload.world_position = _staged.get(&"return_position", Vector2.ZERO)
+	_payload.encounter_type = _encounter_kind
+	_payload.world_day = _staged.get(&"world_day", 0)
+	_payload.world_degree = _staged.get(&"world_degree", 0.0)
 	encounter_started.emit(_payload)
 	_schedule_destination_reveal()
 
@@ -700,10 +777,15 @@ func try_begin_boss_encounter(boss: WorldBountyBoss) -> bool:
 	if _running or boss == null or not is_instance_valid(boss) or boss.bounty == null:
 		return false
 
-	var ambush := _resolve_ambush()
-	var spawner := _resolve_spawner()
 	var player := _resolve_player()
-	if ambush == null or spawner == null or player == null or not ambush.can_begin():
+	var router := WorldRegionRouter.get_active(self)
+	if player == null or router == null:
+		return false
+
+	var region_id := boss.region_id
+	if region_id.is_empty():
+		region_id = router.get_current_region_id()
+	if region_id.is_empty():
 		return false
 
 	_open_loading_transition()
@@ -713,80 +795,69 @@ func try_begin_boss_encounter(boss: WorldBountyBoss) -> bool:
 	_died = false
 	_encounter_kind = &"bounty_boss"
 	_boss = boss
-	_loot = CombatLoot.new()
-	_reset_combat_instance()
-	# Marked engaged and hidden on the spot, the same reason a contacted
-	# [WorldBandit] is - see [method _begin_encounter] - so nothing else can
-	# reach this same contract while it is mid-transition.
+	# Marked engaged on the spot, the same reason a contacted [WorldBandit] is,
+	# so nothing else can reach this same contract mid-transition.
 	boss.set_engaged(true)
-	# The World Map's own presentation goes with it - see
-	# [method _set_world_map_presentation_visible] and the identical call in
-	# [method _begin_encounter].
-	_set_world_map_presentation_visible(false)
 
-	var bounty := boss.bounty
-	var boss_payload := WorldBountyEncounter.new()
-	boss_payload.bounty = bounty
-	boss_payload.boss = boss
-	boss_payload.region_id = boss.region_id
-	boss_payload.camp_location_id = boss.camp.get_location_id() if boss.camp != null else &""
-	boss_payload.world_position = player.global_position
-	_boss_payload = boss_payload
-
-	_saved_world_position = player.global_position
 	var horse := _resolve_horse()
-	_saved_horse_mounted = horse != null and horse.is_mounted()
+	var mounted := horse != null and horse.is_mounted()
 	if horse != null:
 		horse.set_mounted(false)
 
-	_take_camera_to_arena(spawner)
-	_place(player, spawner.arena_bounds.get_center())
-
+	var world_day := 0
+	var world_degree := 0.0
 	var clock := _resolve_world_clock()
 	if clock != null:
 		if clock.has_method(&"get_world_day"):
-			boss_payload.world_day = clock.call(&"get_world_day")
+			world_day = clock.call(&"get_world_day")
 		if clock.has_method(&"get_world_degree"):
-			boss_payload.world_degree = clock.call(&"get_world_degree")
+			world_degree = clock.call(&"get_world_degree")
 		_freeze_world_clock(clock)
-		_match_combat_ambient_to_world_time(clock)
-	_combat_start_msec = Time.get_ticks_msec()
-	_follow_player_death()
 
-	# The smallest adapter there is for a boss, too: [method Bounty.get_knowledge_ratio]'s
-	# own doc already names it as what mini boss difficulty is meant to be
-	# scaled off, read here through the exact min/max an ordinary [WorldBandit]
-	# fight already clamps its own count to. No second curve, no boss-specific
-	# numbers - rule 4's "use the smallest adapter possible", applied a second
-	# time rather than reinvented.
+	# The smallest adapter there is for a boss: [method Bounty.get_knowledge_ratio]'s
+	# own doc already names it as what mini boss difficulty is meant to be scaled
+	# off, read here through the exact min/max an ordinary [WorldBandit] fight
+	# already clamps its own count to. No second curve, no boss-specific numbers.
+	var bounty := boss.bounty
 	var ratio := bounty.get_knowledge_ratio()
 	var count := clampi(
 		int(round(lerpf(float(min_enemy_count), float(max_enemy_count), ratio))),
 		mini(min_enemy_count, max_enemy_count), max_enemy_count)
-	_combat_enemy_count = count
 
-	if not ambush.cleared.is_connected(_on_combat_cleared):
-		ambush.cleared.connect(_on_combat_cleared, CONNECT_ONE_SHOT)
+	# The bounty is carried across as its id rather than as the boss node, which
+	# is freed with the map. Completing the contract on a win is the ledger's
+	# business and the ledger only ever needed the id.
+	var payload := {
+		&"kind": &"bounty_boss",
+		&"group_strength": float(count),
+		&"enemy_count": count,
+		&"region_id": region_id,
+		&"bounty_id": boss.get_bounty_id(),
+		&"camp_location_id": boss.camp.get_location_id() if boss.camp != null else &"",
+		&"world_day": world_day,
+		&"world_degree": world_degree,
+		&"horse_mounted": mounted,
+		&"return_region": region_id,
+		&"return_position": player.global_position,
+	}
 
-	var placed := ambush.begin_with(count)
-	if placed <= 0:
-		if ambush.cleared.is_connected(_on_combat_cleared):
-			ambush.cleared.disconnect(_on_combat_cleared)
+	if not router.go_to_combat(region_id, payload):
+		_unfreeze_world_clock(clock, 0.0)
 		_cancel_loading_transition()
 		_abort_encounter()
 		return false
-
-	_resupply_equipped_weapon()
-	boss_encounter_started.emit(boss_payload)
-	_schedule_destination_reveal()
 	return true
-
-
+	return true
 ## The one path back out that was never actually a fight - nothing could be
-## spawned. Everything [method _begin_encounter] or [method try_begin_boss_encounter]
-## touched is put back exactly as rule 12 of the World Map integration asks
-## for a failed transition: whatever was contacted stands exactly as it was
-## found rather than being spent for nothing.
+## spawned. Whatever was contacted stands exactly as it was found rather than
+## being spent for nothing, as rule 12 of the World Map integration asks for a
+## failed transition.
+##
+## It is reached from either side of the scene change: on the map, when there is
+## no arena to go to, and in the arena, when the crowd could not be placed. On the
+## map nothing has moved yet, so there is nothing to put back but the group and
+## the music. In the arena there is no map left to stand back on, so the way out
+## is the ordinary way back.
 func _abort_encounter() -> void:
 	# The combat or boss music this same call already started is asked back
 	# off, since there is no fight underneath it after all.
@@ -802,30 +873,31 @@ func _abort_encounter() -> void:
 	_reinforcements = []
 	if _boss != null and is_instance_valid(_boss):
 		_boss.set_engaged(false)
-	# Given back before the player is placed, same as every other path back to
-	# the World Map here - see [method _set_world_map_presentation_visible].
-	_set_world_map_presentation_visible(true)
-
-	var player := _resolve_player()
-	if player != null:
-		_place(player, _saved_world_position)
 
 	var horse := _resolve_horse()
-	if horse != null:
-		horse.set_mounted(_saved_horse_mounted)
+	if horse != null and _staged.get(&"horse_mounted", false):
+		horse.set_mounted(true)
 
-	_give_camera_back()
 	var clock := _resolve_world_clock()
 	if clock != null:
 		_unfreeze_world_clock(clock, 0.0)
 	_restore_combat_ambient()
 	_drop_player_death()
 
+	var staged := _staged
+	_staged = {}
 	_running = false
 	_bandit = null
 	_boss = null
 	_payload = null
 	_boss_payload = null
+
+	# In the arena there is no map underneath to stand back on, so the abort
+	# leaves the same way a finished fight does.
+	if not staged.is_empty():
+		var router := WorldRegionRouter.get_active(self)
+		if router != null:
+			router.return_from_combat(staged)
 
 
 # --- The cinematic presentation ----------------------------------------------
@@ -1022,7 +1094,6 @@ func _finish_combat_cleared() -> void:
 	var horse := _resolve_horse()
 
 	_drop_player_death()
-	_give_camera_back()
 
 	if died:
 		# The existing death flow carries the player home from here - see
@@ -1086,39 +1157,28 @@ func _finish_combat_cleared() -> void:
 	_restore_combat_ambient()
 
 	if kind == &"bounty_boss":
-		if boss != null and is_instance_valid(boss):
-			boss.mark_defeated()
+		# The boss node was freed with the map that opened this fight, so the
+		# contract is closed by its id - which is all the ledger ever needed. The
+		# camp is written down as taken so the man is not standing there again
+		# the next time this region is built.
+		var bounty_id: StringName = _staged.get(&"bounty_id", &"")
+		if not bounty_id.is_empty():
 			var ledger := _resolve_ledger()
 			if ledger != null:
-				ledger.complete(boss.get_bounty_id())
-	elif bandit != null and is_instance_valid(bandit):
-		bandit.queue_free()
-	if kind != &"bounty_boss":
-		_release_reinforcements(true)
+				ledger.complete(bounty_id)
+		var state := WorldMapState.get_active(self)
+		var camp_id: StringName = _staged.get(&"camp_location_id", &"")
+		if state != null and not camp_id.is_empty():
+			state.remember(
+				_staged.get(&"region_id", &""), WorldMapState.KIND_LOCATION, camp_id,
+				{"cleared": true})
 
-	# The World Map's own presentation - every remaining group's formation,
-	# the fog, its own screen-space HUD - is given back the instant there is
-	# a World Map to give it back to. See [method _set_world_map_presentation_visible]
-	# and the class doc's own note on why a death never reaches this line.
-	_set_world_map_presentation_visible(true)
-
-	var player := _resolve_player()
-	if player != null:
-		_place(player, _saved_world_position)
+	# Everything that was folded into this fight was written down as gone before
+	# the map was freed - see [method _begin_encounter] - so there is no group
+	# left standing to free and no reinforcement left to hand back.
 
 	if horse != null:
-		horse.set_mounted(_saved_horse_mounted)
-
-	# A bandit fight's own return framing: the player is already standing
-	# exactly where they were contacted, so the camera starts the hand-back
-	# already at the interaction's own zoom rather than climbing into it a
-	# second time, and only the release - back to the World Map's ordinary
-	# zoom - is the smooth beat. Bounty-boss returns are untouched: that
-	# fight's own camera work is [BossDefeat]'s to own, not this one's.
-	if kind == &"bandit":
-		var cam := _resolve_interaction_camera()
-		if cam != null:
-			cam.snap_and_release()
+		horse.set_mounted(_staged.get(&"horse_mounted", false))
 
 	_reset_combat_instance()
 
@@ -1131,120 +1191,13 @@ func _finish_combat_cleared() -> void:
 	if kind == &"bounty_boss":
 		boss_encounter_ended.emit(true)
 
-
-# --- The ground the fight is measured against -------------------------------
-
-## The camera clamped to the Arena for the fight, with what it was written down
-## so it can be given back exactly - the same trade [BossEncounterMap] already
-## makes for its own ground.
-##
-## [b]The zoom is snapped back to the Arena's own resting level here too, not
-## just eased.[/b] A contact reaches this through [WorldMapInteractionCamera]'s
-## own 3x decision push, and [method _on_decision_answered] only ever starts
-## that zoom easing back out - it has not landed by the time this runs, same
-## frame. [method EnemySpawner.get_view_rect] divides the viewport by whatever
-## [member CameraController.zoom] actually is *right now* to decide how much of
-## the Arena [AmbushWaveDirector]'s opening group is allowed to spread across -
-## see [method AmbushWaveDirector._opening_point]. Left easing, that view reads
-## as the decision screen's own tight 3x frame rather than the Arena's, and the
-## whole opening group is clamped down into the sliver of ground that frame
-## covers - a few dozen pixels around the player instead of
-## [member AmbushWaveDirector.opening_distance] - which is what put enemies
-## already touching the player the instant a fight opened. Snapping it here
-## costs nothing to see: this is still behind [TravelLetterbox]'s own loading
-## bars, exactly the "transition that has already hidden the cut" [method
-## CameraController.set_zoom_multiplier]'s own [param immediate] is for.
-func _take_camera_to_arena(spawner: EnemySpawner) -> void:
-	var camera := CameraController.get_active(self)
-	if camera == null:
-		return
-	_camera_limits_saved = Vector4i(
-		camera.limit_left, camera.limit_top, camera.limit_right, camera.limit_bottom)
-	_camera_limits_taken = true
-	camera.set_zoom_multiplier(1.0, true)
-	_clamp_camera_to(camera, spawner.arena_bounds)
-
-
-## Handed back without [method Camera2D.reset_smoothing] - deliberately, unlike
-## every other transition in the project. Rule 10 of the integration asks for
-## the World Map to re-centre smoothly rather than cut, so the camera is left
-## to glide back to the player on its own ordinary follow instead of being
-## snapped there.
-func _give_camera_back() -> void:
-	if not _camera_limits_taken:
-		return
-	_camera_limits_taken = false
-	var camera := CameraController.get_active(self)
-	if camera == null:
-		return
-	camera.limit_left = _camera_limits_saved.x
-	camera.limit_top = _camera_limits_saved.y
-	camera.limit_right = _camera_limits_saved.z
-	camera.limit_bottom = _camera_limits_saved.w
-
-
-## Shows or hides the whole of the World Map's own presentation - every
-## [WorldBandit] and the formation of boxes it builds for itself, the fog, the
-## hover tooltip, the wanted board, the World Map's own clock and minimap -
-## for the length of a fight held in the Arena.
-##
-## [b]This is the actual fix for the World Map leaking into combat[/b], not a
-## patch on top of one bandit. [method _begin_encounter] and
-## [method try_begin_boss_encounter] already mark the one bandit or boss
-## contacted as hidden, but nothing before this ever told the *rest* of the
-## World Map - every other patrolling group, the fog overlay, the hover
-## tooltip a stray mouse position could still be aimed at - that a fight had
-## started at all. The World Map is never removed from the tree for a fight -
-## see [WorldMapCombatBridge]'s own class doc on the Arena being a rectangle
-## in the same scene, not a second one loaded over it - so nothing about the
-## World Map's own nodes stops rendering by itself; this is what actually
-## asks them to.
-##
-## [b][member world_map_ui_path] is asked separately because a [CanvasLayer]
-## is not a [CanvasItem].[/b] Everything under [member world_map_path] is an
-## ordinary [Node2D], so hiding that one root already cascades to every
-## [WorldBandit], its formation boxes and the hover tooltip beneath it - the
-## same [member Node2D.visible] inheritance [method WorldBandit._update_fog_visibility]
-## already relies on. [code]WorldMap.tscn[/code]'s own [code]UI[/code] node is
-## a [CanvasLayer] instead, precisely so its clock and minimap draw in screen
-## space regardless of the World Map's own camera - but that independence
-## cuts both ways: a [CanvasLayer] draws on its own layer no matter what an
-## ancestor [CanvasItem]'s [member CanvasItem.visible] says, so it has to be
-## told separately or it would keep drawing straight over the Arena. Both
-## paths are optional: a world missing either simply leaves that piece exactly
-## as before, the same fallback every other resolved path in this file uses.
-func _set_world_map_presentation_visible(shown: bool) -> void:
-	var world_map := get_node_or_null(world_map_path) as CanvasItem
-	if world_map != null:
-		world_map.visible = shown
-	var world_map_ui := get_node_or_null(world_map_ui_path) as CanvasLayer
-	if world_map_ui != null:
-		world_map_ui.visible = shown
-
-
-## The same growing [Teleporter] and [BossEncounterMap] both do: a limit
-## rectangle smaller than the screen is a request the camera cannot satisfy, so
-## the Arena is widened around its own centre rather than leaving bars down the
-## edges.
-func _clamp_camera_to(camera: CameraController, area: Rect2) -> void:
-	var view := camera.get_viewport_rect().size / camera.zoom
-	var box := area
-	if area.size.x < view.x or area.size.y < view.y:
-		var size := Vector2(maxf(area.size.x, view.x), maxf(area.size.y, view.y))
-		box = Rect2(area.get_center() - size * 0.5, size)
-
-	camera.limit_left = int(box.position.x)
-	camera.limit_top = int(box.position.y)
-	camera.limit_right = int(box.end.x)
-	camera.limit_bottom = int(box.end.y)
-	camera.reset_smoothing()
-
-
-func _place(body: Node2D, at: Vector2) -> void:
-	if body == null or not is_instance_valid(body):
-		return
-	body.global_position = at
-	body.reset_physics_interpolation()
+	# Back to the map the fight was picked up from, standing where it was picked
+	# up. The arena is freed by the change, which is what makes the next fight a
+	# clean floor: no corpse, no dropped gun, no casing and no blood survive it.
+	var router := WorldRegionRouter.get_active(self)
+	if router != null:
+		router.return_from_combat(_staged)
+	_staged = {}
 
 
 # --- Matching the Combat Map to the frozen World Map hour --------------------

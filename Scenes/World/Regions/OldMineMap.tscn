@@ -866,6 +866,7 @@ stream_budget_ms = 3.0
 stream_first_frame_budget_ms = 4.0
 cull_enabled = true
 cull_minimum_radius = 2000.0
+count_scale = 0.2
 
 [node name="OldMine_PortalWest" parent="WorldMap/TravelPortals" instance=ExtResource("207_portal")]
 location = SubResource("Resource_portal_oldmine_west")

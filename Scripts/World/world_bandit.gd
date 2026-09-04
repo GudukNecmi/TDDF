@@ -105,6 +105,19 @@ signal region_changed(new_region_id: StringName)
 ## pull a group out of play (defeated, captured, not yet spawned) without
 ## removing the node.
 @export var active: bool = true
+## Whether this group is written down when its region's scene is freed and read
+## back the next time that region is built.
+##
+## [b]This is what makes a region persist without staying loaded.[/b] Only one
+## region exists at a time now, so a group the player rode away from is a freed
+## node rather than a node standing quietly in another band of the same map. What
+## it was doing - where it had got to along its route, how strong it was, whether
+## it had already been beaten - is kept in [WorldMapState] instead, which a scene
+## change does not touch.
+##
+## Off leaves a group standing exactly where its scene authored it on every
+## build, which is what a map opened on its own for tuning wants.
+@export var remembers_across_scenes: bool = true
 ## The [Sprite2D] scaled and tinted to hint at [member group_strength] - see
 ## [method _apply_visual]. Left unset, this group simply never adjusts its
 ## own artwork. Doubles as the formation's own leader box - box 0 - once
@@ -243,10 +256,21 @@ var _movement_heading := Vector2.RIGHT
 ## Empty for a group whose whole [member group_strength] fits in the leader
 ## alone.
 var _formation_boxes: Array[Sprite2D] = []
+## Whether this group has been beaten. Kept so the record written as it leaves
+## the tree says "gone" rather than "standing here", which is what stops it from
+## being built again the next time this region is.
+var _defeated: bool = false
 
 
 func _ready() -> void:
 	add_to_group(&"world_bandit")
+	# Which region this group is standing in has to be known before anything is
+	# read back, because that is what its record is filed under.
+	_update_region()
+	if _restore():
+		# Beaten the last time this region was built. It does not come back.
+		queue_free()
+		return
 	_route = get_node_or_null(current_route) as WorldBanditRoute
 	movement_speed = _compute_speed()
 	_apply_visual()
@@ -813,3 +837,82 @@ func get_state_name() -> String:
 		BehaviorState.DISENGAGE:
 			return "DISENGAGE"
 	return "?"
+
+
+# --- Surviving the region's scene being freed --------------------------------
+
+## Records this group as beaten, so it is not standing here again the next time
+## this region is built.
+##
+## Called by [WorldMapCombatBridge] as it takes the fight to an arena, before the
+## map is freed. It is written down rather than simply freed because freeing is
+## all a scene change does anyway - what has to outlive it is the fact that this
+## particular group is gone.
+func mark_defeated() -> void:
+	_defeated = true
+	_write_record()
+
+
+## Whether this group has been beaten.
+func is_defeated() -> bool:
+	return _defeated
+
+
+## Reads back what this group was doing the last time its region was built.
+## Answers true when the record says it was beaten, which [method _ready] takes
+## as "do not stand here at all".
+##
+## A group with no record has never been met and keeps every value its scene
+## authored, which is what the first ride into a region shows.
+func _restore() -> bool:
+	if not remembers_across_scenes or region_id.is_empty():
+		return false
+	var state := WorldMapState.get_active(self)
+	if state == null:
+		return false
+
+	var record := state.recall(region_id, WorldMapState.KIND_BANDIT, name)
+	if record.is_empty():
+		return false
+	if record.get("defeated", false):
+		_defeated = true
+		return true
+
+	global_position = record.get("position", global_position)
+	group_strength = record.get("group_strength", group_strength)
+	current_route_index = record.get("route_index", current_route_index)
+	_route_direction = record.get("route_direction", _route_direction)
+	active = record.get("active", active)
+	return false
+
+
+## Writes down what this group is doing, so the next build of this region picks
+## it up mid-patrol rather than back at the spot it was authored at.
+##
+## [b]Behaviour is deliberately not kept.[/b] A chase, an investigation or a
+## flight is a reaction to a player who is no longer there - the map has been
+## left - so a group is always found patrolling again, from wherever it had
+## actually got to. Position and strength are the facts worth keeping; being
+## halfway through hunting somebody is not.
+func _write_record() -> void:
+	if not remembers_across_scenes or region_id.is_empty():
+		return
+	var state := WorldMapState.get_active(self)
+	if state == null:
+		return
+
+	if _defeated:
+		state.remember(region_id, WorldMapState.KIND_BANDIT, name, {"defeated": true})
+		return
+
+	state.remember(region_id, WorldMapState.KIND_BANDIT, name, {
+		"position": global_position,
+		"group_strength": group_strength,
+		"route_index": current_route_index,
+		"route_direction": _route_direction,
+		"active": active,
+	})
+
+
+func _exit_tree() -> void:
+	_write_record()

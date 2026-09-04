@@ -399,8 +399,23 @@ func _travel_home() -> void:
 	# A teleport that could not be made - no destination, or one already under way -
 	# answers false rather than stranding the sequence, and the player is simply put
 	# back together where they fell.
-	if not _teleporter.teleport(silent_teleport, false):
-		_begin_restore()
+	if _teleporter.teleport(silent_teleport, false):
+		return
+
+	# [b]Home is another scene now.[/b] The base used to be a few thousand pixels
+	# from wherever the player fell, so being carried home was a teleport across
+	# the one world scene and there was always a destination in the tree to be
+	# carried to. Dying out on a region's map, or in an arena, there is none -
+	# the base is its own scene - so the way back is the same change of scene
+	# every other journey makes. The run is ended first, because the scene that
+	# comes up is the one that reads whether a run is still under way.
+	var router := WorldRegionRouter.get_active(self)
+	if router != null and not router.is_travelling():
+		_end_the_run()
+		if router.go_to_base():
+			return
+
+	_begin_restore()
 
 
 func _on_teleported(_destination: TeleportDestination) -> void:

@@ -15,3 +15,5 @@ enemy_base_health = 400.0
 start_position = Vector2(0, 80)
 map_position = Vector2(0.5, 0.52)
 map_size = Vector2(0.222, 0.25)
+world_map_scene_path = "res://Scenes/World/Regions/GhostTownMap.tscn"
+arena_scene_path = "res://Scenes/World/Arenas/GhostTownArena.tscn"

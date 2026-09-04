@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="MusicState" load_steps=10 format=3 uid="uid://cgotikdecisionstate"]
+[gd_resource type="Resource" script_class="MusicState" format=3 uid="uid://cbp83nbe2ca4i"]
 
 [ext_resource type="Script" uid="uid://c6ylwt4xp2d23" path="res://Scripts/Common/music_state.gd" id="1_state"]
 [ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#1-1788290581159.wav" id="2_loop1a"]

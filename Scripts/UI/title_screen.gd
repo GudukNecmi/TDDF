@@ -38,7 +38,7 @@ extends Control
 ## starts either way.
 
 ## The world STORY loads.
-@export_file("*.tscn") var world_scene: String = "res://Scenes/World/World.tscn"
+@export_file("*.tscn") var world_scene: String = "res://Scenes/Base/BaseWorld.tscn"
 
 ## How long the "coming soon" message stays up after FREE RUN is pressed, in
 ## seconds.

@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://cgotikfilmpost"]
+[gd_scene format=3 uid="uid://82ydc1svu2fb"]
 
 [ext_resource type="Material" uid="uid://d3e4irw5iatn1" path="res://Resources/World/film_post_process_material.tres" id="1_material"]
 [ext_resource type="Script" uid="uid://bqik2s0ut3ync" path="res://Scripts/World/film_post_process.gd" id="2_script"]

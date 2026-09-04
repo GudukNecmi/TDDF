@@ -136,6 +136,41 @@ extends Resource
 ## What a locked region says instead of being selectable.
 @export var locked_label: String = "LOCKED"
 
+@export_group("Scenes")
+## The World Map scene the player rides around while they are in this part of the
+## world, as a [code]res://[/code] path.
+##
+## [b]One region is one scene, and only one of them is ever built.[/b] The desert
+## used to be five bands of a single ten-thousand-pixel map, so standing in the
+## dust camp meant the mine, the ghost town, the river and the dead were all in the
+## tree behind the player, being simulated and drawn. Each band is now its own
+## scene file and moving between them is a real scene change - see
+## [WorldRegionRouter] - so the four places the player is not standing in do not
+## exist at all.
+##
+## [b]It is a path rather than a [PackedScene] on purpose.[/b] The scene names this
+## region back - its own region zone, its ground and its scatter all point at this
+## file - so holding the scene here as a resource would be a load cycle between the
+## two. A string is read only when the router is actually asked to go there, which
+## breaks it.
+##
+## Left empty means this region has no map of its own to ride, which the router
+## reads as "there is nowhere to go" and refuses rather than changing scene to
+## nothing.
+@export_file("*.tscn") var world_map_scene_path: String = ""
+## The Arena scene a fight in this region is fought in, as a [code]res://[/code]
+## path.
+##
+## Built fresh for every fight and thrown away at the end of it - see
+## [WorldRegionRouter] - so no corpse, dropped gun, shell casing, blood patch or
+## scattered prop from one fight can be standing in the next one. The freshness is
+## the scene change itself; nothing clears the floor because nothing survives to be
+## cleared.
+##
+## Empty falls back to the region's own map staying up, which is what a region
+## with no arena authored yet does.
+@export_file("*.tscn") var arena_scene_path: String = ""
+
 
 ## The scenery belonging to this place alone. Empty for a region that has none,
 ## which every caller reads as "this place adds nothing to the map's shared props".
@@ -192,3 +227,17 @@ func get_place_name() -> String:
 func get_full_label(separator: String = "  -  ") -> String:
 	var place := get_place_name()
 	return get_label() if place.is_empty() else get_label() + separator + place
+
+
+## The World Map scene for this place, or empty for a region with none authored.
+## Empty is what every caller reads as "there is no map to ride here", and is
+## refused rather than changed to.
+func get_world_map_scene_path() -> String:
+	return world_map_scene_path
+
+
+## The Arena scene a fight here is fought in, or empty for a region with none.
+## Empty is read as "this region has no arena of its own", and the fight is
+## refused rather than opened onto nothing.
+func get_arena_scene_path() -> String:
+	return arena_scene_path

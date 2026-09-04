@@ -1,0 +1,905 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/World/WorldMapBase.tscn" id="0_base"]
+[ext_resource type="Script" uid="uid://b05im5xftlqsx" path="res://Scripts/World/tiled_surface.gd" id="2_surface"]
+[ext_resource type="Script" uid="uid://bkovnrs57lx46" path="res://Scripts/World/world_map_location.gd" id="5_ol223"]
+[ext_resource type="Script" uid="uid://dngpapk0xeker" path="res://Scripts/World/map_location.gd" id="6_pwgfs"]
+[ext_resource type="Script" uid="uid://d0w1v0ldacvie" path="res://Scripts/World/world_map_region_zone.gd" id="6_regionzone"]
+[ext_resource type="Resource" uid="uid://8v5pie2b1dv" path="res://Resources/Maps/Desert/Regions/region_b.tres" id="8_regionb"]
+[ext_resource type="Script" uid="uid://dqlo2m72g7o55" path="res://Scripts/World/world_bandit_route.gd" id="8_x6t4c"]
+[ext_resource type="Script" uid="uid://8rmldir4gmtk" path="res://Scripts/World/world_bandit.gd" id="9_cuo70"]
+[ext_resource type="Resource" uid="uid://fms2ku7a8ccx" path="res://Resources/World/Bandits/bandit_speed_profile.tres" id="10_inp14"]
+[ext_resource type="Resource" uid="uid://d2ka6vtyuug0d" path="res://Resources/World/Bandits/bandit_threat_profile.tres" id="11_ol223"]
+[ext_resource type="Texture2D" uid="uid://b5yjrmddijjg3" path="res://Assets/Maps/Desert/WorldMap/placeholder_dot.tres" id="15_r3xhl"]
+[ext_resource type="Texture2D" uid="uid://hiss48qcyama" path="res://Assets/Maps/Desert/WorldMap/placeholder_solid.tres" id="16_w262y"]
+[ext_resource type="Script" path="res://Scripts/World/prop_scatter.gd" id="200_scatter"]
+[ext_resource type="Script" path="res://Scripts/World/scatter_layer.gd" id="200_layertype"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/scatter_worldmap_cacti.tres" id="201_cacti"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/scatter_worldmap_bushes.tres" id="202_bushes"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/scatter_worldmap_bones.tres" id="203_bones"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Mountain.tscn" id="206_mountain"]
+[ext_resource type="PackedScene" path="res://Scenes/World/TravelPortal.tscn" id="207_portal"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/Old Mine/Old Mine Background.PNG" id="210_bg_b"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5tegj"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_eorlv"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6j2tu"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x0ngi"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_y8wwu"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_swmqu"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hiorq"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l2pgb"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6pum3"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_flg07"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7vq2g"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wwj71"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qd2hw"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vs16u"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_i50ps"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2u03s"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yikbn"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_p3lq1"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gks00"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dng8m"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5lo6s"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kw4hx"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cmjsb"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ymj7q"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qjyxs"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pkydj"]
+size = Vector2(32, 32)
+
+[sub_resource type="Resource" id="Resource_eorlv"]
+script = ExtResource("6_pwgfs")
+location_id = &"bounty_camp_b1"
+location_type = 0
+region_id = &"B"
+world_position = Vector2(-1385.8233, -2506.4972)
+display_name = "B Bounty Camp 1"
+
+[sub_resource type="Resource" id="Resource_6j2tu"]
+script = ExtResource("6_pwgfs")
+location_id = &"bounty_camp_b2"
+location_type = 0
+region_id = &"B"
+world_position = Vector2(-1605.3335, 4210.4738)
+display_name = "B Bounty Camp 2"
+
+[sub_resource type="Resource" id="Resource_x0ngi"]
+script = ExtResource("6_pwgfs")
+location_id = &"bounty_camp_b3"
+location_type = 0
+region_id = &"B"
+world_position = Vector2(-1845.188, -2652.1212)
+display_name = "B Bounty Camp 3"
+
+[sub_resource type="Resource" id="Resource_y8wwu"]
+script = ExtResource("6_pwgfs")
+location_id = &"normal_camp_b1"
+region_id = &"B"
+world_position = Vector2(-2518.134, 2925.1905)
+display_name = "B Camp 1"
+
+[sub_resource type="Resource" id="Resource_swmqu"]
+script = ExtResource("6_pwgfs")
+location_id = &"normal_camp_b2"
+region_id = &"B"
+world_position = Vector2(-1489.1618, -4521.9495)
+display_name = "B Camp 2"
+
+[sub_resource type="Resource" id="Resource_hiorq"]
+script = ExtResource("6_pwgfs")
+location_id = &"normal_camp_b3"
+region_id = &"B"
+world_position = Vector2(-2378.3662, -3109.52)
+display_name = "B Camp 3"
+
+[sub_resource type="Resource" id="Resource_l2pgb"]
+script = ExtResource("6_pwgfs")
+location_id = &"normal_camp_b4"
+region_id = &"B"
+world_position = Vector2(-2059.7315, 3730.3338)
+display_name = "B Camp 4"
+
+[sub_resource type="Resource" id="Resource_6pum3"]
+script = ExtResource("6_pwgfs")
+location_id = &"normal_camp_b5"
+region_id = &"B"
+world_position = Vector2(-1755.273, -1548.418)
+display_name = "B Camp 5"
+
+[sub_resource type="Resource" id="Resource_flg07"]
+script = ExtResource("6_pwgfs")
+location_id = &"market_b"
+location_type = 3
+region_id = &"B"
+world_position = Vector2(-1685.6493, 975.4908)
+display_name = "B Market"
+
+[sub_resource type="Resource" id="Resource_7vq2g"]
+script = ExtResource("6_pwgfs")
+location_id = &"extraction_b1"
+location_type = 5
+region_id = &"B"
+world_position = Vector2(-2243.4102, -2714.04)
+display_name = "B Extraction 1"
+
+[sub_resource type="Resource" id="Resource_wwj71"]
+script = ExtResource("6_pwgfs")
+location_id = &"extraction_b2"
+location_type = 5
+region_id = &"B"
+world_position = Vector2(-1925.2388, 2621.7328)
+display_name = "B Extraction 2"
+
+[sub_resource type="Resource" id="Resource_qd2hw"]
+script = ExtResource("6_pwgfs")
+location_id = &"extraction_b3"
+location_type = 5
+region_id = &"B"
+world_position = Vector2(-2578.698, 4432.362)
+display_name = "B Extraction 3"
+
+[sub_resource type="Resource" id="Resource_portal_oldmine_west"]
+script = ExtResource("6_pwgfs")
+location_id = &"travel_portal_old_mine_west"
+location_type = 7
+region_id = &"B"
+world_position = Vector2(-2850, 0)
+display_name = "Portal to Dust Camp"
+
+[sub_resource type="Resource" id="Resource_portal_oldmine_east"]
+script = ExtResource("6_pwgfs")
+location_id = &"travel_portal_old_mine_east"
+location_type = 7
+region_id = &"B"
+world_position = Vector2(-1150, 0)
+display_name = "Portal to Ghost Town"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_band_h_B"]
+size = Vector2(2128.0, 64)
+
+[node name="OldMineMap" instance=ExtResource("0_base")]
+
+[node name="Rock0" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.42, 0.35, 0.28, 1)
+z_index = -12
+position = Vector2(-2995.0328, -4750)
+rotation = 0.10178289
+scale = Vector2(2.9472609, 6.877883)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock0"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock0/Collision"]
+shape = SubResource("RectangleShape2D_5tegj")
+
+[node name="Rock1" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.48, 0.4, 0.3, 1)
+z_index = -12
+position = Vector2(-3009.4977, -4125)
+rotation = 0.06862836
+scale = Vector2(3.4193532, 7.56234)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock1"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock1/Collision"]
+shape = SubResource("RectangleShape2D_eorlv")
+
+[node name="Rock2" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.38, 0.3, 0.24, 1)
+z_index = -12
+position = Vector2(-2990.7932, -3500)
+rotation = 0.007886844
+scale = Vector2(3.2926807, 7.4555187)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock2"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock2/Collision"]
+shape = SubResource("RectangleShape2D_6j2tu")
+
+[node name="Rock3" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.42, 0.35, 0.28, 1)
+z_index = -12
+position = Vector2(-3001.4247, -2875)
+rotation = -0.080484144
+scale = Vector2(2.8813708, 6.452745)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock3"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock3/Collision"]
+shape = SubResource("RectangleShape2D_x0ngi")
+
+[node name="Rock4" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.48, 0.4, 0.3, 1)
+z_index = -12
+position = Vector2(-3011.9971, -2250)
+rotation = -0.059061915
+scale = Vector2(2.8640661, 6.9790764)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock4"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock4/Collision"]
+shape = SubResource("RectangleShape2D_y8wwu")
+
+[node name="Rock5" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.38, 0.3, 0.24, 1)
+z_index = -12
+position = Vector2(-2999.7502, -1625)
+rotation = 0.08243975
+scale = Vector2(3.054331, 7.115413)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock5"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock5/Collision"]
+shape = SubResource("RectangleShape2D_swmqu")
+
+[node name="Rock6" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.42, 0.35, 0.28, 1)
+z_index = -12
+position = Vector2(-3001.3232, -1000)
+rotation = -0.03292257
+scale = Vector2(3.1108348, 7.168516)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock6"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock6/Collision"]
+shape = SubResource("RectangleShape2D_hiorq")
+
+[node name="Rock7" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.48, 0.4, 0.3, 1)
+z_index = -12
+position = Vector2(-2992.8762, 875)
+rotation = 0.033651385
+scale = Vector2(3.462809, 6.451034)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock7"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock7/Collision"]
+shape = SubResource("RectangleShape2D_l2pgb")
+
+[node name="Rock8" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.38, 0.3, 0.24, 1)
+z_index = -12
+position = Vector2(-3005.4211, 1500)
+rotation = -0.10220604
+scale = Vector2(3.4528499, 6.8300037)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock8"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock8/Collision"]
+shape = SubResource("RectangleShape2D_6pum3")
+
+[node name="Rock9" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.42, 0.35, 0.28, 1)
+z_index = -12
+position = Vector2(-2990.801, 2125)
+rotation = -0.08017024
+scale = Vector2(3.5779464, 6.445135)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock9"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock9/Collision"]
+shape = SubResource("RectangleShape2D_flg07")
+
+[node name="Rock10" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.48, 0.4, 0.3, 1)
+z_index = -12
+position = Vector2(-2991.0457, 2750)
+rotation = 0.028312648
+scale = Vector2(3.3185525, 6.764864)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock10"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock10/Collision"]
+shape = SubResource("RectangleShape2D_7vq2g")
+
+[node name="Rock11" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.38, 0.3, 0.24, 1)
+z_index = -12
+position = Vector2(-3010.3091, 3375)
+rotation = -0.09131352
+scale = Vector2(3.1798444, 7.4449534)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock11"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock11/Collision"]
+shape = SubResource("RectangleShape2D_wwj71")
+
+[node name="Rock12" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.42, 0.35, 0.28, 1)
+z_index = -12
+position = Vector2(-2996.9015, 4000)
+rotation = -0.008119005
+scale = Vector2(3.3376927, 6.5731907)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock12"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock12/Collision"]
+shape = SubResource("RectangleShape2D_qd2hw")
+
+[node name="Rock13" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.48, 0.4, 0.3, 1)
+z_index = -12
+position = Vector2(-2983.7635, 4625)
+rotation = -0.021952312
+scale = Vector2(3.288075, 6.7424664)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock13"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock13/Collision"]
+shape = SubResource("RectangleShape2D_vs16u")
+
+[node name="Rock14" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.38, 0.3, 0.24, 1)
+z_index = -12
+position = Vector2(-991.383, -4750)
+rotation = -0.016879698
+scale = Vector2(2.9926665, 7.392436)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock14"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock14/Collision"]
+shape = SubResource("RectangleShape2D_i50ps")
+
+[node name="Rock15" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.42, 0.35, 0.28, 1)
+z_index = -12
+position = Vector2(-1017.1842, -4125)
+rotation = -0.02034412
+scale = Vector2(3.2664695, 6.551341)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock15"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock15/Collision"]
+shape = SubResource("RectangleShape2D_2u03s")
+
+[node name="Rock16" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.48, 0.4, 0.3, 1)
+z_index = -12
+position = Vector2(-1003.3694, -3500)
+rotation = 0.041849364
+scale = Vector2(3.1773353, 6.5273833)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock16"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock16/Collision"]
+shape = SubResource("RectangleShape2D_yikbn")
+
+[node name="Rock17" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.38, 0.3, 0.24, 1)
+z_index = -12
+position = Vector2(-1003.6573, -2875)
+rotation = -0.012249293
+scale = Vector2(2.9713974, 7.4154387)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock17"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock17/Collision"]
+shape = SubResource("RectangleShape2D_p3lq1")
+
+[node name="Rock18" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.42, 0.35, 0.28, 1)
+z_index = -12
+position = Vector2(-1011.4888, -2250)
+rotation = -0.053361088
+scale = Vector2(3.4640203, 6.4852753)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock18"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock18/Collision"]
+shape = SubResource("RectangleShape2D_gks00")
+
+[node name="Rock19" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.48, 0.4, 0.3, 1)
+z_index = -12
+position = Vector2(-983.0828, -1625)
+rotation = -0.08023319
+scale = Vector2(3.1033204, 6.4237137)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock19"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock19/Collision"]
+shape = SubResource("RectangleShape2D_dng8m")
+
+[node name="Rock20" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.38, 0.3, 0.24, 1)
+z_index = -12
+position = Vector2(-996.955, -1000)
+rotation = 0.073866315
+scale = Vector2(3.396509, 7.3716774)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock20"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock20/Collision"]
+shape = SubResource("RectangleShape2D_5lo6s")
+
+[node name="Rock21" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.42, 0.35, 0.28, 1)
+z_index = -12
+position = Vector2(-985.3566, 875)
+rotation = -0.05502363
+scale = Vector2(3.4581594, 7.1430345)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock21"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock21/Collision"]
+shape = SubResource("RectangleShape2D_kw4hx")
+
+[node name="Rock22" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.48, 0.4, 0.3, 1)
+z_index = -12
+position = Vector2(-993.1414, 2750)
+rotation = 0.09251848
+scale = Vector2(2.970419, 6.6691494)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock22"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock22/Collision"]
+shape = SubResource("RectangleShape2D_cmjsb")
+
+[node name="Rock23" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.38, 0.3, 0.24, 1)
+z_index = -12
+position = Vector2(-982.5834, 3375)
+rotation = 0.086952895
+scale = Vector2(3.0123014, 6.426541)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock23"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock23/Collision"]
+shape = SubResource("RectangleShape2D_ymj7q")
+
+[node name="Rock24" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.42, 0.35, 0.28, 1)
+z_index = -12
+position = Vector2(-996.1558, 4000)
+rotation = 0.0007501126
+scale = Vector2(3.1576877, 6.6333814)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock24"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock24/Collision"]
+shape = SubResource("RectangleShape2D_qjyxs")
+
+[node name="Rock25" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
+modulate = Color(0.48, 0.4, 0.3, 1)
+z_index = -12
+position = Vector2(-991.9402, 4625)
+rotation = 0.09777942
+scale = Vector2(3.5168355, 7.306621)
+texture = ExtResource("16_w262y")
+
+[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock25"]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock25/Collision"]
+shape = SubResource("RectangleShape2D_pkydj")
+
+[node name="MainSpine" type="Sprite2D" parent="WorldMap/Roads"]
+modulate = Color(0.64, 0.52, 0.34, 1)
+z_index = -12
+scale = Vector2(125, 7.5)
+texture = ExtResource("16_w262y")
+position = Vector2(-2000.0, 0)
+
+[node name="AltPassBC" type="Sprite2D" parent="WorldMap/Roads"]
+modulate = Color(0.6, 0.48, 0.3, 1)
+z_index = -12
+position = Vector2(-1050, 1750)
+scale = Vector2(78.125, 6)
+texture = ExtResource("16_w262y")
+
+[node name="RegionB" type="Node2D" parent="WorldMap/Locations"]
+
+[node name="bounty_camp_01" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_eorlv")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/bounty_camp_01"]
+modulate = Color(0.85, 0.2, 0.15, 1)
+z_index = -8
+scale = Vector2(1.15, 1.15)
+texture = ExtResource("15_r3xhl")
+
+[node name="bounty_camp_02" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_6j2tu")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/bounty_camp_02"]
+modulate = Color(0.85, 0.2, 0.15, 1)
+z_index = -8
+scale = Vector2(1.15, 1.15)
+texture = ExtResource("15_r3xhl")
+
+[node name="bounty_camp_03" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_x0ngi")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/bounty_camp_03"]
+modulate = Color(0.85, 0.2, 0.15, 1)
+z_index = -8
+scale = Vector2(1.15, 1.15)
+texture = ExtResource("15_r3xhl")
+
+[node name="normal_camp_01" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_y8wwu")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/normal_camp_01"]
+modulate = Color(0.82, 0.62, 0.22, 1)
+z_index = -8
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("15_r3xhl")
+
+[node name="normal_camp_02" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_swmqu")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/normal_camp_02"]
+modulate = Color(0.82, 0.62, 0.22, 1)
+z_index = -8
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("15_r3xhl")
+
+[node name="normal_camp_03" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_hiorq")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/normal_camp_03"]
+modulate = Color(0.82, 0.62, 0.22, 1)
+z_index = -8
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("15_r3xhl")
+
+[node name="normal_camp_04" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_l2pgb")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/normal_camp_04"]
+modulate = Color(0.82, 0.62, 0.22, 1)
+z_index = -8
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("15_r3xhl")
+
+[node name="normal_camp_05" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_6pum3")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/normal_camp_05"]
+modulate = Color(0.82, 0.62, 0.22, 1)
+z_index = -8
+scale = Vector2(0.9, 0.9)
+texture = ExtResource("15_r3xhl")
+
+[node name="market_01" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_flg07")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/market_01"]
+modulate = Color(0.25, 0.66, 0.85, 1)
+z_index = -8
+scale = Vector2(1.6, 1.6)
+texture = ExtResource("15_r3xhl")
+
+[node name="extraction_01" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_7vq2g")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/extraction_01"]
+modulate = Color(0.3, 0.85, 0.45, 1)
+z_index = -8
+scale = Vector2(1.05, 1.05)
+texture = ExtResource("15_r3xhl")
+
+[node name="extraction_02" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_wwj71")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/extraction_02"]
+modulate = Color(0.3, 0.85, 0.45, 1)
+z_index = -8
+scale = Vector2(1.05, 1.05)
+texture = ExtResource("15_r3xhl")
+
+[node name="extraction_03" type="Node2D" parent="WorldMap/Locations/RegionB"]
+script = ExtResource("5_ol223")
+location = SubResource("Resource_qd2hw")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionB/extraction_03"]
+modulate = Color(0.3, 0.85, 0.45, 1)
+z_index = -8
+scale = Vector2(1.05, 1.05)
+texture = ExtResource("15_r3xhl")
+
+[node name="RouteB1" type="Node2D" parent="WorldMap/WorldBandits/Routes"]
+script = ExtResource("8_x6t4c")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteB1"]
+position = Vector2(-1941.1625, 1541.0345)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteB1"]
+position = Vector2(-2669.3633, 869.371)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteB1"]
+position = Vector2(-1917.4777, 259.2421)
+
+[node name="RouteB2" type="Node2D" parent="WorldMap/WorldBandits/Routes"]
+script = ExtResource("8_x6t4c")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteB2"]
+position = Vector2(-2271.4642, 3565.9813)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteB2"]
+position = Vector2(-2372.9588, 2496.3395)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteB2"]
+position = Vector2(-1704.6537, 2899.3153)
+
+[node name="RouteB3" type="Node2D" parent="WorldMap/WorldBandits/Routes"]
+script = ExtResource("8_x6t4c")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteB3"]
+position = Vector2(-2226.7107, -1775.9926)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteB3"]
+position = Vector2(-1521.833, -2639.9485)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteB3"]
+position = Vector2(-1375.4665, -1292.3076)
+
+[node name="RegionB_Bandit1" type="Node2D" parent="WorldMap/WorldBandits/Groups"]
+position = Vector2(-1941.1625, 1541.0345)
+script = ExtResource("9_cuo70")
+speed_profile = ExtResource("10_inp14")
+threat_profile = ExtResource("11_ol223")
+current_route = NodePath("../../Routes/RouteB1")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionB_Bandit1"]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_r3xhl")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionB_Bandit1"]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_w262y")
+
+[node name="RegionB_Bandit2" type="Node2D" parent="WorldMap/WorldBandits/Groups"]
+position = Vector2(-2271.4642, 3565.9813)
+script = ExtResource("9_cuo70")
+group_strength = 40.0
+speed_profile = ExtResource("10_inp14")
+threat_profile = ExtResource("11_ol223")
+current_route = NodePath("../../Routes/RouteB2")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionB_Bandit2"]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_r3xhl")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionB_Bandit2"]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_w262y")
+
+[node name="RegionB_Bandit3" type="Node2D" parent="WorldMap/WorldBandits/Groups"]
+position = Vector2(-2226.7107, -1775.9926)
+script = ExtResource("9_cuo70")
+group_strength = 60.0
+speed_profile = ExtResource("10_inp14")
+threat_profile = ExtResource("11_ol223")
+current_route = NodePath("../../Routes/RouteB3")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionB_Bandit3"]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_r3xhl")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionB_Bandit3"]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_w262y")
+
+[node name="RegionB" type="Node2D" parent="WorldMap/Regions"]
+script = ExtResource("6_regionzone")
+region = ExtResource("8_regionb")
+area = Rect2(-3000, -5000, 2000, 10000)
+
+[node name="GroundB" type="Polygon2D" parent="WorldMap/Terrain"]
+z_index = -13
+texture_filter = 4
+texture_repeat = 2
+position = Vector2(-3000, -5000)
+texture = ExtResource("210_bg_b")
+texture_scale = Vector2(4, 4)
+polygon = PackedVector2Array(0, 0, 2000, 0, 2000, 10000, 0, 10000)
+script = ExtResource("2_surface")
+surface_size = Vector2(2000, 10000)
+tile_size = 1000.0
+
+[node name="MountainB1" parent="WorldMap/Terrain" instance=ExtResource("206_mountain")]
+position = Vector2(-1973.3333, -1002.5)
+
+[node name="SharedScatter" type="Node2D" parent="WorldMap/Scenery"]
+script = ExtResource("200_scatter")
+region = Rect2(-3000.0, -5000.0, 2000.0, 10000.0)
+layers = Array[ExtResource("200_layertype")]([ExtResource("201_cacti"), ExtResource("202_bushes"), ExtResource("203_bones")])
+include_day_stage_layers = false
+include_region_layers = false
+clear_radius = 0.0
+keep_clear = Array[Rect2]([Rect2(-5000, -90, 10000, 180), Rect2(-1675, 1690, 1250, 120), Rect2(425, -1810, 1250, 120), Rect2(-3400, -250, 500, 500), Rect2(-3100, -250, 500, 500), Rect2(-1400, -250, 500, 500), Rect2(-1100, -250, 500, 500), Rect2(600, -250, 500, 500), Rect2(1950, -250, 500, 500), Rect2(2900, -250, 500, 500)])
+grid_cell_size = 260.0
+stream_enabled = true
+stream_budget_ms = 3.0
+stream_first_frame_budget_ms = 4.0
+cull_enabled = true
+cull_minimum_radius = 2000.0
+
+[node name="OldMine_PortalWest" parent="WorldMap/TravelPortals" instance=ExtResource("207_portal")]
+location = SubResource("Resource_portal_oldmine_west")
+destination = NodePath("../DustCamp_Portal")
+destination_region = &"A"
+destination_position = Vector2(-3150.0, 90.0)
+
+[node name="OldMine_PortalEast" parent="WorldMap/TravelPortals" instance=ExtResource("207_portal")]
+location = SubResource("Resource_portal_oldmine_east")
+destination = NodePath("../GhostTown_PortalWest")
+destination_region = &"C"
+destination_position = Vector2(-850.0, 90.0)
+
+[node name="Floor" parent="WorldMap/Terrain"]
+position = Vector2(-3000.0, -5000.0)
+polygon = PackedVector2Array(0, 0, 2000.0, 0, 2000.0, 10000.0, 0, 10000.0)
+surface_size = Vector2(2000.0, 10000.0)
+
+[node name="TopWall" parent="WorldMap/Terrain/Bounds"]
+position = Vector2(-2000.0, -5032)
+shape = SubResource("RectangleShape2D_band_h_B")
+
+[node name="BottomWall" parent="WorldMap/Terrain/Bounds"]
+position = Vector2(-2000.0, 5032)
+shape = SubResource("RectangleShape2D_band_h_B")
+
+[node name="LeftWall" parent="WorldMap/Terrain/Bounds"]
+position = Vector2(-3032.0, 0)
+
+[node name="RightWall" parent="WorldMap/Terrain/Bounds"]
+position = Vector2(-968.0, 0)
+
+[node name="Zone" parent="WorldMap/Camera"]
+region = Rect2(-3000.0, -5000.0, 2000.0, 10000.0)
+
+[node name="SpawnPoint" parent="WorldMap/Player"]
+position = Vector2(-2850.0, 140.0)

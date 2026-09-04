@@ -1,0 +1,369 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/Player/Player.tscn" id="1_vxvin"]
+[ext_resource type="Script" path="res://Scripts/Player/player.gd" id="2_1jy8m"]
+[ext_resource type="Script" path="res://Scripts/World/camera_bounds.gd" id="3_graqb"]
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_mount.gd" id="4_lkck1"]
+[ext_resource type="Resource" path="res://Resources/Weapons/weapon_catalog.tres" id="5_1x2ol"]
+[ext_resource type="PackedScene" path="res://Scenes/Weapons/Shotgun.tscn" id="6_s7akv"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/RunHUD.tscn" id="7_ilq40"]
+[ext_resource type="Script" path="res://Scripts/Common/music_director.gd" id="8_q3xuu"]
+[ext_resource type="Script" path="res://Scripts/World/music_state_watcher.gd" id="9_qi0tx"]
+[ext_resource type="Script" path="res://Scripts/Run/world_slowdown.gd" id="10_hdppt"]
+[ext_resource type="Script" path="res://Scripts/Common/hit_stop.gd" id="11_wwi4t"]
+[ext_resource type="Script" path="res://Scripts/UI/damage_numbers.gd" id="12_uivtg"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/DamageNumber.tscn" id="13_bxbud"]
+[ext_resource type="Script" path="res://Scripts/World/world_reset.gd" id="14_t0r51"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_combat_bridge.gd" id="15_0ejtt"]
+[ext_resource type="Resource" path="res://Resources/World/Decision/tier_stronger.tres" id="16_tgpw7"]
+[ext_resource type="Resource" path="res://Resources/World/Decision/tier_equal.tres" id="17_6cm4n"]
+[ext_resource type="Resource" path="res://Resources/World/Decision/tier_weaker.tres" id="18_xwoym"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Trouble/fight1.WAV" id="19_kxmfl"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Trouble/fight2.WAV" id="20_ol11q"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Trouble/fight3.mp3" id="21_rgivc"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_ambush_director.gd" id="22_h4uxd"]
+[ext_resource type="Script" path="res://Scripts/World/world_bounty_boss_director.gd" id="23_uysyj"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_extraction_service.gd" id="24_56ra5"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_interaction_camera.gd" id="25_lqy81"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_location_interaction_camera.gd" id="26_ghnqd"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_destination.gd" id="27_y521i"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/1- Ground/DesertFloor.PNG" id="28_byeqv"]
+[ext_resource type="Script" path="res://Scripts/World/tiled_surface.gd" id="29_vrtts"]
+[ext_resource type="Script" path="res://Scripts/World/world_zone.gd" id="30_wubsr"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_player_power.gd" id="31_ejay5"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_fog.gd" id="32_82ybd"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_fog_overlay.gd" id="33_ms8ip"]
+[ext_resource type="Script" path="res://Scripts/Dev/world_map_clock.gd" id="34_vkwns"]
+[ext_resource type="Script" path="res://Scripts/UI/world_map_minimap.gd" id="35_e2bjf"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_location_director.gd" id="36_7jhqb"]
+[ext_resource type="Script" path="res://Scripts/UI/interaction_prompt.gd" id="37_5smvh"]
+[ext_resource type="Script" path="res://Scripts/World/blood_depot_service.gd" id="38_bl4s3"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_occlusion.gd" id="39_duk83"]
+[ext_resource type="Script" path="res://Scripts/UI/world_bandit_hover_tooltip.gd" id="40_6keif"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_travel_service.gd" id="41_ncuap"]
+[ext_resource type="Script" path="res://Scripts/World/Sun/sun_controller.gd" id="42_o3pkq"]
+[ext_resource type="Script" path="res://Scripts/World/Sun/sun_stage.gd" id="43_mdfis"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/1_dawn.tres" id="44_cqg6w"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/2_morning.tres" id="45_c3nhg"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/3_noon.tres" id="46_se3wf"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/4_evening.tres" id="47_h1ntu"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/5_twilight.tres" id="48_4j0a4"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/6_night.tres" id="49_oybtq"]
+[ext_resource type="Script" path="res://Scripts/World/day_cycle_director.gd" id="50_yuwrf"]
+[ext_resource type="Script" path="res://Scripts/World/day_stage.gd" id="51_8uusn"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/1_dawn.tres" id="52_ms2qg"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/2_morning.tres" id="53_h44pd"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/3_noon.tres" id="54_tuy0l"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/4_evening.tres" id="55_vxdud"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/5_twilight.tres" id="56_5dqxm"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/6_night.tres" id="57_vsqnr"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wmtop"]
+size = Vector2(10128, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wmbottom"]
+size = Vector2(10128, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wmleft"]
+size = Vector2(64, 10128)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wmright"]
+size = Vector2(64, 10128)
+
+[node name="WorldMapBase" type="Node2D" unique_id=1423641666]
+y_sort_enabled = true
+
+[node name="Darkness" type="CanvasModulate" parent="." unique_id=1100277015 groups=["ambient_modulate"]]
+color = Color(1, 0.8666667, 0.30588236, 1)
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=1731179406 groups=["player"] instance=ExtResource("1_vxvin")]
+collision_mask = 33
+motion_mode = 1
+wall_min_slide_angle = 0.0
+script = ExtResource("2_1jy8m")
+speed_modifier_paths = Array[NodePath]([NodePath("DeathSequence"), NodePath("TerrainSlow"), NodePath("PlayerSleep"), NodePath("WorldMapHorse"), NodePath("ExtractionHold"), NodePath("TravelHold")])
+
+[node name="CameraBounds" type="Node2D" parent="." unique_id=1705884162]
+script = ExtResource("3_graqb")
+region = Rect2(-1449.6, -815.4, 2899.2, 1630.8)
+
+[node name="WeaponMount" type="Node2D" parent="." unique_id=1217776971]
+script = ExtResource("4_lkck1")
+catalog = ExtResource("5_1x2ol")
+target_path = NodePath("../Player")
+fallback_scene = ExtResource("6_s7akv")
+
+[node name="RunHUD" type="CanvasLayer" parent="." unique_id=1330291175 instance=ExtResource("7_ilq40")]
+process_mode = 3
+layer = 2
+
+[node name="MusicDirector" type="Node" parent="." unique_id=1330861437 groups=["music_director"]]
+process_mode = 3
+script = ExtResource("8_q3xuu")
+
+[node name="MusicStateWatcher" type="Node" parent="." unique_id=977416575]
+script = ExtResource("9_qi0tx")
+
+[node name="WorldSlowdown" type="Node" parent="." unique_id=902085865 groups=["world_slowdown"]]
+script = ExtResource("10_hdppt")
+
+[node name="HitStop" type="Node" parent="." unique_id=1130592027]
+script = ExtResource("11_wwi4t")
+max_duration = 0.5
+
+[node name="DamageNumbers" type="Node2D" parent="." unique_id=1983049173 groups=["damage_numbers"]]
+z_index = 20
+script = ExtResource("12_uivtg")
+number_scene = ExtResource("13_bxbud")
+
+[node name="WorldReset" type="Node" parent="." unique_id=1592448932 groups=["world_reset"]]
+script = ExtResource("14_t0r51")
+
+[node name="WorldMapCombatBridge" type="Node" parent="." unique_id=791092820]
+script = ExtResource("15_0ejtt")
+stronger_tier = ExtResource("16_tgpw7")
+equal_tier = ExtResource("17_6cm4n")
+weaker_tier = ExtResource("18_xwoym")
+fight_tracks = Array[AudioStream]([ExtResource("19_kxmfl"), ExtResource("20_ol11q"), ExtResource("21_rgivc")])
+
+[node name="WorldMapAmbushDirector" type="Node" parent="." unique_id=791092821]
+script = ExtResource("22_h4uxd")
+
+[node name="WorldBountyBossDirector" type="Node" parent="." unique_id=1125725810]
+script = ExtResource("23_uysyj")
+
+[node name="WorldMapExtractionService" type="Node" parent="." unique_id=51447099]
+script = ExtResource("24_56ra5")
+
+[node name="WorldMapInteractionCamera" type="Node" parent="." unique_id=1651415873]
+script = ExtResource("25_lqy81")
+
+[node name="WorldMapLocationInteractionCamera" type="Node" parent="." unique_id=1658095693]
+script = ExtResource("26_ghnqd")
+
+[node name="WorldMap" type="Node2D" parent="." unique_id=141076097 groups=["world_map"]]
+y_sort_enabled = true
+script = ExtResource("27_y521i")
+id = &"world_map"
+spawn_point_path = NodePath("Player/SpawnPoint")
+bounds = Rect2(-5000, -5000, 10000, 10000)
+
+[node name="Terrain" type="Node2D" parent="WorldMap" unique_id=1757087088]
+
+[node name="Floor" type="Polygon2D" parent="WorldMap/Terrain" unique_id=1446303729]
+z_index = -13
+texture_filter = 4
+texture_repeat = 2
+position = Vector2(-5000, -5000)
+texture = ExtResource("28_byeqv")
+texture_scale = Vector2(4, 4)
+polygon = PackedVector2Array(0, 0, 10000, 0, 10000, 10000, 0, 10000)
+script = ExtResource("29_vrtts")
+surface_size = Vector2(10000, 10000)
+tile_size = 1000.0
+
+[node name="Bounds" type="StaticBody2D" parent="WorldMap/Terrain" unique_id=1060569150]
+
+[node name="TopWall" type="CollisionShape2D" parent="WorldMap/Terrain/Bounds" unique_id=1043543340]
+position = Vector2(0, -5032)
+shape = SubResource("RectangleShape2D_wmtop")
+
+[node name="BottomWall" type="CollisionShape2D" parent="WorldMap/Terrain/Bounds" unique_id=362981438]
+position = Vector2(0, 5032)
+shape = SubResource("RectangleShape2D_wmbottom")
+
+[node name="LeftWall" type="CollisionShape2D" parent="WorldMap/Terrain/Bounds" unique_id=1535628561]
+position = Vector2(-5032, 0)
+shape = SubResource("RectangleShape2D_wmleft")
+
+[node name="RightWall" type="CollisionShape2D" parent="WorldMap/Terrain/Bounds" unique_id=498787921]
+position = Vector2(5032, 0)
+shape = SubResource("RectangleShape2D_wmright")
+
+[node name="Boundaries" type="Node2D" parent="WorldMap/Terrain" unique_id=409987695]
+
+[node name="Roads" type="Node2D" parent="WorldMap" unique_id=1082091988]
+
+[node name="Locations" type="Node2D" parent="WorldMap" unique_id=392766687]
+
+[node name="WorldBandits" type="Node2D" parent="WorldMap" unique_id=25669060]
+
+[node name="Routes" type="Node2D" parent="WorldMap/WorldBandits" unique_id=1594767623]
+
+[node name="Groups" type="Node2D" parent="WorldMap/WorldBandits" unique_id=1155586066]
+
+[node name="Regions" type="Node2D" parent="WorldMap" unique_id=622546371]
+
+[node name="Encounters" type="Node2D" parent="WorldMap" unique_id=2053871778]
+
+[node name="Player" type="Node2D" parent="WorldMap" unique_id=1864513394]
+
+[node name="SpawnPoint" type="Marker2D" parent="WorldMap/Player" unique_id=86088442]
+position = Vector2(-4333.3335, 0)
+
+[node name="Camera" type="Node2D" parent="WorldMap" unique_id=498949200]
+
+[node name="Zone" type="Node2D" parent="WorldMap/Camera" unique_id=1492441900]
+script = ExtResource("30_wubsr")
+zone_id = &"world_map"
+region = Rect2(-5000, -5000, 10000, 10000)
+ambient_follows_day_cycle = false
+follows_world_time = true
+camera_zoom_multiplier = 0.4
+heals_player = false
+blocks_weapon_fire = true
+
+[node name="PlayerPower" type="Node" parent="WorldMap" unique_id=703381792]
+script = ExtResource("31_ejay5")
+
+[node name="Fog" type="Node2D" parent="WorldMap" unique_id=1070347352]
+script = ExtResource("32_82ybd")
+
+[node name="FogOverlay" type="Node2D" parent="WorldMap" unique_id=713703337]
+script = ExtResource("33_ms8ip")
+fog_path = NodePath("../Fog")
+
+[node name="UI" type="CanvasLayer" parent="WorldMap" unique_id=576314106]
+
+[node name="WorldMapClock" type="Control" parent="WorldMap/UI" unique_id=914955305]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 76.0
+offset_right = 104.0
+offset_bottom = 156.0
+mouse_filter = 2
+script = ExtResource("34_vkwns")
+
+[node name="DayLabel" type="Label" parent="WorldMap/UI/WorldMapClock" unique_id=1979046355]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 4.0
+offset_right = 280.0
+offset_bottom = 34.0
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.03, 0.01, 1)
+theme_override_constants/outline_size = 5
+text = "DAY 1"
+
+[node name="PeriodLabel" type="Label" parent="WorldMap/UI/WorldMapClock" unique_id=99143255]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 34.0
+offset_right = 280.0
+offset_bottom = 64.0
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.03, 0.01, 1)
+theme_override_constants/outline_size = 5
+text = "DAWN"
+
+[node name="Minimap" type="Control" parent="WorldMap/UI" unique_id=1445433921]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -240.0
+offset_top = 92.0
+offset_right = -20.0
+offset_bottom = 312.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("35_e2bjf")
+
+[node name="Frame" type="Panel" parent="WorldMap/UI/Minimap" unique_id=77289755]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="ViewportContainer" type="SubViewportContainer" parent="WorldMap/UI/Minimap/Frame" unique_id=1551894020]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+mouse_filter = 2
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="WorldMap/UI/Minimap/Frame/ViewportContainer" unique_id=2097848592]
+disable_3d = true
+handle_input_locally = false
+size = Vector2i(212, 212)
+render_target_update_mode = 4
+
+[node name="Camera" type="Camera2D" parent="WorldMap/UI/Minimap/Frame/ViewportContainer/Viewport" unique_id=1371098660]
+zoom = Vector2(0.1, 0.1)
+
+[node name="PlayerDot" type="ColorRect" parent="WorldMap/UI/Minimap" unique_id=987383312]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 4.0
+mouse_filter = 2
+color = Color(1, 0.85, 0.2, 1)
+
+[node name="LocationDirector" type="Node" parent="WorldMap" unique_id=1172181067]
+script = ExtResource("36_7jhqb")
+
+[node name="Prompt" type="Node2D" parent="WorldMap/LocationDirector" unique_id=1085856344]
+script = ExtResource("37_5smvh")
+
+[node name="Label" type="Label" parent="WorldMap/LocationDirector/Prompt" unique_id=1183411712]
+offset_left = -90.0
+offset_top = -26.0
+offset_right = 90.0
+offset_bottom = 26.0
+theme_override_font_sizes/font_size = 40
+theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 10
+text = "E"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BloodDepotService" type="Node" parent="WorldMap" unique_id=250267112]
+script = ExtResource("38_bl4s3")
+
+[node name="Occlusion" type="Node" parent="WorldMap" unique_id=632161183]
+script = ExtResource("39_duk83")
+
+[node name="BanditHoverTooltip" type="Node2D" parent="WorldMap" unique_id=632161184]
+script = ExtResource("40_6keif")
+
+[node name="Label" type="Label" parent="WorldMap/BanditHoverTooltip" unique_id=632161185]
+offset_left = -90.0
+offset_top = -26.0
+offset_right = 90.0
+offset_bottom = 12.0
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 0.55, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.03, 0.01, 1)
+theme_override_constants/outline_size = 8
+text = "0 BANDITS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Scenery" type="Node2D" parent="WorldMap" unique_id=2115480896]
+
+[node name="TravelPortals" type="Node2D" parent="WorldMap" unique_id=728417756]
+
+[node name="WorldMapTravelService" type="Node" parent="WorldMap" unique_id=1813309953]
+script = ExtResource("41_ncuap")
+
+[node name="Sun" type="Node2D" parent="." unique_id=746016131 groups=["sun"]]
+script = ExtResource("42_o3pkq")
+stages = Array[ExtResource("43_mdfis")]([ExtResource("44_cqg6w"), ExtResource("45_c3nhg"), ExtResource("46_se3wf"), ExtResource("47_h1ntu"), ExtResource("48_4j0a4"), ExtResource("49_oybtq")])
+projection_mode = 1
+
+[node name="DayCycle" type="Node" parent="." unique_id=1367528904 groups=["day_cycle"]]
+script = ExtResource("50_yuwrf")
+stages = Array[ExtResource("51_8uusn")]([ExtResource("52_ms2qg"), ExtResource("53_h44pd"), ExtResource("54_tuy0l"), ExtResource("55_vxdud"), ExtResource("56_5dqxm"), ExtResource("57_vsqnr")])

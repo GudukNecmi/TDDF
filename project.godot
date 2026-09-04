@@ -34,13 +34,20 @@ DevConfig="*res://Scripts/Dev/dev_balance_store.gd"
 Vitals="*res://Scripts/Run/run_vitals.gd"
 Streak="*res://Scripts/Run/run_streak.gd"
 MusicStates="*res://Scenes/Common/MusicStates.tscn"
-WorldClock="*res://Scripts/World/world_time_manager.gd"
-HorseBlood="*res://Scripts/Currency/horse_blood_storage.gd"
-ExtractionUnlocks="*res://Scripts/World/extraction_unlock_state.gd"
 MCPScreenshot="*res://addons/godot_mcp/mcp_screenshot_service.gd"
 MCPInputService="*res://addons/godot_mcp/mcp_input_service.gd"
 MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
+WorldClock="*res://Scripts/World/world_time_manager.gd"
+HorseBlood="*res://Scripts/Currency/horse_blood_storage.gd"
+ExtractionUnlocks="*res://Scripts/World/extraction_unlock_state.gd"
 LoadingScreen="*res://Scenes/UI/LoadingScreen.tscn"
+WorldState="*res://Scripts/World/world_map_state.gd"
+WorldRouter="*res://Scripts/World/world_region_router.gd"
+
+[debug]
+
+settings/stdout/print_fps=true
+settings/stdout/print_gpu_profile=true
 
 [display]
 

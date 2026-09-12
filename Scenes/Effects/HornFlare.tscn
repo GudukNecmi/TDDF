@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://c5peormv2cu6a"]
+
+[ext_resource type="Script" uid="uid://chr1k8boqka8m" path="res://Scripts/Effects/one_shot_particles.gd" id="1_ospar"]
+
+[sub_resource type="Gradient" id="Gradient_flarepuff"]
+offsets = PackedFloat32Array(0, 0.42, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.7, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_flarepuff"]
+gradient = SubResource("Gradient_flarepuff")
+width = 24
+height = 24
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Curve" id="Curve_flare"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.3, 0.82), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Gradient" id="Gradient_flare"]
+offsets = PackedFloat32Array(0, 0.18, 0.55, 1)
+colors = PackedColorArray(1, 0.92, 0.62, 1, 1, 0.42, 0.08, 1, 0.88, 0.1, 0.02, 0.85, 0.28, 0.02, 0.01, 0)
+
+[node name="HornFlare" type="CPUParticles2D"]
+emitting = false
+amount = 20
+lifetime = 0.22
+one_shot = true
+explosiveness = 0.9
+randomness = 0.35
+script = ExtResource("1_ospar")
+texture = SubResource("GradientTexture2D_flarepuff")
+emission_shape = 1
+emission_sphere_radius = 2.5
+direction = Vector2(1, 0)
+spread = 26.0
+gravity = Vector2(0, -70)
+initial_velocity_min = 150.0
+initial_velocity_max = 360.0
+damping_min = 240.0
+damping_max = 520.0
+scale_amount_min = 0.75
+scale_amount_max = 1.7
+scale_amount_curve = SubResource("Curve_flare")
+color_ramp = SubResource("Gradient_flare")

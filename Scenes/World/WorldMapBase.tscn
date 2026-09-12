@@ -33,7 +33,6 @@
 [ext_resource type="Script" path="res://Scripts/World/world_map_fog.gd" id="31_wubsr"]
 [ext_resource type="Script" path="res://Scripts/World/world_map_fog_overlay.gd" id="32_ejay5"]
 [ext_resource type="Script" path="res://Scripts/Dev/world_map_clock.gd" id="33_82ybd"]
-[ext_resource type="Script" path="res://Scripts/UI/world_map_minimap.gd" id="34_ms8ip"]
 [ext_resource type="Script" path="res://Scripts/World/world_map_location_director.gd" id="35_vkwns"]
 [ext_resource type="Script" path="res://Scripts/UI/interaction_prompt.gd" id="36_e2bjf"]
 [ext_resource type="Script" path="res://Scripts/World/blood_depot_service.gd" id="37_7jhqb"]
@@ -56,6 +55,9 @@
 [ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/4_evening.tres" id="54_h44pd"]
 [ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/5_twilight.tres" id="55_tuy0l"]
 [ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/6_night.tres" id="56_vxdud"]
+[ext_resource type="Script" path="res://Scripts/World/world_bandit_activation_director.gd" id="57_bandact"]
+[ext_resource type="Script" path="res://Scripts/World/world_bandit_gallop_director.gd" id="58_bandgal"]
+[ext_resource type="AudioStream" uid="uid://b6gxvueefltur" path="res://Sound/Efect/Horse/Gallop/HorseGallop.WAV" id="59_galwav"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wmtop"]
 size = Vector2(10128, 64)
@@ -84,7 +86,7 @@ speed_modifier_paths = Array[NodePath]([NodePath("DeathSequence"), NodePath("Ter
 
 [node name="CameraBounds" type="Node2D" parent="." unique_id=1705884162]
 script = ExtResource("3_1jy8m")
-region = Rect2(-1449.6, -815.4, 2899.2, 1630.8)
+fence_path = NodePath("../WorldMap/Terrain/Bounds")
 
 [node name="WeaponMount" type="Node2D" parent="." unique_id=1217776971]
 script = ExtResource("4_graqb")
@@ -127,6 +129,13 @@ fight_tracks = Array[AudioStream]([ExtResource("19_xwoym"), ExtResource("20_kxmf
 
 [node name="WorldMapAmbushDirector" type="Node" parent="." unique_id=791092821]
 script = ExtResource("22_rgivc")
+
+[node name="WorldBanditActivationDirector" type="Node" parent="." unique_id=791092822]
+script = ExtResource("57_bandact")
+
+[node name="WorldBanditGallopDirector" type="Node" parent="." unique_id=791092823]
+script = ExtResource("58_bandgal")
+stream = ExtResource("59_galwav")
 
 [node name="WorldBountyBossDirector" type="Node" parent="." unique_id=1125725810]
 script = ExtResource("23_h4uxd")
@@ -182,10 +191,12 @@ shape = SubResource("RectangleShape2D_wmright")
 [node name="Locations" type="Node2D" parent="WorldMap" unique_id=392766687]
 
 [node name="WorldBandits" type="Node2D" parent="WorldMap" unique_id=25669060]
+y_sort_enabled = true
 
 [node name="Routes" type="Node2D" parent="WorldMap/WorldBandits" unique_id=1594767623]
 
 [node name="Groups" type="Node2D" parent="WorldMap/WorldBandits" unique_id=1155586066]
+y_sort_enabled = true
 
 [node name="Regions" type="Node2D" parent="WorldMap" unique_id=622546371]
 
@@ -254,58 +265,6 @@ theme_override_colors/font_outline_color = Color(0.05, 0.03, 0.01, 1)
 theme_override_constants/outline_size = 5
 text = "DAWN"
 
-[node name="Minimap" type="Control" parent="WorldMap/UI" unique_id=1445433921]
-layout_mode = 3
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -240.0
-offset_top = 92.0
-offset_right = -20.0
-offset_bottom = 312.0
-grow_horizontal = 0
-mouse_filter = 2
-script = ExtResource("34_ms8ip")
-
-[node name="Frame" type="Panel" parent="WorldMap/UI/Minimap" unique_id=77289755]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-
-[node name="ViewportContainer" type="SubViewportContainer" parent="WorldMap/UI/Minimap/Frame" unique_id=1551894020]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = -4.0
-offset_bottom = -4.0
-mouse_filter = 2
-stretch = true
-
-[node name="Viewport" type="SubViewport" parent="WorldMap/UI/Minimap/Frame/ViewportContainer" unique_id=2097848592]
-disable_3d = true
-handle_input_locally = false
-size = Vector2i(212, 212)
-render_target_update_mode = 4
-
-[node name="Camera" type="Camera2D" parent="WorldMap/UI/Minimap/Frame/ViewportContainer/Viewport" unique_id=1371098660]
-zoom = Vector2(0.1, 0.1)
-
-[node name="PlayerDot" type="ColorRect" parent="WorldMap/UI/Minimap" unique_id=987383312]
-layout_mode = 0
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -4.0
-offset_top = -4.0
-offset_right = 4.0
-offset_bottom = 4.0
-mouse_filter = 2
-color = Color(1, 0.85, 0.2, 1)
-
 [node name="LocationDirector" type="Node" parent="WorldMap" unique_id=1172181067]
 script = ExtResource("35_vkwns")
 
@@ -358,6 +317,13 @@ script = ExtResource("40_duk83")
 script = ExtResource("41_6keif")
 stages = Array[ExtResource("42_ncuap")]([ExtResource("43_o3pkq"), ExtResource("44_mdfis"), ExtResource("45_cqg6w"), ExtResource("46_c3nhg"), ExtResource("47_se3wf"), ExtResource("48_h1ntu")])
 projection_mode = 1
+measure_height_to_top = true
+solid_casters = true
+minimum_shadow_ratio = 0.45
+anchor_shadows_on_footing = true
+ground_contact_shadows = true
+republish_threshold_degrees = 0.5
+cull_static_rebuilds = true
 
 [node name="DayCycle" type="Node" parent="." unique_id=1367528904 groups=["day_cycle"]]
 script = ExtResource("49_4j0a4")

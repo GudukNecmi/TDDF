@@ -1,0 +1,144 @@
+[gd_scene load_steps=10 format=3 uid="uid://cgotikhorserig"]
+
+[ext_resource type="Script" path="res://Scripts/World/Horses/horse_rig.gd" id="1_rig"]
+[ext_resource type="Script" path="res://Scripts/World/Horses/horse_part_motion.gd" id="2_motion"]
+[ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="3_shadow"]
+
+[sub_resource type="Resource" id="Resource_tail"]
+script = ExtResource("2_motion")
+part_path = NodePath("Rig/Tail")
+swing_degrees = 8.0
+swing_bias_degrees = -32.0
+phase_offset = 0.62
+harmonic = 1
+lift_pixels = 0.0
+reach_pixels = 0.0
+idle_swing_degrees = 2.0
+idle_lift_pixels = 0.0
+
+[sub_resource type="Resource" id="Resource_backleg"]
+script = ExtResource("2_motion")
+part_path = NodePath("Rig/BackLeg")
+swing_degrees = 22.0
+swing_bias_degrees = 0.0
+phase_offset = 0.5
+harmonic = 1
+lift_pixels = 0.0
+reach_pixels = 0.0
+idle_swing_degrees = 1.0
+idle_lift_pixels = 0.0
+
+[sub_resource type="Resource" id="Resource_frontleg"]
+script = ExtResource("2_motion")
+part_path = NodePath("Rig/FrontLeg")
+swing_degrees = 26.0
+swing_bias_degrees = 0.0
+phase_offset = 0.0
+harmonic = 1
+lift_pixels = 0.0
+reach_pixels = 0.0
+idle_swing_degrees = 1.2
+idle_lift_pixels = 0.0
+
+[sub_resource type="Resource" id="Resource_neck"]
+script = ExtResource("2_motion")
+part_path = NodePath("Rig/Neck")
+swing_degrees = 5.0
+swing_bias_degrees = -5.0
+phase_offset = 0.25
+harmonic = 1
+lift_pixels = 0.0
+reach_pixels = 0.0
+idle_swing_degrees = 0.8
+idle_lift_pixels = 5.0
+
+[sub_resource type="Resource" id="Resource_body"]
+script = ExtResource("2_motion")
+part_path = NodePath("Rig/Body")
+swing_degrees = 2.0
+swing_bias_degrees = 0.0
+phase_offset = 0.1
+harmonic = 1
+lift_pixels = 0.0
+reach_pixels = 0.0
+idle_swing_degrees = 0.4
+idle_lift_pixels = 8.0
+
+[sub_resource type="Resource" id="Resource_head"]
+script = ExtResource("2_motion")
+part_path = NodePath("Rig/Head")
+swing_degrees = 7.0
+swing_bias_degrees = -4.0
+phase_offset = 0.32
+harmonic = 1
+lift_pixels = 0.0
+reach_pixels = 0.0
+idle_swing_degrees = 1.0
+idle_lift_pixels = 7.0
+
+[node name="Horse" type="Node2D" groups=["horse_rig"]]
+scale = Vector2(0.09, 0.09)
+script = ExtResource("1_rig")
+parts = Array[ExtResource("2_motion")]([SubResource("Resource_tail"), SubResource("Resource_backleg"), SubResource("Resource_frontleg"), SubResource("Resource_neck"), SubResource("Resource_body"), SubResource("Resource_head")])
+
+[node name="Rig" type="Node2D" parent="."]
+
+[node name="Tail" type="Sprite2D" parent="Rig"]
+position = Vector2(270, 65)
+centered = false
+offset = Vector2(-1800, -1110)
+
+[node name="BackLeg" type="Sprite2D" parent="Rig"]
+position = Vector2(130, 255)
+centered = false
+offset = Vector2(-1660, -1300)
+
+[node name="FrontLeg" type="Sprite2D" parent="Rig"]
+position = Vector2(-395, 305)
+centered = false
+offset = Vector2(-1135, -1350)
+
+[node name="Neck" type="Sprite2D" parent="Rig"]
+position = Vector2(-470, 265)
+centered = false
+offset = Vector2(-1060, -1310)
+
+[node name="Body" type="Sprite2D" parent="Rig"]
+position = Vector2(-110, 235)
+centered = false
+offset = Vector2(-1420, -1280)
+
+[node name="Head" type="Sprite2D" parent="Rig"]
+position = Vector2(-540, -145)
+centered = false
+offset = Vector2(-990, -900)
+
+[node name="TailShadow" type="Node2D" parent="."]
+script = ExtResource("3_shadow")
+source_sprite_path = NodePath("../Rig/Tail")
+drops_out_while_hidden = true
+
+[node name="BackLegShadow" type="Node2D" parent="."]
+script = ExtResource("3_shadow")
+source_sprite_path = NodePath("../Rig/BackLeg")
+drops_out_while_hidden = true
+
+[node name="FrontLegShadow" type="Node2D" parent="."]
+script = ExtResource("3_shadow")
+source_sprite_path = NodePath("../Rig/FrontLeg")
+drops_out_while_hidden = true
+
+[node name="NeckShadow" type="Node2D" parent="."]
+script = ExtResource("3_shadow")
+source_sprite_path = NodePath("../Rig/Neck")
+drops_out_while_hidden = true
+
+[node name="BodyShadow" type="Node2D" parent="."]
+script = ExtResource("3_shadow")
+source_sprite_path = NodePath("../Rig/Body")
+drops_out_while_hidden = true
+
+[node name="HeadShadow" type="Node2D" parent="."]
+script = ExtResource("3_shadow")
+source_sprite_path = NodePath("../Rig/Head")
+drops_out_while_hidden = true

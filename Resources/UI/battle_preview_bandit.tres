@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="BattlePreviewEnemyType" load_steps=10 format=3 uid="uid://cgotikprevbandit"]
+
+[ext_resource type="Script" path="res://Scripts/UI/battle_preview_enemy_type.gd" id="1_entry"]
+[ext_resource type="Texture2D" uid="uid://dsobn3kfxbtq1" path="res://Assets/Enemies/Enemy1/Face1.PNG" id="2_f1"]
+[ext_resource type="Texture2D" uid="uid://db5bstfmqbesa" path="res://Assets/Enemies/Enemy1/Face2.PNG" id="3_f2"]
+[ext_resource type="Texture2D" uid="uid://bfxjvxah0ejgg" path="res://Assets/Enemies/Enemy1/Face3.PNG" id="4_f3"]
+[ext_resource type="Texture2D" uid="uid://wk3bdw37jyv2" path="res://Assets/Enemies/Enemy1/Face4.PNG" id="5_f4"]
+[ext_resource type="Texture2D" uid="uid://cscam2xjca2gc" path="res://Assets/Enemies/Enemy1/Face5.PNG" id="6_f5"]
+[ext_resource type="Texture2D" uid="uid://ehbawibwdu4b" path="res://Assets/Enemies/Enemy1/Face6.PNG" id="7_f6"]
+[ext_resource type="Texture2D" uid="uid://qkj3y6dld5aq" path="res://Assets/Enemies/Enemy1/Face7.PNG" id="8_f7"]
+[ext_resource type="Texture2D" uid="uid://caubjnckwd5le" path="res://Assets/Enemies/Enemy1/Face8.PNG" id="9_f8"]
+
+[resource]
+script = ExtResource("1_entry")
+display_name = "Bandit"
+show_name = false
+icons = Array[Texture2D]([ExtResource("2_f1"), ExtResource("3_f2"), ExtResource("4_f3"), ExtResource("5_f4"), ExtResource("6_f5"), ExtResource("7_f6"), ExtResource("8_f7"), ExtResource("9_f8")])
+portrait_count = 3

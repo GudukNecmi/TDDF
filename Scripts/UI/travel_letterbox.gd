@@ -1,8 +1,9 @@
 class_name TravelLetterbox
 extends Control
 ## The reusable cinematic bars used everywhere the game wants to frame a scene
-## the way an old western picture would: one fixed black bar across the top,
-## one across the bottom, drawn on the shared [RunHUD] canvas layer above every
+## the way an old western picture would: one bar across the top, one across
+## the bottom - both the same authored [code]Letterbox.PNG[/code] strip, the
+## bottom one flipped - drawn on the shared [RunHUD] canvas layer above every
 ## camera, zone and menu in the game.
 ##
 ## [b]One instance, every destination.[/b] Nothing about entering the Arena,
@@ -72,6 +73,14 @@ enum State {
 ## How tall each bar is, in pixels - the one number that decides how much of
 ## the screen the World Map's own picture is framed down to.
 @export var bar_height: float = 64.0
+## How much of each bar is still on screen once the letterbox has been
+## cleared - the thin frame the Arena and every other non-World-Map moment
+## keeps, rather than the picture opening out to a completely bare edge. Zero
+## restores the old behaviour of the bars sliding entirely off screen. Only
+## ever subtracted from how far a bar travels, so the framed size the World
+## Map and every loading transition are presented at is still exactly
+## [member bar_height] whatever this is set to.
+@export var hidden_bar_height: float = 26.0
 ## How long [method show_letterbox] and [method hide_letterbox] take to slide
 ## the bars into or out of place when [param animated] is left on.
 @export var show_hide_time: float = 0.5
@@ -269,16 +278,26 @@ func _animate_bars(start: float, target: float, duration: float) -> void:
 
 
 ## Positions both bars along the same 0-1 line: 0 is fully framed at each
-## bar's own resting [member Control.position], 1 is fully off screen - the
-## top bar displaced upward by [member bar_height], the bottom bar displaced
-## downward by the same amount. One shared number driving both bars, so they
-## can never end up a frame apart from each other however a tween is
-## interrupted and restarted.
+## bar's own resting [member Control.position], 1 is cleared - the top bar
+## displaced upward and the bottom bar displaced downward by the same
+## distance, which is [member bar_height] less whatever sliver
+## [member hidden_bar_height] asks to be left showing. One shared number
+## driving both bars, so they can never end up a frame apart from each other
+## however a tween is interrupted and restarted.
 func _set_bar_progress(t: float) -> void:
+	var travel := _bar_travel()
 	if _top_bar != null:
-		_top_bar.position.y = _top_rest_y - bar_height * t
+		_top_bar.position.y = _top_rest_y - travel * t
 	if _bottom_bar != null:
-		_bottom_bar.position.y = _bottom_rest_y + bar_height * t
+		_bottom_bar.position.y = _bottom_rest_y + travel * t
+
+
+## How far a bar actually moves between framed and cleared. Everything the
+## bars ever do is this one distance scaled by a 0-1 progress, so the framed
+## end of the line stays put at [member bar_height] and only the cleared end
+## is pulled back by [member hidden_bar_height].
+func _bar_travel() -> float:
+	return maxf(bar_height - clampf(hidden_bar_height, 0.0, bar_height), 0.0)
 
 
 func _snap_to(state: State) -> void:

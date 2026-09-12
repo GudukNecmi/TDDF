@@ -4,3 +4,28 @@
 
 [resource]
 shader = ExtResource("1_ary6w")
+shader_parameter/grain_amount = 0.06
+shader_parameter/grain_size = 1.6
+shader_parameter/grain_speed = 12.0
+shader_parameter/grain_contrast = 1.8
+shader_parameter/dust_amount = 0.045
+shader_parameter/dust_frequency = 0.75
+shader_parameter/dust_size = 2.3
+shader_parameter/dust_opacity = 0.65
+shader_parameter/dust_lifetime = 0.4
+shader_parameter/grain_sheet_amount = 0.18
+shader_parameter/grain_sheet_whiteness = 0.85
+shader_parameter/grain_sheet_frequency = 0.35
+shader_parameter/grain_sheet_chance = 0.45
+shader_parameter/grain_sheet_duration = 0.2
+shader_parameter/grain_sheet_scale = 1.0
+shader_parameter/grain_sheet_frame_rate = 14.0
+shader_parameter/flicker_amount = 0.045
+shader_parameter/flicker_speed = 4.0
+shader_parameter/flicker_smoothness = 0.65
+shader_parameter/jitter_amount = 0.55
+shader_parameter/jitter_speed = 2.6
+shader_parameter/vignette_amount = 0.2
+shader_parameter/vignette_radius = 0.88
+shader_parameter/vignette_softness = 1.15
+shader_parameter/global_intensity = 1.0

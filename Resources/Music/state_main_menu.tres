@@ -1,11 +1,9 @@
 [gd_resource type="Resource" script_class="MusicState" format=3 uid="uid://82ydjspwrrac"]
 
 [ext_resource type="Script" uid="uid://c6ylwt4xp2d23" path="res://Scripts/Common/music_state.gd" id="1_state"]
-[ext_resource type="AudioStream" path="res://Sound/Music/Main menu/MainMenu Music.mp3" id="2_track"]
+[ext_resource type="AudioStream" uid="uid://ursl141hangw" path="res://Sound/Music/Main menu/MainMenu Music.mp3" id="2_track"]
 
 [resource]
 script = ExtResource("1_state")
 state_id = &"main_menu"
 stream = ExtResource("2_track")
-volume_db = -6.0
-loops = true

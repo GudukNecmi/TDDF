@@ -33,15 +33,28 @@ func _process(_delta: float) -> void:
 		text = "BANDIT: -"
 		return
 
-	text = "BANDIT: %s  |  STR %d  |  SPD %d  |  %s  |  REGION %s  |  TARGET (%d, %d)" % [
+	text = "BANDIT: %s  |  STR %d  |  SPD %d  |  %s  |  %s  |  REGION %s  |  TARGET (%d, %d)%s" % [
 		nearest.name,
 		int(nearest.group_strength),
 		int(nearest.movement_speed),
 		nearest.get_state_name(),
+		nearest.get_activation_name(),
 		String(nearest.region_id) if nearest.region_id != &"" else "-",
 		int(nearest.target_position.x),
 		int(nearest.target_position.y),
+		_activation_tally(),
 	]
+
+
+## How many of the map's groups the [WorldBanditActivationDirector] is
+## currently simulating at full rate, read off the tally its own sweep
+## already keeps rather than counted again here. Empty on a map with no
+## director in it, where every group is active by definition.
+func _activation_tally() -> String:
+	var director := WorldBanditActivationDirector.get_active(self)
+	if director == null:
+		return ""
+	return "  |  AWAKE %d/%d" % [director.get_awake_count(), director.get_group_count()]
 
 
 func _nearest_bandit(player: Node2D) -> WorldBandit:

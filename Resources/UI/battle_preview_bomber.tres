@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BattlePreviewEnemyType" load_steps=4 format=3 uid="uid://cgotikprevbomber"]
+
+[ext_resource type="Script" path="res://Scripts/UI/battle_preview_enemy_type.gd" id="1_entry"]
+[ext_resource type="PackedScene" uid="uid://cgotikbomber" path="res://Scenes/Enemy/Bomber.tscn" id="2_bomber"]
+[ext_resource type="Texture2D" uid="uid://dn4vnukxo6cru" path="res://Assets/Enemies/Suicide Bomber/Body Parts/IMG_2354.PNG" id="3_head"]
+
+[resource]
+script = ExtResource("1_entry")
+scene = ExtResource("2_bomber")
+display_name = "SUICIDE BOMBER"
+show_name = true
+icons = Array[Texture2D]([ExtResource("3_head")])
+portrait_count = 1

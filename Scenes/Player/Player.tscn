@@ -50,6 +50,10 @@
 [ext_resource type="Script" path="res://Scripts/Player/travel_hold.gd" id="50_travelhold"]
 [ext_resource type="AudioStream" uid="uid://b6gxvueefltur" path="res://Sound/Efect/Horse/Gallop/HorseGallop.WAV" id="48_1nex2"]
 [ext_resource type="Script" path="res://Scripts/World/world_map_horse_gallop.gd" id="49_tgfvv"]
+[ext_resource type="PackedScene" uid="uid://cgotikhorsemain" path="res://Scenes/World/Horses/MainCharacterHorse.tscn" id="51_horse"]
+[ext_resource type="Script" path="res://Scripts/Player/player_dash.gd" id="52_dash"]
+[ext_resource type="PackedScene" uid="uid://cgotikhornflare" path="res://Scenes/Effects/HornFlare.tscn" id="53_flare"]
+[ext_resource type="AudioStream" uid="uid://cu1p1uspqv0sn" path="res://Sound/Character/Dash.WAV" id="54_dashsfx"]
 
 [sub_resource type="Gradient" id="Gradient_smokepuff"]
 offsets = PackedFloat32Array(0, 0.45, 1)
@@ -85,6 +89,26 @@ height = 512
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_dashspark"]
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.62, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_dashspark"]
+gradient = SubResource("Gradient_dashspark")
+width = 20
+height = 20
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Curve" id="Curve_dashtrail"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.35, 0.62), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Gradient" id="Gradient_dashtrail"]
+offsets = PackedFloat32Array(0, 0.2, 0.6, 1)
+colors = PackedColorArray(1, 0.93, 0.6, 1, 1, 0.45, 0.08, 1, 0.85, 0.11, 0.03, 0.75, 0.25, 0.02, 0.01, 0)
 
 [node name="Player" type="CharacterBody2D" unique_id=1731179406 groups=["player"]]
 collision_mask = 33
@@ -156,6 +180,12 @@ visible = false
 position = Vector2(-8, -380)
 texture = ExtResource("32_deadeyes")
 
+[node name="LeftHornTip" type="Marker2D" parent="Visual/Head" unique_id=771002461]
+position = Vector2(-195, -722)
+
+[node name="RightHornTip" type="Marker2D" parent="Visual/Head" unique_id=771002462]
+position = Vector2(148, -739)
+
 [node name="Cigarette" type="Node2D" parent="Visual/Head" unique_id=1451928045]
 position = Vector2(87, -362)
 script = ExtResource("28_cig")
@@ -194,6 +224,9 @@ script = ExtResource("41_shadow")
 source_sprite_path = NodePath("..")
 ground_root_path = NodePath("../../..")
 auto_ground_anchor = false
+
+[node name="MountedHorse" parent="." instance=ExtResource("51_horse")]
+visible = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2003829022]
 position = Vector2(0, -18)
@@ -381,3 +414,38 @@ fade_out_speed = 12.0
 
 [node name="WorldMapHorseGallop" type="Node" parent="." unique_id=706594697]
 script = ExtResource("49_tgfvv")
+
+[node name="Dash" type="Node" parent="." unique_id=771002463]
+script = ExtResource("52_dash")
+flare_scene = ExtResource("53_flare")
+
+[node name="DashTrail" type="CPUParticles2D" parent="." unique_id=771002464]
+position = Vector2(0, -18)
+emitting = false
+amount = 46
+lifetime = 0.35
+randomness = 0.5
+lifetime_randomness = 0.4
+texture = SubResource("GradientTexture2D_dashspark")
+emission_shape = 1
+emission_sphere_radius = 9.0
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, -110)
+initial_velocity_min = 8.0
+initial_velocity_max = 46.0
+damping_min = 60.0
+damping_max = 160.0
+scale_amount_min = 0.5
+scale_amount_max = 1.5
+scale_amount_curve = SubResource("Curve_dashtrail")
+color_ramp = SubResource("Gradient_dashtrail")
+
+[node name="DashSounds" type="Node" parent="Dash" unique_id=771002465]
+script = ExtResource("14_sbank")
+sounds = {
+&"dash": ExtResource("54_dashsfx")
+}
+voice_count = 2
+bus = &"Game"
+pitch_variation = 0.05

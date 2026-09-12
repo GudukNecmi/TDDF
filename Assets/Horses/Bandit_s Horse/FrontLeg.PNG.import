@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyqj11yvylc08"
-path="res://.godot/imported/BaseReference.png-e6d51e4c127dc783e048fc37674dbd39.ctex"
+uid="uid://bwr7r6vxp8c0l"
+path="res://.godot/imported/FrontLeg.PNG-1b4ceb04e273d9737d5e1149b5612bdd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Base/BaseReference.png"
-dest_files=["res://.godot/imported/BaseReference.png-e6d51e4c127dc783e048fc37674dbd39.ctex"]
+source_file="res://Assets/Horses/Bandit_s Horse/FrontLeg.PNG"
+dest_files=["res://.godot/imported/FrontLeg.PNG-1b4ceb04e273d9737d5e1149b5612bdd.ctex"]
 
 [params]
 

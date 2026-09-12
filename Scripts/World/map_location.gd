@@ -47,3 +47,17 @@ enum LocationType {
 ## Whether this location is currently live. A disabled location is data the
 ## World Map still knows about but nothing should offer the player yet.
 @export var enabled: bool = true
+## Whether the player rides out already having heard of this place - a saloon and
+## a market are talked about; a bandit camp out in the dunes is not.
+##
+## [b]It is only ever a question mark.[/b] This grants
+## [constant MapKnowledge.Tier.KNOWN] and never more, so the map screen prints a
+## question mark where the place is and nothing about what it is; the marker, the
+## name and the icon are still earned by riding there. See [MapKnowledge].
+##
+## It is authored per location rather than derived from
+## [member location_type], because which places a person would have heard of is a
+## fact about the place - a famous camp, an unmarked one - and not about what kind
+## of thing it is. A later Cartographer grants the same tier the same way, through
+## [method MapKnowledge.mark_known], without this field or this file changing.
+@export var known_from_start: bool = false

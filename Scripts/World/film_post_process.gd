@@ -35,8 +35,8 @@ extends ColorRect
 ## [code]screen_texture[/code] always implies across layers.
 ##
 ## [b]Every knob that shapes the look lives on the shader itself.[/b] Grain,
-## dust, scratches, flicker, frame jitter and the film's own vignette are all
-## uniforms on [code]film_post_process.gdshader[/code], which is what makes
+## dust, the authored grain sheet, flicker, frame jitter and the film's own
+## vignette are all uniforms on [code]film_post_process.gdshader[/code], which is what makes
 ## them ordinary inspector fields on this node's material - nothing about
 ## their strength, size or timing is decided in this script. This script only
 ## drives the shader's single [code]global_intensity[/code] dial: a bit
@@ -59,6 +59,13 @@ extends ColorRect
 ## extraction or the player's own death can knock on later for a brief lift
 ## in the whole effect's weight. Nothing here decides when that happens -
 ## calling it is entirely up to whichever of those systems is built next.
+##
+## [b]The grain hook.[/b] [method grain_burst] is the second such door, and the
+## one the dash already uses: a short, loud throw of the authored grain sheet
+## across the frame for a jolt. It is the same sheet, the same fragments and
+## the same place in the same pass as the reel's own ambient dirt - only
+## louder and faster - so a burst can never read as a separate overlay dropped
+## on top of the film.
 
 ## Group used by [method get_active], the same pattern [ScreenFlash] and
 ## [SunController] are already found by.
@@ -105,12 +112,23 @@ const GROUP := &"film_post_process"
 ## [method pulse].
 @export var default_pulse_curve := Vector3(0.15, 0.5, 1.0)
 
+@export_group("Grain burst")
+## How long a grain burst lasts by default, in seconds, when a caller names no
+## length of its own - see [method grain_burst].
+@export var default_grain_burst_time: float = 0.3
+## How the burst falls away across that window. Later easing holds the grain
+## at full strength for most of the burst and drops it at the end, which is
+## what makes it read as a flash rather than as a fade.
+@export var grain_burst_ease: Tween.EaseType = Tween.EASE_IN
+@export var grain_burst_transition: Tween.TransitionType = Tween.TRANS_QUAD
+
 ## The material's own shader, cached once so every frame is a single
 ## [method ShaderMaterial.set_shader_parameter] rather than a resource fetch.
 var _shader_material: ShaderMaterial
 var _clock: Node
 var _pulse_amount: float = 0.0
 var _pulse_tween: Tween
+var _grain_burst_tween: Tween
 
 
 func _ready() -> void:
@@ -168,6 +186,49 @@ func clear_pulse() -> void:
 	if _pulse_tween != null and _pulse_tween.is_running():
 		_pulse_tween.kill()
 	_pulse_amount = 0.0
+
+
+## Throws the authored grain sheet across the frame for [param seconds] - the
+## door a dash, an impact or any other jolt knocks on for a burst of analog
+## damage on the film.
+##
+## [b]It says how loud and how long, never what it looks like.[/b] Where the
+## fragments land, how they are shaped, how fast they blink and how they are
+## coloured are all uniforms on the shader - this only lifts
+## [code]grain_sheet_burst[/code] to [param strength] and drives it back down,
+## and re-rolls the seed so no two bursts scatter to the same places. The burst
+## is composited inside the same film pass as the reel's own dirt, so the
+## flicker and the vignette act on it exactly as they always did.
+##
+## Retriggering restarts the burst from full rather than stacking, so dashing
+## repeatedly cannot leave the screen buried in grain.
+func grain_burst(seconds: float = -1.0, strength: float = 1.0) -> void:
+	if _shader_material == null:
+		return
+
+	if _grain_burst_tween != null and _grain_burst_tween.is_running():
+		_grain_burst_tween.kill()
+
+	var peak := maxf(strength, 0.0)
+	var time := default_grain_burst_time if seconds < 0.0 else seconds
+	_shader_material.set_shader_parameter(&"grain_sheet_burst_seed", randf() * 512.0)
+	_set_grain_burst(peak)
+	_grain_burst_tween = create_tween()
+	_grain_burst_tween.tween_method(_set_grain_burst, peak, 0.0, maxf(time, 0.01)) \
+		.set_trans(grain_burst_transition).set_ease(grain_burst_ease)
+
+
+## Cancels a burst in flight and clears the frame immediately.
+func clear_grain_burst() -> void:
+	if _grain_burst_tween != null and _grain_burst_tween.is_running():
+		_grain_burst_tween.kill()
+	_set_grain_burst(0.0)
+
+
+func _set_grain_burst(value: float) -> void:
+	if _shader_material == null:
+		return
+	_shader_material.set_shader_parameter(&"grain_sheet_burst", value)
 
 
 func _compute_intensity() -> float:

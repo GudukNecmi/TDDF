@@ -31,7 +31,7 @@ extends Node
 ## always zero there and the loop never starts. Nothing here reaches into
 ## Base or Arena movement at all.
 ##
-## [b]Acceleration and the Gallop are the same ramp.[/b] [member _current_speed]
+## [b]Acceleration and the Gallop are the same ramp.[/b] [member GallopRamp.speed]
 ## eases toward whatever [WorldMapHorse] says the target speed is - zero at
 ## rest, [member WorldMapHorse.walk_speed] moving, [member WorldMapHorse.run_speed]
 ## sprinting - over [member acceleration_duration] rising and
@@ -39,8 +39,12 @@ extends Node
 ## pitch are read straight off that one eased number every frame. That is what
 ## keeps the two "synchronized" rather than two separate timers that happen to
 ## agree today: there is only one clock between them. A direction change while
-## still moving never touches [member _current_speed] at all - see
+## still moving never touches [member GallopRamp.speed] at all - see
 ## [method _target_speed] - so the Gallop never restarts over it.
+
+## Group this joins, so anything that must stay quieter than the player's
+## own horse can find it - see [method get_active].
+const GROUP := &"world_map_horse_gallop"
 
 ## The reusable voice - a [LoopingSound] this node only ever calls
 ## [method LoopingSound.set_level] on. Left unresolved, the Gallop simply never
@@ -78,7 +82,7 @@ extends Node
 ## shaped, not for what the two ends are.
 @export var sprint_gallop_playback_rate: float = 1.5
 ## Shapes the climb from [member normal_gallop_playback_rate] to
-## [member sprint_gallop_playback_rate] as [member _current_speed] rises from
+## [member sprint_gallop_playback_rate] as [member GallopRamp.speed] rises from
 ## walk to run speed. 1 is a straight line; above 1 holds close to the normal
 ## rate until the horse is most of the way to a full sprint and then climbs
 ## quickly, so a light push past walking pace does not already sound like a
@@ -92,13 +96,15 @@ var _horse: WorldMapHorse
 ## the node again every frame.
 var _walk_speed: float = 0.0
 var _run_speed: float = 0.0
-## The Gallop's own current speed reading, eased toward whatever
-## [method _target_speed] asks for - the one clock volume and pitch are both
-## read off. Pixels per second, the same unit [member WorldMapHorse.walk_speed]
-## and [member WorldMapHorse.run_speed] are authored in, so 0 is unambiguously
-## "not moving" rather than a level or a rate that has to be reasoned about
-## separately.
-var _current_speed: float = 0.0
+## The gallop's own shape - the eased speed reading volume and pitch are both
+## taken from, and the curves between them. See [GallopRamp], which is where
+## all of that used to live inline in this file and where the World Map's
+## bandits now read it from too.
+var _ramp := GallopRamp.new()
+
+
+func _enter_tree() -> void:
+	add_to_group(GROUP)
 
 
 func _ready() -> void:
@@ -107,19 +113,33 @@ func _ready() -> void:
 		_loop.max_volume_db = volume_db
 
 
+## The player's own gallop, found by group - so anything that has to stay
+## quieter than the player's horse can ask what that actually is rather than
+## carrying a second copy of the number. See
+## [member WorldBanditGallopDirector.match_player_gallop_volume].
+static func get_active(from_node: Node) -> WorldMapHorseGallop:
+	if from_node == null or not from_node.is_inside_tree():
+		return null
+	return from_node.get_tree().get_first_node_in_group(GROUP) as WorldMapHorseGallop
+
+
 func _process(delta: float) -> void:
 	if _loop == null:
 		return
 	_bind_horse()
 
-	var target := _target_speed()
-	var duration := acceleration_duration if target > _current_speed else deceleration_duration
-	var span := maxf(maxf(_walk_speed, _run_speed), 1.0)
-	var rate := span / maxf(duration, 0.0001)
-	_current_speed = move_toward(_current_speed, target, rate * delta)
+	# Copied across every frame rather than once on ready, so retuning any of
+	# them in the inspector while the game runs is heard immediately - which is
+	# exactly how they behaved when they were read inline here.
+	_ramp.acceleration_duration = acceleration_duration
+	_ramp.deceleration_duration = deceleration_duration
+	_ramp.normal_playback_rate = normal_gallop_playback_rate
+	_ramp.sprint_playback_rate = sprint_gallop_playback_rate
+	_ramp.playback_scaling = speed_to_playback_scaling
+	_ramp.advance(_target_speed(), delta)
 
-	_loop.set_level(_level_for(_current_speed))
-	_loop.pitch_scale = _pitch_for(_current_speed)
+	_loop.set_level(_ramp.level())
+	_loop.pitch_scale = _ramp.pitch()
 
 
 ## The horse, found by group once and then reused - see the class doc's "never
@@ -139,6 +159,8 @@ func _bind_horse() -> void:
 
 	_walk_speed = maxf(_horse.walk_speed, 0.0)
 	_run_speed = maxf(_horse.run_speed, 0.0)
+	_ramp.walk_speed = _walk_speed
+	_ramp.run_speed = _run_speed
 
 
 ## Zero unmounted or standing still, [member _walk_speed] moving, and
@@ -158,28 +180,3 @@ func _target_speed() -> float:
 ## for movement starting or stopping.
 func _has_movement_input() -> bool:
 	return Input.get_vector(&"move_left", &"move_right", &"move_up", &"move_down") != Vector2.ZERO
-
-
-## 0 at rest, climbing to 1 by the time [member _current_speed] reaches
-## [member _walk_speed] and held there through a sprint - "do not instantly
-## start the full-volume gallop" is entirely about this leg; nothing about
-## reaching a sprint should make the loop louder than ordinary movement
-## already does.
-func _level_for(speed: float) -> float:
-	if _walk_speed <= 0.0:
-		return 0.0 if speed <= 0.0 else 1.0
-	return clampf(speed / _walk_speed, 0.0, 1.0)
-
-
-## [member normal_gallop_playback_rate] up to [member _walk_speed], easing
-## towards [member sprint_gallop_playback_rate] as [member _current_speed]
-## closes the gap to [member _run_speed] - shaped by
-## [member speed_to_playback_scaling] rather than a straight line, and never
-## the raw speed ratio itself, per rule 9's "do not use a 1:1 speed
-## multiplier".
-func _pitch_for(speed: float) -> float:
-	if _run_speed <= _walk_speed:
-		return normal_gallop_playback_rate
-	var t := clampf((speed - _walk_speed) / (_run_speed - _walk_speed), 0.0, 1.0)
-	var shaped := pow(t, speed_to_playback_scaling)
-	return lerpf(normal_gallop_playback_rate, sprint_gallop_playback_rate, shaped)

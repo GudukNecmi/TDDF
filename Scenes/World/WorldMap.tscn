@@ -26,7 +26,6 @@
 [ext_resource type="Script" uid="uid://dxlloon6fp242" path="res://Scripts/World/world_map_player_power.gd" id="20_mmw2l"]
 [ext_resource type="Script" uid="uid://b6r6wfqdlb8sn" path="res://Scripts/World/world_map_fog.gd" id="21_ol223"]
 [ext_resource type="Script" uid="uid://cw8vybahyjt8e" path="res://Scripts/World/world_map_fog_overlay.gd" id="22_mmw2l"]
-[ext_resource type="Script" uid="uid://oyyna3j78o7k" path="res://Scripts/UI/world_map_minimap.gd" id="26_udi1a"]
 [ext_resource type="Script" uid="uid://drqe4a700selw" path="res://Scripts/World/world_map_location_director.gd" id="30_5tegj"]
 [ext_resource type="Script" uid="uid://c3c46hecwmx6x" path="res://Scripts/World/blood_depot_service.gd" id="32_6j2tu"]
 [ext_resource type="Script" uid="uid://bggv4e5a4m7ja" path="res://Scripts/World/world_map_occlusion.gd" id="34_x0ngi"]
@@ -2222,6 +2221,7 @@ scale = Vector2(1.3, 1.3)
 texture = ExtResource("15_r3xhl")
 
 [node name="WorldBandits" type="Node2D" parent="." unique_id=25669060]
+y_sort_enabled = true
 
 [node name="Routes" type="Node2D" parent="WorldBandits" unique_id=1594767623]
 
@@ -2382,6 +2382,7 @@ position = Vector2(3625.0105, -2536.9702)
 position = Vector2(3557.2962, -1338.3712)
 
 [node name="Groups" type="Node2D" parent="WorldBandits" unique_id=1155586066]
+y_sort_enabled = true
 
 [node name="RegionA_Bandit1" type="Node2D" parent="WorldBandits/Groups" unique_id=1411326646]
 position = Vector2(-3786.906, -3891.2292)
@@ -2735,58 +2736,6 @@ theme_override_colors/font_outline_color = Color(0.05, 0.03, 0.01, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 22
 text = "DAWN"
-
-[node name="Minimap" type="Control" parent="UI" unique_id=1445433921]
-layout_mode = 3
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -240.0
-offset_top = 92.0
-offset_right = -20.0
-offset_bottom = 312.0
-grow_horizontal = 0
-mouse_filter = 2
-script = ExtResource("26_udi1a")
-
-[node name="Frame" type="Panel" parent="UI/Minimap" unique_id=77289755]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-
-[node name="ViewportContainer" type="SubViewportContainer" parent="UI/Minimap/Frame" unique_id=1551894020]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = -4.0
-offset_bottom = -4.0
-mouse_filter = 2
-stretch = true
-
-[node name="Viewport" type="SubViewport" parent="UI/Minimap/Frame/ViewportContainer" unique_id=2097848592]
-disable_3d = true
-handle_input_locally = false
-size = Vector2i(212, 212)
-render_target_update_mode = 4
-
-[node name="Camera" type="Camera2D" parent="UI/Minimap/Frame/ViewportContainer/Viewport" unique_id=1371098660]
-zoom = Vector2(0.1, 0.1)
-
-[node name="PlayerDot" type="ColorRect" parent="UI/Minimap" unique_id=987383312]
-layout_mode = 0
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -4.0
-offset_top = -4.0
-offset_right = 4.0
-offset_bottom = 4.0
-mouse_filter = 2
-color = Color(1, 0.85, 0.2, 1)
 
 [node name="ReturnGate" type="Node2D" parent="." unique_id=352526780]
 position = Vector2(-4333.3333, 1050)

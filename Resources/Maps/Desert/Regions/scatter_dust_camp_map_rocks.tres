@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ScatterLayer" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/scatter_layer.gd" id="1_layer"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Rock.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_layer")
+scenes = Array[PackedScene]([ExtResource("2_scene")])
+count = 560
+enabled = true
+scale_range = Vector2(0.8, 1.35)
+min_separation = 145.0
+min_separation_from_others = 45.0
+max_attempts = 14

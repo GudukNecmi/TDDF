@@ -8,6 +8,6 @@ point_count = 5
 
 [resource]
 script = ExtResource("1_h8gqu")
-fastest_speed = 314.6
-slowest_speed = 217.8
+fastest_speed = 214.2
+slowest_speed = 147.9
 speed_curve = SubResource("Curve_u0363")

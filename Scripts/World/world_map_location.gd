@@ -326,6 +326,11 @@ func _apply_location() -> void:
 	if location == null:
 		return
 	position = location.world_position
+	# A place the player rode out already having heard of - see
+	# [member MapLocation.known_from_start]. It grants the question mark and
+	# nothing else; the marker is still earned by [method _record_discovery].
+	if location.known_from_start:
+		MapKnowledge.mark_known(location.location_id)
 	_refresh_state()
 
 
@@ -350,7 +355,12 @@ func _apply_location() -> void:
 ## which is what lets this recheck occlusion on the same beat without a
 ## timer of this node's own.
 func _refresh_state() -> void:
-	if location == null or _icon == null:
+	if location == null:
+		return
+
+	_record_discovery()
+
+	if _icon == null:
 		return
 
 	var state := get_visibility_state()
@@ -369,6 +379,31 @@ func _refresh_state() -> void:
 		_icon.scale = Vector2(s, s) * icon_scale
 
 	_refresh_highlight()
+
+
+## Writes this place down as found, permanently, the first time [WorldMapFog]
+## actually reports it VISIBLE - see [MapKnowledge], which is what the M map
+## screen reads and what survives the run this location was found in.
+##
+## [b]It rides on the fog's own answer rather than measuring anything.[/b] This
+## runs on the same [signal WorldMapFog.fog_changed] beat the icon is redrawn on,
+## from the same [method WorldMapFog.get_state] call, so what the map remembers
+## having shown the player cannot drift out of step with what they were shown.
+##
+## [b]No fog records nothing.[/b] [method get_visibility_state] answers VISIBLE
+## when there is no fog to ask - the right fallback for drawing a marker in a
+## scene that has no fog of war, and exactly the wrong one for a permanent
+## record, since [method _apply_location] calls this once as the resource is
+## assigned, before the node is even in the tree. So the fog is asked directly
+## here and a missing one is simply not an answer.
+func _record_discovery() -> void:
+	if not is_enabled() or not is_inside_tree():
+		return
+	var fog := WorldMapFog.get_active(self)
+	if fog == null:
+		return
+	if fog.get_state(global_position) == WorldMapFog.VisibilityState.VISIBLE:
+		MapKnowledge.mark_discovered(location.location_id)
 
 
 ## Whether nothing on [WorldMapOcclusion]'s obstruction layer stands between

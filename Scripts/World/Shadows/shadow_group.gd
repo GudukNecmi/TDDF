@@ -21,6 +21,17 @@ extends Node2D
 ## number, so a head lands beyond a body, a raised knife lands beyond a hand, and a
 ## thing thrown into the air walks out from under itself without a special case.
 ##
+## [b]And an object may be standing on more than a line.[/b] Read as above, a prop
+## is a picture standing upright at one depth, so its base is a line and every last
+## pixel of it swings round with the light - which is what makes a tent's mark look
+## detached from the tent. A prop that has authored a footprint - see
+## [member ShadowCaster.ground_contact_path] - is projected as what it really is
+## instead: the band of artwork standing on that footing is [i]lying on the
+## ground[/i] and is drawn exactly where it is drawn, fixed under the prop at every
+## hour, and the rest of the picture is a thing standing on the back of that patch.
+## So the mark is the object's own footing with a rake growing out of it, and it
+## cannot leave the thing casting it. See [method _norm].
+##
 ## [b]Assembled first, all the same.[/b] The parts are laid out in [i]group
 ## space[/i] - a flat copy of the world with its origin at the point the object is
 ## standing on - each at its own real world transform, and every one of them is
@@ -79,6 +90,23 @@ const COMPOSITE_SHADER_PATH := "res://Shaders/shadow_composite.gdshader"
 ## worked out, in world pixels, if it has no measurable height at all. Only ever
 ## reached by a group whose artwork is a flat line.
 const MIN_SPAN := 1.0
+
+## How sharply a shadow settles onto the shortest length it is allowed - see
+## [method _pool_extent]. The two lengths are joined as
+## [code](reach^n + pool^n)^(1/n)[/code], which is a floor that is smooth
+## everywhere and has no corner to pop over. Raising it makes the floor bite later
+## and harder; 4 leaves a shadow twice its own footing lengthened by under half a
+## percent, which is well below a pixel, while still holding one at the floor
+## firmly.
+const POOL_FALLOFF := 4.0
+
+## Where along its own length a mark that is entirely the pool sits against the
+## point its object is standing on. Half is directly underneath, which is where the
+## patch of ground a thing stands on is; a cast shadow is anchored on its object's
+## footing instead - or on the hour's own authored slide, where the map has not asked
+## for the footing - and the two are blended by how much of the mark is which. See
+## [method _place].
+const POOL_CENTRE := 0.5
 
 ## How many texels of blur a softness of 1 asks for. Shared with the shaders, which
 ## do the same multiplication, so the padding put round the geometry and the blur
@@ -354,6 +382,11 @@ var _post_offset := Vector2.ZERO
 var _base_height: float = 0.0
 ## How tall the assembled artwork stands above that line, in world pixels.
 var _span: float = MIN_SPAN
+## How far to the side of the object's ground line its artwork reaches, in world
+## pixels - the half-width of the patch of ground it stands on. What the shortest
+## its shadow may be is taken from, so the floor is the object's own size and there
+## is nothing to author per prop. See [method _pool_extent].
+var _half_width: float = MIN_SPAN
 ## The height of the highest point of the artwork, in world pixels above the ground
 ## line. What the length fade is measured against, so the tip of a shadow is always
 ## the far end of it whatever the object is.
@@ -400,6 +433,43 @@ var _ray_width: float = 1.0
 ## by the container rather than by any vertex.
 var _shape_rise: float = 1.0
 var _shape_lean := Vector2.DOWN
+## Which way the silhouette's own width lies on the ground, and how much of it there
+## is.
+##
+## Straight across the screen for a caster taken as a flat card; for one taken as
+## having a body, the same side of the screen still, narrowed and tilted by however
+## its footprint presents to the light - see [method _lay_across], which is where
+## the whole of the reasoning is. It is the other axis of the container's basis, so
+## it costs nothing per vertex and cannot bend the silhouette any more than the lean
+## can. Its [b]length is not 1[/b]: it carries the foreshortening of the body and
+## the rounding off into the pool.
+var _shape_across := Vector2(1.0, 0.0)
+## How much of this object's artwork, measured up from the point it is standing on,
+## is lying on the ground rather than standing up - the authored footprint gathered
+## off the contributors, in world pixels. Zero for an object that has authored none,
+## and for every object on a map whose sun has not asked for footprints, which is
+## what leaves those projected exactly as they always were. See
+## [method ShadowCaster.get_ground_contact].
+var _contact_authored: float = 0.0
+## The same number as this update actually draws it: the authored one, or zero for
+## an hour whose basis has no inverse to write a flat band through - see
+## [method _lay_flat].
+var _contact_height: float = 0.0
+## How far that patch of floor spreads either side of the object, in world pixels.
+## What the pool underneath it is sized from - see [method _pool_extent].
+var _contact_half_width: float = 0.0
+## The container's basis read backwards: what one world pixel across and one world
+## pixel down the screen are worth as a vertex. The ground-contact band is written
+## through these, which is the whole of why it stays where it is drawn while the
+## light swings round - see [method _norm]. Both are the identity when there is no
+## footprint to draw, and the band is skipped rather than drawn through a basis
+## that cannot be inverted.
+var _flat_x := Vector2(1.0, 0.0)
+var _flat_y := Vector2(0.0, 1.0)
+## How much of the finished mark is the pool underneath the object rather than the
+## shadow thrown from it - 1 when the sun is straight overhead, 0 for anything with
+## a shadow much longer than its own footing. See [member SunController.minimum_shadow_ratio].
+var _pool_blend: float = 0.0
 ## How hard the projection bends over this object right now, as the second
 ## derivative of the shadow's displacement with respect to height. What the number
 ## of cuts a part needs is worked out from - see [method _grid_steps].
@@ -408,6 +478,15 @@ var _ray_curve: float = 0.0
 ## silhouette is worth drawing again - see [method _pose_settled]. Worked back from
 ## [member projection_tolerance] through how much this hour magnifies a movement.
 var _pose_slack: float = 0.0
+
+## Whether this group is sitting out an hour it owes a rebuild for because it is
+## outside the view - see [method _worth_rebuilding_now]. It is the one case the
+## return has to be watched for: the map's own scenery cull announces itself
+## through [signal CanvasItem.visibility_changed], but a landmark that is simply
+## off the side of the screen never stops being visible and nothing tells it that
+## the camera has come back. So the group processes - a rectangle test and nothing
+## else - for exactly as long as it is waiting.
+var _view_deferred: bool = false
 
 
 func _enter_tree() -> void:
@@ -423,7 +502,11 @@ func _ready() -> void:
 		process_priority = PROCESS_PRIORITY
 	_refresh_containers()
 	_connect_sun()
+	# Built once here whatever the view says, so no object is ever without a shadow
+	# it has simply never got round to making. Only the *re*builds are ever skipped.
 	update_group(true)
+	if not visibility_changed.is_connected(_on_visibility_changed):
+		visibility_changed.connect(_on_visibility_changed)
 	_refresh_processing()
 
 
@@ -432,6 +515,13 @@ func _exit_tree() -> void:
 
 
 func _process(_delta: float) -> void:
+	# Waiting for the camera to come back, and nothing else - see
+	# [member _view_deferred]. Paying the debt does the dynamic parts too, so there
+	# is nothing left to do this frame.
+	if _view_deferred and _worth_rebuilding_now():
+		_unpack_sun()
+		update_group(true)
+		return
 	update_group(false)
 
 
@@ -644,7 +734,7 @@ func project_to_group(world_point: Vector2) -> Vector2:
 	if _state == null:
 		return world_point - _ground - _post_offset
 	return _ray(
-		(world_point.x - _ground.x) * _ray_width,
+		world_point.x - _ground.x,
 		maxf((_ground.y - world_point.y) * height_scale, 0.0))
 
 
@@ -664,7 +754,8 @@ func project_to_group(world_point: Vector2) -> Vector2:
 ## the vector [code]ground - S[/code], which multiplies [code]t[/code] and nothing
 ## else. So the projection splits cleanly in two: a shape
 ## [code](across * (1 + t), t)[/code] that does not know where the object is, and one
-## 2x2 basis mapping that shape's second coordinate onto the ground - which is what
+## 2x2 basis laying that shape's two coordinates onto the ground - its width along
+## [member _shape_across] and its rise along [member _shape_lean] - which is what
 ## the container carries, and which costs the same to set for one object as for a
 ## hundred.
 ##
@@ -682,28 +773,54 @@ func project_to_group(world_point: Vector2) -> Vector2:
 ## The rise is scaled by [member _shape_rise] on the way out and unscaled by
 ## [member _shape_lean] on the way back, purely so the numbers written into a vertex
 ## stay in pixel-sized units instead of thousandths.
-func _norm(across: float, height: float) -> Vector2:
-	if height <= 0.0:
-		# Resting on the floor: the shadow of a point on the ground is that point.
-		return Vector2(across, 0.0)
+func _norm(art_across: float, height: float) -> Vector2:
+	# The hour's own width scale belongs to the spread a projection causes, never to
+	# the patch of ground the object is standing on - see the footprint below.
+	var across := art_across * _ray_width
+
+	if _contact_height <= 0.0:
+		if height <= 0.0:
+			# Resting on the floor: the shadow of a point on the ground is that
+			# point.
+			return Vector2(across, 0.0)
+		if not _ray_positional:
+			# Parallel rays - or standing exactly under the sun, where there is no
+			# direction to lean and the authored one breaks the tie. The rise is the
+			# height itself; nothing spreads, so there is no widening either.
+			return Vector2(across, height * _shape_rise)
+		# The sun cannot be reached, let alone passed: something thrown higher than
+		# the sun would flip its shadow to the far side, so the ray is held just
+		# below it.
+		var lift := minf(height, _ray_height * 0.98)
+		var rise := lift / (_ray_height - lift)
+		return Vector2(across * (1.0 + rise), rise * _shape_rise)
+
+	# [b]Standing on a footprint.[/b] The band of artwork up to it is not standing
+	# up at all - it is the patch of floor the object covers - so it is written
+	# through the world's own axes and lands exactly where it is drawn, whatever the
+	# light is doing. Everything above it is a thing standing on the back of that
+	# patch, so the ray is added as an [i]offset[/i] from the point the band reached
+	# rather than from the object's own ground line: the two meet exactly at the
+	# seam, and the mark can no longer leave the thing casting it.
+	var flat := minf(height, _contact_height)
+	var base := art_across * _flat_x - flat * _flat_y
+	var lifted := height - _contact_height
+	if lifted <= 0.0:
+		return base
 	if not _ray_positional:
-		# Parallel rays - or standing exactly under the sun, where there is no
-		# direction to lean and the authored one breaks the tie. The rise is the
-		# height itself; nothing spreads, so there is no widening either.
-		return Vector2(across, height * _shape_rise)
-	# The sun cannot be reached, let alone passed: something thrown higher than the
-	# sun would flip its shadow to the far side, so the ray is held just below it.
-	var lift := minf(height, _ray_height * 0.98)
-	var rise := lift / (_ray_height - lift)
-	return Vector2(across * (1.0 + rise), rise * _shape_rise)
+		return base + Vector2(0.0, lifted * _shape_rise)
+	var stand := minf(lifted, _ray_height * 0.98)
+	var thrown := stand / (_ray_height - stand)
+	return base + Vector2(across * thrown, thrown * _shape_rise)
 
 
 ## The basis the shape is drawn through - the container's own transform, and the
-## other half of [method _norm]. Its x axis is left alone and its y axis says where
-## a unit of the ray's rise lands, which is where the object's own place on the map
-## enters and the only place it does.
+## other half of [method _norm]. Its x axis says where the silhouette's own width
+## lies on the ground - see [member _shape_across] - and its y axis where a unit of
+## the ray's rise lands, which is where the object's own place on the map enters and
+## the only place it does.
 func _shape_basis() -> Transform2D:
-	return Transform2D(Vector2(1.0, 0.0), _shape_lean, _ground + _post_offset)
+	return Transform2D(_shape_across, _shape_lean, _ground + _post_offset)
 
 
 ## How high above the ground line a point of artwork at [param world_point] is
@@ -725,18 +842,19 @@ func height_of(world_point: Vector2) -> float:
 ## the basis is put on the container once. It is the readout - what a test, a debug
 ## panel or [ShadowTransform] asks when it wants one point's answer in full.
 ##
-## [param across] is already scaled by the hour's own width; [param height] is
+## [param art_across] is the artwork's own offset from the object's ground line, before
+## the hour's width scale - see [method _norm]; [param height] is
 ## already scaled by [member height_scale] and never negative.
 ## The art offsets are deliberately not in here. They shift every point of the
 ## silhouette by the same amount, so they are carried by the container the geometry
 ## hangs under instead - which means authoring one, or the hour changing where a
 ## shadow sits along its own length, moves the mark without a single point of it
 ## having to be projected again.
-func _ray(across: float, height: float) -> Vector2:
-	var shape := _norm(across, height)
+func _ray(art_across: float, height: float) -> Vector2:
+	var shape := _norm(art_across, height)
 	return Vector2(
-		shape.x + shape.y * _shape_lean.x,
-		shape.y * _shape_lean.y)
+		shape.x * _shape_across.x + shape.y * _shape_lean.x,
+		shape.x * _shape_across.y + shape.y * _shape_lean.y)
 
 
 ## Redraws the group. [param include_static] does the contributors that only repaint
@@ -950,12 +1068,22 @@ func get_edge_padding() -> float:
 
 
 ## The softness this object's shadow is actually drawn with - see
-## [member softness_override].
+## [member softness_override], and [member SunController.pool_softness] for the
+## other half.
+##
+## A mark that has shortened into the pool under its object is ambient shade rather
+## than a cast shadow, and a hard cut-out is a good part of what makes a very short
+## shadow read as broken, so the edge softens as the pool takes over. It only ever
+## softens: a prop that asked for a softer edge than the map's pool keeps its own.
 func _effective_softness() -> float:
 	if _state == null:
 		return 0.0
-	return _state.shadow_softness if softness_override < 0.0 \
+	var own := _state.shadow_softness if softness_override < 0.0 \
 		else clampf(softness_override, 0.0, 1.0)
+	if _pool_blend <= 0.0 or _sun == null:
+		return own
+	return clampf(
+		lerpf(own, maxf(_sun.get_pool_softness(), own), _pool_blend), 0.0, 1.0)
 
 
 ## Builds one contributor's geometry: its artwork cut into a grid and every corner
@@ -1025,6 +1153,12 @@ func apply(caster: ShadowCaster, world: Transform2D, alpha: float) -> bool:
 	var lift_cap := sun_height * 0.98
 	var rise_scale := _shape_rise
 	var width := _ray_width
+	# The footprint, unpacked the same way. Zero is the whole of what an object with
+	# no authored footing costs: one comparison per point, and the same arithmetic
+	# the projection always did.
+	var contact := _contact_height
+	var flat_x := _flat_x
+	var flat_y := _flat_y
 	var index := 0
 	var colour := Color(0.0, 0.0, 0.0, alpha)
 	var _t1 := Time.get_ticks_usec()
@@ -1037,9 +1171,26 @@ func apply(caster: ShadowCaster, world: Transform2D, alpha: float) -> bool:
 			# so this whole loop has no idea where on the map it is standing.
 			var point := world * (edge + Vector2(padded.size.x * over, 0.0))
 			var height := -point.y * height_scale
-			var across := point.x * width
 			if height <= 0.0:
 				height = 0.0
+			var across := point.x * width
+			# How much of this point is standing up. Without a footprint that is the
+			# whole of its height; with one, the band below the footing is lying on
+			# the floor and only what is above it is thrown - see _norm, which is
+			# this said once and readably.
+			var lifted := height - contact
+			if contact > 0.0:
+				var base := flat_x * point.x - flat_y * minf(height, contact)
+				if lifted <= 0.0:
+					vertices[index] = base
+				elif positional:
+					var stand := minf(lifted, lift_cap)
+					var thrown := stand / (sun_height - stand)
+					vertices[index] = base \
+						+ Vector2(across * thrown, thrown * rise_scale)
+				else:
+					vertices[index] = base + Vector2(0.0, lifted * rise_scale)
+			elif height <= 0.0:
 				vertices[index] = Vector2(across, 0.0)
 			elif positional:
 				var lift := minf(height, lift_cap)
@@ -1052,8 +1203,11 @@ func apply(caster: ShadowCaster, world: Transform2D, alpha: float) -> bool:
 			# Red carries how high up the object this point was, so the length fade
 			# can be measured off the light rather than off the picture's own edges -
 			# which is what keeps a swung weapon and a rolling head fading with the
-			# rest of the figure instead of along their own texture.
-			colour.r = minf(height * inverse_top, 1.0)
+			# rest of the figure instead of along their own texture. Measured from
+			# the footing rather than from the ground line, so the band lying on the
+			# floor is the near end of the fade rather than a fifth of the way along
+			# it.
+			colour.r = clampf(lifted * inverse_top, 0.0, 1.0)
 			colors[index] = colour
 			index += 1
 
@@ -1158,14 +1312,93 @@ func _measure_art(part: Part, source: Sprite2D, texture: Texture2D,
 func _grid_steps(world: Transform2D, padded: Rect2) -> Vector2i:
 	var cap := maxi(projection_subdivisions, 1)
 	var detail := maxf(projection_detail_scale, 0.0)
-	if detail <= 0.0 or _ray_curve <= 0.0:
-		return Vector2i.ONE
-	# Cuts per world pixel of height covered, from bend * (span / n)^2 / 8 <= tol.
-	var tolerance := maxf(projection_tolerance, 0.01) / detail
-	var per_pixel := sqrt(_ray_curve / (8.0 * tolerance)) * height_scale
-	return Vector2i(
-		clampi(ceili(absf(world.x.y) * padded.size.x * per_pixel), 1, cap),
-		clampi(ceili(absf(world.y.y) * padded.size.y * per_pixel), 1, cap))
+	var across := 1
+	var down := 1
+	if detail > 0.0 and _ray_curve > 0.0:
+		# Cuts per world pixel of height covered, from bend * (span / n)^2 / 8 <= tol.
+		var tolerance := maxf(projection_tolerance, 0.01) / detail
+		var per_pixel := sqrt(_ray_curve / (8.0 * tolerance)) * height_scale
+		across = clampi(ceili(absf(world.x.y) * padded.size.x * per_pixel), 1, cap)
+		down = clampi(ceili(absf(world.y.y) * padded.size.y * per_pixel), 1, cap)
+
+	if _contact_height > 0.0:
+		# [b]A footprint puts a crease across the picture, and a crease has to fall
+		# between two rows of vertices to be a crease at all.[/b] The band is lying
+		# on the ground and everything above it is standing up - see [method _norm]
+		# - so a cell that spans the two is drawn as one smooth ramp between them
+		# and the band is sheared after all. Cutting finely enough that a cell
+		# covers no more of the world's vertical than the band itself does puts a
+		# row inside the band however little the bend alone would have asked for.
+		#
+		# It is allowed twice the authored cap, because this is a fact about the
+		# geometry rather than about how hard the projection happens to be bending,
+		# and because what needs it is scenery - which is rebuilt when the sun moves
+		# and not otherwise.
+		var seam := maxf(_contact_height, 0.01)
+		var crease := cap * 2
+		across = clampi(maxi(across,
+			ceili(absf(world.x.y) * padded.size.x * height_scale / seam)), 1, crease)
+		down = clampi(maxi(down,
+			ceili(absf(world.y.y) * padded.size.y * height_scale / seam)), 1, crease)
+	return Vector2i(across, down)
+
+
+## Gathers the patch of floor this object is standing on off its contributors - see
+## [method ShadowCaster.get_ground_contact].
+##
+## [b]The largest footing wins, and nothing is averaged.[/b] An object is standing
+## on whatever its widest and deepest part is standing on: a tent has one footing,
+## and a figure with several stands on the ground its own parts cover between them.
+## A part that has authored none says nothing at all rather than pulling the answer
+## down to zero, so a weapon in a hand cannot flatten the figure holding it.
+##
+## Zero on a map whose sun has not asked for footprints - see
+## [member SunController.ground_contact_shadows] - which is what leaves the Arena
+## and the Base projected exactly as they always were, whatever their props have
+## authored.
+func _measure_contact() -> void:
+	_contact_authored = 0.0
+	_contact_half_width = 0.0
+	if _sun == null or not _sun.grounds_shadows_on_contact():
+		return
+	for caster: ShadowCaster in _casters:
+		if not is_instance_valid(caster):
+			continue
+		var part: Part = _parts.get(caster)
+		if part == null or not part.contributing:
+			continue
+		var contact := caster.get_ground_contact()
+		if contact.y <= 0.0:
+			continue
+		_contact_half_width = maxf(_contact_half_width, contact.x)
+		_contact_authored = maxf(_contact_authored, contact.y * height_scale)
+
+
+## Reads the container's basis backwards, so the ground-contact band can be written
+## in the world's own axes - see [member _flat_x].
+##
+## [b]It is the whole of what a footprint costs per update.[/b] Every point of the
+## band has to land exactly where its artwork is drawn, and the container the
+## geometry hangs under carries the sun's own two axes; so what a vertex has to hold
+## is those axes inverted, worked out once here rather than once per point.
+##
+## A basis with no inverse - a light with no lean for a shadow to lie along - has no
+## ground to lay a band on either, so the footprint is dropped for that update and
+## the object is projected as the upright card it always was.
+func _lay_flat() -> void:
+	_flat_x = Vector2(1.0, 0.0)
+	_flat_y = Vector2(0.0, 1.0)
+	_contact_height = 0.0
+	if _contact_authored <= 0.0:
+		return
+	var determinant := _shape_across.x * _shape_lean.y \
+		- _shape_lean.x * _shape_across.y
+	if absf(determinant) < 0.0001:
+		return
+	var inverse := 1.0 / determinant
+	_flat_x = Vector2(_shape_lean.y, -_shape_across.y) * inverse
+	_flat_y = Vector2(-_shape_lean.x, _shape_across.x) * inverse
+	_contact_height = _contact_authored
 
 
 ## How tall the object's assembled artwork stands and how high off the floor it is
@@ -1179,8 +1412,10 @@ func _grid_steps(world: Transform2D, padded: Rect2) -> Vector2i:
 ## against the ground point, so an object that merely walked carries its whole shape
 ## with it and the answer cannot have changed - see [method _gather].
 func _measure() -> void:
+	_measure_contact()
 	var lowest := -INF
 	var highest := INF
+	var widest := 0.0
 	var found := false
 	for caster: ShadowCaster in _casters:
 		var part: Part = _parts.get(caster)
@@ -1188,18 +1423,24 @@ func _measure() -> void:
 			continue
 		# Measured against the pose already taken for the frame, so no part's
 		# transform is read twice and nothing is allocated to hold its corners.
-		var band := SpriteBounds.world_band(caster.get_source_sprite(), part.pose)
-		if band == Vector2.ZERO:
+		var box := SpriteBounds.world_box(caster.get_source_sprite(), part.pose)
+		if box.size == Vector2.ZERO:
 			continue
 		found = true
-		lowest = maxf(lowest, band.y)
-		highest = minf(highest, band.x)
+		lowest = maxf(lowest, box.end.y)
+		highest = minf(highest, box.position.y)
+		# The poses are held against the point the object is standing on, so the
+		# widest the artwork reaches either side of x = 0 is the half-width of the
+		# ground it covers - which is what a pool under it is sized from.
+		widest = maxf(widest, maxf(absf(box.position.x), absf(box.end.x)))
 
 	if not found:
 		_base_height = 0.0
 		_span = MIN_SPAN
 		_top_height = MIN_SPAN
+		_half_width = MIN_SPAN
 		return
+	_half_width = maxf(widest, MIN_SPAN)
 
 	# World Y runs down the screen, so the artwork's own ground line is its lowest
 	# point and its top is its highest. Both are turned into heights above the point
@@ -1207,7 +1448,28 @@ func _measure() -> void:
 	# taken against that point already, so the ground line is simply zero.
 	_base_height = maxf(-lowest, 0.0)
 	_span = maxf(lowest - highest, MIN_SPAN)
-	_top_height = maxf((_base_height + _span) * height_scale, MIN_SPAN)
+	# How high the top of the artwork stands above the point the object is standing
+	# on, which is the only height the sun is ever asked about.
+	#
+	# Read off the top directly where the map asks for it - see
+	# [member SunController.measure_height_to_top]. Artwork drawn [i]below[/i] the
+	# ground line - a prop whose base skirts a little under its own footing, a leg
+	# mid-stride - is standing on the floor, not sunk beneath it, so the part of it
+	# under the line is projected where it is and is no part of how tall the thing
+	# is. Adding it in, which is what the sum below does, stretches every such shadow
+	# by however far the artwork dips.
+	#
+	# The sum is still what a map that has not asked gets, to the last bit, because
+	# the shadow lengths in those scenes were authored against it.
+	if _measures_height_to_top():
+		_top_height = maxf(-highest, MIN_SPAN) * height_scale
+	else:
+		_top_height = maxf((_base_height + _span) * height_scale, MIN_SPAN)
+	# The footing is not part of how tall the object is. The band lying on the floor
+	# throws nothing, so the height the sun is asked about is what stands above it -
+	# which is what keeps a tent's mark the length of the tent above its pegs rather
+	# than of the whole picture.
+	_top_height = maxf(_top_height - _contact_authored, MIN_SPAN)
 
 
 ## Asks the sun where this object's ground line and its top go, and from that works
@@ -1218,11 +1480,12 @@ func _measure() -> void:
 ## art controls from being able to fake a sun direction.
 func _place() -> void:
 	_post_offset = Vector2.ZERO
-	_direction = _state.shadow_direction_at(_ground)
+	# The sun's own numbers first. Which way the light lies, how far this object
+	# throws and how much of the mark is the pool underneath it all come out of
+	# there, and every offset below is measured against one of them.
+	_unpack_sun()
 
 	var foot := _state.project(_ground, _base_height * height_scale)
-	var tip := _state.project(_ground, _top_height)
-	_reach = (tip - _ground).length()
 
 	# The near end's walk away from the feet, held to the sun's own limit so a very
 	# low sun and a very high jump cannot throw a mark across the whole arena.
@@ -1231,16 +1494,52 @@ func _place() -> void:
 	if _state.shadow_max_distance > 0.0 and distance > _state.shadow_max_distance:
 		_post_offset -= walked * (1.0 - _state.shadow_max_distance / distance)
 
-	# Where along its own length the finished mark sits against the object's feet. 0
-	# starts it there, which is what a cast shadow does; 0.5 centres it under them,
-	# which is what a midday pool wants. Along the light, and only along it.
-	_post_offset -= _direction * (_reach * _state.shadow_length_anchor)
-	# The authored pull, in the one direction that means anything: back along the
-	# light towards the object. Positive closes the gap between a prop and its mark.
-	_post_offset -= _direction * (shadow_pull + _anchor_pull())
+	# Where along its own length the finished mark sits against the object's feet.
+	# Along the light, and only along it.
+	#
+	# [b]A cast shadow starts at the object's own footing, and that is not an
+	# authored number.[/b] The near end of the mark is where the object meets the
+	# floor, so it belongs exactly where the sun put that point and nowhere else.
+	# Sliding it a fraction of the way down its own length instead walks the mark off
+	# its object by a fraction of that object's whole reach - nothing on a bone, half
+	# a tent on a tent, which is why it was the large props whose shadows read as
+	# detached.
+	#
+	# What genuinely does want to sit under the feet is the pool: a mark that has
+	# shortened onto the patch of ground the object is standing on has no far end
+	# left to hang off, so it centres. Blended rather than switched, so the mark
+	# slides under the object as the sun climbs instead of arriving there.
+	#
+	# A map that has not asked for the footing keeps the authored slide as the near
+	# end it blends away from - see [member SunController.anchor_shadows_on_footing]
+	# - so the Arena and the Base, which have no pool for the blend to reach, are
+	# placed exactly where they always were.
+	# [b]An object standing on its own footprint is already anchored, so nothing
+	# slides it.[/b] The slide along the light and the authored pull both exist to
+	# put a mark back on a caster the projection had walked it off - see
+	# [member SunController.anchor_shadows_on_footing] - and a shadow grown out of
+	# the patch of floor the object covers never left it to begin with. Sliding one
+	# of those is what would take the fixed band out from under the prop, so with a
+	# footprint in play both are simply not applied.
+	if _contact_authored <= 0.0:
+		var along := lerpf(_authored_anchor(), POOL_CENTRE, _pool_blend)
+		_post_offset -= _direction * (_reach * along)
+		# The authored pull, in the one direction that means anything: back along the
+		# light towards the object. Positive closes the gap between a prop and its
+		# mark.
+		#
+		# [b]It is a contact gap, so it goes when there is no gap left.[/b] A pull is
+		# authored against a raked shadow - the mark leaves the prop's base along the
+		# light and a few pixels of pull sit it back down on the footing. A mark that
+		# has shortened into the pool underneath the object never left in the first
+		# place, and the same pull then walks the pool off the very thing it belongs
+		# to, which is what makes a big prop look as though its shadow has come
+		# adrift. So it fades out on exactly the curve the pool comes in on, leaving
+		# the pool centred on the object's own footing and a raked shadow pulled in
+		# full.
+		_post_offset -= _direction \
+			* ((shadow_pull + _anchor_pull()) * (1.0 - _pool_blend))
 	_post_offset += shadow_offset + _anchor_offset()
-
-	_unpack_sun()
 
 
 ## Takes the sun's numbers out of [SunState] and into plain floats for [method _ray]
@@ -1254,6 +1553,7 @@ func _unpack_sun() -> void:
 		and not (_ground - _state.position).is_zero_approx()
 	_ray_sun = _state.position
 	_ray_fall = _state.direction * _state.length_ratio
+	_direction = _state.shadow_direction_at(_ground)
 
 	# The two halves of the projection - see _norm. The rise written into a vertex is
 	# scaled by the sun's own height, which every object in the map shares, so what a
@@ -1280,10 +1580,186 @@ func _unpack_sun() -> void:
 		var fall := _ray_height - top
 		_ray_curve = away * 2.0 * _ray_height / (fall * fall * fall)
 
-	# How much this hour magnifies a movement of the artwork: sideways, by how far the
-	# rays have spread by the time they reach the top of the object; up and down, by
-	# how many pixels along the light a pixel of height is worth. A movement smaller
-	# than the tolerance divided by that cannot show.
+	_measure_reach(top)
+	_hold_minimum_reach(top)
+	_lay_across()
+	_lay_flat()
+
+	_pose_slack = _movement_slack(top)
+
+
+## How far the top of this object throws, worked out from the two halves the
+## geometry is actually built in rather than by asking the sun again.
+##
+## [b]It is the same number [method SunState.project] gives[/b], and deliberately
+## so: the tip of a vertex at the top of the object is [param carry] units of rise
+## through [member _shape_lean], so a reach taken that way cannot disagree with
+## where the drawing actually goes. [param top] is the object's height already held
+## below the sun's own.
+func _measure_reach(top: float) -> void:
+	_reach = _shape_lean.length() * _carry(top)
+
+
+## How much rise a vertex at the top of the object carries - see [method _norm].
+## Multiply [member _shape_lean] by it and you have the tip.
+func _carry(top: float) -> float:
+	if not _ray_positional:
+		return maxf(_top_height, MIN_SPAN)
+	return _ray_height * top / maxf(_ray_height - top, 0.001)
+
+
+## Holds the shadow at the shortest length the object's own footing allows, and
+## says how much of what is left is that footing rather than a cast shadow.
+##
+## [b]A thing standing on the ground covers some of it however high the sun
+## climbs.[/b] Under a nearly overhead sun the rake goes to nothing and the
+## projection has a whole object compressed into a few pixels along the light,
+## which draws as a torn sliver rather than as a shadow. Giving the length a floor
+## taken from the object's own width restores what was missing - the patch of
+## ground it is standing on - and does it without a second shape to draw or a
+## threshold to cross, because it is the same silhouette through the same
+## projection with one number held up.
+##
+## [b]Nothing is switched.[/b] The floor is joined to the true length as
+## [code](reach^n + floor^n)^(1/n)[/code] - see [constant POOL_FALLOFF] - which is
+## smooth at every length, so a shadow growing out of its pool lengthens
+## continuously and there is no instant at which the shape changes. The blend that
+## comes back is the same curve read the other way, and is what settles the mark
+## under the object's feet - see [constant POOL_CENTRE] - rounds its width off onto
+## the same footing - see [method _lay_across] - and softens its edge as it becomes
+## a pool. All three arrive together and on the one curve, so what a rising sun
+## actually does is shorten a shadow into a small soft round patch underneath its
+## object, and a falling one draws it back out again.
+##
+## The light's own direction is untouched: the lean is rewritten along
+## [member _direction], which is where it already pointed in both projection modes.
+func _hold_minimum_reach(top: float) -> void:
+	_pool_blend = 0.0
+	var pool := _pool_extent()
+	if pool <= 0.0:
+		return
+
+	var thrown := pow(maxf(_reach, 0.0), POOL_FALLOFF)
+	var floored := pow(pool, POOL_FALLOFF)
+	var want := pow(thrown + floored, 1.0 / POOL_FALLOFF)
+	_pool_blend = clampf(floored / maxf(thrown + floored, 0.0001), 0.0, 1.0)
+
+	var carry := _carry(top)
+	if carry > 0.0001:
+		_shape_lean = _direction * (want / carry)
+	_reach = want
+
+
+## The shortest this object's shadow may be, in world pixels - the patch of ground
+## it is standing on, as a fraction of its own measured width. Zero on a map that
+## has not asked for a floor at all, which is every arena.
+func _pool_extent() -> float:
+	if _sun == null:
+		return 0.0
+	var ratio := _sun.get_minimum_shadow_ratio()
+	if ratio <= 0.0:
+		return 0.0
+	# The ground the object is standing on, where it has said what that is, and the
+	# width of its artwork where it has not. A wide-topped thing - a tent, a cactus
+	# with arms - covers far less floor than it covers screen, and a pool taken off
+	# the picture instead of off the footing is the size of the roof.
+	var footing := _contact_half_width if _contact_half_width > 0.0 else _half_width
+	# Against the width the shadow is actually drawn at, so the pool stays as round
+	# as the hour's own width scale leaves it.
+	return ratio * footing * 2.0 * maxf(_ray_width, 0.0)
+
+
+## Whether this map measures an object's height to the top of its artwork - see
+## [member SunController.measure_height_to_top]. A group with no sun measures the
+## old way, since that is what a scene opened on its own was always drawn with.
+func _measures_height_to_top() -> bool:
+	return _sun != null and _sun.measures_height_to_top()
+
+
+## Where along its own length a mark starts, before the pool centres it - 0 on a map
+## that anchors a shadow on its caster's footing, and the hour's own authored slide
+## on one that does not. See [member SunController.anchor_shadows_on_footing].
+func _authored_anchor() -> float:
+	if _state == null or (_sun != null and _sun.anchors_shadows_on_footing()):
+		return 0.0
+	return _state.shadow_length_anchor
+
+
+## Lays the silhouette's own width on the ground - see [member _shape_across].
+##
+## [b]The object's left stays on its left, at every hour of the day.[/b] That is the
+## whole of what this method is for, and it is not a matter of taste: the projection
+## of an upright thing onto the floor moves points along the light and leaves their
+## sideways position alone, so a point drawn to the right of a prop lands to the
+## right of it whichever side of the map the sun is on. A width axis that swings
+## round with the light does not do that - it carries the silhouette round with the
+## sun, so a wide building lit from the side lays its width [i]up the screen[/i] and
+## the same building lit from the front lays it out mirrored. That is what a shadow
+## flipping over through the afternoon actually is.
+##
+## [b]So the width is pinned to the screen's own right, and only its length
+## changes.[/b] For a caster taken as a flat card - see
+## [member SunController.solid_casters] - that is the whole answer, and the card
+## loses its shadow entirely at the two hours the light runs along its width, which
+## is what a thing with no depth does.
+##
+## For one taken as having a body, the footprint is an ellipse as wide as the
+## artwork and [member SunController.caster_depth_ratio] as deep, and the width is
+## laid across whatever that ellipse presents to the light: its full width when the
+## light comes down the screen or up it, its depth when the light runs straight
+## across, and the support point of the ellipse in between. So the mark narrows and
+## opens out over the day the way a body's does, without ever turning round.
+##
+## [b]And it rounds off into the pool.[/b] As the sun climbs and the mark shortens
+## onto the patch of ground the object is standing on - see
+## [method _hold_minimum_reach] - the width settles onto that same footing, so what
+## is left directly under an overhead sun is a small round shadow rather than the
+## object's whole silhouette squashed flat along one axis.
+func _lay_across() -> void:
+	if _sun == null or _direction.is_zero_approx():
+		_shape_across = Vector2(1.0, 0.0)
+		return
+
+	# Perpendicular to the light, taken on the side the camera calls right. Both
+	# perpendiculars describe the same footprint - an ellipse is symmetric - and this
+	# is the one that leaves the artwork the way round it is drawn.
+	var normal := Vector2(_direction.y, -_direction.x)
+	if normal.x < 0.0:
+		normal = -normal
+
+	# The ellipse's support point in that direction, as a multiple of the artwork's
+	# own half width: (a*a*n.x, b*b*n.y) normalised, with b = depth * a. Depth 1
+	# leaves the normal itself - a round footprint, and the one case that does swing
+	# the silhouette round with the sun.
+	var depth := _sun.get_caster_depth_ratio()
+	if depth <= 0.0:
+		# No body to present: a flat card, whose width is across the screen and
+		# stays there. Every arena is drawn this way.
+		_shape_across = Vector2(1.0, 0.0)
+	else:
+		var squash := depth * depth
+		var scale := sqrt(normal.x * normal.x + squash * normal.y * normal.y)
+		_shape_across = Vector2(normal.x, squash * normal.y) / maxf(scale, 0.0001)
+
+	# The pool is the ground the object stands on rather than a picture of the
+	# object, so it is as wide as it is long. The length has already been held at
+	# twice the footing radius - see _pool_extent - and one half width of artwork
+	# reaches that same radius at exactly the map's own ratio, so the two ends of the
+	# blend meet without either being authored.
+	if _pool_blend > 0.0:
+		var round_width := _sun.get_minimum_shadow_ratio()
+		_shape_across = _shape_across.normalized() \
+			* lerpf(_shape_across.length(), round_width, _pool_blend)
+
+
+## How far a contributor may move against the object before its silhouette is worth
+## drawing again - see [method _pose_settled].
+##
+## How much this hour magnifies a movement of the artwork: sideways, by how far the
+## rays have spread by the time they reach the top of the object; up and down, by
+## how many pixels along the light a pixel of height is worth. A movement smaller
+## than the tolerance divided by that cannot show.
+func _movement_slack(top: float) -> float:
 	var spread := _ray_width
 	if _ray_positional:
 		spread *= _ray_height / maxf(_ray_height - top, 0.001)
@@ -1293,7 +1769,7 @@ func _unpack_sun() -> void:
 		# Drawn as a flat quad by choice: nothing about this object is worth a redraw
 		# it does not need, so the bound is the tolerance in full.
 		detail = 1.0
-	_pose_slack = maxf(projection_tolerance, 0.0) / detail \
+	return maxf(projection_tolerance, 0.0) / detail \
 		/ maxf(maxf(spread, rake), 1.0)
 
 
@@ -1510,10 +1986,73 @@ func _resolve_sun() -> SunController:
 
 ## Static groups hang off the sun rather than the frame: they repaint while it is
 ## crossing the sky and cost exactly nothing while it is not.
+##
+## [b]The debt is taken before the view is consulted.[/b] [method mark_dirty] is
+## what records that this object owes a rebuild, and it runs whether or not one
+## happens now - so a shadow passed over while nobody could see it is not a shadow
+## that has forgotten the hour, it is one that has not got round to it yet, and the
+## next update it does rebuilds in full.
 func _on_sun_updated(state: SunState) -> void:
 	_state = state
-	_unpack_sun()
 	mark_dirty()
+	if not _worth_rebuilding_now():
+		return
+	_unpack_sun()
+	update_group(true)
+
+
+## The map's own answer to "can the player see this", and the whole of the view
+## cull. Only ever consulted for a rebuild; see [method _on_sun_updated].
+##
+## [b]It reuses the culling the map already does rather than measuring again.[/b]
+## Scenery that [PropScatter] has taken away is hidden, so the first test is a flag
+## the map keeps up to date for its own reasons and this reads for free. What is
+## left - the landmarks and the buildings, which are always in the tree because
+## nothing culls them - is measured against the camera's own rectangle, and that is
+## asked of the sun rather than of the viewport so the whole map pays for one
+## camera read a frame.
+func _worth_rebuilding_now() -> bool:
+	if _sun == null or not _sun.culls_static_rebuilds():
+		return _clear_view_deferral(true)
+	if not is_visible_in_tree():
+		# Taken away by the map's own cull. Nothing has to watch for the return:
+		# being handed back is a visibility change and announces itself.
+		return _clear_view_deferral(false)
+
+	var view := _sun.get_rebuild_view()
+	if view.size.x <= 0.0 or view.size.y <= 0.0:
+		# No camera to measure against, so nothing is out of view.
+		return _clear_view_deferral(true)
+	# A shadow can reach the screen from an object that cannot, so the object's own
+	# length is added to the map's margin rather than assumed to be inside it.
+	if view.grow(maxf(_reach, 0.0) + maxf(_top_height, 0.0)).has_point(_ground):
+		return _clear_view_deferral(true)
+
+	if not _view_deferred:
+		_view_deferred = true
+		_refresh_processing()
+	return false
+
+
+## Puts down the wait for the camera, if one was being kept, and answers
+## [param verdict] - so the two lines that end a deferral live in one place rather
+## than at every way out of [method _worth_rebuilding_now].
+func _clear_view_deferral(verdict: bool) -> bool:
+	if _view_deferred:
+		_view_deferred = false
+		_refresh_processing()
+	return verdict
+
+
+## Brought back by the map's scenery cull, or by a parent being shown again. A
+## group that owes an hour pays it here, in the frame it is handed back, so nothing
+## is ever seen wearing the shadow of an hour that has gone.
+func _on_visibility_changed() -> void:
+	if _built_look == _look_serial or not is_visible_in_tree():
+		return
+	if not _worth_rebuilding_now():
+		return
+	_unpack_sun()
 	update_group(true)
 
 
@@ -1523,4 +2062,4 @@ func _refresh_processing() -> void:
 		if is_instance_valid(caster) and caster.enabled \
 				and caster.cast_mode == ShadowCaster.CastMode.CAST_DYNAMIC:
 			_dynamic_count += 1
-	set_process(enabled and _dynamic_count > 0)
+	set_process(enabled and (_dynamic_count > 0 or _view_deferred))

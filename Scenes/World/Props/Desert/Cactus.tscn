@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://Scripts/World/prop_lizard.gd" id="10_lizard"]
 [ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Lizard.tscn" id="11_lizardscene"]
 [ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
+[ext_resource type="Script" uid="uid://cuqueuaya768u" path="res://Scripts/World/prop_footing.gd" id="95_footing"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_solid"]
 radius = 22.0
@@ -67,9 +68,25 @@ max_active = 3
 emerge_height = 6.0
 emerge_spread = 7.0
 
+[node name="Footing" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Footing"]
+script = ExtResource("95_footing")
+pixels_per_unit = 45.0
+height_units = 0.18
+width_units = 0.0
+width_fraction = 0.5
+art_path = NodePath("../../Sway/Art")
+holds_world_size = true
+
 [node name="ShadowCaster" type="Node2D" parent="."]
 script = ExtResource("90_shadow")
 shadow_pull = 24.0
 cast_mode = 1
 source_sprite_path = NodePath("../Sway/Art")
 shadow_softness_override = 0.16
+

@@ -412,6 +412,13 @@ func _open_decision(bandit: WorldBandit) -> void:
 		_begin_encounter(bandit)
 		return
 
+	# How many men the FIGHT button leads to - the same reinforced strength
+	# through the same conversion [method _begin_encounter] itself uses, so the
+	# number the player is shown and the number the arena is built with cannot
+	# come apart. Read here rather than at the reveal because the reinforcements
+	# this counts are the ones gathered above for this contact.
+	var count := _enemy_count_for(_combined_strength(bandit))
+
 	_deciding = true
 	_decision_bandit = bandit
 	# Held still and silent for the length of the question, the same way a
@@ -428,16 +435,16 @@ func _open_decision(bandit: WorldBandit) -> void:
 
 	var cam := _resolve_interaction_camera()
 	if cam == null:
-		menu.ask(tier)
+		menu.ask(tier, count)
 		return
 
 	cam.zoom_in()
 	var seconds := maxf(cam.default_zoom_seconds, 0.0)
 	if seconds <= 0.0:
-		menu.ask(tier)
+		menu.ask(tier, count)
 		return
 	var timer := get_tree().create_timer(seconds, true, false, true)
-	timer.timeout.connect(_reveal_decision_menu.bind(menu, tier, bandit))
+	timer.timeout.connect(_reveal_decision_menu.bind(menu, tier, bandit, count))
 
 
 ## The other half of [method _open_decision]'s delayed reveal - only opens
@@ -445,11 +452,12 @@ func _open_decision(bandit: WorldBandit) -> void:
 ## same guard [method MusicStateBoard._open_if_pending] already uses for a
 ## timer that can outlive what asked for it.
 func _reveal_decision_menu(
-		menu: WorldBanditDecisionMenu, tier: WorldBanditDecisionTier, bandit: WorldBandit
+		menu: WorldBanditDecisionMenu, tier: WorldBanditDecisionTier, bandit: WorldBandit,
+		enemy_count: int
 ) -> void:
 	if not _deciding or _decision_bandit != bandit:
 		return
-	menu.ask(tier)
+	menu.ask(tier, enemy_count)
 
 
 func _tier_for(bandit: WorldBandit) -> WorldBanditDecisionTier:
@@ -495,6 +503,19 @@ func _combined_strength(bandit: WorldBandit) -> float:
 		if reinforcement != null and is_instance_valid(reinforcement):
 			total += reinforcement.group_strength
 	return total
+
+
+## How large a fight [param strength] is worth - [member enemy_count_scale]
+## applied and clamped to this world's own limits.
+##
+## [b]The one place the conversion lives.[/b] The decision screen quotes it
+## before the player answers and [method _begin_encounter] stages it once they
+## have, off the identical strength, so the briefing can never promise a fight
+## of a different size from the one that opens.
+func _enemy_count_for(strength: float) -> int:
+	return clampi(
+		int(round(strength * enemy_count_scale)),
+		mini(min_enemy_count, max_enemy_count), max_enemy_count)
 
 
 ## Frees every gathered reinforcement alongside [param bandit] - see
@@ -647,9 +668,7 @@ func _begin_encounter(bandit: WorldBandit) -> void:
 			world_degree = clock.call(&"get_world_degree")
 		_freeze_world_clock(clock)
 
-	var count := clampi(
-		int(round(combined_strength * enemy_count_scale)),
-		mini(min_enemy_count, max_enemy_count), max_enemy_count)
+	var count := _enemy_count_for(combined_strength)
 
 	var payload := {
 		&"kind": &"bandit",

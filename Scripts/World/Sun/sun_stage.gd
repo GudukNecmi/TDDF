@@ -88,8 +88,17 @@ extends Resource
 ## little under 1 keeps a low sun from painting a slab.
 @export_range(0.0, 3.0, 0.01) var shadow_width_scale: float = 0.95
 ## Where along its own length a shadow is anchored to the point its caster's feet
-## project to. 0 puts the near end there, which is what a cast shadow does; 0.5
-## centres it, which is what a midday pool wants.
+## project to. 0 starts it there, which is what a cast shadow does; 0.5 centres it
+## under them, which is the older, cruder way of getting a midday shadow to sit on
+## its object.
+##
+## [b]Only maps that have not moved on to the footing read it[/b] - see
+## [member SunController.anchor_shadows_on_footing]. It is a fraction of the
+## object's whole reach rather than a place, so it walks a mark off its object in
+## proportion to how big that object is, and a map that has asked for the footing
+## ignores it and lets the pool do the centring instead. The Arena and the Base
+## still read it, and the large values these stages carry at the short-shadow hours
+## are what put their midday shadows under their objects.
 @export_range(0.0, 1.0, 0.01) var shadow_length_anchor: float = 0.02
 ## How much of its opacity a shadow loses per hundred world pixels its caster is
 ## above the ground. The mark under something at the top of a jump is fainter.

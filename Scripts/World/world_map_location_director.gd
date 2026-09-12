@@ -30,7 +30,7 @@ extends Node
 ## proximity does not need to be re-evaluated sixty times a second to feel
 ## immediate at this map's scale. [method _process] also asks the World
 ## Map's own [WorldZone] whether the player is even here, the same gate
-## [WorldMapMinimap] and every [code]Scripts/Dev[/code] readout already use -
+## every [code]Scripts/Dev[/code] readout already uses -
 ## without it, [InteractionPrompt] would keep following the player's head
 ## into the base or the arena, since it is world-space and player-following
 ## rather than fixed to a place the camera happens to be pointed at.

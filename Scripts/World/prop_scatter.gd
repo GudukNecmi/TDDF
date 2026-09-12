@@ -113,6 +113,23 @@ extends Node2D
 ## collision footprint, in pixels, past the footprint itself.
 @export var impassable_clearance_margin: float = 80.0
 
+@export_group("Walkable ground")
+## The map's own ground plan. Given one, nothing is placed outside the walkable
+## desert or inside one of its rock masses.
+##
+## [b]This is the exact answer [member impassable_group] can only approximate.[/b]
+## That clearance reads an obstacle's bounding box, which is right for a boulder
+## and hopeless for a mesa four thousand pixels across with open sand in the
+## crook of it - the box would blank out ground the player can walk on. A shape
+## is tested against the outlines themselves, so scenery fills every yard of
+## desert and none of the rock. Left empty, nothing here applies and a map keeps
+## scattering exactly as it did before.
+@export var terrain_shape: TerrainShape
+## How much walkable room a prop needs around it, in pixels, on top of simply
+## standing on walkable ground - so a cactus is not planted with half of itself
+## inside a cliff face. Only read when [member terrain_shape] is set.
+@export var terrain_margin: float = 60.0
+
 @export_group("Randomness")
 ## Seed the arrangement is rolled from. 0 rolls a different desert every run,
 ## which is what a run-based game wants; any other value pins it, for looking at
@@ -557,6 +574,8 @@ func _is_fixed_scale(layer: ScatterLayer) -> bool:
 
 func _is_allowed(point: Vector2) -> bool:
 	if clear_radius > 0.0 and point.distance_to(clear_centre) < clear_radius:
+		return false
+	if terrain_shape != null and not terrain_shape.is_clear(to_global(point), terrain_margin):
 		return false
 	for box: Rect2 in keep_clear:
 		if box.has_point(point):

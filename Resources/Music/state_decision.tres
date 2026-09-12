@@ -1,14 +1,14 @@
 [gd_resource type="Resource" script_class="MusicState" format=3 uid="uid://cbp83nbe2ca4i"]
 
 [ext_resource type="Script" uid="uid://c6ylwt4xp2d23" path="res://Scripts/Common/music_state.gd" id="1_state"]
-[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#1-1788290581159.wav" id="2_loop1a"]
-[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#1-1788290588956.wav" id="3_loop1b"]
-[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#2-1788290581159.wav" id="4_loop2a"]
-[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#2-1788290588957.wav" id="5_loop2b"]
-[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#3-1788290580068.wav" id="6_loop3a"]
-[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#3-1788290587979.wav" id="7_loop3b"]
-[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#4-1788290578647.wav" id="8_loop4a"]
-[ext_resource type="AudioStream" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#4-1788290584758.wav" id="9_loop4b"]
+[ext_resource type="AudioStream" uid="uid://dtmugotybqiun" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#1-1788290581159.wav" id="2_loop1a"]
+[ext_resource type="AudioStream" uid="uid://beugko8newiud" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#1-1788290588956.wav" id="3_loop1b"]
+[ext_resource type="AudioStream" uid="uid://i6l1flo76hhl" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#2-1788290581159.wav" id="4_loop2a"]
+[ext_resource type="AudioStream" uid="uid://bysxlsa4j1atm" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#2-1788290588957.wav" id="5_loop2b"]
+[ext_resource type="AudioStream" uid="uid://b4qa5lfm7qcq0" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#3-1788290580068.wav" id="6_loop3a"]
+[ext_resource type="AudioStream" uid="uid://c2kete8lk6g53" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#3-1788290587979.wav" id="7_loop3b"]
+[ext_resource type="AudioStream" uid="uid://cn3o8sinaodu7" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#4-1788290578647.wav" id="8_loop4a"]
+[ext_resource type="AudioStream" uid="uid://dky46pjfyfofw" path="res://Sound/Efect/Decision Screen/Loop/10-second_looping_te_#4-1788290584758.wav" id="9_loop4b"]
 
 [resource]
 script = ExtResource("1_state")

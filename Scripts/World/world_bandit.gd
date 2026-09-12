@@ -41,7 +41,40 @@ extends Node2D
 ## [method _enter_disengage].
 enum BehaviorState { PATROL, INVESTIGATE, CHASE, FLEE, DISENGAGE }
 
+## How often this group's whole simulation is stepped right now - a level of
+## detail, never a second behaviour.
+##
+## [b]Neither level changes what a group does.[/b] [constant ACTIVE] and
+## [constant DORMANT] run the identical [method _simulate] body, over the
+## identical [enum BehaviorState] machine, along the identical route: the only
+## difference is how often. [constant ACTIVE] steps it every physics frame,
+## which is exactly what this class always did and what every group away from
+## a [WorldBanditActivationDirector] still does. [constant DORMANT] steps it
+## once every [member dormant_step_interval] instead, handing that whole
+## interval in as the frame's [code]delta[/code], so a group far out on the
+## map covers precisely the same ground along precisely the same route - in
+## coarse hops rather than smooth ones, which is free, because at that
+## distance it is outside [WorldMapFog]'s radius and nobody is looking at it.
+##
+## [b]Dormant is not stood down.[/b] A dormant group keeps its position, its
+## route index, its strength and its behaviour, is still written into
+## [WorldMapState] when its region is freed, and is still swept by
+## [WorldMapCombatBridge] and [WorldMapAmbushDirector]. The flag that
+## genuinely freezes a group and takes it out of play is [member active], and
+## nothing here touches it.
+enum ActivationLevel { DORMANT, ACTIVE }
+
+## How much further than [member rider_horse_radius] a group that already has its
+## horses is allowed to get before giving them up - see
+## [method _within_rider_horse_range].
+const RIDER_HORSE_KEEP_SCALE := 1.15
+
 signal behavior_changed(state: BehaviorState)
+## Emitted whenever [member activation_level] changes - a group waking as the
+## player rides into range, or falling dormant once they have gone. Nothing
+## currently listens beyond the development readout; the seam exists so
+## anything that wants to know can ask rather than poll.
+signal activation_changed(level: ActivationLevel)
 ## Emitted whenever [member region_id] changes - crossing from one
 ## [WorldMapRegionZone] into another, exactly the way the player's own
 ## crossing tells [WorldMapState] about it. Nothing currently listens; the
@@ -125,6 +158,134 @@ signal region_changed(new_region_id: StringName)
 ## [method _rebuild_formation].
 @export var icon_path: NodePath = ^"Icon"
 
+@export_group("Territory")
+## The camp, outpost or landmark this group belongs to. Left unset - and for
+## every roaming patrol it should be - a group's home is simply wherever its
+## scene authored it, which is what every group already fell back on before
+## this existed.
+##
+## Read once, on the first tick that needs it, and only ever read: nothing
+## here moves, claims or writes to the node it points at.
+@export var home_path: NodePath
+## How far from [member home_path] a group will let the player draw it before
+## it breaks off and heads home - the edge of the ground this group considers
+## its own.
+##
+## [b]This is the camp defence the World Map asks for, and it is one extra
+## reason to give up rather than a second kind of chase.[/b] A garrison spots,
+## closes and fights exactly as any other group does - see
+## [method _on_player_spotted] - but where an untethered patrol only stops
+## when the player has outrun it by [member give_up_distance], a garrison also
+## stops the moment the player is off its ground, whether it is still on their
+## heels or not. What that produces is the "driven out of their territory"
+## read: the group harries the player to the boundary and turns back, instead
+## of trailing them across the desert.
+##
+## Zero is untethered - no boundary, and the group behaves precisely as this
+## class always has. Deliberately much larger than
+## [member detection_radius]: the boundary is where a chase ends, never where
+## one can begin.
+@export var territory_radius: float = 0.0
+## How long a group already chasing the player keeps at it after they reach
+## safe ground - see [WorldMapSanctuary] - before giving up, in seconds. The
+## visible beat of the group pulling up short at the edge of the Saloon or the
+## Market rather than stopping dead on the line.
+##
+## What happens at the end of it is [method _enter_disengage] and nothing
+## else: the same wind-down every other broken-off chase already runs.
+@export var sanctuary_hold_duration: float = 2.0
+
+@export_group("Navigation")
+## Whether this group walks the map's navigation mesh instead of straight at
+## whatever it is heading for.
+##
+## [b]It is Godot's navigation, asked once per decision - not an obstacle test
+## every frame.[/b] Where the group wants to be is still decided by
+## [method _ai_tick] exactly as it always was; all this changes is that the walk
+## there follows a corridor [method NavigationServer2D.map_get_path] returned on
+## a mesh baked as the map loaded - see [WorldMapNavigation] - so a group chasing
+## the player round the far side of a mesa goes round it. Nothing in this file
+## looks at a rock.
+##
+## A map with no navigation mesh in it answers no path, and every group on it
+## steers straight at its target the way it always did. That is what keeps this
+## an addition rather than a change: a region that has not been given a mesh
+## behaves exactly as before.
+@export var uses_navigation: bool = true
+## How far the destination may move before the corridor is asked for again, in
+## pixels. A chased player drifting a few paces does not justify a fresh path;
+## one who has rounded a rock does.
+@export var repath_distance: float = 260.0
+## Floor on how often a fresh path may be asked for, in seconds, however far the
+## destination has moved. Stops a group whose target jumps every frame from
+## querying the navigation server every frame with it.
+@export var repath_interval: float = 0.35
+## How close the leader must come to a corner of its corridor before it starts
+## turning toward the next one, in pixels. Smaller keeps the group tighter to
+## the rock; larger rounds the turns off more.
+@export var waypoint_radius: float = 120.0
+## Whether the group is pulled back onto the navigation mesh when it somehow
+## ends up off it - spawned inside a rock, or carried out by a scripted move.
+## The backstop behind the corridor, not the way the walking normally works.
+@export var clamps_to_navigation: bool = true
+## How often that backstop is applied, in seconds.
+@export var navigation_clamp_interval: float = 0.2
+## Whether a group that has stopped getting anywhere takes itself out of it.
+##
+## [b]This is the corridor's own backstop, not a second way of moving.[/b] The
+## walk is still the navigated corridor above; all this watches is whether the
+## group is actually covering ground along it. A group that is not - one whose
+## patrol point turned out to sit inside a rock, one pressed into the side of a
+## mesa by a destination on the far side of it, one whose corridor was answered
+## before the mesh finished baking - asks for a fresh corridor, and if that
+## changes nothing, gives up on the destination it cannot reach and takes the
+## next one instead. Off leaves the group pushing at the rock, which is what
+## every group did before this existed.
+@export var stall_recovery_enabled: bool = true
+## How long a group is watched before its progress is judged, in seconds. Short
+## enough that a group standing at a rock is noticed while the player is still
+## looking at it; long enough that a group genuinely walking the long way round
+## a mesa is never mistaken for a stuck one, since that group is covering ground
+## the whole time.
+@export var stall_window: float = 1.5
+## How much of the ground a group should have covered in [member stall_window]
+## it has to actually cover to count as moving, as a fraction of
+## [method _effective_speed] times that window. Ground covered is measured
+## corner to corner over the window rather than step by step, so a group sawing
+## back and forth against a rock reads as the standing still it really is.
+@export_range(0.0, 1.0, 0.01) var stall_progress_fraction: float = 0.35
+## How many stalled windows in a row are answered with nothing but a fresh
+## corridor before the group gives up on the destination itself. One fresh
+## corridor covers the ordinary case - a path answered against a mesh that had
+## not finished baking, or one left stale by a clamp - and anything past it is a
+## destination that genuinely cannot be walked to.
+@export var stall_repath_attempts: int = 2
+## How far to the side a group steps when it has given up on reaching something
+## it is not free to stop chasing, in pixels - a chase or a flight, where a
+## patrol would simply take its next waypoint. The step alternates sides each
+## time, so a group boxed in on one side of an obstacle tries the other.
+@export var detour_distance: float = 700.0
+## How long that sidestep is walked before the group heads for its real
+## destination again, in seconds. Long enough to clear the corner of an
+## obstacle, short enough that the group is never visibly walking away from
+## what it wants.
+@export var detour_duration: float = 2.0
+## How close the leader has to come to a patrol waypoint to count as having
+## reached it, in pixels.
+##
+## [b]A turning group cannot converge on a point tighter than its own turning
+## circle.[/b] A sixty-strong group at [member min_turn_rate] describes a circle
+## the better part of a hundred pixels across, so a waypoint tolerance smaller
+## than that is one it orbits forever without ever arriving - which is exactly
+## what a stuck patrol looks like. The tolerance actually used is this or that
+## circle, whichever is larger; see [method _arrival_radius].
+@export var waypoint_arrival_radius: float = 48.0
+## How much room past its own turning circle a group is given to count as
+## arrived. 1.0 is the circle exactly, which a group can ride round without ever
+## crossing; anything above it is the margin that lets the arrival actually
+## happen.
+@export_range(1.0, 4.0, 0.05) var arrival_turn_margin: float = 1.4
+
 @export_group("Formation")
 ## How many people one visual box stands for - "one visual red box represents
 ## 5 people". [method _rebuild_formation] always shows
@@ -154,6 +315,31 @@ signal region_changed(new_region_id: StringName)
 ## [method _formation_width]. Below this a group would start reading as the
 ## single-file line this whole formation exists to avoid.
 @export var min_formation_width: int = 2
+## The most ground a rider may make up on its own place in the formation in one
+## second, as a multiple of the speed the group itself is travelling at - see
+## [method _update_formation_heading].
+##
+## [b]This is what stops the flanks orbiting the leader.[/b] A formation whose
+## every box is written straight to its slot is a rigid block being spun about
+## its front rider, and the further out to the side a rider sits the faster it
+## is flung round: a three-rider group turning at [member max_turn_rate] threw
+## its flankers sideways at nine times the speed the group itself was moving,
+## which is the circular sweep the riders read as. Riders instead ride toward
+## the place the formation wants them, at a speed of their own, so a group
+## changing direction has its flanks swing wide and fall back into line the way
+## riders actually do.
+##
+## [b]Kept at or below 1 on purpose.[/b] A rider closing its gap can then never
+## out-travel the group it belongs to, so its own net movement always points the
+## way the group is going - which is what keeps [HorseRig], who reads its facing
+## off the ground it covers and nothing else, from turning a horse round to
+## chase its own place in the line.
+@export_range(0.0, 1.0, 0.05) var formation_catch_up_scale: float = 0.8
+## How sharply a rider closes the last of that gap, in reciprocal seconds - the
+## eased half of the same movement. Large is a rider that snaps the final few
+## pixels shut, small is one that drifts in; the speed above is the ceiling on
+## both, and is what the far half of the gap is covered at.
+@export var formation_catch_up_response: float = 5.0
 ## The colour a trailing box is tinted at once it is [member darkest_at_box]
 ## boxes back or further - blended from [member _icon]'s own colour at
 ## [member group_strength] the nearer a box is to the front. "Boxes farther
@@ -164,6 +350,70 @@ signal region_changed(new_region_id: StringName)
 ## seventy-strong group's fourteen boxes never fade out to nothing rather
 ## than merely getting darker.
 @export var darkest_at_box: int = 6
+## The horse every rider this group shows is sitting on - one instance per box,
+## the leader included, placed on that box and moving with it.
+##
+## [b]It is the player's own horse system, given to somebody else.[/b] The scene
+## is a [HorseRig]: the same rig, the same [HorsePartMotion] array and the same
+## [GallopRamp] the horse under the player runs on, so a bandit group's horses
+## gallop the way the player's does because it is literally the same animation
+## doing it, and nothing in this file decides how a horse moves. A rig measures
+## the ground it covers on its own - see [HorseRig] - so a group standing still
+## because it has arrived, because it is blocked or because an encounter has
+## frozen it has horses standing still, and no state, speed or heading of this
+## class is ever handed across.
+##
+## Every group rides the one bandit horse for now. Horse variety is a different
+## scene of the same rig - see [code]Scenes/World/Horses/[/code] - so giving a
+## group a different mount is changing this property and nothing else. Left
+## unset, a group shows exactly the boxes it always did.
+@export var rider_horse_scene: PackedScene = preload("res://Scenes/World/Horses/BanditHorse.tscn")
+## How large a rider's horse is drawn, as the scale written onto the rig. The
+## same size the horse under the player is drawn at, so a group riding past is
+## made of horses the player can measure their own against rather than of
+## miniatures.
+@export var rider_horse_scale: float = 0.09
+## How much further apart the formation lines its riders up once they are on
+## horses - a multiplier on [member box_spacing] and
+## [member box_lateral_spacing], and the only thing in this class that changes
+## where a box sits.
+##
+## [b]The riders did not move; they grew.[/b] The two spacings were authored for
+## boxes a few pixels across, and a horse at [member rider_horse_scale] is the
+## better part of two hundred wide - so a block laid out on the old numbers would
+## be one solid smear of overlapping horses rather than a group of riders. This
+## is that same block measured in horses instead of in boxes; the grid, its
+## width and its ranks are exactly what [method _update_formation_heading]
+## always built. A group with no [member rider_horse_scene] is laid out on the
+## bare spacings, unchanged.
+@export var mounted_spacing_scale: float = 5.0
+## Whether every rider this group shows is sorted into the World Map's own depth
+## order by where it is actually standing, rather than the whole group being drawn
+## at the one point its node happens to be at.
+##
+## [b]A formation is spread over a good deal of ground.[/b] Its riders stand rows
+## apart, and the map is y-sorted - so with this off the flanker out in front and
+## the one bringing up the rear are drawn at the same depth as the group's own
+## node, and scenery between them cuts across the block or covers it outright. On,
+## the group's own children take part in the sort themselves, so a rider in front
+## of a tent is drawn in front of it and one behind it is hidden by it.
+##
+## [b]A horse and the rider on it are one entry in that order[/b], because they are
+## at one and the same position - see [method _place_rider_horses] - so nothing can
+## be drawn between them however the light or the scenery falls.
+@export var sort_riders_by_depth: bool = true
+## Whether the rider markers themselves are drawn into their horses' shadows - see
+## [method _rebuild_rider_horses]. Off leaves a group's shadows the horses alone,
+## which is what a map wanting the cheapest possible crowd would ask for.
+@export var rider_marker_casts_shadow: bool = true
+
+## How near the player a group has to be before its horses are built at all, in
+## pixels - see [method _rebuild_rider_horses]. Matches
+## [member WorldBanditGallopDirector.hearing_radius] on purpose: a group's
+## horses appear at about the distance its gallop becomes audible, so it is
+## never heard riding without being seen to. Zero or less builds every awake
+## group's horses, which is what a small map for tuning wants.
+@export var rider_horse_radius: float = 2600.0
 
 @export_group("Update frequency")
 ## Groups within this many pixels of the player re-run their AI every frame.
@@ -175,6 +425,18 @@ signal region_changed(new_region_id: StringName)
 @export var medium_update_interval: float = 0.25
 ## Seconds between AI ticks for a group past [member medium_range] entirely.
 @export var far_update_interval: float = 0.75
+## Seconds between the coarse steps a group takes while
+## [member activation_level] is [constant ActivationLevel.DORMANT] - see that
+## enum. The whole of [method _simulate] runs on this beat instead of every
+## physics frame, with the elapsed interval handed in as the step's delta, so
+## the group covers the same ground along the same route at a thirtieth of
+## the cost.
+##
+## Kept at or above [member far_update_interval] by nothing but sense: a
+## dormant group is by definition further from the player than
+## [member medium_range], so its AI tick was already the slowest of the three
+## tiers before this ever applied.
+@export var dormant_step_interval: float = 0.5
 
 @export_group("State Speed")
 ## What [member movement_speed] is multiplied by while
@@ -213,6 +475,13 @@ var region_id: StringName = &""
 var current_route_index: int = 0
 ## What this group is doing right now. See [enum BehaviorState].
 var behavior_state: BehaviorState = BehaviorState.PATROL
+## How often this group is currently being simulated. See
+## [enum ActivationLevel]. Written only through
+## [method set_activation_level], and only ever by
+## [WorldBanditActivationDirector]; a map with no director in it leaves every
+## group at [constant ActivationLevel.ACTIVE] for its whole life, which is
+## this class's original behaviour exactly.
+var activation_level: ActivationLevel = ActivationLevel.ACTIVE
 ## Where [method _physics_process] is currently steering this group toward -
 ## the next patrol point, the player's last known position, or a point
 ## chosen away from them. Always in global space.
@@ -244,7 +513,22 @@ var _investigate_timer: float = 0.0
 ## Counts down while [member behavior_state] is [constant BehaviorState.DISENGAGE] -
 ## see [method _enter_disengage].
 var _disengage_timer: float = 0.0
+## Counts up while a chased player stands on safe ground, against
+## [member sanctuary_hold_duration]. Reset the moment they step back off it,
+## so a player crossing the corner of a sanctuary and riding on out does not
+## bank progress toward being given up on.
+var _sanctuary_timer: float = 0.0
+## The node [member home_path] points at, resolved on first use and kept.
+var _home: Node2D
+## Where this group's ground is centred - see [method _home_position]. Falls
+## back to wherever the scene authored the group, captured in
+## [method _ready] before anything has moved it.
+var _home_fallback := Vector2.ZERO
 var _update_timer: float = 0.0
+## Counts up toward [member dormant_step_interval] while this group is
+## [constant ActivationLevel.DORMANT] - the whole of the extra bookkeeping
+## being dormant costs.
+var _dormant_timer: float = 0.0
 ## The direction this group is actually moving in right now, kept and turned
 ## toward [member target_position] at [method _effective_turn_rate] rather
 ## than recomputed from scratch every frame - see [method _move_along_heading].
@@ -256,17 +540,88 @@ var _movement_heading := Vector2.RIGHT
 ## Empty for a group whose whole [member group_strength] fits in the leader
 ## alone.
 var _formation_boxes: Array[Sprite2D] = []
+## One horse per rider this group is showing - see [member rider_horse_scene].
+## Index 0 is the leader's, riding on [member _icon] itself, and the rest follow
+## [member _formation_boxes] in order. Empty for a group with no horse scene and
+## for one that has fallen [constant ActivationLevel.DORMANT], which is what
+## keeps a hundred-group map from carrying four hundred rigs it cannot show.
+var _rider_horses: Array[HorseRig] = []
 ## Whether this group has been beaten. Kept so the record written as it leaves
 ## the tree says "gone" rather than "standing here", which is what stops it from
 ## being built again the next time this region is.
 var _defeated: bool = false
+## The corridor currently being walked - the corners
+## [method NavigationServer2D.map_get_path] answered for the last destination
+## asked about. Empty on a map with no navigation mesh, which is what
+## [method _navigation_target] reads as "steer straight there".
+var _path: PackedVector2Array = PackedVector2Array()
+## Which corner of [member _path] the group is currently walking toward.
+var _path_index: int = 0
+## Where [member _path] was asked to reach, so a destination that has barely
+## moved does not throw the corridor away - see [member repath_distance].
+var _path_goal := Vector2.INF
+## Seconds since the last path query, against [member repath_interval].
+var _repath_timer: float = 0.0
+## Seconds since the last clamp back onto the mesh, against
+## [member navigation_clamp_interval].
+var _clamp_timer: float = 0.0
+## The navigation map this group walks, resolved lazily: a mesh baked in a
+## region's own [method Node._ready] is not queryable until the server has
+## synchronised, so this is asked for until it answers rather than once.
+var _nav_map: RID = RID()
+
+## Whether the last corridor asked for actually arrived at the destination it
+## was asked about, rather than stopping short of it against a rock or on the
+## near side of ground the mesh does not join up. False is what
+## [method _step_patrol] reads as "this waypoint cannot be walked to, take the
+## next one".
+var _goal_reachable: bool = true
+## Where the group stood at the start of the window [method _check_stall] is
+## currently measuring, so the ground it covered is corner to corner over the
+## whole window rather than the sum of a lot of small steps that cancel out.
+var _stall_mark := Vector2.ZERO
+## Seconds into the current stall window, against [member stall_window].
+var _stall_timer: float = 0.0
+## How many stalled windows have run back to back without the group covering
+## ground in between - see [member stall_repath_attempts].
+var _stall_count: int = 0
+## Where a group that gave up on reaching its destination directly is currently
+## stepping aside to, or [constant Vector2.INF] for a group walking normally.
+## Never written to [member target_position]: the destination is unchanged and
+## everything that reads it still sees the real one - this is only where the
+## group is putting its feet on the way.
+var _detour_point := Vector2.INF
+## Seconds left of the current sidestep, against [member detour_duration].
+var _detour_timer: float = 0.0
+## Which way the next sidestep goes - flipped every time one is taken, so a
+## group blocked on one side of an obstacle tries round the other.
+var _detour_side: float = 1.0
+## The destination [method _begin_destination] last started a walk to, so a
+## group told to head for the same place again is not treated as one setting
+## off afresh. [constant Vector2.INF] before any walk has been started.
+var _destination_mark := Vector2.INF
 
 
 func _ready() -> void:
+	# Before any rider exists, so the very first formation is built into a group
+	# already taking part in the map's depth order - see sort_riders_by_depth.
+	y_sort_enabled = sort_riders_by_depth
 	add_to_group(&"world_bandit")
+	# Captured before anything has had a chance to move this group - a restored
+	# record puts it back mid-patrol - so a group with no home node authored
+	# still defends the ground it was placed on rather than wherever it had
+	# wandered to when the region was last left.
+	_home_fallback = global_position
+	_stall_mark = global_position
 	# Which region this group is standing in has to be known before anything is
 	# read back, because that is what its record is filed under.
 	_update_region()
+	# Counted into this region's population before anything can take it out
+	# again, so a region's total stays the number of groups its scene authors -
+	# see [method BanditPopulationState.note_group]. A group about to remove
+	# itself below still registers here: it is one of the region's own, it has
+	# simply been beaten.
+	_note_population()
 	if _restore():
 		# Beaten the last time this region was built. It does not come back.
 		queue_free()
@@ -286,12 +641,40 @@ func _ready() -> void:
 	_ai_tick(0.0)
 
 
+## Decides only how often [method _simulate] runs - never what it does. An
+## [constant ActivationLevel.ACTIVE] group steps it every physics frame, the
+## way this class always has; a [constant ActivationLevel.DORMANT] one banks
+## the frames up and spends them in a single coarse step every
+## [member dormant_step_interval]. See [enum ActivationLevel].
 func _physics_process(delta: float) -> void:
 	if not active:
 		return
 
+	if activation_level == ActivationLevel.DORMANT:
+		_dormant_timer += delta
+		if _dormant_timer < dormant_step_interval:
+			return
+		var banked := _dormant_timer
+		_dormant_timer = 0.0
+		_simulate(banked)
+		return
+
+	_simulate(delta)
+
+
+## One step of this group's whole simulation - its AI cadence, its walk, its
+## hold to the navigation mesh, its fog visibility and its formation. Exactly
+## the body [method _physics_process] used to be, unchanged and unreordered;
+## all that moved is the decision of how often to call it.
+##
+## [param delta] is real elapsed time, whether that is one physics frame or a
+## dormant group's whole banked [member dormant_step_interval] - every timer
+## and every step below already scales off it, which is what lets the two
+## rates produce the same route walked at the same speed.
+func _simulate(delta: float) -> void:
 	_update_fog_visibility()
 
+	_repath_timer += delta
 	_update_timer += delta
 	var interval := _update_interval()
 	if _update_timer >= interval:
@@ -300,7 +683,11 @@ func _physics_process(delta: float) -> void:
 		_ai_tick(elapsed)
 
 	_step_toward_target(delta)
-	_update_formation_heading()
+	_hold_to_navigation(delta)
+	_check_stall(delta)
+	_update_formation_heading(delta)
+	_rebuild_rider_horses()
+	_place_rider_horses()
 
 
 ## Changes [member group_strength] and immediately recomputes
@@ -313,6 +700,52 @@ func set_group_strength(strength: float) -> void:
 	group_strength = maxf(strength, 0.0)
 	movement_speed = _compute_speed()
 	_apply_visual()
+
+
+## Sets how often this group is simulated - what
+## [WorldBanditActivationDirector] calls on each group as the player rides
+## into and back out of range. See [enum ActivationLevel].
+##
+## [b]A group reacting to the player refuses to be put to sleep.[/b] Only a
+## group actually on patrol, and not currently one of an ambush's attackers,
+## can be dropped to [constant ActivationLevel.DORMANT] - see
+## [method can_sleep]. A chase, an investigation, a flight or a disengage
+## therefore always plays out at full rate, whatever the director asks for,
+## and the group falls dormant only once its own existing rules -
+## [member give_up_distance], [member chase_break_distance],
+## [member disengage_duration], [WorldMapAmbushDirector]'s own escape
+## distance - have returned it to [constant BehaviorState.PATROL] on their
+## own. Nothing here ends a behaviour early or resets one.
+##
+## Waking is never refused: a dormant group asked to become
+## [constant ActivationLevel.ACTIVE] always does, immediately, and takes its
+## next step on the very next physics frame.
+func set_activation_level(level: ActivationLevel) -> void:
+	if level == activation_level:
+		return
+	if level == ActivationLevel.DORMANT and not can_sleep():
+		return
+	activation_level = level
+	# Banked frames belong to the level that banked them. Clearing this on
+	# both edges means a group that wakes mid-interval does not carry a
+	# part-spent dormant step into full-rate simulation, and one that falls
+	# dormant takes its first coarse step a whole interval later rather than
+	# immediately.
+	_dormant_timer = 0.0
+	# A group falling asleep gives its horses up and one waking builds them
+	# again - see [method _rebuild_rider_horses]. Only the artwork moves either
+	# way; the group itself is simulated at exactly the rate this method just
+	# chose, awake or not.
+	_rebuild_rider_horses()
+	_place_rider_horses()
+	activation_changed.emit(level)
+
+
+## Whether this group is currently doing something that has to keep running
+## at full rate - see [method set_activation_level]. False for anything but
+## an ordinary, unambushed patrol.
+func can_sleep() -> bool:
+	return behavior_state == BehaviorState.PATROL and not in_ambush
 
 
 ## Forces this group straight into CHASE, aimed at [param player_position],
@@ -403,6 +836,130 @@ func _rebuild_formation() -> void:
 	_update_formation_heading()
 
 
+## Keeps one horse under every rider this group is showing - see
+## [member rider_horse_scene] - and none at all while there is nobody near
+## enough to see them.
+##
+## [b]Built by the same count the boxes are.[/b] The leader plus every trailing
+## box is exactly [method get_visible_bandit_count], the symbolic formation
+## rather than [member group_strength], so a thirty-five strong group rides
+## seven horses at the default [member people_per_box] and a horse can never be
+## built for a rider the formation is not drawing.
+##
+## [b]And only for a group near enough to be looked at.[/b] A hundred groups at
+## seven riders each is seven hundred rigs a map would otherwise carry to show
+## the four the player can actually see, so horses are built inside
+## [member rider_horse_radius] and freed outright past it - never built at all
+## while the region is being assembled, and never for a
+## [constant ActivationLevel.DORMANT] group. Groups come into range one at a
+## time as the player rides, which is what spreads the building out; nothing
+## here keeps a timer of its own.
+func _rebuild_rider_horses() -> void:
+	var wanted := 0
+	if rider_horse_scene != null and activation_level == ActivationLevel.ACTIVE \
+			and _icon != null and _within_rider_horse_range():
+		wanted = _formation_boxes.size() + 1
+
+	while _rider_horses.size() > wanted:
+		var extra: HorseRig = _rider_horses.pop_back()
+		if is_instance_valid(extra):
+			extra.queue_free()
+	while _rider_horses.size() < wanted:
+		var horse := rider_horse_scene.instantiate() as HorseRig
+		if horse == null:
+			return
+		# Scaled before it enters the tree, so the rig reads this as the size it
+		# was authored at and mirrors itself against it when it turns round.
+		horse.scale = Vector2.ONE * rider_horse_scale
+		add_child(horse)
+		_rider_horses.append(horse)
+		_seat_rider_shadow(horse, _rider_horses.size() - 1)
+
+
+## Draws the rider sitting on [param horse] into that horse's own shadow - see
+## [member rider_marker_casts_shadow].
+##
+## [b]It is the shadow system doing it, not this file.[/b] What is added is one
+## [ShadowCaster] pointed at the marker's artwork and standing on the horse, so the
+## rider goes into the same silhouette the horse's own parts do and the pair throw
+## one mark between them rather than two that darken each other where they overlap.
+## Nothing here works out where a shadow goes, how long it is or which way it lies.
+##
+## The caster hangs off the horse, so a group that rides out of range and gives its
+## horses up gives up their riders' shadows with them - see
+## [method _rebuild_rider_horses].
+func _seat_rider_shadow(horse: HorseRig, index: int) -> void:
+	if not rider_marker_casts_shadow:
+		return
+	var marker := _rider_marker(index)
+	if marker == null:
+		return
+	var caster := ShadowCaster.new()
+	caster.name = "RiderShadow"
+	# The marker is placed by the formation and so lives beside the horse rather
+	# than under it; the path is worked out before the caster enters the tree,
+	# because a caster resolves its artwork the moment it is ready.
+	caster.source_sprite_path = NodePath("../%s" % horse.get_path_to(marker))
+	# A rider is not standing anywhere - they are sitting on the horse - so the
+	# point they are "standing on" is the horse's own, and the marker's artwork is
+	# not allowed to pull the pair's footing down to wherever it happens to be
+	# drawn.
+	caster.auto_ground_anchor = false
+	horse.add_child(caster)
+
+
+## The marker the rider at [param index] is drawn as: the leader's own icon for the
+## first, and one of the trailing boxes for the rest.
+##
+## It is the same order [method _place_rider_horses] seats the horses in, and the
+## same order both lists are grown and shrunk in, so a rider's horse and a rider's
+## marker are the same rider without either list having to be kept in step with the
+## other.
+func _rider_marker(index: int) -> Sprite2D:
+	if index <= 0:
+		return _icon
+	if index - 1 >= _formation_boxes.size():
+		return null
+	return _formation_boxes[index - 1]
+
+
+## Whether the player is close enough for this group's horses to be worth
+## building - see [member rider_horse_radius]. True everywhere while that is
+## zero or less, and true for a map with nobody on it, which is what leaves a
+## region opened on its own for tuning showing its horses.
+func _within_rider_horse_range() -> bool:
+	if rider_horse_radius <= 0.0:
+		return true
+	var player := _get_player()
+	if player == null:
+		return true
+	# Held a little further out once the horses exist, for exactly the reason
+	# [member WorldBanditActivationDirector.sleep_radius] sits outside
+	# [member WorldBanditActivationDirector.activate_radius]: a group drifting
+	# along the boundary must not build and free its riders on alternate frames.
+	var limit := rider_horse_radius
+	if not _rider_horses.is_empty():
+		limit *= RIDER_HORSE_KEEP_SCALE
+	return global_position.distance_to(player.global_position) <= limit
+
+
+## Sits every horse on the rider it belongs to, read straight off the same
+## [member _icon] and [member _formation_boxes] positions
+## [method _update_formation_heading] just wrote - never a second layout of this
+## method's own, so a horse is wherever the formation actually put its rider
+## this frame.
+func _place_rider_horses() -> void:
+	if _rider_horses.is_empty() or _icon == null:
+		return
+	_rider_horses[0].position = _icon.position
+	for i in range(1, _rider_horses.size()):
+		if i - 1 >= _formation_boxes.size():
+			return
+		var box := _formation_boxes[i - 1]
+		if is_instance_valid(box):
+			_rider_horses[i].position = box.position
+
+
 ## Keeps every trailing box lined up in a compact block behind wherever this
 ## group is actually heading right now, rather than a fixed direction - read
 ## straight off [member target_position] and [member Node2D.global_position],
@@ -421,7 +978,22 @@ func _rebuild_formation() -> void:
 ## [member box_spacing] apart, so a ten-strong group's own single trailing box
 ## rides shoulder to shoulder with the leader rather than trailing it, and a
 ## seventy-strong group reads as a wide, shallow block instead of a long tail.
-func _update_formation_heading() -> void:
+##
+## [b]The block is where the riders are going, not where they are.[/b] Written
+## straight onto the boxes, the grid above is a rigid shape pinned to the
+## group's heading - so the moment that heading swings, every flanker is
+## teleported round the arc to its new side and the group reads as a carousel
+## with the leader for a spindle. Each rider instead moves toward its own place
+## at a speed of its own - see [member formation_catch_up_scale] - which is what
+## makes a turn read as riders swinging wide and closing back up, and what keeps
+## a rider's own travel pointing the way the group is going, so the horse under
+## it never turns round to go and fetch its slot.
+##
+## [param delta] is the frame the movement is measured against; the default
+## places every rider exactly on its slot instead, which is what a formation
+## that has just been rebuilt - new boxes standing at the group's own origin -
+## needs so it never slides out from under the leader.
+func _update_formation_heading(delta: float = -1.0) -> void:
 	if _formation_boxes.is_empty():
 		return
 
@@ -432,16 +1004,43 @@ func _update_formation_heading() -> void:
 	# not wherever it merely wants to.
 	var width := _formation_width()
 	var right := _movement_heading.orthogonal()
+	# Riders on horses need the room a horse takes up - see
+	# [member mounted_spacing_scale]. Read off whether this group has a horse
+	# scene at all rather than off whether its horses happen to be built right
+	# now, so a group does not spread out as the player rides into range of it.
+	var spread := mounted_spacing_scale if rider_horse_scene != null else 1.0
+	# The ground a rider is allowed to make up this frame, measured against the
+	# group's own pace so the whole formation slows and closes together - a
+	# disengaging group's riders fall in at a disengaging group's speed. Below
+	# zero is the snap the default asks for.
+	var reach := -1.0
+	if delta > 0.0:
+		reach = maxf(_effective_speed(), 0.0) * maxf(formation_catch_up_scale, 0.0) * delta
+
 	for i in _formation_boxes.size():
 		var slot := i + 1
 		var row := slot / width
 		var col := slot % width
-		var lateral := (float(col) - float(width - 1) * 0.5) * box_lateral_spacing
+		var lateral := (float(col) - float(width - 1) * 0.5) * box_lateral_spacing * spread
 		# +0.6 rather than a whole extra row keeps row 1 close enough behind
 		# the leader to still read as one tight knot of riders, while still
 		# leaving the leader clearly the front-most of the group.
-		var depth := (float(row) - 1.0 + 0.6) * box_spacing
-		_formation_boxes[i].position = _icon.position + right * lateral - _movement_heading * depth
+		var depth := (float(row) - 1.0 + 0.6) * box_spacing * spread
+		var place := _icon.position + right * lateral - _movement_heading * depth
+
+		var box := _formation_boxes[i]
+		if reach < 0.0:
+			box.position = place
+			continue
+		var gap := place - box.position
+		var distance := gap.length()
+		if distance <= 0.01:
+			continue
+		# Eased close in and capped far out: the response term is what settles
+		# a rider onto its place without a stop, and the reach above is what a
+		# rider crossing the group to the far side of a turn is held to.
+		var step := minf(distance * maxf(formation_catch_up_response, 0.0) * delta, reach)
+		box.position += gap / distance * minf(step, distance)
 
 
 ## How many boxes wide the formation's own grid is, leader included - see the
@@ -456,6 +1055,38 @@ func _formation_width() -> int:
 		return 1
 	var raw := int(round(sqrt(float(total)) * formation_width_factor))
 	return clampi(raw, mini(maxi(min_formation_width, 1), total), total)
+
+
+## How many riders this group actually shows - the leader plus every trailing
+## box, which is [code]ceil(group_strength / people_per_box)[/code]. A
+## thirty-five strong group at the default five people to a box shows seven.
+##
+## The symbolic representation, never the strength: anything that should scale
+## with how big the group [i]looks[/i] rather than how big it is asks this. See
+## [WorldBanditGallopDirector], which gives one gallop voice to each of them.
+func get_visible_bandit_count() -> int:
+	return _formation_boxes.size() + 1
+
+
+## Where the first [param limit] of those riders are standing right now, in
+## world space, the leader first and the formation's own order after it - so a
+## caller placing something on each rider lands on the front of the block
+## rather than scattered through it when it wants fewer than the group shows.
+##
+## Read off the same boxes [method _update_formation_heading] moves, never a
+## second layout of this method's own, so a rider is wherever the formation
+## actually put them this frame.
+func get_visible_bandit_positions(limit: int) -> PackedVector2Array:
+	var places := PackedVector2Array()
+	if _icon == null or limit <= 0:
+		return places
+	places.append(_icon.global_position)
+	for box in _formation_boxes:
+		if places.size() >= limit:
+			break
+		if is_instance_valid(box):
+			places.append(box.global_position)
+	return places
 
 
 ## Seconds between AI ticks for a group this far from the player right now -
@@ -491,6 +1122,16 @@ func _ai_tick(elapsed: float) -> void:
 	# player's live position however far off or blocked the sightline actually
 	# is, for as long as it is still in CHASE.
 	var chase_can_see := can_see or in_ambush
+
+	# The two reasons a pursuit ends that are about *where* the player has got
+	# to rather than how far ahead of this group they are: they have reached
+	# safe ground, or they are off this group's own territory. Both resolve
+	# into the same wind-down every other broken-off chase already runs, and
+	# neither ever applies to an ambush, whose break-off is
+	# [WorldMapAmbushDirector]'s alone. See [method _should_break_off].
+	if not in_ambush and _is_pursuing() and _should_break_off(player, elapsed):
+		_enter_disengage()
+		return
 
 	match behavior_state:
 		BehaviorState.PATROL:
@@ -532,6 +1173,69 @@ func _ai_tick(elapsed: float) -> void:
 				_enter_patrol()
 
 
+## Whether this group is currently after the player at all - the only two
+## states a boundary or a sanctuary has anything to end.
+## [constant BehaviorState.PATROL] has no pursuit to break off,
+## [constant BehaviorState.DISENGAGE] is already breaking one off, and
+## [constant BehaviorState.FLEE] is the opposite problem entirely.
+func _is_pursuing() -> bool:
+	return behavior_state == BehaviorState.CHASE \
+		or behavior_state == BehaviorState.INVESTIGATE
+
+
+## Whether the player is somewhere this group will not go after them at all:
+## on safe ground, or off this group's own territory.
+##
+## The same two facts [method _should_break_off] ends a chase on, asked
+## without the two-second wait and without touching a timer, so the question
+## can also be put before a chase is ever committed to - see
+## [method _on_player_spotted]. A group with no territory, on a map with no
+## sanctuaries, is never off limits anywhere.
+func _player_is_off_limits(player: Node2D) -> bool:
+	if territory_radius > 0.0 \
+			and _home_position().distance_to(player.global_position) > territory_radius:
+		return true
+	return WorldMapSanctuary.contains(self, player.global_position)
+
+
+## Whether this group should give up on the player now, for a reason about
+## where they are standing rather than how far off they have got.
+##
+## Two, in order. Safe ground first: a player on it is waited out for
+## [member sanctuary_hold_duration] before the group turns back, and the wait
+## is dropped the moment they leave it again, so this is a group pulling up at
+## the edge of the Saloon rather than one that stops the instant a boot
+## crosses the line. Then the boundary: a group with a
+## [member territory_radius] gives up as soon as the player is off its own
+## ground, however close they still are.
+##
+## A group with no territory and a map with no sanctuaries answers false to
+## both, which leaves [member give_up_distance] the only thing that ever ends
+## a chase - exactly as this class behaved before either existed.
+func _should_break_off(player: Node2D, elapsed: float) -> bool:
+	if WorldMapSanctuary.contains(self, player.global_position):
+		_sanctuary_timer += elapsed
+		if _sanctuary_timer >= maxf(sanctuary_hold_duration, 0.0):
+			return true
+	else:
+		_sanctuary_timer = 0.0
+
+	if territory_radius <= 0.0:
+		return false
+	return _home_position().distance_to(player.global_position) > territory_radius
+
+
+## The centre of the ground this group defends: the node
+## [member home_path] names, or where the scene authored this group when it
+## names none. Resolved lazily and kept, the same way [member _player] and
+## [member _nav_map] already are, since a camp landmark may well enter the
+## tree after its garrison does.
+func _home_position() -> Vector2:
+	if _home == null or not is_instance_valid(_home):
+		_home = get_node_or_null(home_path) as Node2D
+	return _home_fallback if _home == null else _home.global_position
+
+
 ## Weighs this group's strength against the player's and picks a side - flee
 ## or chase - the way section 12 of the design asks for: a ratio read from
 ## [member threat_profile], never a hardcoded branch on either strength. A
@@ -549,18 +1253,47 @@ func _on_player_spotted(player: Node2D) -> void:
 
 	if player_power >= group_strength * flee_ratio:
 		_enter_flee(player.global_position)
-	elif group_strength >= player_power * chase_ratio:
+	# A group never sets off after somebody it would give up on in the same
+	# breath - see [method _player_is_off_limits]. Without this a garrison
+	# harries the player to its own boundary, turns back, sees them still
+	# standing there and sets off again, over and over. Fleeing is deliberately
+	# left above it: a group outmatched by the player runs whether or not the
+	# ground it is standing on is theirs to defend.
+	elif group_strength >= player_power * chase_ratio \
+			and not _player_is_off_limits(player):
 		_enter_chase()
 	else:
 		_enter_patrol()
 
 
+## Puts the group back on its route.
+##
+## [b]Re-entering patrol while already patrolling leaves the route alone.[/b]
+## [method _on_player_spotted] calls this on every AI tick for a player this
+## group is neither strong enough to chase nor weak enough to run from - and up
+## close that is every single frame - so without this guard the route index is
+## re-snapped to whatever waypoint the group happens to be nearest sixty times a
+## second. That is a group walking away from a waypoint, being told each frame
+## that the waypoint behind it is the nearest one, turning back to it, arriving,
+## being pointed at the next one, and turning back again: it circles the spot it
+## is standing on and never leaves. It also wipes the stall bookkeeping - see
+## [method _begin_destination] - on every one of those frames, so the recovery
+## that exists for exactly this can never see it either.
+##
+## A group that is genuinely arriving into patrol from somewhere else still
+## resumes at its nearest leg, which is the whole point of
+## [method _nearest_route_index]; a group that was already patrolling simply
+## keeps walking to the waypoint it had.
 func _enter_patrol() -> void:
+	var was_patrolling := behavior_state == BehaviorState.PATROL
 	_set_state(BehaviorState.PATROL)
 	fleeing = false
 	in_ambush = false
+	if was_patrolling and _route != null and not _route.get_points().is_empty():
+		return
 	current_route_index = _nearest_route_index()
 	target_position = _route_point(current_route_index)
+	_begin_destination()
 
 
 func _enter_investigate() -> void:
@@ -568,12 +1301,14 @@ func _enter_investigate() -> void:
 	fleeing = false
 	target_position = _last_known_player_position
 	_investigate_timer = threat_profile.investigate_duration if threat_profile != null else 4.0
+	_begin_destination()
 
 
 func _enter_chase() -> void:
 	_set_state(BehaviorState.CHASE)
 	fleeing = false
 	target_position = _last_known_player_position
+	_begin_destination()
 
 
 ## The visible "giving up" beat between [constant BehaviorState.CHASE] and
@@ -589,11 +1324,18 @@ func _enter_disengage() -> void:
 	_disengage_timer = disengage_duration
 	current_route_index = _nearest_route_index()
 	target_position = _route_point(current_route_index)
+	_begin_destination()
 
 
 ## Picks a point on the opposite side of this group from the player and
 ## heads for it. Never teleports and never starts a fight - see the class
 ## doc - it is only ever a destination and the ordinary walk toward it.
+##
+## The point is put onto walkable ground before it is taken - see
+## [method _walkable_point]. A frightened group picks its direction from where
+## the player is standing and nothing else, so on a map with any rock in it
+## some of those points land inside one; taken raw, the group walks into the
+## rock face and stops there, which reads as a group too frightened to move.
 func _enter_flee(player_position: Vector2) -> void:
 	_set_state(BehaviorState.FLEE)
 	fleeing = true
@@ -602,12 +1344,47 @@ func _enter_flee(player_position: Vector2) -> void:
 	if away.is_zero_approx():
 		away = Vector2.from_angle(randf() * TAU)
 	target_position = global_position + away * detection_radius * 2.0
+	var map := _resolve_nav_map()
+	if uses_navigation and map.is_valid():
+		target_position = _walkable_point(map, target_position)
+	_begin_destination()
+
+
+## Wipes the bookkeeping the walk to the last destination left behind, so a
+## group setting off for a new one is never judged on how it was getting on
+## with the old one - see [method _check_stall] - and never still walking a
+## corridor or a sidestep that belonged to it.
+func _begin_destination() -> void:
+	# Only when the destination has genuinely changed. A group watching a player
+	# it is neither strong enough to chase nor weak enough to run from re-enters
+	# patrol on every single AI tick - see [method _on_player_spotted] - and
+	# wiping the bookkeeping that often would mean a group stuck in front of
+	# that player is never once noticed to be stuck.
+	if _destination_mark != Vector2.INF \
+			and _destination_mark.distance_to(target_position) <= 1.0:
+		return
+	_destination_mark = target_position
+	_detour_point = Vector2.INF
+	_detour_timer = 0.0
+	_goal_reachable = true
+	_stall_mark = global_position
+	_stall_timer = 0.0
+	_stall_count = 0
+	_clear_path()
 
 
 func _set_state(state: BehaviorState) -> void:
 	if state == behavior_state:
 		return
 	behavior_state = state
+	# Anything but patrol is a reaction to the player, and a reaction is
+	# always simulated at full rate - so a group that starts one wakes on the
+	# spot rather than waiting for [WorldBanditActivationDirector]'s next
+	# sweep to notice. This is what makes [method begin_ambush] safe to call
+	# on a dormant group: [WorldMapAmbushDirector] orders the chase and the
+	# group is at full rate the same frame.
+	if state != BehaviorState.PATROL:
+		set_activation_level(ActivationLevel.ACTIVE)
 	behavior_changed.emit(state)
 
 
@@ -615,20 +1392,46 @@ func _set_state(state: BehaviorState) -> void:
 ## frame regardless of how often [method _ai_tick] itself runs, which is
 ## what keeps a group's movement smooth even while it is only reconsidering
 ## its decisions a few times a second.
+##
+## A group part way through a sidestep walks at that instead - see
+## [method _begin_detour]. [member target_position] is untouched by it, so
+## nothing that reads where this group is going ever sees the detour; only
+## where it is putting its feet changes, and only until the sidestep runs out.
 func _step_toward_target(delta: float) -> void:
+	if _detour_point != Vector2.INF:
+		_detour_timer -= delta
+		if _detour_timer <= 0.0 \
+				or global_position.distance_to(_detour_point) <= _arrival_radius():
+			_end_detour()
+		else:
+			_move_along_heading(_detour_point, delta)
+			return
 	if behavior_state == BehaviorState.PATROL:
 		_step_patrol(delta)
 		return
 	_move_along_heading(target_position, delta)
 
 
+## Walking a route, and taking the next waypoint once this one is behind the
+## group - either because it arrived, or because the corridor to it came back
+## short and it never can. See [member _goal_reachable].
 func _step_patrol(delta: float) -> void:
 	if _route == null or _route.get_points().is_empty():
 		return
 	_move_along_heading(target_position, delta)
-	if global_position.distance_to(target_position) <= 4.0:
+	var arrived := global_position.distance_to(target_position) <= _arrival_radius()
+	# A waypoint the mesh cannot reach - one dropped inside a rock as the map
+	# was authored, or on ground the walkable outline does not join to this
+	# group's own - is skipped rather than pressed against. Without this the
+	# group walks to the nearest edge of it and stands there for good, which is
+	# a patrol that has silently stopped.
+	if arrived or not _goal_reachable:
 		_advance_route_index()
 		target_position = _route_point(current_route_index)
+		# Wiped rather than left standing: everything it holds describes the
+		# waypoint just given up on, and the next one has not been asked about
+		# yet.
+		_begin_destination()
 
 
 ## Turns [member _movement_heading] toward [param target] at
@@ -640,7 +1443,11 @@ func _step_patrol(delta: float) -> void:
 ## [member speed_profile] already samples speed, so nothing here invents a
 ## second notion of how heavy a group is.
 func _move_along_heading(target: Vector2, delta: float) -> void:
-	var to_target := target - global_position
+	# Where the group is going is [param target]; where it steers this frame is
+	# the next corner of the corridor to it. On a map with no navigation mesh
+	# the two are the same value and nothing below changes.
+	var steer := _navigation_target(target)
+	var to_target := steer - global_position
 	var distance := to_target.length()
 	var speed := _effective_speed()
 	if speed <= 0.0:
@@ -651,6 +1458,257 @@ func _move_along_heading(target: Vector2, delta: float) -> void:
 		var turn := clampf(_movement_heading.angle_to(desired), -max_radians, max_radians)
 		_movement_heading = _movement_heading.rotated(turn).normalized()
 	global_position += _movement_heading * minf(speed * delta, distance)
+
+
+# --- Walking the map's navigation mesh --------------------------------------
+
+## The point to actually steer at this frame on the way to [param target]: the
+## next corner of the navigated corridor to it, or - on a map with no navigation
+## mesh - [param target] itself.
+##
+## The corridor is only re-asked for when the destination has genuinely moved -
+## see [member repath_distance] - and never more often than
+## [member repath_interval], so a group chasing a running player queries the
+## navigation server a couple of times a second rather than sixty.
+func _navigation_target(target: Vector2) -> Vector2:
+	if not uses_navigation:
+		return target
+	var map := _resolve_nav_map()
+	if not map.is_valid():
+		return target
+
+	var stale := _path.size() < 2 \
+		or _path_index >= _path.size() \
+		or _path_goal == Vector2.INF \
+		or _path_goal.distance_to(target) > repath_distance
+	if stale and _repath_timer >= repath_interval:
+		_request_path(map, target)
+
+	if _path_index >= _path.size():
+		# No corridor to walk. Steering at the raw destination is what drives a
+		# group into the side of whatever stands between it and there, so the
+		# nearest walkable stand-in for it is steered at instead - which for a
+		# destination out on open sand is the destination itself, and for one
+		# inside a rock is the sand at that rock's edge.
+		return _walkable_point(map, target)
+
+	# Corners already arrived at are passed over here rather than on a timer, so
+	# a group that covered two short legs in one frame does not spend the next
+	# frame walking back to the first of them.
+	while _path_index < _path.size() - 1 \
+			and global_position.distance_to(_path[_path_index]) <= waypoint_radius:
+		_path_index += 1
+	return _path[_path_index]
+
+
+## Asks the navigation server for a way from here to [param target] and starts
+## walking it.
+##
+## Also settles [member _goal_reachable] for that destination. A corridor that
+## stops short of what it was asked for is the mesh's own answer that there is
+## no way to there from here - the destination sits inside a rock, inside a
+## structure, or on ground the walkable outline never joined to this group's -
+## and that answer is what lets a patrol take its next waypoint instead of
+## pressing at this one forever. Fewer than two corners is read the same way.
+func _request_path(map: RID, target: Vector2) -> void:
+	_repath_timer = 0.0
+	_path_goal = target
+	_path = NavigationServer2D.map_get_path(map, global_position, target, true)
+	_path_index = 0
+	if _path.size() < 2:
+		_path = PackedVector2Array()
+		_goal_reachable = false
+		return
+	_goal_reachable = _path[_path.size() - 1].distance_to(target) <= _arrival_radius()
+	# The first corner is where the group is already standing.
+	if global_position.distance_to(_path[0]) <= waypoint_radius:
+		_path_index = 1
+
+
+## The nearest point on walkable ground to [param point] - [param point] itself
+## whenever it already is on some.
+func _walkable_point(map: RID, point: Vector2) -> Vector2:
+	return NavigationServer2D.map_get_closest_point(map, point)
+
+
+## Throws the current corridor away. The next call to
+## [method _navigation_target] asks for a fresh one, at the earliest the
+## ordinary [member repath_interval] allows.
+func _clear_path() -> void:
+	_path = PackedVector2Array()
+	_path_index = 0
+	_path_goal = Vector2.INF
+
+
+## Throws the current corridor away and lets a fresh one be asked for on the
+## very next frame rather than after another [member repath_interval] of walking
+## on nothing. What a group that has just been moved, or has just been found not
+## to be getting anywhere, needs: waiting the interval out is a third of a
+## second of steering blind, which against a rock is a third of a second of
+## pushing at it.
+func _force_repath() -> void:
+	_clear_path()
+	_repath_timer = repath_interval
+
+
+## Pulls the group back onto walkable ground when it is somehow off it. The
+## corridor above is what normally keeps a group clear of the rock; this is the
+## backstop for the cases the corridor never covered - a group authored a little
+## too close to a cliff, or moved there by something other than its own walking.
+func _hold_to_navigation(delta: float) -> void:
+	if not uses_navigation or not clamps_to_navigation:
+		return
+	_clamp_timer += delta
+	if _clamp_timer < navigation_clamp_interval:
+		return
+	_clamp_timer = 0.0
+
+	var map := _resolve_nav_map()
+	if not map.is_valid():
+		return
+	var closest := NavigationServer2D.map_get_closest_point(map, global_position)
+	# On the mesh, the closest point on it is where the group already is; a
+	# correction only ever has a length when the group is genuinely outside.
+	if global_position.distance_to(closest) > 1.0:
+		global_position = closest
+		# The corridor was answered from where the group was, not from where it
+		# has just been put, so it is asked for again at once. Left to the
+		# ordinary interval this is the loop that reads as a group shivering
+		# against a rock: steer into it, get pulled back out, steer into it
+		# again, a third of a second at a time.
+		_force_repath()
+
+
+# --- Getting unstuck ---------------------------------------------------------
+
+## How close the leader has to come to something to count as having reached it,
+## in pixels - [member waypoint_arrival_radius], or the circle the group's own
+## turning describes if that is wider.
+##
+## A group turns at [method _effective_turn_rate] and walks at
+## [method _effective_speed], and between them those describe a circle it cannot
+## steer inside of. Asking it to arrive within a tolerance tighter than that
+## circle is asking for something it can only orbit - and a group riding round
+## and round a waypoint it never reaches is one of the two ways a patrol
+## silently stops.
+func _arrival_radius() -> float:
+	var turn := maxf(_effective_turn_rate() * TAU, 0.001)
+	return maxf(waypoint_arrival_radius, _effective_speed() / turn * arrival_turn_margin)
+
+
+## Watches whether the group is actually covering ground, and takes it out of it
+## when it is not. See [member stall_recovery_enabled].
+##
+## Ground covered is measured from where the group stood when the window opened
+## to where it stands as that window closes, so a group sawing back and forth
+## against a rock - which travels a long way and gets nowhere - reads as the
+## standing still it really is, while a group walking the long way round a mesa
+## reads as the moving it really is.
+func _check_stall(delta: float) -> void:
+	if not stall_recovery_enabled:
+		return
+	var speed := _effective_speed()
+	if speed <= 0.0:
+		return
+
+	_stall_timer += delta
+	if _stall_timer < stall_window:
+		return
+	var window := _stall_timer
+	_stall_timer = 0.0
+	var covered := _stall_mark.distance_to(global_position)
+	_stall_mark = global_position
+	if covered >= speed * window * stall_progress_fraction:
+		_stall_count = 0
+		return
+
+	_stall_count += 1
+	if _stall_count < maxi(stall_repath_attempts, 1):
+		# The cheap answer first, and the one that covers every ordinary cause:
+		# a corridor answered against a mesh that had not finished baking, or
+		# one left describing ground the group is no longer standing on.
+		_force_repath()
+		return
+	_stall_count = 0
+	_break_deadlock()
+
+
+## What a group does about a destination it has proved it cannot walk to.
+##
+## A patrol has somewhere else to be: it takes the next waypoint on its route
+## and leaves this one, which is the whole of the answer to a point authored
+## inside a rock. Anything else - a chase, a flight, a walk back to its own
+## ground - has no second destination to take, so it steps aside instead and
+## comes at the same one again from a few hundred pixels along, which is what
+## carries a group round the corner of the obstacle it was pressed against.
+func _break_deadlock() -> void:
+	if behavior_state == BehaviorState.PATROL and _route != null \
+			and not _route.get_points().is_empty():
+		_advance_route_index()
+		target_position = _route_point(current_route_index)
+		_begin_destination()
+		_force_repath()
+		return
+	_begin_detour()
+
+
+## Sends the group a few hundred pixels along the face of whatever is in its
+## way, on walkable ground, before it heads for its real destination again.
+##
+## The side alternates every time, so a group that steps the wrong way out of a
+## dead end tries the other way next time rather than the same way twice. The
+## step is put onto walkable ground by the mesh itself - see
+## [method _walkable_point] - so a sidestep is never a step into another rock.
+func _begin_detour() -> void:
+	var toward := global_position.direction_to(target_position)
+	if toward.is_zero_approx():
+		toward = _movement_heading
+	var aside := toward.orthogonal() * _detour_side
+	_detour_side = -_detour_side
+
+	var point := global_position + (aside + toward * 0.35).normalized() * detour_distance
+	var map := _resolve_nav_map()
+	if map.is_valid():
+		point = _walkable_point(map, point)
+	# A sidestep that lands back on top of the group is no sidestep at all, and
+	# would only spend [member detour_duration] going nowhere.
+	if global_position.distance_to(point) <= _arrival_radius():
+		_force_repath()
+		return
+	_detour_point = point
+	_detour_timer = maxf(detour_duration, 0.0)
+	_force_repath()
+
+
+## Ends a sidestep and puts the group back onto its real destination.
+func _end_detour() -> void:
+	_detour_point = Vector2.INF
+	_detour_timer = 0.0
+	_goal_reachable = true
+	_stall_mark = global_position
+	_stall_timer = 0.0
+	_force_repath()
+
+
+## The navigation map this group walks, or an invalid [RID] on a map that has
+## none. Resolved lazily and then kept: a mesh baked in [WorldMapNavigation]'s
+## own [method Node._ready] is not queryable until the navigation server has
+## synchronised, which is a frame or two after every node is ready.
+func _resolve_nav_map() -> RID:
+	if _nav_map.is_valid():
+		return _nav_map
+	if not is_inside_tree():
+		return RID()
+	var map: RID = get_world_2d().navigation_map
+	if not map.is_valid() or NavigationServer2D.map_get_regions(map).is_empty():
+		return RID()
+	# A map that has not run an iteration yet refuses every query and complains
+	# about it, so the mesh is only taken up once the server says it has one -
+	# which is a frame or two after the region baked itself.
+	if NavigationServer2D.map_get_iteration_id(map) == 0:
+		return RID()
+	_nav_map = map
+	return _nav_map
 
 
 ## [member movement_speed] - [member speed_profile] sampled at
@@ -716,24 +1774,42 @@ func _route_point(index: int) -> Vector2:
 	return points[clampi(index, 0, points.size() - 1)]
 
 
-## The route point closest to where this group actually is right now, so a
-## group returning to [constant BehaviorState.PATROL] resumes at whichever
-## leg of its route it is nearest to instead of snapping back to wherever it
-## started.
+## The route point this group should walk to next, given where it actually is:
+## the nearest one it is not already standing on.
+##
+## The plain nearest point is what a group returning from a chase wants, so it
+## resumes at whichever leg of its route it ended up beside instead of snapping
+## back to wherever it started. But "nearest" alone hands back the waypoint
+## under the group's own feet whenever it happens to have stopped on one, and a
+## destination the group has already arrived at is a destination it can only
+## circle: [method _move_along_heading] steers at it, the group's own turning
+## circle is wider than the gap, and it orbits a point it is already at. So a
+## point already within [method _arrival_radius] is treated as reached and
+## passed over, exactly the way [method _step_patrol] would have passed over it.
+##
+## Every point being within reach - a group standing in the middle of a very
+## short route - falls back to the plain nearest, since there is no further leg
+## to prefer and walking to the nearest one is still the right answer.
 func _nearest_route_index() -> int:
 	if _route == null:
 		return 0
 	var points := _route.get_points()
 	if points.is_empty():
 		return 0
+	var reach := _arrival_radius()
 	var best_index := 0
 	var best_distance := INF
+	var nearest_index := 0
+	var nearest_distance := INF
 	for i in points.size():
 		var distance := global_position.distance_to(points[i])
-		if distance < best_distance:
+		if distance < nearest_distance:
+			nearest_distance = distance
+			nearest_index = i
+		if distance > reach and distance < best_distance:
 			best_distance = distance
 			best_index = i
-	return best_index
+	return nearest_index if best_distance == INF else best_index
 
 
 ## True only when [param target] is both within [member detection_radius] and
@@ -839,6 +1915,11 @@ func get_state_name() -> String:
 	return "?"
 
 
+## The name a debug readout shows for [member activation_level].
+func get_activation_name() -> String:
+	return "ACTIVE" if activation_level == ActivationLevel.ACTIVE else "DORMANT"
+
+
 # --- Surviving the region's scene being freed --------------------------------
 
 ## Records this group as beaten, so it is not standing here again the next time
@@ -850,12 +1931,42 @@ func get_state_name() -> String:
 ## particular group is gone.
 func mark_defeated() -> void:
 	_defeated = true
+	# Taken off the region's population as well as written down here. The record
+	# below is what keeps this group gone for the rest of this run; the
+	# population is what keeps it gone for every run after it - see
+	# [BanditPopulationState].
+	var population := _population()
+	if population != null:
+		population.record_defeat(region_id, name)
 	_write_record()
 
 
 ## Whether this group has been beaten.
 func is_defeated() -> bool:
 	return _defeated
+
+
+## The world's bandit population, or null when there is none to ask - a region
+## opened on its own for tuning, or a group authored not to be remembered at
+## all. Every caller reads null as "nothing is being kept", which leaves the
+## region exactly as its scene authored it.
+##
+## [member remembers_across_scenes] gates this for the same reason it gates the
+## record: a group that is not remembered is not part of a population that
+## outlives the run either, so turning the flag off still leaves a map that
+## plays the same way every time it is opened.
+func _population() -> BanditPopulationState:
+	if not remembers_across_scenes:
+		return null
+	return BanditPopulationState.get_active(self)
+
+
+## Counts this group into its region's population. Called once, as the group is
+## built, before anything can free it.
+func _note_population() -> void:
+	var population := _population()
+	if population != null:
+		population.note_group(region_id, name)
 
 
 ## Reads back what this group was doing the last time its region was built.
@@ -867,6 +1978,17 @@ func is_defeated() -> bool:
 func _restore() -> bool:
 	if not remembers_across_scenes or region_id.is_empty():
 		return false
+
+	# The region's own population is asked first, and it is the answer that
+	# outlives a run: a group beaten in an earlier run is gone from this region
+	# for good, and there is no record of it here to say so, because the memory
+	# below is meant to be thrown away when a run ends. See
+	# [BanditPopulationState].
+	var population := _population()
+	if population != null and population.is_group_lost(region_id, name):
+		_defeated = true
+		return true
+
 	var state := WorldMapState.get_active(self)
 	if state == null:
 		return false

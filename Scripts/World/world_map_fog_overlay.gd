@@ -39,8 +39,7 @@ extends Node2D
 ##
 ## [b]Lives in world space, on purpose.[/b] This is a plain child of
 ## [code]WorldMap[/code], not fixed to the camera or the HUD, so whichever
-## camera looks at the World Map sees the same shroud - the main gameplay
-## camera and [WorldMapMinimap]'s own camera both, since a [SubViewport]
+## camera looks at the World Map sees the same shroud, since a [SubViewport]
 ## shares its parent's [World2D] by default. A [WorldMapLocation] or a hidden
 ## [WorldBandit] underneath is genuinely covered, not just visually implied
 ## to be.

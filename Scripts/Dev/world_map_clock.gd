@@ -5,7 +5,7 @@ extends Control
 ## second copy of the time.
 ##
 ## Development-grade presentation, the same way
-## [code]world_map_debug_readout.gd[/code] is - a real HUD, a minimap and fog
+## [code]world_map_debug_readout.gd[/code] is - a real HUD, a map screen and fog
 ## of war are later-phase work; this exists only so Phase 2's continuous
 ## clock can be checked by eye. [b]It only shows itself on the World Map[/b],
 ## gated the same way and for the same reason that readout is: a

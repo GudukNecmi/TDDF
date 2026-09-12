@@ -1,596 +1,3267 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://ceiwdy36lb0ih"]
 
 [ext_resource type="PackedScene" path="res://Scenes/World/WorldMapBase.tscn" id="0_base"]
-[ext_resource type="Script" uid="uid://b05im5xftlqsx" path="res://Scripts/World/tiled_surface.gd" id="2_surface"]
-[ext_resource type="Script" uid="uid://bkovnrs57lx46" path="res://Scripts/World/world_map_location.gd" id="5_ol223"]
-[ext_resource type="Script" uid="uid://dngpapk0xeker" path="res://Scripts/World/map_location.gd" id="6_pwgfs"]
-[ext_resource type="Script" uid="uid://d0w1v0ldacvie" path="res://Scripts/World/world_map_region_zone.gd" id="6_regionzone"]
-[ext_resource type="Resource" uid="uid://cnlq0v14y5to1" path="res://Resources/Maps/Desert/Regions/region_a.tres" id="7_regiona"]
-[ext_resource type="Script" uid="uid://dqlo2m72g7o55" path="res://Scripts/World/world_bandit_route.gd" id="8_x6t4c"]
-[ext_resource type="Script" uid="uid://8rmldir4gmtk" path="res://Scripts/World/world_bandit.gd" id="9_cuo70"]
-[ext_resource type="Resource" uid="uid://fms2ku7a8ccx" path="res://Resources/World/Bandits/bandit_speed_profile.tres" id="10_inp14"]
-[ext_resource type="Resource" uid="uid://d2ka6vtyuug0d" path="res://Resources/World/Bandits/bandit_threat_profile.tres" id="11_ol223"]
-[ext_resource type="Script" uid="uid://bjp7hsnq31h5f" path="res://Scripts/Dev/test_map_gate.gd" id="14_k4iq7"]
-[ext_resource type="Texture2D" uid="uid://b5yjrmddijjg3" path="res://Assets/Maps/Desert/WorldMap/placeholder_dot.tres" id="15_r3xhl"]
-[ext_resource type="Texture2D" uid="uid://hiss48qcyama" path="res://Assets/Maps/Desert/WorldMap/placeholder_solid.tres" id="16_w262y"]
-[ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="17_pwgfs"]
-[ext_resource type="Script" path="res://Scripts/World/prop_scatter.gd" id="200_scatter"]
-[ext_resource type="Script" path="res://Scripts/World/scatter_layer.gd" id="200_layertype"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/scatter_worldmap_cacti.tres" id="201_cacti"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/scatter_worldmap_bushes.tres" id="202_bushes"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/scatter_worldmap_bones.tres" id="203_bones"]
-[ext_resource type="Resource" path="res://Resources/Maps/Desert/Regions/scatter_dust_camp_tents.tres" id="204_tents"]
-[ext_resource type="PackedScene" path="res://Scenes/World/Props/Desert/Mountain.tscn" id="206_mountain"]
-[ext_resource type="PackedScene" path="res://Scenes/World/TravelPortal.tscn" id="207_portal"]
-[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/Dust Camp/Dust Camp Background.PNG" id="209_bg_a"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Regions/dust_camp_terrain.tres" id="1_terrain"]
+[ext_resource type="Script" uid="uid://cnw2xmwyn1fbu" path="res://Scripts/World/terrain_masses.gd" id="2_masses"]
+[ext_resource type="Script" uid="uid://c0tgfi6qr6uq" path="res://Scripts/World/world_map_navigation.gd" id="3_nav"]
+[ext_resource type="Script" uid="uid://kllt3nm2ftc4" path="res://Scripts/World/prop_scale.gd" id="4_propscale"]
+[ext_resource type="Texture2D" uid="uid://cx8os5b3t4f21" path="res://Assets/Maps/Desert/Dust Camp/Dust Camp Background.PNG" id="5_ground"]
+[ext_resource type="Script" uid="uid://bkovnrs57lx46" path="res://Scripts/World/world_map_location.gd" id="6_loc"]
+[ext_resource type="Script" uid="uid://dngpapk0xeker" path="res://Scripts/World/map_location.gd" id="7_maploc"]
+[ext_resource type="Script" uid="uid://d0w1v0ldacvie" path="res://Scripts/World/world_map_region_zone.gd" id="8_zone"]
+[ext_resource type="Resource" uid="uid://cnlq0v14y5to1" path="res://Resources/Maps/Desert/Regions/region_a.tres" id="9_regiona"]
+[ext_resource type="Script" uid="uid://dqlo2m72g7o55" path="res://Scripts/World/world_bandit_route.gd" id="10_route"]
+[ext_resource type="Script" uid="uid://8rmldir4gmtk" path="res://Scripts/World/world_bandit.gd" id="11_bandit"]
+[ext_resource type="Resource" uid="uid://fms2ku7a8ccx" path="res://Resources/World/Bandits/bandit_speed_profile.tres" id="12_speed"]
+[ext_resource type="Resource" uid="uid://d2ka6vtyuug0d" path="res://Resources/World/Bandits/bandit_threat_profile.tres" id="13_threat"]
+[ext_resource type="Script" uid="uid://bjp7hsnq31h5f" path="res://Scripts/Dev/test_map_gate.gd" id="14_gate"]
+[ext_resource type="Texture2D" uid="uid://b5yjrmddijjg3" path="res://Assets/Maps/Desert/WorldMap/placeholder_dot.tres" id="15_dot"]
+[ext_resource type="Texture2D" uid="uid://hiss48qcyama" path="res://Assets/Maps/Desert/WorldMap/placeholder_solid.tres" id="16_solid"]
+[ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="17_prompt"]
+[ext_resource type="Script" uid="uid://dmeyhvk7sc3g4" path="res://Scripts/World/prop_scatter.gd" id="20_scatter"]
+[ext_resource type="Script" uid="uid://jbqgmet8idv" path="res://Scripts/World/scatter_layer.gd" id="21_layer"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Regions/scatter_dust_camp_map_cacti.tres" id="22_cacti"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Regions/scatter_dust_camp_map_bushes.tres" id="23_bushes"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Regions/scatter_dust_camp_map_bones.tres" id="24_bones"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Regions/scatter_dust_camp_map_rocks.tres" id="25_rocks"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Regions/scatter_dust_camp_map_tents.tres" id="26_tents"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Landmarks/DustCampSaloon.tscn" id="30_saloon"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Landmarks/DustCampMarket.tscn" id="31_market"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Landmarks/BossCampSite.tscn" id="32_boss"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Landmarks/BanditCampSite.tscn" id="33_bandit"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Landmarks/DesertOutpost.tscn" id="34_outpost"]
+[ext_resource type="PackedScene" uid="uid://c7lj6xrpkxku7" path="res://Scenes/World/TravelPortal.tscn" id="40_portal"]
+[ext_resource type="Script" uid="uid://cqueo1fgvg3g" path="res://Scripts/World/world_map_sanctuary.gd" id="41_sanct"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_5tegj"]
-size = Vector2(32, 32)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_h"]
+size = Vector2(20128, 64)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_eorlv"]
-size = Vector2(32, 32)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall_v"]
+size = Vector2(64, 16128)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_6j2tu"]
-size = Vector2(32, 32)
+[sub_resource type="Resource" id="Resource_saloon"]
+script = ExtResource("7_maploc")
+location_id = &"saloon_dust_camp"
+location_type = 2
+region_id = &"A"
+world_position = Vector2(-760, -4120)
+display_name = "Dust Camp Saloon"
+known_from_start = true
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_x0ngi"]
-size = Vector2(32, 32)
+[sub_resource type="Resource" id="Resource_market"]
+script = ExtResource("7_maploc")
+location_id = &"market_dust_camp"
+location_type = 3
+region_id = &"A"
+world_position = Vector2(7800, 1000)
+display_name = "Dust Camp Market"
+known_from_start = true
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_y8wwu"]
-size = Vector2(32, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_swmqu"]
-size = Vector2(32, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_hiorq"]
-size = Vector2(32, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_l2pgb"]
-size = Vector2(32, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_6pum3"]
-size = Vector2(32, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_flg07"]
-size = Vector2(32, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_7vq2g"]
-size = Vector2(32, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_wwj71"]
-size = Vector2(32, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_qd2hw"]
-size = Vector2(32, 32)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_vs16u"]
-size = Vector2(32, 32)
-
-[sub_resource type="Resource" id="Resource_yac85"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_boss1"]
+script = ExtResource("7_maploc")
 location_id = &"bounty_camp_a1"
 location_type = 0
 region_id = &"A"
-world_position = Vector2(-4731.628, 769.9988)
-display_name = "A Bounty Camp 1"
+world_position = Vector2(-4280, -6920)
+display_name = "North Ridge Boss Camp"
 
-[sub_resource type="Resource" id="Resource_7k7xv"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_boss2"]
+script = ExtResource("7_maploc")
 location_id = &"bounty_camp_a2"
 location_type = 0
 region_id = &"A"
-world_position = Vector2(-4162.4113, -4602.2742)
-display_name = "A Bounty Camp 2"
+world_position = Vector2(7160, 6200)
+display_name = "South Reach Boss Camp"
 
-[sub_resource type="Resource" id="Resource_4wxut"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_boss3"]
+script = ExtResource("7_maploc")
 location_id = &"bounty_camp_a3"
 location_type = 0
 region_id = &"A"
-world_position = Vector2(-4131.3437, 733.858)
-display_name = "A Bounty Camp 3"
+world_position = Vector2(-5480, 7160)
+display_name = "Dry Wash Boss Camp"
 
-[sub_resource type="Resource" id="Resource_0lc3b"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_camp1"]
+script = ExtResource("7_maploc")
 location_id = &"normal_camp_a1"
 region_id = &"A"
-world_position = Vector2(-4030.5313, -3802.9752)
-display_name = "A Camp 1"
+world_position = Vector2(-8840, -7160)
+display_name = "Northwest Bandit Camp"
 
-[sub_resource type="Resource" id="Resource_x6t4c"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_camp2"]
+script = ExtResource("7_maploc")
 location_id = &"normal_camp_a2"
 region_id = &"A"
-world_position = Vector2(-4149.5443, -1434.4473)
-display_name = "A Camp 2"
+world_position = Vector2(6200, -4280)
+display_name = "Northeast Bandit Camp"
 
-[sub_resource type="Resource" id="Resource_cuo70"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_camp3"]
+script = ExtResource("7_maploc")
 location_id = &"normal_camp_a3"
 region_id = &"A"
-world_position = Vector2(-4228.9343, -2935.5818)
-display_name = "A Camp 3"
+world_position = Vector2(1320, -2440)
+display_name = "Middle Flats Bandit Camp"
 
-[sub_resource type="Resource" id="Resource_inp14"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_camp4"]
+script = ExtResource("7_maploc")
 location_id = &"normal_camp_a4"
 region_id = &"A"
-world_position = Vector2(-3633.5567, -1176.9534)
-display_name = "A Camp 4"
+world_position = Vector2(-3560, 2760)
+display_name = "Southwest Bandit Camp"
 
-[sub_resource type="Resource" id="Resource_ol223"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_camp5"]
+script = ExtResource("7_maploc")
 location_id = &"normal_camp_a5"
 region_id = &"A"
-world_position = Vector2(-4255.0528, 2441.8378)
-display_name = "A Camp 5"
+world_position = Vector2(6040, 3320)
+display_name = "Southeast Bandit Camp"
 
-[sub_resource type="Resource" id="Resource_mmw2l"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_arena"]
+script = ExtResource("7_maploc")
 location_id = &"arena_a"
 location_type = 4
 region_id = &"A"
-world_position = Vector2(-4008.1478, -4183.8747)
-display_name = "A Arena"
+world_position = Vector2(-5880, -1720)
+display_name = "Dust Camp Arena"
+known_from_start = true
 
-[sub_resource type="Resource" id="Resource_udi1a"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_extract1"]
+script = ExtResource("7_maploc")
 location_id = &"extraction_a1"
 location_type = 5
 region_id = &"A"
-world_position = Vector2(-3661.2833, 1110.025)
-display_name = "A Extraction 1"
+world_position = Vector2(1560, -7000)
+display_name = "North Road Outpost"
+known_from_start = true
 
-[sub_resource type="Resource" id="Resource_5tegj"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_extract2"]
+script = ExtResource("7_maploc")
 location_id = &"extraction_a2"
 location_type = 5
 region_id = &"A"
-world_position = Vector2(-3386.3778, -2452.4762)
-display_name = "A Extraction 2"
+world_position = Vector2(1880, 6920)
+display_name = "South Road Outpost"
+known_from_start = true
 
-[sub_resource type="Resource" id="Resource_portal_dustcamp"]
-script = ExtResource("6_pwgfs")
+[sub_resource type="Resource" id="Resource_portal"]
+script = ExtResource("7_maploc")
 location_id = &"travel_portal_dust_camp"
 location_type = 7
 region_id = &"A"
-world_position = Vector2(-3150, 0)
+world_position = Vector2(8520, -120)
 display_name = "Portal to Old Mine"
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_band_h_A"]
-size = Vector2(2128.0, 64)
+[node name="DustCampMap" unique_id=1658543898 instance=ExtResource("0_base")]
 
-[node name="DustCampMap" instance=ExtResource("0_base")]
+[node name="Floor" parent="WorldMap/Terrain" parent_id_path=PackedInt32Array(1757087088) index="0" unique_id=1446303729]
+visible = false
+position = Vector2(-10000, -8000)
+polygon = PackedVector2Array(0, 0, 20000, 0, 20000, 16000, 0, 16000)
+surface_size = Vector2(20000, 16000)
 
-[node name="Rock0" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.42, 0.35, 0.28, 1)
-z_index = -12
-position = Vector2(-2995.0328, -4750)
-rotation = 0.10178289
-scale = Vector2(2.9472609, 6.877883)
-texture = ExtResource("16_w262y")
+[node name="TopWall" parent="WorldMap/Terrain/Bounds" parent_id_path=PackedInt32Array(1060569150) index="0" unique_id=1043543340]
+position = Vector2(0, -8032)
+shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock0"]
-collision_layer = 32
-collision_mask = 0
+[node name="BottomWall" parent="WorldMap/Terrain/Bounds" parent_id_path=PackedInt32Array(1060569150) index="1" unique_id=362981438]
+position = Vector2(0, 8032)
+shape = SubResource("RectangleShape2D_wall_h")
 
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock0/Collision"]
-shape = SubResource("RectangleShape2D_5tegj")
+[node name="LeftWall" parent="WorldMap/Terrain/Bounds" parent_id_path=PackedInt32Array(1060569150) index="2" unique_id=1535628561]
+position = Vector2(-10032, 0)
+shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="Rock1" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.48, 0.4, 0.3, 1)
-z_index = -12
-position = Vector2(-3009.4977, -4125)
-rotation = 0.06862836
-scale = Vector2(3.4193532, 7.56234)
-texture = ExtResource("16_w262y")
+[node name="RightWall" parent="WorldMap/Terrain/Bounds" parent_id_path=PackedInt32Array(1060569150) index="3" unique_id=498787921]
+position = Vector2(10032, 0)
+shape = SubResource("RectangleShape2D_wall_v")
 
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock1"]
-collision_layer = 32
-collision_mask = 0
+[node name="Masses" type="Node2D" parent="WorldMap/Terrain" parent_id_path=PackedInt32Array(1757087088) index="3" unique_id=2052338936]
+script = ExtResource("2_masses")
+shape = ExtResource("1_terrain")
+ground_texture = ExtResource("5_ground")
 
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock1/Collision"]
-shape = SubResource("RectangleShape2D_eorlv")
+[node name="Locations" parent="WorldMap" parent_id_path=PackedInt32Array(141076097) index="2" unique_id=392766687]
+y_sort_enabled = true
 
-[node name="Rock2" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.38, 0.3, 0.24, 1)
-z_index = -12
-position = Vector2(-2990.7932, -3500)
-rotation = 0.007886844
-scale = Vector2(3.2926807, 7.4555187)
-texture = ExtResource("16_w262y")
+[node name="RegionA" type="Node2D" parent="WorldMap/Locations" index="0" unique_id=1489402649]
+y_sort_enabled = true
 
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock2"]
-collision_layer = 32
-collision_mask = 0
+[node name="saloon" type="Node2D" parent="WorldMap/Locations/RegionA" index="0" unique_id=84854574]
+script = ExtResource("6_loc")
+location = SubResource("Resource_saloon")
+interaction_radius = 420.0
 
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock2/Collision"]
-shape = SubResource("RectangleShape2D_6j2tu")
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/saloon" index="0" unique_id=1137085698]
+modulate = Color(0.3, 0.85, 0.45, 1)
+z_index = -8
+position = Vector2(0, -560)
+scale = Vector2(1.4, 1.4)
+texture = ExtResource("15_dot")
 
-[node name="Rock3" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.42, 0.35, 0.28, 1)
-z_index = -12
-position = Vector2(-3001.4247, -2875)
-rotation = -0.080484144
-scale = Vector2(2.8813708, 6.452745)
-texture = ExtResource("16_w262y")
+[node name="Sanctuary" type="Node2D" parent="WorldMap/Locations/RegionA/saloon" index="1" unique_id=812000101]
+script = ExtResource("41_sanct")
+radius = 1600.0
 
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock3"]
-collision_layer = 32
-collision_mask = 0
+[node name="market" type="Node2D" parent="WorldMap/Locations/RegionA" index="1" unique_id=1895709496]
+script = ExtResource("6_loc")
+location = SubResource("Resource_market")
+interaction_radius = 320.0
 
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock3/Collision"]
-shape = SubResource("RectangleShape2D_x0ngi")
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/market" index="0" unique_id=1479882292]
+modulate = Color(0.72, 0.4, 0.85, 1)
+z_index = -8
+position = Vector2(0, -520)
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("15_dot")
 
-[node name="Rock4" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.48, 0.4, 0.3, 1)
-z_index = -12
-position = Vector2(-3011.9971, -2250)
-rotation = -0.059061915
-scale = Vector2(2.8640661, 6.9790764)
-texture = ExtResource("16_w262y")
+[node name="Sanctuary" type="Node2D" parent="WorldMap/Locations/RegionA/market" index="1" unique_id=812000102]
+script = ExtResource("41_sanct")
+radius = 1600.0
 
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock4"]
-collision_layer = 32
-collision_mask = 0
+[node name="bounty_camp_01" type="Node2D" parent="WorldMap/Locations/RegionA" index="2" unique_id=1930196537]
+script = ExtResource("6_loc")
+location = SubResource("Resource_boss1")
+interaction_radius = 340.0
 
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock4/Collision"]
-shape = SubResource("RectangleShape2D_y8wwu")
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/bounty_camp_01" index="0" unique_id=741145244]
+modulate = Color(0.95, 0.5, 0.15, 1)
+z_index = -8
+position = Vector2(0, -420)
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("15_dot")
 
-[node name="Rock5" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.38, 0.3, 0.24, 1)
-z_index = -12
-position = Vector2(-2999.7502, -1625)
-rotation = 0.08243975
-scale = Vector2(3.054331, 7.115413)
-texture = ExtResource("16_w262y")
+[node name="bounty_camp_02" type="Node2D" parent="WorldMap/Locations/RegionA" index="3" unique_id=294928447]
+script = ExtResource("6_loc")
+location = SubResource("Resource_boss2")
+interaction_radius = 340.0
 
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock5"]
-collision_layer = 32
-collision_mask = 0
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/bounty_camp_02" index="0" unique_id=844974885]
+modulate = Color(0.95, 0.5, 0.15, 1)
+z_index = -8
+position = Vector2(0, -420)
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("15_dot")
 
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock5/Collision"]
-shape = SubResource("RectangleShape2D_swmqu")
+[node name="bounty_camp_03" type="Node2D" parent="WorldMap/Locations/RegionA" index="4" unique_id=997785630]
+script = ExtResource("6_loc")
+location = SubResource("Resource_boss3")
+interaction_radius = 340.0
 
-[node name="Rock6" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.42, 0.35, 0.28, 1)
-z_index = -12
-position = Vector2(-3001.3232, -1000)
-rotation = -0.03292257
-scale = Vector2(3.1108348, 7.168516)
-texture = ExtResource("16_w262y")
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/bounty_camp_03" index="0" unique_id=1659244429]
+modulate = Color(0.95, 0.5, 0.15, 1)
+z_index = -8
+position = Vector2(0, -420)
+scale = Vector2(1.3, 1.3)
+texture = ExtResource("15_dot")
 
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock6"]
-collision_layer = 32
-collision_mask = 0
+[node name="normal_camp_01" type="Node2D" parent="WorldMap/Locations/RegionA" index="5" unique_id=461206611]
+script = ExtResource("6_loc")
+location = SubResource("Resource_camp1")
+interaction_radius = 260.0
 
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock6/Collision"]
-shape = SubResource("RectangleShape2D_hiorq")
-
-[node name="Rock7" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.48, 0.4, 0.3, 1)
-z_index = -12
-position = Vector2(-2992.8762, 875)
-rotation = 0.033651385
-scale = Vector2(3.462809, 6.451034)
-texture = ExtResource("16_w262y")
-
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock7"]
-collision_layer = 32
-collision_mask = 0
-
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock7/Collision"]
-shape = SubResource("RectangleShape2D_l2pgb")
-
-[node name="Rock8" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.38, 0.3, 0.24, 1)
-z_index = -12
-position = Vector2(-3005.4211, 1500)
-rotation = -0.10220604
-scale = Vector2(3.4528499, 6.8300037)
-texture = ExtResource("16_w262y")
-
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock8"]
-collision_layer = 32
-collision_mask = 0
-
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock8/Collision"]
-shape = SubResource("RectangleShape2D_6pum3")
-
-[node name="Rock9" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.42, 0.35, 0.28, 1)
-z_index = -12
-position = Vector2(-2990.801, 2125)
-rotation = -0.08017024
-scale = Vector2(3.5779464, 6.445135)
-texture = ExtResource("16_w262y")
-
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock9"]
-collision_layer = 32
-collision_mask = 0
-
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock9/Collision"]
-shape = SubResource("RectangleShape2D_flg07")
-
-[node name="Rock10" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.48, 0.4, 0.3, 1)
-z_index = -12
-position = Vector2(-2991.0457, 2750)
-rotation = 0.028312648
-scale = Vector2(3.3185525, 6.764864)
-texture = ExtResource("16_w262y")
-
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock10"]
-collision_layer = 32
-collision_mask = 0
-
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock10/Collision"]
-shape = SubResource("RectangleShape2D_7vq2g")
-
-[node name="Rock11" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.38, 0.3, 0.24, 1)
-z_index = -12
-position = Vector2(-3010.3091, 3375)
-rotation = -0.09131352
-scale = Vector2(3.1798444, 7.4449534)
-texture = ExtResource("16_w262y")
-
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock11"]
-collision_layer = 32
-collision_mask = 0
-
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock11/Collision"]
-shape = SubResource("RectangleShape2D_wwj71")
-
-[node name="Rock12" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.42, 0.35, 0.28, 1)
-z_index = -12
-position = Vector2(-2996.9015, 4000)
-rotation = -0.008119005
-scale = Vector2(3.3376927, 6.5731907)
-texture = ExtResource("16_w262y")
-
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock12"]
-collision_layer = 32
-collision_mask = 0
-
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock12/Collision"]
-shape = SubResource("RectangleShape2D_qd2hw")
-
-[node name="Rock13" type="Sprite2D" parent="WorldMap/Terrain/Boundaries"]
-modulate = Color(0.48, 0.4, 0.3, 1)
-z_index = -12
-position = Vector2(-2983.7635, 4625)
-rotation = -0.021952312
-scale = Vector2(3.288075, 6.7424664)
-texture = ExtResource("16_w262y")
-
-[node name="Collision" type="StaticBody2D" parent="WorldMap/Terrain/Boundaries/Rock13"]
-collision_layer = 32
-collision_mask = 0
-
-[node name="Shape" type="CollisionShape2D" parent="WorldMap/Terrain/Boundaries/Rock13/Collision"]
-shape = SubResource("RectangleShape2D_vs16u")
-
-[node name="MainSpine" type="Sprite2D" parent="WorldMap/Roads"]
-modulate = Color(0.64, 0.52, 0.34, 1)
-z_index = -12
-scale = Vector2(125, 7.5)
-texture = ExtResource("16_w262y")
-position = Vector2(-4000.0, 0)
-
-[node name="RegionA" type="Node2D" parent="WorldMap/Locations"]
-
-[node name="bounty_camp_01" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_yac85")
-
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/bounty_camp_01"]
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/normal_camp_01" index="0" unique_id=556787555]
 modulate = Color(0.85, 0.2, 0.15, 1)
 z_index = -8
-scale = Vector2(1.15, 1.15)
-texture = ExtResource("15_r3xhl")
+position = Vector2(0, -300)
+texture = ExtResource("15_dot")
 
-[node name="bounty_camp_02" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_7k7xv")
+[node name="normal_camp_02" type="Node2D" parent="WorldMap/Locations/RegionA" index="6" unique_id=38595856]
+script = ExtResource("6_loc")
+location = SubResource("Resource_camp2")
+interaction_radius = 260.0
 
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/bounty_camp_02"]
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/normal_camp_02" index="0" unique_id=1849908397]
 modulate = Color(0.85, 0.2, 0.15, 1)
 z_index = -8
-scale = Vector2(1.15, 1.15)
-texture = ExtResource("15_r3xhl")
+position = Vector2(0, -300)
+texture = ExtResource("15_dot")
 
-[node name="bounty_camp_03" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_4wxut")
+[node name="normal_camp_03" type="Node2D" parent="WorldMap/Locations/RegionA" index="7" unique_id=1713314880]
+script = ExtResource("6_loc")
+location = SubResource("Resource_camp3")
+interaction_radius = 260.0
 
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/bounty_camp_03"]
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/normal_camp_03" index="0" unique_id=1963355470]
 modulate = Color(0.85, 0.2, 0.15, 1)
 z_index = -8
-scale = Vector2(1.15, 1.15)
-texture = ExtResource("15_r3xhl")
+position = Vector2(0, -300)
+texture = ExtResource("15_dot")
 
-[node name="normal_camp_01" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_0lc3b")
+[node name="normal_camp_04" type="Node2D" parent="WorldMap/Locations/RegionA" index="8" unique_id=1790704641]
+script = ExtResource("6_loc")
+location = SubResource("Resource_camp4")
+interaction_radius = 260.0
 
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/normal_camp_01"]
-modulate = Color(0.82, 0.62, 0.22, 1)
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/normal_camp_04" index="0" unique_id=1841583380]
+modulate = Color(0.85, 0.2, 0.15, 1)
 z_index = -8
-scale = Vector2(0.9, 0.9)
-texture = ExtResource("15_r3xhl")
+position = Vector2(0, -300)
+texture = ExtResource("15_dot")
 
-[node name="normal_camp_02" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_x6t4c")
+[node name="normal_camp_05" type="Node2D" parent="WorldMap/Locations/RegionA" index="9" unique_id=854488366]
+script = ExtResource("6_loc")
+location = SubResource("Resource_camp5")
+interaction_radius = 260.0
 
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/normal_camp_02"]
-modulate = Color(0.82, 0.62, 0.22, 1)
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/normal_camp_05" index="0" unique_id=404134573]
+modulate = Color(0.85, 0.2, 0.15, 1)
 z_index = -8
-scale = Vector2(0.9, 0.9)
-texture = ExtResource("15_r3xhl")
+position = Vector2(0, -300)
+texture = ExtResource("15_dot")
 
-[node name="normal_camp_03" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_cuo70")
+[node name="arena_01" type="Node2D" parent="WorldMap/Locations/RegionA" index="10" unique_id=154303031]
+script = ExtResource("6_loc")
+location = SubResource("Resource_arena")
+interaction_radius = 300.0
 
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/normal_camp_03"]
-modulate = Color(0.82, 0.62, 0.22, 1)
-z_index = -8
-scale = Vector2(0.9, 0.9)
-texture = ExtResource("15_r3xhl")
-
-[node name="normal_camp_04" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_inp14")
-
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/normal_camp_04"]
-modulate = Color(0.82, 0.62, 0.22, 1)
-z_index = -8
-scale = Vector2(0.9, 0.9)
-texture = ExtResource("15_r3xhl")
-
-[node name="normal_camp_05" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_ol223")
-
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/normal_camp_05"]
-modulate = Color(0.82, 0.62, 0.22, 1)
-z_index = -8
-scale = Vector2(0.9, 0.9)
-texture = ExtResource("15_r3xhl")
-
-[node name="arena_01" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_mmw2l")
-
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/arena_01"]
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/arena_01" index="0" unique_id=1555655772]
 modulate = Color(0.85, 0.25, 0.6, 1)
 z_index = -8
-scale = Vector2(1.8, 1.8)
-texture = ExtResource("15_r3xhl")
+scale = Vector2(2, 2)
+texture = ExtResource("15_dot")
 
-[node name="extraction_01" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_udi1a")
+[node name="extraction_01" type="Node2D" parent="WorldMap/Locations/RegionA" index="11" unique_id=376216495]
+script = ExtResource("6_loc")
+location = SubResource("Resource_extract1")
+interaction_radius = 300.0
 
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/extraction_01"]
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/extraction_01" index="0" unique_id=1211614615]
 modulate = Color(0.3, 0.85, 0.45, 1)
 z_index = -8
-scale = Vector2(1.05, 1.05)
-texture = ExtResource("15_r3xhl")
+position = Vector2(0, -400)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("15_dot")
 
-[node name="extraction_02" type="Node2D" parent="WorldMap/Locations/RegionA"]
-script = ExtResource("5_ol223")
-location = SubResource("Resource_5tegj")
+[node name="extraction_02" type="Node2D" parent="WorldMap/Locations/RegionA" index="12" unique_id=1132801072]
+script = ExtResource("6_loc")
+location = SubResource("Resource_extract2")
+interaction_radius = 300.0
 
-[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/extraction_02"]
+[node name="Icon" type="Sprite2D" parent="WorldMap/Locations/RegionA/extraction_02" index="0" unique_id=1820619677]
 modulate = Color(0.3, 0.85, 0.45, 1)
 z_index = -8
-scale = Vector2(1.05, 1.05)
-texture = ExtResource("15_r3xhl")
+position = Vector2(0, -400)
+scale = Vector2(1.2, 1.2)
+texture = ExtResource("15_dot")
 
-[node name="RouteA1" type="Node2D" parent="WorldMap/WorldBandits/Routes"]
-script = ExtResource("8_x6t4c")
+[node name="RouteCampNorthwest" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="0" unique_id=810000137]
+script = ExtResource("10_route")
+loop = true
 
-[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA1"]
-position = Vector2(-3786.906, -3891.2292)
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNorthwest" index="0" unique_id=810000274]
+position = Vector2(-8085, -6841)
 
-[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA1"]
-position = Vector2(-4215.157, -3304.6347)
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNorthwest" index="1" unique_id=810000411]
+position = Vector2(-8739, -6346)
 
-[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA1"]
-position = Vector2(-4339.7022, -4154.2467)
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNorthwest" index="2" unique_id=810000548]
+position = Vector2(-9254, -6666)
 
-[node name="RouteA2" type="Node2D" parent="WorldMap/WorldBandits/Routes"]
-script = ExtResource("8_x6t4c")
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNorthwest" index="3" unique_id=810000685]
+position = Vector2(-9248, -7386)
 
-[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA2"]
-position = Vector2(-4286.2737, -2370.2537)
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNorthwest" index="4" unique_id=810000822]
+position = Vector2(-8817, -7510)
 
-[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA2"]
-position = Vector2(-4916.6667, -3009.669)
+[node name="Point5" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNorthwest" index="5" unique_id=810000959]
+position = Vector2(-8186, -7414)
 
-[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA2"]
-position = Vector2(-4248.4762, -3550.8835)
+[node name="RouteCampNortheast" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="1" unique_id=810003151]
+script = ExtResource("10_route")
+loop = true
 
-[node name="RegionA_Bandit1" type="Node2D" parent="WorldMap/WorldBandits/Groups"]
-position = Vector2(-3786.906, -3891.2292)
-script = ExtResource("9_cuo70")
-group_strength = 10.0
-speed_profile = ExtResource("10_inp14")
-threat_profile = ExtResource("11_ol223")
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNortheast" index="0" unique_id=810003288]
+position = Vector2(6955, -3961)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNortheast" index="1" unique_id=810003425]
+position = Vector2(6301, -3466)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNortheast" index="2" unique_id=810003562]
+position = Vector2(5546, -3786)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNortheast" index="3" unique_id=810003699]
+position = Vector2(5445, -4599)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNortheast" index="4" unique_id=810003836]
+position = Vector2(6099, -5094)
+
+[node name="Point5" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampNortheast" index="5" unique_id=810003973]
+position = Vector2(6854, -4774)
+
+[node name="RouteCampMiddleFlats" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="2" unique_id=810006165]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampMiddleFlats" index="0" unique_id=810006302]
+position = Vector2(1660, -1881)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampMiddleFlats" index="1" unique_id=810006439]
+position = Vector2(1421, -1626)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampMiddleFlats" index="2" unique_id=810006576]
+position = Vector2(666, -1946)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampMiddleFlats" index="3" unique_id=810006713]
+position = Vector2(565, -2759)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampMiddleFlats" index="4" unique_id=810006850]
+position = Vector2(1219, -3254)
+
+[node name="Point5" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampMiddleFlats" index="5" unique_id=810006987]
+position = Vector2(1742, -2872)
+
+[node name="RouteCampSouthwest" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="3" unique_id=810009179]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSouthwest" index="0" unique_id=810009316]
+position = Vector2(-2890, 3164)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSouthwest" index="1" unique_id=810009453]
+position = Vector2(-3459, 3574)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSouthwest" index="2" unique_id=810009590]
+position = Vector2(-4214, 3254)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSouthwest" index="3" unique_id=810009727]
+position = Vector2(-4315, 2441)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSouthwest" index="4" unique_id=810009864]
+position = Vector2(-3661, 1946)
+
+[node name="Point5" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSouthwest" index="5" unique_id=810010001]
+position = Vector2(-2966, 2370)
+
+[node name="RouteCampSoutheast" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="4" unique_id=810012193]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSoutheast" index="0" unique_id=810012330]
+position = Vector2(6795, 3639)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSoutheast" index="1" unique_id=810012467]
+position = Vector2(6141, 4134)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSoutheast" index="2" unique_id=810012604]
+position = Vector2(5386, 3814)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSoutheast" index="3" unique_id=810012741]
+position = Vector2(5285, 3001)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSoutheast" index="4" unique_id=810012878]
+position = Vector2(5939, 2506)
+
+[node name="Point5" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteCampSoutheast" index="5" unique_id=810013015]
+position = Vector2(6632, 3057)
+
+[node name="RouteBossCampNorthRidge" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="5" unique_id=810015207]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampNorthRidge" index="0" unique_id=810015344]
+position = Vector2(-3359, -6531)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampNorthRidge" index="1" unique_id=810015481]
+position = Vector2(-4157, -5928)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampNorthRidge" index="2" unique_id=810015618]
+position = Vector2(-4838, -6317)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampNorthRidge" index="3" unique_id=810015755]
+position = Vector2(-4841, -7309)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampNorthRidge" index="4" unique_id=810015892]
+position = Vector2(-4403, -7432)
+
+[node name="Point5" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampNorthRidge" index="5" unique_id=810016029]
+position = Vector2(-3602, -7315)
+
+[node name="RouteBossCampSouthReach" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="6" unique_id=810018632]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampSouthReach" index="0" unique_id=810018769]
+position = Vector2(8081, 6589)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampSouthReach" index="1" unique_id=810018906]
+position = Vector2(7283, 7192)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampSouthReach" index="2" unique_id=810019043]
+position = Vector2(6362, 6803)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampSouthReach" index="3" unique_id=810019180]
+position = Vector2(6239, 5811)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampSouthReach" index="4" unique_id=810019317]
+position = Vector2(7037, 5208)
+
+[node name="Point5" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampSouthReach" index="5" unique_id=810019454]
+position = Vector2(7958, 5597)
+
+[node name="RouteBossCampDryWash" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="7" unique_id=810022057]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampDryWash" index="0" unique_id=810022194]
+position = Vector2(-4679, 7342)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampDryWash" index="1" unique_id=810022331]
+position = Vector2(-5357, 7432)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampDryWash" index="2" unique_id=810022468]
+position = Vector2(-6038, 7347)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampDryWash" index="3" unique_id=810022605]
+position = Vector2(-6401, 6771)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampDryWash" index="4" unique_id=810022742]
+position = Vector2(-5603, 6168)
+
+[node name="Point5" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteBossCampDryWash" index="5" unique_id=810022879]
+position = Vector2(-4682, 6557)
+
+[node name="RouteChoke01" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="8" unique_id=810025482]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke01" index="0" unique_id=810025619]
+position = Vector2(-6597, -3614)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke01" index="1" unique_id=810025756]
+position = Vector2(-6000, -3200)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke01" index="2" unique_id=810025893]
+position = Vector2(-5463, -2890)
+
+[node name="RouteChoke02" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="9" unique_id=810026441]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke02" index="0" unique_id=810026578]
+position = Vector2(-8820, -1600)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke02" index="1" unique_id=810026715]
+position = Vector2(-8200, -1600)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke02" index="2" unique_id=810026852]
+position = Vector2(-7372, -1480)
+
+[node name="RouteChoke03" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="10" unique_id=810027400]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke03" index="0" unique_id=810027537]
+position = Vector2(7666, -1178)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke03" index="1" unique_id=810027674]
+position = Vector2(8000, -800)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke03" index="2" unique_id=810027811]
+position = Vector2(8099, -701)
+
+[node name="RouteChoke04" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="11" unique_id=810028359]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke04" index="0" unique_id=810028496]
+position = Vector2(200, 3180)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke04" index="1" unique_id=810028633]
+position = Vector2(200, 3800)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke04" index="2" unique_id=810028770]
+position = Vector2(140, 4524)
+
+[node name="RouteChoke05" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="12" unique_id=810029318]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke05" index="0" unique_id=810029455]
+position = Vector2(-3305, -2485)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke05" index="1" unique_id=810029592]
+position = Vector2(-2600, -2400)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke05" index="2" unique_id=810029729]
+position = Vector2(-2096, -2431)
+
+[node name="RouteChoke06" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="13" unique_id=810030277]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke06" index="0" unique_id=810030414]
+position = Vector2(-3136, -6031)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke06" index="1" unique_id=810030551]
+position = Vector2(-2400, -6000)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke06" index="2" unique_id=810030688]
+position = Vector2(-1780, -6000)
+
+[node name="RouteChoke07" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="14" unique_id=810031236]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke07" index="0" unique_id=810031373]
+position = Vector2(-6920, 5001)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke07" index="1" unique_id=810031510]
+position = Vector2(-7000, 5600)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke07" index="2" unique_id=810031647]
+position = Vector2(-6720, 6199)
+
+[node name="RouteChoke08" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="15" unique_id=810032195]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke08" index="0" unique_id=810032332]
+position = Vector2(3599, 1920)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke08" index="1" unique_id=810032469]
+position = Vector2(3000, 2200)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke08" index="2" unique_id=810032606]
+position = Vector2(2297, 2300)
+
+[node name="RouteChoke09" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="16" unique_id=810033154]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke09" index="0" unique_id=810033291]
+position = Vector2(3479, 7040)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke09" index="1" unique_id=810033428]
+position = Vector2(3000, 7200)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke09" index="2" unique_id=810033565]
+position = Vector2(2316, 7276)
+
+[node name="RouteChoke10" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="17" unique_id=810034113]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke10" index="0" unique_id=810034250]
+position = Vector2(7846, -7518)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke10" index="1" unique_id=810034387]
+position = Vector2(7200, -7200)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke10" index="2" unique_id=810034524]
+position = Vector2(6882, -6762)
+
+[node name="RouteChoke11" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="18" unique_id=810035072]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke11" index="0" unique_id=810035209]
+position = Vector2(-4620, 5800)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke11" index="1" unique_id=810035346]
+position = Vector2(-4000, 5800)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke11" index="2" unique_id=810035483]
+position = Vector2(-3380, 5800)
+
+[node name="RouteChoke12" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="19" unique_id=810036031]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke12" index="0" unique_id=810036168]
+position = Vector2(8152, 4295)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke12" index="1" unique_id=810036305]
+position = Vector2(8400, 4600)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteChoke12" index="2" unique_id=810036442]
+position = Vector2(8710, 5257)
+
+[node name="RouteA1" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="20" unique_id=810036990]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA1" index="0" unique_id=810037127]
+position = Vector2(-8840, -7160)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA1" index="1" unique_id=810037264]
+position = Vector2(-4280, -6920)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA1" index="2" unique_id=810037401]
+position = Vector2(-1960, -6600)
+
+[node name="RouteA2" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="21" unique_id=810037949]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA2" index="0" unique_id=810038086]
+position = Vector2(6200, -4280)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA2" index="1" unique_id=810038223]
+position = Vector2(4440, -5800)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA2" index="2" unique_id=810038360]
+position = Vector2(7960, -3240)
+
+[node name="RouteA3" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="22" unique_id=810038908]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA3" index="0" unique_id=810039045]
+position = Vector2(1320, -2440)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA3" index="1" unique_id=810039182]
+position = Vector2(-200, -1160)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA3" index="2" unique_id=810039319]
+position = Vector2(2680, 840)
+
+[node name="RouteA4" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="23" unique_id=810039867]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA4" index="0" unique_id=810040004]
+position = Vector2(-3560, 2760)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA4" index="1" unique_id=810040141]
+position = Vector2(-6680, 4600)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA4" index="2" unique_id=810040278]
+position = Vector2(-1160, 6600)
+
+[node name="RouteA5" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="24" unique_id=810040826]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA5" index="0" unique_id=810040963]
+position = Vector2(6040, 3320)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA5" index="1" unique_id=810041100]
+position = Vector2(7800, 4280)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA5" index="2" unique_id=810041237]
+position = Vector2(6040, 5240)
+
+[node name="RouteA6" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="25" unique_id=810041785]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA6" index="0" unique_id=810041922]
+position = Vector2(-6760, 40)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA6" index="1" unique_id=810042059]
+position = Vector2(-3000, -2600)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteA6" index="2" unique_id=810042196]
+position = Vector2(-5880, -1720)
+
+[node name="RouteWestCanyonRoad" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="26" unique_id=810042744]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteWestCanyonRoad" index="0" unique_id=810042881]
+position = Vector2(-6760, 640)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteWestCanyonRoad" index="1" unique_id=810043018]
+position = Vector2(-5280, 1680)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteWestCanyonRoad" index="2" unique_id=810043155]
+position = Vector2(-3840, 2800)
+
+[node name="RouteArenaRoad" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="27" unique_id=810043703]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteArenaRoad" index="0" unique_id=810043840]
+position = Vector2(-5260, -1980)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteArenaRoad" index="1" unique_id=810043977]
+position = Vector2(-3300, -2840)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteArenaRoad" index="2" unique_id=810044114]
+position = Vector2(-2391, -3033)
+
+[node name="RouteNorthwestRidgeRoad" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="28" unique_id=810044662]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteNorthwestRidgeRoad" index="0" unique_id=810044799]
+position = Vector2(-8260, -6700)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteNorthwestRidgeRoad" index="1" unique_id=810044936]
+position = Vector2(-6400, -5500)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteNorthwestRidgeRoad" index="2" unique_id=810045073]
+position = Vector2(-4660, -6320)
+
+[node name="RouteNorthRoad" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="29" unique_id=810045621]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteNorthRoad" index="0" unique_id=810045758]
+position = Vector2(-3580, -6760)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteNorthRoad" index="1" unique_id=810045895]
+position = Vector2(-1360, -6480)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteNorthRoad" index="2" unique_id=810046032]
+position = Vector2(860, -6780)
+
+[node name="RouteNortheastRoad" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="30" unique_id=810046580]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteNortheastRoad" index="0" unique_id=810046717]
+position = Vector2(2120, -6560)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteNortheastRoad" index="1" unique_id=810046854]
+position = Vector2(3860, -5480)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteNortheastRoad" index="2" unique_id=810046991]
+position = Vector2(5620, -4420)
+
+[node name="RouteSaloonPass" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="31" unique_id=810047539]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSaloonPass" index="0" unique_id=810047676]
+position = Vector2(416, -2552)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSaloonPass" index="1" unique_id=810047813]
+position = Vector2(626, -2734)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSaloonPass" index="2" unique_id=810047950]
+position = Vector2(1020, -2420)
+
+[node name="RouteEastPortalRoad" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="32" unique_id=810048498]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteEastPortalRoad" index="0" unique_id=810048635]
+position = Vector2(6420, -3660)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteEastPortalRoad" index="1" unique_id=810048772]
+position = Vector2(7160, -2020)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteEastPortalRoad" index="2" unique_id=810048909]
+position = Vector2(8121, -702)
+
+[node name="RouteMarketRoad" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="33" unique_id=810049457]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteMarketRoad" index="0" unique_id=810049594]
+position = Vector2(6300, 3260)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteMarketRoad" index="1" unique_id=810049731]
+position = Vector2(6540, 2502)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteMarketRoad" index="2" unique_id=810049868]
+position = Vector2(6546, 2777)
+
+[node name="RouteEastNarrows" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="34" unique_id=810050416]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteEastNarrows" index="0" unique_id=810050553]
+position = Vector2(1780, -3200)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteEastNarrows" index="1" unique_id=810050690]
+position = Vector2(5240, -2660)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteEastNarrows" index="2" unique_id=810050827]
+position = Vector2(6482, -450)
+
+[node name="RouteSouthRoad" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="35" unique_id=810051375]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSouthRoad" index="0" unique_id=810051512]
+position = Vector2(-3260, 2080)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSouthRoad" index="1" unique_id=810051649]
+position = Vector2(-460, 2800)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSouthRoad" index="2" unique_id=810051786]
+position = Vector2(1180, 6180)
+
+[node name="RouteSouthwestWashRoad" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="36" unique_id=810052334]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSouthwestWashRoad" index="0" unique_id=810052471]
+position = Vector2(-3920, 3360)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSouthwestWashRoad" index="1" unique_id=810052608]
+position = Vector2(-5040, 5100)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSouthwestWashRoad" index="2" unique_id=810052745]
+position = Vector2(-5200, 6900)
+
+[node name="RouteSoutheastReachRoad" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="37" unique_id=810053293]
+script = ExtResource("10_route")
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSoutheastReachRoad" index="0" unique_id=810053430]
+position = Vector2(2520, 6960)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSoutheastReachRoad" index="1" unique_id=810053567]
+position = Vector2(4520, 6680)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteSoutheastReachRoad" index="2" unique_id=810053704]
+position = Vector2(6520, 6400)
+
+[node name="RouteDesertLoop01" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="38" unique_id=810054252]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop01" index="0" unique_id=810054389]
+position = Vector2(-5643, -1132)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop01" index="1" unique_id=810054526]
+position = Vector2(-7054, -76)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop01" index="2" unique_id=810054663]
+position = Vector2(-8496, -1092)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop01" index="3" unique_id=810054800]
+position = Vector2(-8575, -2777)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop01" index="4" unique_id=810054937]
+position = Vector2(-5731, -2802)
+
+[node name="RouteDesertLoop02" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="39" unique_id=810056307]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop02" index="0" unique_id=810056444]
+position = Vector2(-5782, 1527)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop02" index="1" unique_id=810056581]
+position = Vector2(-7923, 679)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop02" index="2" unique_id=810056718]
+position = Vector2(-9115, 691)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop02" index="3" unique_id=810056855]
+position = Vector2(-8004, -733)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop02" index="4" unique_id=810056992]
+position = Vector2(-6312, -236)
+
+[node name="RouteDesertLoop03" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="40" unique_id=810058773]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop03" index="0" unique_id=810058910]
+position = Vector2(-821, -1173)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop03" index="1" unique_id=810059047]
+position = Vector2(-3423, -378)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop03" index="2" unique_id=810059184]
+position = Vector2(-4038, -2750)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop03" index="3" unique_id=810059321]
+position = Vector2(-2502, -3267)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop03" index="4" unique_id=810059458]
+position = Vector2(-1063, -2408)
+
+[node name="RouteDesertLoop04" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="41" unique_id=810061650]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop04" index="0" unique_id=810061787]
+position = Vector2(-2136, 7086)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop04" index="1" unique_id=810061924]
+position = Vector2(-3662, 6949)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop04" index="2" unique_id=810062061]
+position = Vector2(-3606, 5768)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop04" index="3" unique_id=810062198]
+position = Vector2(-1654, 4674)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop04" index="4" unique_id=810062335]
+position = Vector2(-1002, 5915)
+
+[node name="RouteDesertLoop05" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="42" unique_id=810064116]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop05" index="0" unique_id=810064253]
+position = Vector2(2606, -5104)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop05" index="1" unique_id=810064390]
+position = Vector2(855, -5691)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop05" index="2" unique_id=810064527]
+position = Vector2(1535, -7148)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop05" index="3" unique_id=810064664]
+position = Vector2(3387, -6925)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop05" index="4" unique_id=810064801]
+position = Vector2(3956, -5639)
+
+[node name="RouteDesertLoop06" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="43" unique_id=810066582]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop06" index="0" unique_id=810066719]
+position = Vector2(1619, 2525)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop06" index="1" unique_id=810066856]
+position = Vector2(1005, 2127)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop06" index="2" unique_id=810066993]
+position = Vector2(2097, 930)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop06" index="3" unique_id=810067130]
+position = Vector2(3634, 1019)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop06" index="4" unique_id=810067267]
+position = Vector2(3784, 1936)
+
+[node name="RouteDesertLoop07" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="44" unique_id=810068637]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop07" index="0" unique_id=810068774]
+position = Vector2(1683, 7191)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop07" index="1" unique_id=810068911]
+position = Vector2(1035, 5680)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop07" index="2" unique_id=810069048]
+position = Vector2(2767, 4267)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop07" index="3" unique_id=810069185]
+position = Vector2(3874, 5398)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop07" index="4" unique_id=810069322]
+position = Vector2(3413, 7035)
+
+[node name="RouteDesertLoop08" type="Node2D" parent="WorldMap/WorldBandits/Routes" parent_id_path=PackedInt32Array(1594767623) index="45" unique_id=810070692]
+script = ExtResource("10_route")
+loop = true
+
+[node name="Point0" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop08" index="0" unique_id=810070829]
+position = Vector2(6309, -902)
+
+[node name="Point1" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop08" index="1" unique_id=810070966]
+position = Vector2(6110, -2654)
+
+[node name="Point2" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop08" index="2" unique_id=810071103]
+position = Vector2(7714, -3385)
+
+[node name="Point3" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop08" index="3" unique_id=810071240]
+position = Vector2(7762, -2745)
+
+[node name="Point4" type="Node2D" parent="WorldMap/WorldBandits/Routes/RouteDesertLoop08" index="4" unique_id=810071377]
+position = Vector2(7867, -720)
+
+[node name="RegionA_CampNorthwest_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="0" unique_id=810001096]
+position = Vector2(-8143, -7160)
+script = ExtResource("11_bandit")
+group_strength = 16.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampNorthwest")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_01")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNorthwest_1" index="0" unique_id=810001233]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNorthwest_1" index="1" unique_id=810001370]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampNorthwest_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="1" unique_id=810001507]
+position = Vector2(-8625, -6497)
+script = ExtResource("11_bandit")
+group_strength = 19.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampNorthwest")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_01")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNorthwest_2" index="0" unique_id=810001644]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNorthwest_2" index="1" unique_id=810001781]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampNorthwest_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="2" unique_id=810001918]
+position = Vector2(-9284, -6750)
+script = ExtResource("11_bandit")
+group_strength = 22.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampNorthwest")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_01")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNorthwest_3" index="0" unique_id=810002055]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNorthwest_3" index="1" unique_id=810002192]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampNorthwest_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="3" unique_id=810002329]
+position = Vector2(-9234, -7400)
+script = ExtResource("11_bandit")
+group_strength = 25.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampNorthwest")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_01")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNorthwest_4" index="0" unique_id=810002466]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNorthwest_4" index="1" unique_id=810002603]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampNorthwest_5" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="4" unique_id=810002740]
+position = Vector2(-8531, -7475)
+script = ExtResource("11_bandit")
+group_strength = 28.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampNorthwest")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_01")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNorthwest_5" index="0" unique_id=810002877]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNorthwest_5" index="1" unique_id=810003014]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampNortheast_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="5" unique_id=810004110]
+position = Vector2(6897, -4280)
+script = ExtResource("11_bandit")
+group_strength = 16.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampNortheast")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_02")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNortheast_1" index="0" unique_id=810004247]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNortheast_1" index="1" unique_id=810004384]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampNortheast_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="6" unique_id=810004521]
+position = Vector2(6415, -3617)
+script = ExtResource("11_bandit")
+group_strength = 19.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampNortheast")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_02")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNortheast_2" index="0" unique_id=810004658]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNortheast_2" index="1" unique_id=810004795]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampNortheast_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="7" unique_id=810004932]
+position = Vector2(5636, -3870)
+script = ExtResource("11_bandit")
+group_strength = 22.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampNortheast")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_02")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNortheast_3" index="0" unique_id=810005069]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNortheast_3" index="1" unique_id=810005206]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampNortheast_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="8" unique_id=810005343]
+position = Vector2(5636, -4690)
+script = ExtResource("11_bandit")
+group_strength = 25.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampNortheast")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_02")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNortheast_4" index="0" unique_id=810005480]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNortheast_4" index="1" unique_id=810005617]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampNortheast_5" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="9" unique_id=810005754]
+position = Vector2(6415, -4943)
+script = ExtResource("11_bandit")
+group_strength = 28.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampNortheast")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_02")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNortheast_5" index="0" unique_id=810005891]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampNortheast_5" index="1" unique_id=810006028]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampMiddleFlats_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="10" unique_id=810007124]
+position = Vector2(1705, -2260)
+script = ExtResource("11_bandit")
+group_strength = 16.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampMiddleFlats")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_03")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampMiddleFlats_1" index="0" unique_id=810007261]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampMiddleFlats_1" index="1" unique_id=810007398]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampMiddleFlats_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="11" unique_id=810007535]
+position = Vector2(1535, -1777)
+script = ExtResource("11_bandit")
+group_strength = 19.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampMiddleFlats")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_03")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampMiddleFlats_2" index="0" unique_id=810007672]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampMiddleFlats_2" index="1" unique_id=810007809]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampMiddleFlats_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="12" unique_id=810007946]
+position = Vector2(756, -2030)
+script = ExtResource("11_bandit")
+group_strength = 22.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampMiddleFlats")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_03")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampMiddleFlats_3" index="0" unique_id=810008083]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampMiddleFlats_3" index="1" unique_id=810008220]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampMiddleFlats_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="13" unique_id=810008357]
+position = Vector2(756, -2850)
+script = ExtResource("11_bandit")
+group_strength = 25.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampMiddleFlats")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_03")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampMiddleFlats_4" index="0" unique_id=810008494]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampMiddleFlats_4" index="1" unique_id=810008631]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampMiddleFlats_5" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="14" unique_id=810008768]
+position = Vector2(1535, -3103)
+script = ExtResource("11_bandit")
+group_strength = 28.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampMiddleFlats")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_03")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampMiddleFlats_5" index="0" unique_id=810008905]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampMiddleFlats_5" index="1" unique_id=810009042]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampSouthwest_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="15" unique_id=810010138]
+position = Vector2(-2894, 2876)
+script = ExtResource("11_bandit")
+group_strength = 16.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampSouthwest")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_04")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSouthwest_1" index="0" unique_id=810010275]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSouthwest_1" index="1" unique_id=810010412]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampSouthwest_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="16" unique_id=810010549]
+position = Vector2(-3345, 3423)
+script = ExtResource("11_bandit")
+group_strength = 19.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampSouthwest")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_04")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSouthwest_2" index="0" unique_id=810010686]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSouthwest_2" index="1" unique_id=810010823]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampSouthwest_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="17" unique_id=810010960]
+position = Vector2(-4124, 3170)
+script = ExtResource("11_bandit")
+group_strength = 22.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampSouthwest")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_04")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSouthwest_3" index="0" unique_id=810011097]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSouthwest_3" index="1" unique_id=810011234]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampSouthwest_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="18" unique_id=810011371]
+position = Vector2(-4124, 2350)
+script = ExtResource("11_bandit")
+group_strength = 25.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampSouthwest")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_04")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSouthwest_4" index="0" unique_id=810011508]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSouthwest_4" index="1" unique_id=810011645]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampSouthwest_5" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="19" unique_id=810011782]
+position = Vector2(-3345, 2097)
+script = ExtResource("11_bandit")
+group_strength = 28.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampSouthwest")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_04")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSouthwest_5" index="0" unique_id=810011919]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSouthwest_5" index="1" unique_id=810012056]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampSoutheast_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="20" unique_id=810013152]
+position = Vector2(6737, 3320)
+script = ExtResource("11_bandit")
+group_strength = 16.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampSoutheast")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_05")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSoutheast_1" index="0" unique_id=810013289]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSoutheast_1" index="1" unique_id=810013426]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampSoutheast_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="21" unique_id=810013563]
+position = Vector2(6255, 3983)
+script = ExtResource("11_bandit")
+group_strength = 19.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampSoutheast")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_05")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSoutheast_2" index="0" unique_id=810013700]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSoutheast_2" index="1" unique_id=810013837]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampSoutheast_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="22" unique_id=810013974]
+position = Vector2(5476, 3730)
+script = ExtResource("11_bandit")
+group_strength = 22.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampSoutheast")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_05")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSoutheast_3" index="0" unique_id=810014111]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSoutheast_3" index="1" unique_id=810014248]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampSoutheast_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="23" unique_id=810014385]
+position = Vector2(5476, 2910)
+script = ExtResource("11_bandit")
+group_strength = 25.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampSoutheast")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_05")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSoutheast_4" index="0" unique_id=810014522]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSoutheast_4" index="1" unique_id=810014659]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_CampSoutheast_5" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="24" unique_id=810014796]
+position = Vector2(6255, 2657)
+script = ExtResource("11_bandit")
+group_strength = 28.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteCampSoutheast")
+home_path = NodePath("../../../Locations/RegionA/normal_camp_05")
+territory_radius = 2600.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSoutheast_5" index="0" unique_id=810014933]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_CampSoutheast_5" index="1" unique_id=810015070]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampNorthRidge_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="25" unique_id=810016166]
+position = Vector2(-3430, -6920)
+script = ExtResource("11_bandit")
+group_strength = 34.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampNorthRidge")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_01")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_1" index="0" unique_id=810016303]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_1" index="1" unique_id=810016440]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampNorthRidge_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="26" unique_id=810016577]
+position = Vector2(-3855, -6184)
+script = ExtResource("11_bandit")
+group_strength = 38.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampNorthRidge")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_01")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_2" index="0" unique_id=810016714]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_2" index="1" unique_id=810016851]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampNorthRidge_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="27" unique_id=810016988]
+position = Vector2(-4705, -6184)
+script = ExtResource("11_bandit")
+group_strength = 42.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampNorthRidge")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_01")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_3" index="0" unique_id=810017125]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_3" index="1" unique_id=810017262]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampNorthRidge_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="28" unique_id=810017399]
+position = Vector2(-4770, -6920)
+script = ExtResource("11_bandit")
+group_strength = 46.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampNorthRidge")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_01")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_4" index="0" unique_id=810017536]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_4" index="1" unique_id=810017673]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampNorthRidge_5" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="29" unique_id=810017810]
+position = Vector2(-4643, -7424)
+script = ExtResource("11_bandit")
+group_strength = 50.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampNorthRidge")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_01")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_5" index="0" unique_id=810017947]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_5" index="1" unique_id=810018084]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampNorthRidge_6" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="30" unique_id=810018221]
+position = Vector2(-3793, -7424)
+script = ExtResource("11_bandit")
+group_strength = 54.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampNorthRidge")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_01")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_6" index="0" unique_id=810018358]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampNorthRidge_6" index="1" unique_id=810018495]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampSouthReach_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="31" unique_id=810019591]
+position = Vector2(8010, 6200)
+script = ExtResource("11_bandit")
+group_strength = 34.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampSouthReach")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_02")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_1" index="0" unique_id=810019728]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_1" index="1" unique_id=810019865]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampSouthReach_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="32" unique_id=810020002]
+position = Vector2(7585, 6936)
+script = ExtResource("11_bandit")
+group_strength = 38.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampSouthReach")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_02")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_2" index="0" unique_id=810020139]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_2" index="1" unique_id=810020276]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampSouthReach_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="33" unique_id=810020413]
+position = Vector2(6735, 6936)
+script = ExtResource("11_bandit")
+group_strength = 42.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampSouthReach")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_02")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_3" index="0" unique_id=810020550]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_3" index="1" unique_id=810020687]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampSouthReach_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="34" unique_id=810020824]
+position = Vector2(6310, 6200)
+script = ExtResource("11_bandit")
+group_strength = 46.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampSouthReach")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_02")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_4" index="0" unique_id=810020961]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_4" index="1" unique_id=810021098]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampSouthReach_5" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="35" unique_id=810021235]
+position = Vector2(6735, 5464)
+script = ExtResource("11_bandit")
+group_strength = 50.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampSouthReach")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_02")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_5" index="0" unique_id=810021372]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_5" index="1" unique_id=810021509]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampSouthReach_6" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="36" unique_id=810021646]
+position = Vector2(7585, 5464)
+script = ExtResource("11_bandit")
+group_strength = 54.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampSouthReach")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_02")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_6" index="0" unique_id=810021783]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampSouthReach_6" index="1" unique_id=810021920]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampDryWash_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="37" unique_id=810023016]
+position = Vector2(-4630, 7160)
+script = ExtResource("11_bandit")
+group_strength = 34.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampDryWash")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_03")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_1" index="0" unique_id=810023153]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_1" index="1" unique_id=810023290]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampDryWash_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="38" unique_id=810023427]
+position = Vector2(-5179, 7432)
+script = ExtResource("11_bandit")
+group_strength = 38.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampDryWash")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_03")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_2" index="0" unique_id=810023564]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_2" index="1" unique_id=810023701]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampDryWash_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="39" unique_id=810023838]
+position = Vector2(-6060, 7317)
+script = ExtResource("11_bandit")
+group_strength = 42.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampDryWash")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_03")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_3" index="0" unique_id=810023975]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_3" index="1" unique_id=810024112]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampDryWash_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="40" unique_id=810024249]
+position = Vector2(-6210, 7160)
+script = ExtResource("11_bandit")
+group_strength = 46.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampDryWash")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_03")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_4" index="0" unique_id=810024386]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_4" index="1" unique_id=810024523]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampDryWash_5" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="41" unique_id=810024660]
+position = Vector2(-5905, 6424)
+script = ExtResource("11_bandit")
+group_strength = 50.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampDryWash")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_03")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_5" index="0" unique_id=810024797]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_5" index="1" unique_id=810024934]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_BossCampDryWash_6" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="42" unique_id=810025071]
+position = Vector2(-5055, 6424)
+script = ExtResource("11_bandit")
+group_strength = 54.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteBossCampDryWash")
+home_path = NodePath("../../../Locations/RegionA/bounty_camp_03")
+territory_radius = 3200.0
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_6" index="0" unique_id=810025208]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_BossCampDryWash_6" index="1" unique_id=810025345]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke01" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="43" unique_id=810026030]
+position = Vector2(-6000, -3200)
+script = ExtResource("11_bandit")
+group_strength = 21.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke01")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke01" index="0" unique_id=810026167]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke01" index="1" unique_id=810026304]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke02" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="44" unique_id=810026989]
+position = Vector2(-8200, -1600)
+script = ExtResource("11_bandit")
+group_strength = 24.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke02")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke02" index="0" unique_id=810027126]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke02" index="1" unique_id=810027263]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke03" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="45" unique_id=810027948]
+position = Vector2(8000, -800)
+script = ExtResource("11_bandit")
+group_strength = 27.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke03")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke03" index="0" unique_id=810028085]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke03" index="1" unique_id=810028222]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke04" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="46" unique_id=810028907]
+position = Vector2(200, 3800)
+script = ExtResource("11_bandit")
+group_strength = 30.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke04")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke04" index="0" unique_id=810029044]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke04" index="1" unique_id=810029181]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke05" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="47" unique_id=810029866]
+position = Vector2(-2600, -2400)
+script = ExtResource("11_bandit")
+group_strength = 18.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke05")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke05" index="0" unique_id=810030003]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke05" index="1" unique_id=810030140]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke06" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="48" unique_id=810030825]
+position = Vector2(-2400, -6000)
+script = ExtResource("11_bandit")
+group_strength = 21.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke06")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke06" index="0" unique_id=810030962]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke06" index="1" unique_id=810031099]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke07" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="49" unique_id=810031784]
+position = Vector2(-7000, 5600)
+script = ExtResource("11_bandit")
+group_strength = 24.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke07")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke07" index="0" unique_id=810031921]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke07" index="1" unique_id=810032058]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke08" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="50" unique_id=810032743]
+position = Vector2(3000, 2200)
+script = ExtResource("11_bandit")
+group_strength = 27.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke08")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke08" index="0" unique_id=810032880]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke08" index="1" unique_id=810033017]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke09" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="51" unique_id=810033702]
+position = Vector2(3000, 7200)
+script = ExtResource("11_bandit")
+group_strength = 30.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke09")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke09" index="0" unique_id=810033839]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke09" index="1" unique_id=810033976]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke10" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="52" unique_id=810034661]
+position = Vector2(7200, -7200)
+script = ExtResource("11_bandit")
+group_strength = 18.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke10")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke10" index="0" unique_id=810034798]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke10" index="1" unique_id=810034935]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke11" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="53" unique_id=810035620]
+position = Vector2(-4000, 5800)
+script = ExtResource("11_bandit")
+group_strength = 21.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke11")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke11" index="0" unique_id=810035757]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke11" index="1" unique_id=810035894]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Choke12" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="54" unique_id=810036579]
+position = Vector2(8400, 4600)
+script = ExtResource("11_bandit")
+group_strength = 24.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteChoke12")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke12" index="0" unique_id=810036716]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Choke12" index="1" unique_id=810036853]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadA1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="55" unique_id=810037538]
+position = Vector2(-8840, -7160)
+script = ExtResource("11_bandit")
+group_strength = 32.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
 current_route = NodePath("../../Routes/RouteA1")
 
-[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Bandit1"]
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA1" index="0" unique_id=810037675]
 modulate = Color(0.9, 0.15, 0.1, 0.35)
 z_index = -1
 scale = Vector2(2.4, 2.4)
-texture = ExtResource("15_r3xhl")
+texture = ExtResource("15_dot")
 
-[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Bandit1"]
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA1" index="1" unique_id=810037812]
 modulate = Color(0.6, 0.14, 0.08, 1)
 rotation = 0.7853982
 scale = Vector2(0.85, 0.85)
-texture = ExtResource("16_w262y")
+texture = ExtResource("16_solid")
 
-[node name="RegionA_Bandit2" type="Node2D" parent="WorldMap/WorldBandits/Groups"]
-position = Vector2(-4286.2737, -2370.2537)
-script = ExtResource("9_cuo70")
-group_strength = 60.0
-speed_profile = ExtResource("10_inp14")
-threat_profile = ExtResource("11_ol223")
+[node name="RegionA_RoadA2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="56" unique_id=810038497]
+position = Vector2(6200, -4280)
+script = ExtResource("11_bandit")
+group_strength = 14.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
 current_route = NodePath("../../Routes/RouteA2")
 
-[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Bandit2"]
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA2" index="0" unique_id=810038634]
 modulate = Color(0.9, 0.15, 0.1, 0.35)
 z_index = -1
 scale = Vector2(2.4, 2.4)
-texture = ExtResource("15_r3xhl")
+texture = ExtResource("15_dot")
 
-[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Bandit2"]
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA2" index="1" unique_id=810038771]
 modulate = Color(0.6, 0.14, 0.08, 1)
 rotation = 0.7853982
 scale = Vector2(0.85, 0.85)
-texture = ExtResource("16_w262y")
+texture = ExtResource("16_solid")
 
-[node name="RegionA" type="Node2D" parent="WorldMap/Regions"]
-script = ExtResource("6_regionzone")
-region = ExtResource("7_regiona")
-area = Rect2(-5000, -5000, 2000, 10000)
+[node name="RegionA_RoadA3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="57" unique_id=810039456]
+position = Vector2(1320, -2440)
+script = ExtResource("11_bandit")
+group_strength = 17.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteA3")
 
-[node name="ReturnGate" type="Node2D" parent="WorldMap"]
-position = Vector2(-4333.3333, 1050)
-script = ExtResource("14_k4iq7")
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA3" index="0" unique_id=810039593]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA3" index="1" unique_id=810039730]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadA4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="58" unique_id=810040415]
+position = Vector2(-3560, 2760)
+script = ExtResource("11_bandit")
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteA4")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA4" index="0" unique_id=810040552]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA4" index="1" unique_id=810040689]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadA5" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="59" unique_id=810041374]
+position = Vector2(6040, 3320)
+script = ExtResource("11_bandit")
+group_strength = 23.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteA5")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA5" index="0" unique_id=810041511]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA5" index="1" unique_id=810041648]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadA6" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="60" unique_id=810042333]
+position = Vector2(-6760, 40)
+script = ExtResource("11_bandit")
+group_strength = 26.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteA6")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA6" index="0" unique_id=810042470]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadA6" index="1" unique_id=810042607]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadWestCanyonRoad" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="61" unique_id=810043292]
+position = Vector2(-6760, 640)
+script = ExtResource("11_bandit")
+group_strength = 29.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteWestCanyonRoad")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadWestCanyonRoad" index="0" unique_id=810043429]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadWestCanyonRoad" index="1" unique_id=810043566]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadArenaRoad" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="62" unique_id=810044251]
+position = Vector2(-5260, -1980)
+script = ExtResource("11_bandit")
+group_strength = 32.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteArenaRoad")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadArenaRoad" index="0" unique_id=810044388]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadArenaRoad" index="1" unique_id=810044525]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadNorthwestRidgeRoad" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="63" unique_id=810045210]
+position = Vector2(-8260, -6700)
+script = ExtResource("11_bandit")
+group_strength = 14.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteNorthwestRidgeRoad")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadNorthwestRidgeRoad" index="0" unique_id=810045347]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadNorthwestRidgeRoad" index="1" unique_id=810045484]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadNorthRoad" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="64" unique_id=810046169]
+position = Vector2(-3580, -6760)
+script = ExtResource("11_bandit")
+group_strength = 17.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteNorthRoad")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadNorthRoad" index="0" unique_id=810046306]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadNorthRoad" index="1" unique_id=810046443]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadNortheastRoad" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="65" unique_id=810047128]
+position = Vector2(2120, -6560)
+script = ExtResource("11_bandit")
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteNortheastRoad")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadNortheastRoad" index="0" unique_id=810047265]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadNortheastRoad" index="1" unique_id=810047402]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadSaloonPass" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="66" unique_id=810048087]
+position = Vector2(416, -2552)
+script = ExtResource("11_bandit")
+group_strength = 23.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteSaloonPass")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadSaloonPass" index="0" unique_id=810048224]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadSaloonPass" index="1" unique_id=810048361]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadEastPortalRoad" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="67" unique_id=810049046]
+position = Vector2(6420, -3660)
+script = ExtResource("11_bandit")
+group_strength = 26.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteEastPortalRoad")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadEastPortalRoad" index="0" unique_id=810049183]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadEastPortalRoad" index="1" unique_id=810049320]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadMarketRoad" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="68" unique_id=810050005]
+position = Vector2(6300, 3260)
+script = ExtResource("11_bandit")
+group_strength = 29.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteMarketRoad")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadMarketRoad" index="0" unique_id=810050142]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadMarketRoad" index="1" unique_id=810050279]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadEastNarrows" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="69" unique_id=810050964]
+position = Vector2(1780, -3200)
+script = ExtResource("11_bandit")
+group_strength = 32.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteEastNarrows")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadEastNarrows" index="0" unique_id=810051101]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadEastNarrows" index="1" unique_id=810051238]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadSouthRoad" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="70" unique_id=810051923]
+position = Vector2(-3260, 2080)
+script = ExtResource("11_bandit")
+group_strength = 14.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteSouthRoad")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadSouthRoad" index="0" unique_id=810052060]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadSouthRoad" index="1" unique_id=810052197]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadSouthwestWashRoad" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="71" unique_id=810052882]
+position = Vector2(-3920, 3360)
+script = ExtResource("11_bandit")
+group_strength = 17.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteSouthwestWashRoad")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadSouthwestWashRoad" index="0" unique_id=810053019]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadSouthwestWashRoad" index="1" unique_id=810053156]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_RoadSoutheastReachRoad" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="72" unique_id=810053841]
+position = Vector2(2520, 6960)
+script = ExtResource("11_bandit")
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteSoutheastReachRoad")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadSoutheastReachRoad" index="0" unique_id=810053978]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_RoadSoutheastReachRoad" index="1" unique_id=810054115]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam01_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="73" unique_id=810055074]
+position = Vector2(-5643, -1132)
+script = ExtResource("11_bandit")
+group_strength = 15.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop01")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam01_1" index="0" unique_id=810055211]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam01_1" index="1" unique_id=810055348]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam01_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="74" unique_id=810055485]
+position = Vector2(-8496, -1092)
+script = ExtResource("11_bandit")
+group_strength = 18.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop01")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam01_2" index="0" unique_id=810055622]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam01_2" index="1" unique_id=810055759]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam01_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="75" unique_id=810055896]
+position = Vector2(-5731, -2802)
+script = ExtResource("11_bandit")
+group_strength = 21.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop01")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam01_3" index="0" unique_id=810056033]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam01_3" index="1" unique_id=810056170]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam02_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="76" unique_id=810057129]
+position = Vector2(-5782, 1527)
+script = ExtResource("11_bandit")
+group_strength = 18.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop02")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam02_1" index="0" unique_id=810057266]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam02_1" index="1" unique_id=810057403]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam02_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="77" unique_id=810057540]
+position = Vector2(-9115, 691)
+script = ExtResource("11_bandit")
+group_strength = 21.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop02")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam02_2" index="0" unique_id=810057677]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam02_2" index="1" unique_id=810057814]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam02_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="78" unique_id=810057951]
+position = Vector2(-6312, -236)
+script = ExtResource("11_bandit")
+group_strength = 24.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop02")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam02_3" index="0" unique_id=810058088]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam02_3" index="1" unique_id=810058225]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam02_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="79" unique_id=810058362]
+position = Vector2(-7923, 679)
+script = ExtResource("11_bandit")
+group_strength = 27.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop02")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam02_4" index="0" unique_id=810058499]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam02_4" index="1" unique_id=810058636]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam03_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="80" unique_id=810059595]
+position = Vector2(-821, -1173)
+script = ExtResource("11_bandit")
+group_strength = 21.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop03")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam03_1" index="0" unique_id=810059732]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam03_1" index="1" unique_id=810059869]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam03_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="81" unique_id=810060006]
+position = Vector2(-4038, -2750)
+script = ExtResource("11_bandit")
+group_strength = 24.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop03")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam03_2" index="0" unique_id=810060143]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam03_2" index="1" unique_id=810060280]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam03_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="82" unique_id=810060417]
+position = Vector2(-1063, -2408)
+script = ExtResource("11_bandit")
+group_strength = 27.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop03")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam03_3" index="0" unique_id=810060554]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam03_3" index="1" unique_id=810060691]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam03_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="83" unique_id=810060828]
+position = Vector2(-3423, -378)
+script = ExtResource("11_bandit")
+group_strength = 12.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop03")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam03_4" index="0" unique_id=810060965]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam03_4" index="1" unique_id=810061102]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam03_5" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="84" unique_id=810061239]
+position = Vector2(-2502, -3267)
+script = ExtResource("11_bandit")
+group_strength = 15.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop03")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam03_5" index="0" unique_id=810061376]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam03_5" index="1" unique_id=810061513]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam04_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="85" unique_id=810062472]
+position = Vector2(-2136, 7086)
+script = ExtResource("11_bandit")
+group_strength = 24.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop04")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam04_1" index="0" unique_id=810062609]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam04_1" index="1" unique_id=810062746]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam04_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="86" unique_id=810062883]
+position = Vector2(-3606, 5768)
+script = ExtResource("11_bandit")
+group_strength = 27.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop04")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam04_2" index="0" unique_id=810063020]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam04_2" index="1" unique_id=810063157]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam04_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="87" unique_id=810063294]
+position = Vector2(-1002, 5915)
+script = ExtResource("11_bandit")
+group_strength = 12.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop04")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam04_3" index="0" unique_id=810063431]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam04_3" index="1" unique_id=810063568]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam04_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="88" unique_id=810063705]
+position = Vector2(-3662, 6949)
+script = ExtResource("11_bandit")
+group_strength = 15.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop04")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam04_4" index="0" unique_id=810063842]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam04_4" index="1" unique_id=810063979]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam05_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="89" unique_id=810064938]
+position = Vector2(2606, -5104)
+script = ExtResource("11_bandit")
+group_strength = 27.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop05")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam05_1" index="0" unique_id=810065075]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam05_1" index="1" unique_id=810065212]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam05_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="90" unique_id=810065349]
+position = Vector2(1535, -7148)
+script = ExtResource("11_bandit")
+group_strength = 12.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop05")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam05_2" index="0" unique_id=810065486]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam05_2" index="1" unique_id=810065623]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam05_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="91" unique_id=810065760]
+position = Vector2(3956, -5639)
+script = ExtResource("11_bandit")
+group_strength = 15.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop05")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam05_3" index="0" unique_id=810065897]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam05_3" index="1" unique_id=810066034]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam05_4" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="92" unique_id=810066171]
+position = Vector2(855, -5691)
+script = ExtResource("11_bandit")
+group_strength = 18.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop05")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam05_4" index="0" unique_id=810066308]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam05_4" index="1" unique_id=810066445]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam06_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="93" unique_id=810067404]
+position = Vector2(1619, 2525)
+script = ExtResource("11_bandit")
+group_strength = 12.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop06")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam06_1" index="0" unique_id=810067541]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam06_1" index="1" unique_id=810067678]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam06_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="94" unique_id=810067815]
+position = Vector2(2097, 930)
+script = ExtResource("11_bandit")
+group_strength = 15.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop06")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam06_2" index="0" unique_id=810067952]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam06_2" index="1" unique_id=810068089]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam06_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="95" unique_id=810068226]
+position = Vector2(3784, 1936)
+script = ExtResource("11_bandit")
+group_strength = 18.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop06")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam06_3" index="0" unique_id=810068363]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam06_3" index="1" unique_id=810068500]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam07_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="96" unique_id=810069459]
+position = Vector2(1683, 7191)
+script = ExtResource("11_bandit")
+group_strength = 15.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop07")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam07_1" index="0" unique_id=810069596]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam07_1" index="1" unique_id=810069733]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam07_2" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="97" unique_id=810069870]
+position = Vector2(2767, 4267)
+script = ExtResource("11_bandit")
+group_strength = 18.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop07")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam07_2" index="0" unique_id=810070007]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam07_2" index="1" unique_id=810070144]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam07_3" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="98" unique_id=810070281]
+position = Vector2(3413, 7035)
+script = ExtResource("11_bandit")
+group_strength = 21.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop07")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam07_3" index="0" unique_id=810070418]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam07_3" index="1" unique_id=810070555]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA_Roam08_1" type="Node2D" parent="WorldMap/WorldBandits/Groups" parent_id_path=PackedInt32Array(1155586066) index="99" unique_id=810071514]
+position = Vector2(6309, -902)
+script = ExtResource("11_bandit")
+group_strength = 18.0
+speed_profile = ExtResource("12_speed")
+threat_profile = ExtResource("13_threat")
+current_route = NodePath("../../Routes/RouteDesertLoop08")
+
+[node name="Glow" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam08_1" index="0" unique_id=810071651]
+modulate = Color(0.9, 0.15, 0.1, 0.35)
+z_index = -1
+scale = Vector2(2.4, 2.4)
+texture = ExtResource("15_dot")
+
+[node name="Icon" type="Sprite2D" parent="WorldMap/WorldBandits/Groups/RegionA_Roam08_1" index="1" unique_id=810071788]
+modulate = Color(0.6, 0.14, 0.08, 1)
+rotation = 0.7853982
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("16_solid")
+
+[node name="RegionA" type="Node2D" parent="WorldMap/Regions" parent_id_path=PackedInt32Array(622546371) index="0" unique_id=633068678]
+script = ExtResource("8_zone")
+region = ExtResource("9_regiona")
+area = Rect2(-10000, -8000, 20000, 16000)
+
+[node name="SpawnPoint" parent="WorldMap/Player" parent_id_path=PackedInt32Array(1864513394) index="0" unique_id=86088442]
+position = Vector2(-8680, -280)
+
+[node name="Zone" parent="WorldMap/Camera" parent_id_path=PackedInt32Array(498949200) index="0" unique_id=1492441900]
+region = Rect2(-10000, -8000, 20000, 16000)
+
+[node name="Scenery" parent="WorldMap" parent_id_path=PackedInt32Array(141076097) index="16" unique_id=434860712]
+y_sort_enabled = true
+
+[node name="DesertScatter" type="Node2D" parent="WorldMap/Scenery" index="0" unique_id=1650053145]
+y_sort_enabled = true
+script = ExtResource("20_scatter")
+region = Rect2(-10000, -8000, 20000, 16000)
+layers = Array[ExtResource("21_layer")]([ExtResource("22_cacti"), ExtResource("23_bushes"), ExtResource("24_bones"), ExtResource("25_rocks")])
+include_day_stage_layers = false
+include_region_layers = false
+clear_centre = Vector2(-8680, -280)
+clear_radius = 420.0
+impassable_clearance_margin = 90.0
+terrain_shape = ExtResource("1_terrain")
+terrain_margin = 70.0
+random_seed = 2101
+grid_cell_size = 200.0
+stream_enabled = true
+stream_cell_size = 1200.0
+stream_first_frame_budget_ms = 4.0
+cull_enabled = true
+cull_minimum_radius = 900.0
+
+[node name="DustCampScatter" type="Node2D" parent="WorldMap/Scenery" index="1" unique_id=1996623173]
+y_sort_enabled = true
+script = ExtResource("20_scatter")
+region = Rect2(-10000, -8000, 20000, 16000)
+layers = Array[ExtResource("21_layer")]([ExtResource("26_tents")])
+include_day_stage_layers = false
+include_region_layers = false
+clear_centre = Vector2(-8680, -280)
+clear_radius = 620.0
+impassable_clearance_margin = 260.0
+terrain_shape = ExtResource("1_terrain")
+terrain_margin = 260.0
+random_seed = 2102
+grid_cell_size = 900.0
+stream_enabled = true
+stream_cell_size = 1200.0
+stream_budget_ms = 1.0
+stream_first_frame_budget_ms = 1.0
+cull_enabled = true
+cull_minimum_radius = 900.0
+
+[node name="DustCamp_Portal" parent="WorldMap/TravelPortals" parent_id_path=PackedInt32Array(1501747357) index="0" unique_id=409314181 instance=ExtResource("40_portal")]
+position = Vector2(8131, -6586)
+destination_region = &"B"
+destination_position = Vector2(-2850, 90)
+location = SubResource("Resource_portal")
+
+[node name="Navigation" type="NavigationRegion2D" parent="WorldMap" parent_id_path=PackedInt32Array(141076097) index="19" unique_id=1545580080]
+script = ExtResource("3_nav")
+shape = ExtResource("1_terrain")
+
+[node name="Landmarks" type="Node2D" parent="WorldMap" parent_id_path=PackedInt32Array(141076097) index="20" unique_id=850100194]
+y_sort_enabled = true
+
+[node name="Saloon" parent="WorldMap/Landmarks" index="0" unique_id=1663165721 instance=ExtResource("30_saloon")]
+position = Vector2(-760, -4120)
+scale = Vector2(0.45, 0.45)
+
+[node name="Market" parent="WorldMap/Landmarks" index="1" unique_id=1165796200 instance=ExtResource("31_market")]
+position = Vector2(7800, 1000)
+scale = Vector2(0.34, 0.34)
+
+[node name="BossCamp1" parent="WorldMap/Landmarks" index="2" unique_id=1426224310 instance=ExtResource("32_boss")]
+position = Vector2(-4280, -6920)
+scale = Vector2(0.45, 0.45)
+
+[node name="BossCamp2" parent="WorldMap/Landmarks" index="3" unique_id=1580396687 instance=ExtResource("32_boss")]
+position = Vector2(7160, 6200)
+scale = Vector2(0.45, 0.45)
+
+[node name="BossCamp3" parent="WorldMap/Landmarks" index="4" unique_id=1080343335 instance=ExtResource("32_boss")]
+position = Vector2(-5480, 7160)
+scale = Vector2(0.45, 0.45)
+
+[node name="BanditCamp1" parent="WorldMap/Landmarks" index="5" unique_id=713873179 instance=ExtResource("33_bandit")]
+position = Vector2(-8840, -7160)
+scale = Vector2(0.5, 0.5)
+
+[node name="BanditCamp2" parent="WorldMap/Landmarks" index="6" unique_id=239332133 instance=ExtResource("33_bandit")]
+position = Vector2(6200, -4280)
+scale = Vector2(0.5, 0.5)
+
+[node name="BanditCamp3" parent="WorldMap/Landmarks" index="7" unique_id=936550250 instance=ExtResource("33_bandit")]
+position = Vector2(1320, -2440)
+scale = Vector2(0.5, 0.5)
+
+[node name="BanditCamp4" parent="WorldMap/Landmarks" index="8" unique_id=2005356389 instance=ExtResource("33_bandit")]
+position = Vector2(-3560, 2760)
+scale = Vector2(0.5, 0.5)
+
+[node name="BanditCamp5" parent="WorldMap/Landmarks" index="9" unique_id=197941992 instance=ExtResource("33_bandit")]
+position = Vector2(6040, 3320)
+scale = Vector2(0.5, 0.5)
+
+[node name="OutpostNorth" parent="WorldMap/Landmarks" index="10" unique_id=225917326 instance=ExtResource("34_outpost")]
+position = Vector2(1560, -7000)
+scale = Vector2(0.42, 0.42)
+
+[node name="OutpostSouth" parent="WorldMap/Landmarks" index="11" unique_id=1356827349 instance=ExtResource("34_outpost")]
+position = Vector2(1880, 6920)
+scale = Vector2(0.42, 0.42)
+
+[node name="ReturnGate" type="Node2D" parent="WorldMap" parent_id_path=PackedInt32Array(141076097) index="21" unique_id=1583864332]
+position = Vector2(-8360, 280)
+script = ExtResource("14_gate")
 destination_id = &"base_pit"
 leaves_scene_to = 2
 
-[node name="Art" type="Node2D" parent="WorldMap/ReturnGate"]
+[node name="Art" type="Node2D" parent="WorldMap/ReturnGate" index="0" unique_id=1049098000]
 
-[node name="Glow" type="Sprite2D" parent="WorldMap/ReturnGate/Art"]
+[node name="Glow" type="Sprite2D" parent="WorldMap/ReturnGate/Art" index="0" unique_id=1110193146]
 modulate = Color(0.95, 0.78, 0.35, 0.55)
 position = Vector2(-1, 2)
 scale = Vector2(2.6, 2.6)
-texture = ExtResource("15_r3xhl")
+texture = ExtResource("15_dot")
 
-[node name="Post" type="Sprite2D" parent="WorldMap/ReturnGate/Art"]
+[node name="Post" type="Sprite2D" parent="WorldMap/ReturnGate/Art" index="1" unique_id=1551486689]
 modulate = Color(0.36, 0.24, 0.14, 1)
 position = Vector2(-1, -33)
 scale = Vector2(0.35, 2.6)
-texture = ExtResource("16_w262y")
+texture = ExtResource("16_solid")
 
-[node name="Cap" type="Sprite2D" parent="WorldMap/ReturnGate/Art"]
+[node name="Cap" type="Sprite2D" parent="WorldMap/ReturnGate/Art" index="2" unique_id=1961535833]
 modulate = Color(0.72, 0.58, 0.34, 1)
 position = Vector2(0, -96)
 scale = Vector2(1.9, 0.5)
-texture = ExtResource("16_w262y")
+texture = ExtResource("16_solid")
 
-[node name="Prompt" type="Node2D" parent="WorldMap/ReturnGate"]
+[node name="Prompt" type="Node2D" parent="WorldMap/ReturnGate" index="1" unique_id=1919603064]
 top_level = true
-script = ExtResource("17_pwgfs")
+script = ExtResource("17_prompt")
 
-[node name="Label" type="Label" parent="WorldMap/ReturnGate/Prompt"]
+[node name="Label" type="Label" parent="WorldMap/ReturnGate/Prompt" index="0" unique_id=622259589]
 offset_left = -22.0
 offset_top = -26.0
 offset_right = 22.0
@@ -603,82 +3274,6 @@ text = "E"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="GroundA" type="Polygon2D" parent="WorldMap/Terrain"]
-z_index = -13
-texture_filter = 4
-texture_repeat = 2
-position = Vector2(-5000, -5000)
-texture = ExtResource("209_bg_a")
-texture_scale = Vector2(4, 4)
-polygon = PackedVector2Array(0, 0, 2000, 0, 2000, 10000, 0, 10000)
-script = ExtResource("2_surface")
-surface_size = Vector2(2000, 10000)
-tile_size = 1000.0
-
-[node name="MountainA1" parent="WorldMap/Terrain" instance=ExtResource("206_mountain")]
-position = Vector2(-4200, 2600)
-rotation = 0.35
-scale = Vector2(0.3, 0.32)
-
-[node name="SharedScatter" type="Node2D" parent="WorldMap/Scenery"]
-script = ExtResource("200_scatter")
-region = Rect2(-5000.0, -5000.0, 2000.0, 10000.0)
-layers = Array[ExtResource("200_layertype")]([ExtResource("201_cacti"), ExtResource("202_bushes"), ExtResource("203_bones")])
-include_day_stage_layers = false
-include_region_layers = false
-clear_radius = 0.0
-keep_clear = Array[Rect2]([Rect2(-5000, -90, 10000, 180), Rect2(-1675, 1690, 1250, 120), Rect2(425, -1810, 1250, 120), Rect2(-3400, -250, 500, 500), Rect2(-3100, -250, 500, 500), Rect2(-1400, -250, 500, 500), Rect2(-1100, -250, 500, 500), Rect2(600, -250, 500, 500), Rect2(1950, -250, 500, 500), Rect2(2900, -250, 500, 500)])
-grid_cell_size = 260.0
-stream_enabled = true
-stream_budget_ms = 3.0
-stream_first_frame_budget_ms = 4.0
-cull_enabled = true
-cull_minimum_radius = 2000.0
-count_scale = 0.2
-
-[node name="DustCampScatter" type="Node2D" parent="WorldMap/Scenery"]
-script = ExtResource("200_scatter")
-region = Rect2(-5000, -5000, 2000, 10000)
-layers = Array[ExtResource("200_layertype")]([ExtResource("204_tents")])
-include_day_stage_layers = false
-include_region_layers = false
-clear_radius = 0.0
-keep_clear = Array[Rect2]([Rect2(-5000, -90, 2000, 180), Rect2(-3400, -250, 500, 500)])
-random_seed = 1001
-grid_cell_size = 300.0
-stream_enabled = true
-stream_budget_ms = 1.0
-stream_first_frame_budget_ms = 1.0
-cull_enabled = true
-cull_minimum_radius = 2000.0
-
-[node name="DustCamp_Portal" parent="WorldMap/TravelPortals" instance=ExtResource("207_portal")]
-location = SubResource("Resource_portal_dustcamp")
-destination = NodePath("../OldMine_PortalWest")
-destination_region = &"B"
-destination_position = Vector2(-2850.0, 90.0)
-
-[node name="Floor" parent="WorldMap/Terrain"]
-position = Vector2(-5000.0, -5000.0)
-polygon = PackedVector2Array(0, 0, 2000.0, 0, 2000.0, 10000.0, 0, 10000.0)
-surface_size = Vector2(2000.0, 10000.0)
-
-[node name="TopWall" parent="WorldMap/Terrain/Bounds"]
-position = Vector2(-4000.0, -5032)
-shape = SubResource("RectangleShape2D_band_h_A")
-
-[node name="BottomWall" parent="WorldMap/Terrain/Bounds"]
-position = Vector2(-4000.0, 5032)
-shape = SubResource("RectangleShape2D_band_h_A")
-
-[node name="LeftWall" parent="WorldMap/Terrain/Bounds"]
-position = Vector2(-5032.0, 0)
-
-[node name="RightWall" parent="WorldMap/Terrain/Bounds"]
-position = Vector2(-2968.0, 0)
-
-[node name="Zone" parent="WorldMap/Camera"]
-region = Rect2(-5000.0, -5000.0, 2000.0, 10000.0)
-
-[node name="SpawnPoint" parent="WorldMap/Player"]
-position = Vector2(-4333.33349609375, 0.0)
+[node name="PropScale" type="Node" parent="." index="20" unique_id=881412831 groups=["prop_scale"]]
+script = ExtResource("4_propscale")
+scale_multiplier = 0.4

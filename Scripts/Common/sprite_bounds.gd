@@ -84,16 +84,36 @@ static func global_corners(sprite: Sprite2D) -> PackedVector2Array:
 ## again for nothing. Every shadow in the world asks this every time it moves, so it
 ## is deliberately allocation-free.
 static func world_band(sprite: Sprite2D, pose: Transform2D) -> Vector2:
-	if sprite == null or sprite.texture == null:
+	var box := world_box(sprite, pose)
+	if box.size == Vector2.ZERO:
 		return Vector2.ZERO
+	return Vector2(box.position.y, box.end.y)
+
+
+## The whole of that measurement: the box [param sprite]'s opaque artwork covers in
+## world space when it is standing in [param pose].
+##
+## [method world_band] is this with the sideways half thrown away, and is what
+## anything asking "how tall is it" wants. The width is asked for separately by
+## whatever needs to know how much ground the thing stands on - a shadow's own
+## footing, for one, which is as wide as the object is and no wider.
+##
+## Allocation-free like the band, since it is asked every time a shadow moves.
+static func world_box(sprite: Sprite2D, pose: Transform2D) -> Rect2:
+	if sprite == null or sprite.texture == null:
+		return Rect2()
 	var rect := local_rect(sprite)
 	var a := pose * rect.position
 	var b := pose * Vector2(rect.end.x, rect.position.y)
 	var c := pose * rect.end
 	var d := pose * Vector2(rect.position.x, rect.end.y)
-	return Vector2(
-		minf(minf(a.y, b.y), minf(c.y, d.y)),
+	var top_left := Vector2(
+		minf(minf(a.x, b.x), minf(c.x, d.x)),
+		minf(minf(a.y, b.y), minf(c.y, d.y)))
+	var bottom_right := Vector2(
+		maxf(maxf(a.x, b.x), maxf(c.x, d.x)),
 		maxf(maxf(a.y, b.y), maxf(c.y, d.y)))
+	return Rect2(top_left, bottom_right - top_left)
 
 
 ## The lowest point of [param node]'s artwork in world space - the part of it

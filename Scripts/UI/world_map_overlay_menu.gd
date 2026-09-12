@@ -62,7 +62,7 @@ var _current_tab: Tab = Tab.INVENTORY
 
 var _inventory_panel: RunInventoryPanel
 var _bounty_panel: WorldMapBountyPanel
-var _map_panel: WorldMapMapPanel
+var _map_panel: WorldMapScreen
 
 
 func _ready() -> void:
@@ -107,7 +107,7 @@ func close() -> void:
 func _process(_delta: float) -> void:
 	# Left standing open across a teleport away from the World Map would leave
 	# the player stuck looking at a screen about a place they are no longer
-	# on - the same reason [WorldMapMinimap] and every [code]Scripts/Dev[/code]
+	# on - the same reason every [code]Scripts/Dev[/code]
 	# readout re-check this every frame rather than once.
 	if not visible:
 		return
@@ -190,7 +190,7 @@ func _build() -> void:
 	content.add_child(_bounty_panel)
 	_panels[Tab.BOUNTIES] = _bounty_panel
 
-	_map_panel = WorldMapMapPanel.new()
+	_map_panel = WorldMapScreen.new()
 	content.add_child(_map_panel)
 	_panels[Tab.MAP] = _map_panel
 

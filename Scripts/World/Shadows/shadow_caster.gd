@@ -134,6 +134,16 @@ const GROUP := &"shadow_caster"
 		source_sprite_path = value
 		if is_node_ready():
 			rebind()
+## Whether this part drops out of its object's shadow entirely while its artwork is
+## hidden, rather than only being drawn at nothing.
+##
+## [b]It changes the object's measurements, which is why it is a choice.[/b] A part
+## faded to nothing still says how tall and how wide the object is, and for a
+## holstered weapon that is right - the figure is the same figure. For a horse that
+## is only under the player on the World Map it is not: a hidden rig would go on
+## stretching the player's shadow to the length of a horse everywhere else. Off by
+## default, so nothing that has not asked is measured differently.
+@export var drops_out_while_hidden: bool = false
 ## The node whose world transform says where the object is standing. Its origin plus
 ## [member ground_anchor_local] is the ground position, and it is the only thing
 ## consulted for it - so artwork lifted off the ground cannot move it.
@@ -184,6 +194,39 @@ const GROUP := &"shadow_caster"
 		if is_node_ready() and not auto_ground_anchor:
 			_anchor = value
 			refresh_shadow()
+
+@export_group("Ground contact")
+## The trigger or collision shape standing for the part of this object that
+## actually touches the ground - see [PropFooting], which is already exactly that
+## for a piece of scenery and is what this points at by default.
+##
+## [b]It is the authored footprint, and it is authored once.[/b] A prop's solid
+## band, the patch the player cannot walk through, is the same patch of floor the
+## prop is standing on, so the shadow reads that band rather than keeping a second
+## set of numbers beside it that could drift out of step. Anything shaped answers:
+## a [CollisionShape2D], a [CollisionPolygon2D], or an [Area2D] with either under
+## it - which is what a prop whose footing must not be solid uses.
+##
+## Left unresolved, this object has no footprint and is projected exactly as it
+## always was. So is every object on a map whose sun has not asked for footprints -
+## see [member SunController.ground_contact_shadows].
+@export var ground_contact_path: NodePath = ^"../Footing":
+	set(value):
+		ground_contact_path = value
+		if is_node_ready():
+			resample_ground_contact()
+## The footprint written out by hand instead of measured, as (half width, height)
+## in world pixels. For an object with no shape to read - a horse, a figure - or
+## one whose solid part is nothing like the ground it covers.
+##
+## The height is how far up the artwork the ground contact reaches, measured from
+## the ground position; the width is how far the patch of floor spreads either
+## side of it. Anything at or below zero falls back to the shape.
+@export var ground_contact_size := Vector2.ZERO:
+	set(value):
+		ground_contact_size = value
+		if is_node_ready():
+			resample_ground_contact()
 
 @export_group("Height")
 ## Where an extra lift comes from, on top of where the artwork is drawn - see
@@ -288,6 +331,11 @@ var _result_stale: bool = true
 var _result_group: ShadowGroup
 var _result_drawn: bool = false
 var _anchor := Vector2.ZERO
+## The patch of floor this part is standing on, as (half width, height) in world
+## pixels, or zero for a part that has not authored one - see
+## [method get_ground_contact]. Sampled with the anchor and held, because a
+## footprint is a property of the object rather than of the moment.
+var _contact := Vector2.ZERO
 ## The root's own rotation and scale as they stood when [member _anchor] was
 ## sampled. The anchor is where the object rests on the floor, so it is carried by
 ## the root's [i]position[/i] alone from then on: a revolver spun in a hand turns
@@ -376,6 +424,7 @@ func rebind() -> void:
 	_source = _resolve_source_sprite()
 	_measure_source()
 	resample_ground_anchor()
+	resample_ground_contact()
 
 
 ## Works out which shadow this caster draws into and joins it, leaving whichever one
@@ -502,6 +551,111 @@ func _capture_anchor_basis() -> void:
 	_anchor_basis = Transform2D(pose.x, pose.y, Vector2.ZERO)
 
 
+## Measures the patch of floor this part is standing on again - see
+## [method get_ground_contact]. Called with the anchor, and by hand for an object
+## whose footing has genuinely been rebuilt.
+func resample_ground_contact() -> void:
+	_contact = _measure_ground_contact()
+
+
+## The patch of floor this part is standing on, as (half width, height) in world
+## pixels. Zero means none was authored, which every caster answers until one is.
+##
+## [b]The height is the part of the picture that is lying down.[/b] It is measured
+## from the point the object is standing on up to the top of the authored shape, so
+## the band a shadow holds fixed underneath a prop is the same band the player
+## cannot walk through. The width is how far that patch spreads either side, and is
+## what the pool under an object at midday is sized from - see
+## [method ShadowGroup._pool_extent], which would otherwise have to take the whole
+## width of the artwork and give a wide-topped thing a pool the size of its roof.
+##
+## Held rather than measured per frame: a footprint is a property of the object, and
+## a live measurement would ride up and down with an animation.
+func get_ground_contact() -> Vector2:
+	return _contact
+
+
+## Works the footprint out from whatever was authored - the typed size first, then
+## the shape at [member ground_contact_path].
+func _measure_ground_contact() -> Vector2:
+	if ground_contact_size.x > 0.0 and ground_contact_size.y > 0.0:
+		return ground_contact_size
+	if ground_contact_path.is_empty():
+		return Vector2.ZERO
+	var node := get_node_or_null(ground_contact_path) as Node2D
+	if node == null:
+		return Vector2.ZERO
+	var box := _contact_box(node)
+	if box.size.x <= 0.0 or box.size.y <= 0.0:
+		return Vector2.ZERO
+	return Vector2(box.size.x * 0.5, maxf(get_ground_position().y - box.position.y, 0.0))
+
+
+## The world-space box a footprint node covers. A shape or a polygon answers for
+## itself; anything else - an [Area2D] holding one, a pivot with several - answers
+## the box round everything shaped underneath it, so a footing built from two
+## shapes is one footprint rather than the first one found.
+static func _contact_box(node: Node2D) -> Rect2:
+	var shape_node := node as CollisionShape2D
+	if shape_node != null:
+		return _world_box(shape_node.global_transform, _shape_box(shape_node.shape))
+
+	var polygon_node := node as CollisionPolygon2D
+	if polygon_node != null:
+		var points := polygon_node.polygon
+		if points.size() < 2:
+			return Rect2()
+		var pose := polygon_node.global_transform
+		var hull := Rect2(pose * points[0], Vector2.ZERO)
+		for i: int in range(1, points.size()):
+			hull = hull.expand(pose * points[i])
+		return hull
+
+	var box := Rect2()
+	var found := false
+	for child: Node in node.get_children():
+		var child_2d := child as Node2D
+		if child_2d == null:
+			continue
+		var part := _contact_box(child_2d)
+		if part.size.x <= 0.0 or part.size.y <= 0.0:
+			continue
+		box = part if not found else box.merge(part)
+		found = true
+	return box
+
+
+## The box a [Shape2D] covers in its own space. Nothing here knows what a prop is:
+## a rectangle, a circle and a capsule are the three a footing is ever drawn with,
+## and anything else answers nothing and is simply not a footprint.
+static func _shape_box(shape: Shape2D) -> Rect2:
+	var rectangle := shape as RectangleShape2D
+	if rectangle != null:
+		return Rect2(-rectangle.size * 0.5, rectangle.size)
+	var circle := shape as CircleShape2D
+	if circle != null:
+		var across := circle.radius * 2.0
+		return Rect2(Vector2(-circle.radius, -circle.radius), Vector2(across, across))
+	var capsule := shape as CapsuleShape2D
+	if capsule != null:
+		var size := Vector2(capsule.radius * 2.0, capsule.height)
+		return Rect2(-size * 0.5, size)
+	return Rect2()
+
+
+## [param box] carried into world space through [param pose], as the box round the
+## four corners it lands on - so a footing on a prop the map has turned or resized
+## is still measured as the ground it actually covers.
+static func _world_box(pose: Transform2D, box: Rect2) -> Rect2:
+	if box.size.x <= 0.0 or box.size.y <= 0.0:
+		return Rect2()
+	var hull := Rect2(pose * box.position, Vector2.ZERO)
+	hull = hull.expand(pose * Vector2(box.end.x, box.position.y))
+	hull = hull.expand(pose * box.end)
+	hull = hull.expand(pose * Vector2(box.position.x, box.end.y))
+	return hull
+
+
 ## How far this part's artwork is currently drawn above its ground position, in world
 ## pixels. Zero means resting on the floor.
 ##
@@ -561,7 +715,13 @@ func get_source_transform() -> Transform2D:
 ## Whether this caster has something to contribute to its object's silhouette right
 ## now.
 func is_contributing() -> bool:
-	return enabled and is_node_ready() and _source != null and _source.texture != null
+	if not enabled or not is_node_ready():
+		return false
+	if not is_instance_valid(_source) or _source.texture == null:
+		return false
+	# A part that has asked to leave while it is out of sight - see
+	# drops_out_while_hidden - stops measuring the object as well as drawing.
+	return not drops_out_while_hidden or _source.is_visible_in_tree()
 
 
 ## The top and bottom of this part's artwork in world space, as (highest y, lowest
@@ -569,7 +729,7 @@ func is_contributing() -> bool:
 ## the [i]opaque[/i] artwork rather than the texture canvas - so a rotated weapon
 ## and a raised arm move it and nothing has to be authored.
 func get_world_height_band() -> Vector2:
-	if _source == null or _source.texture == null:
+	if not is_instance_valid(_source) or _source.texture == null:
 		return Vector2.ZERO
 	var corners := SpriteBounds.global_corners(_source)
 	var lift := get_projection_lift()
@@ -918,7 +1078,7 @@ func _find_sprite(node: Node) -> Sprite2D:
 ## [ShadowTransform]. The placement itself needs no measurement at all - the
 ## silhouette is the artwork, projected point by point where the artwork is.
 func _measure_source() -> void:
-	if _source == null or _source.texture == null:
+	if not is_instance_valid(_source) or _source.texture == null:
 		_measured_texture = null
 		_source_size = Vector2.ONE
 		return

@@ -4,3 +4,4 @@
 
 [resource]
 script = ExtResource("1_y1tg7")
+chase_power_ratio = 0.7

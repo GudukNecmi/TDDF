@@ -3,7 +3,7 @@ extends Label
 ## the player is standing in, whether the horse is walking or running, and
 ## the World Map's own continuous world day, degree and period.
 ##
-## Not the World Map's real UI - a HUD, a minimap and fog of war are
+## Not the World Map's real UI - a HUD, a map screen and fog of war are
 ## later-phase work - this exists only so the foundation can be checked by
 ## eye while it is being built, the same purpose every other node under
 ## [code]Scripts/Dev/[/code] serves.

@@ -63,6 +63,35 @@ const GROUP := &"world_map_horse"
 ## already answers to it, and a second action bound to the same physical key
 ## would be indistinguishable from this one to the player.
 @export var run_action: StringName = &"fast_travel"
+## The horse the player is actually sitting on - a [HorseRig], shown exactly
+## while [member player_on_horse] is true and hidden the rest of the time.
+##
+## [b]Which is why it is answered here and nowhere else.[/b] Whether there is a
+## horse under the player is already this class's one question, asked through
+## [method set_mounted] by the map that opens, the combat that interrupts it and
+## the extraction that ends it - so the artwork is turned on by the same call
+## rather than by a second component watching for the same moment. The Base, the
+## Arena and combat never mount the horse, so they never show one, and nothing
+## in them had to be told about it.
+##
+## Left unresolved - a player with no horse artwork under them at all - this
+## changes nothing and the horse is simply the speed it always was.
+@export var horse_visual_path: NodePath = ^"../MountedHorse"
+
+## The player's own artwork, lifted into the saddle while they are mounted and put
+## back on their feet when they are not - see [method _seat_rider].
+##
+## [b]A rider is not standing on the ground, and the World Map draws them as though
+## they were.[/b] The horse stands on the point the player is at - see
+## [member HorseRig.stands_on_own_origin] - so without this the player is drawn at
+## the horse's hooves rather than on its back. Lifting the artwork rather than the
+## player themselves is what keeps the mounted pair one thing as far as depth,
+## collision and the shadow are all concerned: the player's own position is still
+## the ground the horse is standing on.
+##
+## Left unresolved, nothing is lifted and the horse is simply the speed it always
+## was.
+@export var rider_visual_path: NodePath = ^"../Visual"
 
 @export_group("Stamina")
 ## Full stamina for a fresh horse - fatigue = 0. What [method get_max_stamina]
@@ -146,6 +175,11 @@ var current_stamina: float = 0.0
 var fatigue: float = 0.0
 var horse_food: int = 0
 
+## Where the rider's artwork rests when they are on their own feet, and whether
+## that has been taken yet - see [method _seat_rider]. Read once, so mounting and
+## dismounting a hundred times cannot walk the player up or down the screen.
+var _rider_rest_y: float = 0.0
+var _rider_rest_taken: bool = false
 var _running: bool = false
 var _feed_cooldown_left: float = 0.0
 ## Seconds since sprinting last actually happened - see [member stamina_regen_delay].
@@ -167,6 +201,7 @@ func _ready() -> void:
 	# why nothing more than this is needed for a new run to start clean.
 	current_stamina = get_max_stamina()
 	horse_food = clampi(starting_horse_food, 0, maxi(max_horse_food, 0))
+	_show_horse(player_on_horse)
 
 
 ## The horse currently in play, found by group - the same lookup
@@ -218,6 +253,42 @@ func set_mounted(mounted: bool) -> void:
 	player_on_horse = mounted
 	if not mounted:
 		_running = false
+	_show_horse(mounted)
+
+
+## Puts the horse under the player, or takes it away - see
+## [member horse_visual_path]. Nothing but visibility: the same rig is left in
+## the tree either way, and a hidden [HorseRig] does no work at all, so this is
+## the whole of what dismounting costs.
+func _show_horse(mounted: bool) -> void:
+	var visual := get_node_or_null(horse_visual_path) as CanvasItem
+	if visual != null:
+		visual.visible = mounted
+	_seat_rider(mounted)
+
+
+## Puts the player in the saddle, or back on their own feet - see
+## [member rider_visual_path].
+##
+## The lift is the horse's own - see [method HorseRig.get_saddle_height] - so a
+## taller horse, a differently drawn one or one shown at another size seats its
+## rider correctly without a number being authored anywhere. A carrier that is not
+## a [HorseRig] lifts nobody, which is what a player with no horse artwork under
+## them has always been.
+func _seat_rider(mounted: bool) -> void:
+	var rider := get_node_or_null(rider_visual_path) as Node2D
+	if rider == null:
+		return
+	if not _rider_rest_taken:
+		_rider_rest_taken = true
+		_rider_rest_y = rider.position.y
+
+	var lift := 0.0
+	if mounted:
+		var rig := get_node_or_null(horse_visual_path) as HorseRig
+		if rig != null:
+			lift = rig.get_saddle_height()
+	rider.position.y = _rider_rest_y - lift
 
 
 ## Whether the run key is currently held and actually doing something - for a

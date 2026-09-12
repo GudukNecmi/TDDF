@@ -1,0 +1,29 @@
+[gd_scene load_steps=8 format=3 uid="uid://cgotikhorsemain"]
+
+[ext_resource type="PackedScene" uid="uid://cgotikhorserig" path="res://Scenes/World/Horses/Horse.tscn" id="1_base"]
+[ext_resource type="Texture2D" uid="uid://uj2agnrjf0qj" path="res://Assets/Horses/MainCharacterHorse/Tail.png" id="2_tail"]
+[ext_resource type="Texture2D" uid="uid://0mwr4326705n" path="res://Assets/Horses/MainCharacterHorse/BackLeg.png" id="3_backleg"]
+[ext_resource type="Texture2D" uid="uid://br42cnfsvgegb" path="res://Assets/Horses/MainCharacterHorse/FrontLeg.png" id="4_frontleg"]
+[ext_resource type="Texture2D" uid="uid://cnklrsy0cw17b" path="res://Assets/Horses/MainCharacterHorse/Neck.png" id="5_neck"]
+[ext_resource type="Texture2D" uid="uid://dt0dqowfel5xo" path="res://Assets/Horses/MainCharacterHorse/Body.png" id="6_body"]
+[ext_resource type="Texture2D" uid="uid://b5mplrbg7v3p7" path="res://Assets/Horses/MainCharacterHorse/Head.png" id="7_head"]
+
+[node name="MainCharacterHorse" instance=ExtResource("1_base")]
+
+[node name="Tail" parent="Rig" index="0"]
+texture = ExtResource("2_tail")
+
+[node name="BackLeg" parent="Rig" index="1"]
+texture = ExtResource("3_backleg")
+
+[node name="FrontLeg" parent="Rig" index="2"]
+texture = ExtResource("4_frontleg")
+
+[node name="Neck" parent="Rig" index="3"]
+texture = ExtResource("5_neck")
+
+[node name="Body" parent="Rig" index="4"]
+texture = ExtResource("6_body")
+
+[node name="Head" parent="Rig" index="5"]
+texture = ExtResource("7_head")

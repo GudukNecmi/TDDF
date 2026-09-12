@@ -4,7 +4,7 @@ extends Node2D
 ## coarse grid cells are UNEXPLORED, EXPLORED or VISIBLE right now, kept as
 ## two small dictionaries rather than a per-pixel image or a second
 ## simulation. [WorldMapFogOverlay] paints this in world space,
-## [WorldMapMinimap] shows the same painted world through a second camera,
+## [WorldMapLocation] refreshes its own marker off [signal fog_changed],
 ## and [WorldBandit] asks [method get_state] directly to decide whether it
 ## should currently be drawn - nothing else reaches into how the grid is
 ## stored.

@@ -7,6 +7,12 @@ extends CharacterBody2D
 ##
 ## The idle squash is owned by the [SquashIdle] AnimationPlayer, which keeps it
 ## running at all times and reads `velocity` to decide its playback speed.
+##
+## [b]The dash is the one exception to the constant speed[/b], and it is added
+## rather than substituted: [PlayerDash] is handed the walk velocity worked out
+## here and hands it back with a launch on top - see [member dash_path]. The
+## visuals still never rotate; a dash lifts the artwork off the ground and puts
+## it back down again.
 
 ## Movement speed in pixels per second.
 @export var speed: float = 220.0
@@ -21,7 +27,18 @@ extends CharacterBody2D
 ## slower. Anything with a `get_speed_multiplier()` works here.
 @export var speed_modifier_paths: Array[NodePath] = [^"DeathSequence", ^"TerrainSlow"]
 
+## Component allowed to add motion of its own on top of the walk - see
+## [PlayerDash]. It is handed the velocity the modifiers above have already
+## settled and hands one back, so the walk is worked out in exactly one place
+## and a launch is added to it rather than replacing it.
+##
+## Anything with an [code]apply_dash_velocity(velocity, delta)[/code] method
+## works here. An empty path, or a node without it, leaves movement precisely
+## as it was.
+@export var dash_path: NodePath = ^"Dash"
+
 var _speed_modifiers: Array[Node] = []
+var _dash: Node
 
 
 ## Resolved once. A path that points at nothing, or at something that does not
@@ -32,10 +49,19 @@ func _ready() -> void:
 		if node != null and node.has_method(&"get_speed_multiplier"):
 			_speed_modifiers.append(node)
 
+	var dash := get_node_or_null(dash_path)
+	if dash != null and dash.has_method(&"apply_dash_velocity"):
+		_dash = dash
 
-func _physics_process(_delta: float) -> void:
+
+func _physics_process(delta: float) -> void:
 	var direction := _read_input_direction()
 	velocity = direction * speed * _get_speed_multiplier()
+	# The dash rides on top of the walk rather than replacing it, so it decays
+	# to nothing and control is already back the frame it lands.
+	if _dash != null:
+		var launched: Vector2 = _dash.call(&"apply_dash_velocity", velocity, delta)
+		velocity = launched
 	move_and_slide()
 
 

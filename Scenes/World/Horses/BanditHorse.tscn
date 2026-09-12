@@ -1,0 +1,33 @@
+[gd_scene load_steps=9 format=3 uid="uid://cgotikhorsebandit"]
+
+[ext_resource type="PackedScene" uid="uid://cgotikhorserig" path="res://Scenes/World/Horses/Horse.tscn" id="1_base"]
+[ext_resource type="Texture2D" uid="uid://b22iq1r6t5vbi" path="res://Assets/Horses/Bandit_s Horse/Tail.PNG" id="2_tail"]
+[ext_resource type="Texture2D" uid="uid://comfwb22jek78" path="res://Assets/Horses/Bandit_s Horse/BackLeg.PNG" id="3_backleg"]
+[ext_resource type="Texture2D" uid="uid://bwr7r6vxp8c0l" path="res://Assets/Horses/Bandit_s Horse/FrontLeg.PNG" id="4_frontleg"]
+[ext_resource type="Texture2D" uid="uid://etdpkx5xq33u" path="res://Assets/Horses/Bandit_s Horse/Neck.PNG" id="5_neck"]
+[ext_resource type="Texture2D" uid="uid://dof2qywxbokgo" path="res://Assets/Horses/Bandit_s Horse/Body.PNG" id="6_body"]
+[ext_resource type="Texture2D" uid="uid://dc2l5brbxxcx5" path="res://Assets/Horses/Bandit_s Horse/Head.PNG" id="7_head"]
+[ext_resource type="Script" uid="uid://b8onw55m5xw3k" path="res://Scripts/World/Shadows/shadow_group.gd" id="8_shadowgroup"]
+
+[node name="BanditHorse" instance=ExtResource("1_base")]
+
+[node name="Tail" parent="Rig" index="0"]
+texture = ExtResource("2_tail")
+
+[node name="BackLeg" parent="Rig" index="1"]
+texture = ExtResource("3_backleg")
+
+[node name="FrontLeg" parent="Rig" index="2"]
+texture = ExtResource("4_frontleg")
+
+[node name="Neck" parent="Rig" index="3"]
+texture = ExtResource("5_neck")
+
+[node name="Body" parent="Rig" index="4"]
+texture = ExtResource("6_body")
+
+[node name="Head" parent="Rig" index="5"]
+texture = ExtResource("7_head")
+
+[node name="ShadowGroup" type="Node2D" parent="."]
+script = ExtResource("8_shadowgroup")

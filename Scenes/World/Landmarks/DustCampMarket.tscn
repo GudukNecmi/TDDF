@@ -1,0 +1,29 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/Shadows/shadow_caster.gd" id="1_shadow"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/Dust Camp/Structures/Market.png" id="2_art"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_footprint"]
+size = Vector2(500, 300)
+
+[node name="DustCampMarket" type="Node2D" groups=["impassable_terrain"]]
+y_sort_enabled = true
+
+[node name="Art" type="Sprite2D" parent="."]
+offset = Vector2(0, -490)
+texture = ExtResource("2_art")
+
+[node name="Collision" type="StaticBody2D" parent="."]
+collision_layer = 32
+collision_mask = 0
+
+[node name="Shape" type="CollisionShape2D" parent="Collision"]
+position = Vector2(-15, -160)
+shape = SubResource("RectangleShape2D_footprint")
+
+[node name="ShadowCaster" type="Node2D" parent="."]
+script = ExtResource("1_shadow")
+shadow_pull = 40.0
+cast_mode = 1
+source_sprite_path = NodePath("../Art")
+shadow_softness_override = 0.24

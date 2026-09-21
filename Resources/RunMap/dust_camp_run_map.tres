@@ -1,0 +1,51 @@
+[gd_resource type="Resource" script_class="RunMapGenerator" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_generator.gd" id="1_generator"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_site_plan.gd" id="2_plan"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_final_boss.tres" id="3_boss"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_bounty.tres" id="4_bounty"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_mini_boss.tres" id="5_miniboss"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_market.tres" id="6_market"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_saloon.tres" id="7_saloon"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_sheriff.tres" id="8_sheriff"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_extraction.tres" id="9_extraction"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_treasure.tres" id="10_treasure"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_deposit.tres" id="11_deposit"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_bandit_group.tres" id="12_group"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_bandit_camp.tres" id="13_camp"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Plans/plan_event.tres" id="14_event"]
+
+[resource]
+script = ExtResource("1_generator")
+min_total_sites = 35
+max_total_sites = 50
+min_row_count = 10
+max_row_count = 13
+min_row_sites = 3
+max_row_sites = 5
+band_distances = PackedFloat32Array(340, 590, 840)
+band_tolerance = 0.16
+row_gap_fraction = Vector2(0.82, 0.96)
+column_spacing = 300.0
+column_jitter = 90.0
+row_shift_jitter = 170.0
+row_tilt_jitter = 110.0
+min_forward_links = 1
+max_forward_links = 4
+extra_forward_chance = 0.55
+sideways_link_chance = 0.3
+skip_link_chance = 0.22
+max_links_per_site = 5
+boss_known_from_the_start = true
+site_plans = Array[ExtResource("2_plan")]([ExtResource("3_boss"), ExtResource("4_bounty"), ExtResource("5_miniboss"), ExtResource("6_market"), ExtResource("7_saloon"), ExtResource("8_sheriff"), ExtResource("9_extraction"), ExtResource("10_treasure"), ExtResource("11_deposit"), ExtResource("12_group"), ExtResource("13_camp"), ExtResource("14_event")])
+spacing_target = 1400.0
+spacing_tolerance = 0.4
+spacing_minimum = 700.0
+max_special_share = 0.32
+repair_rounds = 4
+cluster_radius = 780.0
+max_specials_per_cluster = 3
+spacing_penalty = 150.0
+crowding_penalty = 1200.0
+placement_slack = 40.0
+attempts = 24

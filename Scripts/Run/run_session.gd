@@ -155,6 +155,19 @@ var _arrival_owed: bool = false
 ## arrival. A story run never sets it and so never sees either question.
 var _free_run: bool = false
 
+## How many runs have been set out on this session, counted from 1 at the first.
+##
+## [b]It is a handle for "which run is this", not a score.[/b] Anything generated
+## once per run and then kept across the scene changes inside it - the run map's
+## own node graph, held in [WorldMapState]'s between-scenes memory - stamps
+## itself with this and makes itself again the moment the stamp no longer
+## matches. That is the whole reason it exists: [signal run_began] already says a
+## run has begun, but a system that is only built once the first map of the run
+## loads is not in the tree to hear it, and cannot tell a rebuilt world of the
+## same run from the first world of the next one without a number to compare.
+## See [method RunMapDirector._ready].
+var _run_index: int = 0
+
 var _catalog: MapCatalog
 
 
@@ -162,6 +175,13 @@ var _catalog: MapCatalog
 ## whether it is building a base to stand around in or an arena to fight in.
 func is_running() -> bool:
 	return _map_id != &""
+
+
+## Which run this is - see [member _run_index]. 0 before the player has ever set
+## out, which nothing generated per run will ever match, so the first map of the
+## first run is made fresh like every other.
+func get_run_index() -> int:
+	return _run_index
 
 
 ## Which map, or empty when there is no run. Read by the round intro to find the
@@ -484,6 +504,9 @@ func begin(map_id: StringName) -> void:
 	_map_id = map_id
 	_region_id = &""
 	_destination_region_id = &""
+	# Bumped before anything hears the run has begun, so a listener that asks
+	# which run it is while handling [signal run_began] is told the new one.
+	_run_index += 1
 	# A journey belongs to the run it was made in. Setting out on a new one from
 	# the base cannot leave the world thinking it should come back as a road, nor
 	# the first world of the run thinking it was ridden into.

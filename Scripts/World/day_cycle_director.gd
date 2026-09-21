@@ -96,6 +96,32 @@ const GROUP := &"day_cycle"
 ## blending its own [SunStage] pair between - see [method get_world_time_ambient_colour],
 ## the shared formula both now read.
 @export var follow_world_time: bool = true
+## Whether the world's darkness is blended continuously between this hour's
+## authored colour and the next one's, or set to this hour's own colour and held
+## there.
+##
+## [b]On, and the darkness flows while the sun still steps.[/b] This is
+## deliberately [i]not[/i] tied to [member SunController.world_time_blends], and
+## the run map turns exactly one of the two on: the clock is swept frame by frame
+## across a travel tick - see [RunMapTravel] - so the ambient colour eases out of
+## the hour being left and into the one being ridden into, while the sun holds
+## the current hour's own authored rake and direction and re-snaps the instant
+## the period changes. Time reads as flowing; the shadows are never caught
+## between two authored hours.
+##
+## [b]It lands exactly, not approximately.[/b] The blend is read from the clock
+## rather than run as a tween of its own, and a travel tick always finishes on a
+## period boundary - see [method WorldTimeManager.snap_to_period_start] - so at
+## the end of every tick the progress is zero and the colour is the next hour's
+## [member DayStage.ambient_colour] exactly as authored. There is no separate
+## transition that could still be running, overshoot, or be left showing an hour
+## the clock has already left.
+##
+## Off, the world is set to this hour's own colour and keeps it until the clock
+## crosses into the next one. The six authored [DayStage] colours are read either
+## way - this decides only whether the world is allowed to stand between two of
+## them.
+@export var world_time_blends: bool = false
 
 @export_group("Ambient")
 ## Whether the stage's colour is written to the world's ambient light at all.
@@ -144,7 +170,7 @@ func _ready() -> void:
 	apply()
 	_spawn_extra_scenes()
 	stage_applied.emit(get_stage(), get_stage_index())
-	set_process(_follows_world_time())
+	set_process(_follows_world_time() and world_time_blends)
 
 
 ## Re-blends the ambient colour every frame while [method _follows_world_time]
@@ -234,6 +260,12 @@ func get_world_time_ambient_colour(clock: Node, fallback: Color = Color.WHITE) -
 	var to_stage := stages[next_index]
 	if from_stage == null or to_stage == null:
 		return fallback
+
+	# A world whose clock is spent in whole day cycles never stands between two
+	# hours, so there is nothing to blend towards and this hour's own authored
+	# colour is the whole answer - see [member world_time_blends].
+	if not world_time_blends:
+		return from_stage.ambient_colour
 
 	var progress := 0.0
 	if clock.has_method(&"get_period_progress"):

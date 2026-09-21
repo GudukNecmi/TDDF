@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="RunMapSitePlan" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_site_plan.gd" id="1_plan"]
+
+[resource]
+script = ExtResource("1_plan")
+kind = &"bounty"
+exact_count = 3
+min_count = 0
+max_count = 3
+weight = 0.0
+claims_northernmost = false
+spacing_group = &"bounty"
+is_special = true
+row_band = Vector2(0.1, 1)

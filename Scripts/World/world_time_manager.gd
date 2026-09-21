@@ -58,6 +58,24 @@ signal day_changed(day: int)
 ## rather than assuming a rate of its own, so changing this one export is the
 ## whole of changing the game's pacing.
 @export var seconds_per_degree: float = 0.25
+## Whether the clock turns on its own, in real seconds, the way it did while the
+## World Map was ridden across freely.
+##
+## [b]Off, and that is the run map's whole day/night rule.[/b] The world no longer
+## simulates a sun moving continuously overhead: time is spent, in whole day
+## cycles, by riding a road between two points on the run map - see
+## [method advance_day_cycle] - and between those ticks the clock stands still, so
+## the lighting and the shadows an arrival is seen under are the ones it keeps
+## until the next road is taken. [SunController] and [DayCycleDirector] each have
+## a matching switch of their own - see [member SunController.world_time_blends] -
+## which stops them blending [i]between[/i] two hours as well; the two halves are
+## authored apart on purpose, since a map that wanted a turning clock but stepped
+## lighting, or the reverse, can have either.
+##
+## Turning it back on restores the old continuous behaviour exactly: nothing was
+## removed, and [method advance_seconds] is still what [method Node._process]
+## calls.
+@export var advances_in_real_time: bool = false
 ## How many degrees make a full day. 360, one for each of the six 60° periods
 ## below.
 @export var degrees_per_day: float = 360.0
@@ -97,7 +115,14 @@ func _ready() -> void:
 	_period = _period_for_degree(_degree)
 
 
+## The real-time advance, still weighed here rather than by switching the
+## callback off, so that the systems which already stop and start this node for
+## their own reasons - [method WorldMapCombatBridge._freeze_world_clock] turns
+## the process off for the length of a fight and back on afterwards - cannot
+## quietly undo [member advances_in_real_time] by handing the callback back.
 func _process(delta: float) -> void:
+	if not advances_in_real_time:
+		return
 	advance_seconds(delta)
 
 
@@ -164,6 +189,83 @@ func advance_ticks(ticks: int) -> void:
 	if ticks == 0:
 		return
 	_advance_degrees(float(ticks))
+
+
+## Moves the clock on by [param degrees] directly, as a float. What a travel
+## tick sweeps the clock with frame by frame so the movement can be watched -
+## see [RunMapTravel]. Public for the same reason [method advance_ticks] is: a
+## gameplay system spending world time should not have to translate it through
+## seconds first.
+func advance_degrees(degrees: float) -> void:
+	_advance_degrees(degrees)
+
+
+## How many degrees are left until the next period begins - the size of one day
+## cycle's tick from wherever the clock currently stands.
+##
+## [b]A clock sitting exactly on a boundary is at the start of that period, not
+## the end of the last one[/b], so this answers a whole period's length there
+## rather than nothing - which is what makes one tick always one day cycle no
+## matter how many have been spent before it.
+func degrees_until_next_period() -> float:
+	var index := int(_period)
+	var length := _period_length(index)
+	var into := fposmod(_degree - _boundary(index), maxf(degrees_per_day, 1.0))
+	return maxf(length - into, 0.0)
+
+
+## Spends one whole day cycle in a single step, landing the clock exactly on the
+## start of the next period.
+##
+## [b]This is the unit the run map's travel is paid in.[/b] One road of one day
+## cycle is one call; a three-day road is three, one per visible tick. Landing
+## exactly on the boundary is what lets the sun and the world's darkness snap to
+## one authored hour and hold it - see
+## [member WorldTimeManager.advances_in_real_time].
+func advance_day_cycle() -> void:
+	jump_to_degree(_boundary(int(_period)) + _period_length(int(_period)))
+
+
+## Puts the clock exactly on whichever period boundary it is nearest, throwing
+## away the rounding a swept advance leaves behind.
+##
+## [b]A tick that ends a hair short of its boundary is a tick that did not
+## happen.[/b] A beat of travel hands the clock its 60° a frame at a time - see
+## [RunMapTravel] - and the sum of those fractions lands on 59.999997 as readily
+## as on 60, which would leave the world still in the hour it was meant to have
+## left and the next beat with nothing left to spend. Called at the end of each
+## beat, this makes the landing exact, so a three-day road always moves the world
+## exactly three authored hours.
+func snap_to_period_start() -> void:
+	var index := int(_period)
+	var start := _boundary(index)
+	var length := _period_length(index)
+	var into := fposmod(_degree - start, maxf(degrees_per_day, 1.0))
+	jump_to_degree(start if into * 2.0 < length else start + length)
+
+
+## Puts the clock at [param degree] outright, rolling the day over as many times
+## as that takes. [b]Assigned rather than added to[/b], because the whole point
+## of the callers above is to land on an exactly authored number, and a degree
+## reached by adding a difference is only ever as exact as the difference was.
+func jump_to_degree(degree: float) -> void:
+	var span := maxf(degrees_per_day, 1.0)
+	var old_period := _period
+	var target := degree
+	while target >= span:
+		target -= span
+		_day += 1
+		day_changed.emit(_day)
+	while target < 0.0:
+		target += span
+		_day -= 1
+		day_changed.emit(_day)
+
+	_degree = target
+	degree_changed.emit(_degree)
+	_period = _period_for_degree(_degree)
+	if _period != old_period:
+		period_changed.emit(_period, int(_period))
 
 
 ## How many real seconds until the clock reaches [param target_degree], going

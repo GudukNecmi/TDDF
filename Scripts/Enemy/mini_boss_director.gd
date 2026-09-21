@@ -594,6 +594,31 @@ func begin() -> int:
 		push_warning("MiniBossDirector: no tier authored for knowledge %d - no boss." % known)
 		return 0
 
+	_bounty = bounty
+	var placed := place_encounter(MiniBossBrief.from_bounty(bounty, self), tier)
+	if placed <= 0:
+		_bounty = null
+	return placed
+
+
+## Stands a boss and his men up, wherever the brief came from, and reports how many
+## bodies that came to. 0 means nothing was built and nothing was changed.
+##
+## [b]This is [method begin] with the paperwork taken off the front.[/b] Everything
+## between "who is he" and "he is standing there" is here and only here, so a run
+## map's mini boss point - which has no contract and never will - is the same man,
+## at the same rung, with the same men round him, built by the same spawner, as one
+## the player found by holding a poster. See [MiniBossBrief].
+##
+## [param support] is how many men stand with him, -1 taking the rung's own answer.
+## [param centre] is where he waits, [constant Vector2.INF] leaving
+## [method _pick_boss_position] to choose. [param announce] is whether the player is
+## told he is nearby, which is false for a boss who is about to walk in on them.
+func place_encounter(brief: MiniBossBrief, tier: MiniBossTier, support: int = -1,
+		centre: Vector2 = Vector2.INF, announce: bool = true) -> int:
+	if _phase != Phase.NONE or not enabled or brief == null or tier == null:
+		return 0
+
 	var spawner := _resolve_spawner()
 	if spawner == null:
 		push_warning("MiniBossDirector: no spawner to build a boss with.")
@@ -603,25 +628,41 @@ func begin() -> int:
 	# itself rather than against a fight in the world the player rode out of.
 	spawner.begin_batch()
 
-	var point := _pick_boss_position(spawner, tier)
-	var boss := _build_boss(spawner, point, tier, bounty, known)
+	var point := centre if centre != Vector2.INF else _pick_boss_position(spawner, tier)
+	var boss := _build_boss(spawner, point, tier, brief)
 	if boss == null:
 		return 0
 
-	_bounty = bounty
 	_tier = tier
 	_boss = boss
-	var wanted := tier.support_count if tier.support_count >= 0 else support_count
+	var wanted := support
+	if wanted < 0:
+		wanted = tier.support_count if tier.support_count >= 0 else support_count
 	var placed := 1 + _build_support(spawner, point, wanted)
 
 	_attach_marker(boss)
-	_announce(bounty)
+	if announce:
+		_announce(brief)
 
 	_phase = Phase.APPROACHING
 	set_process(true)
 
 	boss_placed.emit(placed)
 	return placed
+
+
+## Skips the walk: the introduction begins now, on a boss who has just arrived
+## rather than one who has been stood in the region waiting to be found.
+##
+## [b]It is the same introduction.[/b] The mark comes down, the title card goes up
+## and [method BossArena.play_intro] takes the camera exactly as it does when the
+## player walks into [member trigger_radius] - see [method _begin_intro], which this
+## is a door onto and not a copy of. A caller uses it when the arrival [i]is[/i] the
+## event, which is what a run map mini boss point's second half is.
+func introduce_now() -> void:
+	if _phase != Phase.APPROACHING:
+		return
+	_begin_intro()
 
 
 ## Takes the encounter off the map: the boss, the men standing with him and the mark
@@ -793,8 +834,7 @@ func _build_boss(
 	spawner: EnemySpawner,
 	point: Vector2,
 	tier: MiniBossTier,
-	bounty: Bounty,
-	known: int
+	brief: MiniBossBrief
 ) -> Node2D:
 	var boss := spawner.spawn_at(point)
 	if boss == null:
@@ -806,7 +846,7 @@ func _build_boss(
 	if health != null:
 		# Filled to the new ceiling, so he arrives whole.
 		health.set_max_health(
-			health.get_authored_max_health() * get_boss_health_multiplier(bounty), true)
+			health.get_authored_max_health() * maxf(brief.health_multiplier, 0.01), true)
 
 	var speed := tier.speed_multiplier if tier.speed_multiplier > 0.0 else boss_speed_multiplier
 	if "speed" in boss:
@@ -822,13 +862,13 @@ func _build_boss(
 
 	var component := MiniBoss.new()
 	component.name = "MiniBoss"
-	component.bounty_id = bounty.bounty_id
-	component.target_name = _poster_name(bounty)
-	component.accepted_knowledge = known
+	component.bounty_id = brief.contract_id
+	component.target_name = brief.display_name
+	component.accepted_knowledge = brief.known
 	boss.add_child(component)
 	_boss_component = component
 
-	_dress_boss(boss, bounty)
+	_dress_boss(boss, brief.look_key)
 	# Deferred, so it lands on top of whatever the wardrobe scaled the weapon to rather
 	# than being overwritten by it - see [method MiniBossAppearance.apply], which runs on
 	# ready and writes the sprite's scale absolutely from the size it was authored at.
@@ -853,14 +893,14 @@ func _build_boss(
 ## Nothing is rolled at this point. The look is derived from [method look_key_for], so
 ## a boss rebuilt for the same contract tomorrow is the same man - and a boss whose
 ## contract the player has met before is recognisably him.
-func _dress_boss(boss: Node2D, bounty: Bounty) -> void:
+func _dress_boss(boss: Node2D, look_key: StringName) -> void:
 	if wardrobe == null:
 		return
 
 	var look := MiniBossAppearance.new()
 	look.name = "MiniBossAppearance"
 	look.wardrobe = wardrobe
-	look.look_key = look_key_for(bounty)
+	look.look_key = look_key
 	boss.add_child(look)
 
 
@@ -1005,9 +1045,9 @@ func _attach_marker(boss: Node2D) -> void:
 
 ## Says he is nearby, through the HUD panel every other piece of contract news
 ## already goes out on.
-func _announce(bounty: Bounty) -> void:
-	var who := _poster_name(bounty)
-	boss_discovered.emit(bounty, who)
+func _announce(brief: MiniBossBrief) -> void:
+	var who := brief.display_name
+	boss_discovered.emit(_bounty, who)
 
 	var notice := get_node_or_null(notice_path)
 	if notice == null or not notice.has_method(&"show_message"):
@@ -1162,7 +1202,7 @@ func _resolve_title() -> Control:
 
 ## What the poster calls him, falling back so a contract with no outlaw on it still
 ## produces a name to print rather than a gap.
-func _poster_name(bounty: Bounty) -> String:
+func poster_name_for(bounty: Bounty) -> String:
 	if bounty == null or bounty.target == null or bounty.target.display_name.is_empty():
 		return "THE OUTLAW"
 	return bounty.target.display_name

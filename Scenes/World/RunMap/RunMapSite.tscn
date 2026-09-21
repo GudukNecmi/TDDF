@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgotikrunmapsite"]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_site_marker.gd" id="1_marker"]
+[ext_resource type="Texture2D" path="res://Assets/RunMap/Sites/SiteHalo.png" id="2_halo"]
+
+[node name="RunMapSite" type="Node2D"]
+script = ExtResource("1_marker")
+pick_radius = 130.0
+halo_pulse_scale = 1.12
+halo_pulse_period = 1.4
+hover_scale = 1.15
+hover_speed = 14.0
+visited_dim = 0.55
+
+[node name="Halo" type="Sprite2D" parent="."]
+visible = false
+modulate = Color(1, 1, 1, 0.9)
+z_index = -1
+texture_filter = 1
+texture = ExtResource("2_halo")
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture_filter = 1

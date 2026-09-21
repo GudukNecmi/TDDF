@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="RunMapBanditEncounter" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_bandit_encounter.gd" id="1_enc"]
+
+[resource]
+script = ExtResource("1_enc")
+kind = &"bandit_camp"
+min_enemies = 40
+max_enemies = 80
+cleared_kind = &"bandit_camp_cleared"

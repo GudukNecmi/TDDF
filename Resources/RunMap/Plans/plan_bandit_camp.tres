@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="RunMapSitePlan" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_site_plan.gd" id="1_plan"]
+
+[resource]
+script = ExtResource("1_plan")
+kind = &"bandit_camp"
+exact_count = -1
+min_count = 1
+max_count = -1
+weight = 10.0
+claims_northernmost = false
+spacing_group = &""
+is_special = false
+row_band = Vector2(0.15, 1)

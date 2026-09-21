@@ -1,0 +1,276 @@
+[gd_scene format=3 uid="uid://6lhfy8hw7npv"]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_view.gd" id="1_view"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_travel.gd" id="2_travel"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_director.gd" id="3_director"]
+[ext_resource type="Resource" path="res://Resources/RunMap/dust_camp_run_map.tres" id="4_generator"]
+[ext_resource type="PackedScene" path="res://Scenes/World/RunMap/RunMapSite.tscn" id="5_site"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_site_kind.gd" id="6_kind"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_unknown.tres" id="7_unknown"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_start.tres" id="8_start"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_boss.tres" id="9_boss"]
+[ext_resource type="Texture2D" path="res://Assets/RunMap/Paths/PathDash.png" id="10_dash"]
+[ext_resource type="Texture2D" path="res://Assets/RunMap/Token/PlayerToken.png" id="11_token"]
+[ext_resource type="Texture2D" path="res://Assets/Maps/Desert/Dust Camp/Dust Camp Background.PNG" id="12_ground"]
+[ext_resource type="Script" path="res://Scripts/World/tiled_surface.gd" id="13_surface"]
+[ext_resource type="Script" path="res://Scripts/Dev/world_map_clock.gd" id="14_clock"]
+[ext_resource type="Script" path="res://Scripts/UI/run_map_panel.gd" id="15_panel"]
+[ext_resource type="Script" path="res://Scripts/Common/music_director.gd" id="16_music"]
+[ext_resource type="Script" path="res://Scripts/World/music_state_watcher.gd" id="17_watcher"]
+[ext_resource type="PackedScene" uid="uid://82ydc1svu2fb" path="res://Scenes/Common/FilmPostProcess.tscn" id="34_film"]
+[ext_resource type="Script" path="res://Scripts/World/Sun/sun_controller.gd" id="18_sun"]
+[ext_resource type="Script" path="res://Scripts/World/Sun/sun_stage.gd" id="19_sunstage"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/1_dawn.tres" id="20_sun1"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/2_morning.tres" id="21_sun2"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/3_noon.tres" id="22_sun3"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/4_evening.tres" id="23_sun4"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/5_twilight.tres" id="24_sun5"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/6_night.tres" id="25_sun6"]
+[ext_resource type="Script" path="res://Scripts/World/day_cycle_director.gd" id="26_daydir"]
+[ext_resource type="Script" path="res://Scripts/World/day_stage.gd" id="27_daystage"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/1_dawn.tres" id="28_day1"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/2_morning.tres" id="29_day2"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/3_noon.tres" id="30_day3"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/4_evening.tres" id="31_day4"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/5_twilight.tres" id="32_day5"]
+[ext_resource type="Resource" path="res://Resources/Maps/Desert/Day/6_night.tres" id="33_day6"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_bandit_node.gd" id="37_banditnode"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_combat_bridge.gd" id="38_bridge"]
+[ext_resource type="Resource" path="res://Resources/World/Decision/tier_stronger.tres" id="39_stronger"]
+[ext_resource type="Resource" path="res://Resources/World/Decision/tier_equal.tres" id="40_equal"]
+[ext_resource type="Resource" path="res://Resources/World/Decision/tier_weaker.tres" id="41_weaker"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Trouble/fight1.WAV" id="42_fight1"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Trouble/fight2.WAV" id="43_fight2"]
+[ext_resource type="AudioStream" path="res://Sound/Music/Trouble/fight3.mp3" id="44_fight3"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/WorldBanditDecisionMenu.tscn" id="45_decision"]
+[ext_resource type="Resource" path="res://Resources/Weapons/weapon_catalog.tres" id="46_weapons"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_bandit_group.tres" id="47_kgroup"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_bandit_camp.tres" id="48_kcamp"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_bandit_group_cleared.tres" id="49_kgroupdone"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_bandit_camp_cleared.tres" id="50_kcampdone"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_mini_boss.tres" id="51_kminiboss"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_market.tres" id="52_kmarket"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_saloon.tres" id="53_ksaloon"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_treasure.tres" id="54_ktreasure"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_event.tres" id="55_kevent"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_bounty.tres" id="56_kbounty"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_deposit.tres" id="57_kdeposit"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_extraction.tres" id="58_kextraction"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_sheriff_outpost.tres" id="59_ksheriff"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_bandit_encounter.gd" id="60_encounter"]
+[ext_resource type="Resource" path="res://Resources/RunMap/bandit_group_encounter.tres" id="61_egroup"]
+[ext_resource type="Resource" path="res://Resources/RunMap/bandit_camp_encounter.tres" id="62_ecamp"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_mini_boss_cleared.tres" id="63_kminibossdone"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_mini_boss_node.gd" id="64_minibossnode"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_mini_boss_encounter.gd" id="65_mbencounter"]
+[ext_resource type="Resource" path="res://Resources/RunMap/mini_boss_encounter.tres" id="66_emboss"]
+
+[node name="DustCampRunMap" type="Node2D"]
+
+[node name="Darkness" type="CanvasModulate" parent="." groups=["ambient_modulate"]]
+
+[node name="Ground" type="Polygon2D" parent="."]
+color = Color(0.36, 0.27, 0.21, 1)
+z_index = -20
+texture_filter = 4
+texture_repeat = 2
+position = Vector2(-3200, -8200)
+texture = ExtResource("12_ground")
+texture_scale = Vector2(4, 4)
+polygon = PackedVector2Array(0, 0, 6400, 0, 6400, 10000, 0, 10000)
+script = ExtResource("13_surface")
+surface_size = Vector2(6400, 10000)
+tile_size = 900.0
+
+[node name="RunMapView" type="Node2D" parent="."]
+script = ExtResource("1_view")
+links_container_path = NodePath("Links")
+sites_container_path = NodePath("Sites")
+token_path = NodePath("Token")
+camera_path = NodePath("Camera")
+site_scene = ExtResource("5_site")
+site_kinds = Array[ExtResource("6_kind")]([ExtResource("7_unknown"), ExtResource("8_start"), ExtResource("9_boss"), ExtResource("47_kgroup"), ExtResource("48_kcamp"), ExtResource("49_kgroupdone"), ExtResource("50_kcampdone"), ExtResource("51_kminiboss"), ExtResource("63_kminibossdone"), ExtResource("52_kmarket"), ExtResource("53_ksaloon"), ExtResource("54_ktreasure"), ExtResource("55_kevent"), ExtResource("56_kbounty"), ExtResource("57_kdeposit"), ExtResource("58_kextraction"), ExtResource("59_ksheriff")])
+fog_kind = &"unknown"
+link_texture = ExtResource("10_dash")
+link_width = 20.0
+link_color = Color(0.72, 0.64, 0.52, 0.65)
+link_choice_color = Color(0.95, 0.86, 0.66, 1)
+link_hover_color = Color(0.86, 0.26, 0.2, 1)
+link_taken_color = Color(0.45, 0.38, 0.31, 0.55)
+map_zoom = 0.42
+max_zoom = 0.9
+min_zoom = 0.22
+zoom_step = 0.08
+camera_speed = 6.0
+camera_margin = 420.0
+camera_lead = 320.0
+
+[node name="Links" type="Node2D" parent="RunMapView"]
+z_index = -5
+
+[node name="Sites" type="Node2D" parent="RunMapView"]
+
+[node name="Token" type="Sprite2D" parent="RunMapView"]
+z_index = 5
+texture_filter = 1
+scale = Vector2(1.45, 1.45)
+offset = Vector2(0, -30)
+texture = ExtResource("11_token")
+
+[node name="Camera" type="Camera2D" parent="RunMapView"]
+process_callback = 0
+zoom = Vector2(0.42, 0.42)
+
+[node name="RunMapTravel" type="Node" parent="."]
+script = ExtResource("2_travel")
+step_duration = 0.36
+step_hold = 1.0
+arrival_hold = 0.35
+
+[node name="RunMapDirector" type="Node" parent="."]
+script = ExtResource("3_director")
+region_id = &"A"
+generator = ExtResource("4_generator")
+map_seed = 0
+view_path = NodePath("../RunMapView")
+travel_path = NodePath("../RunMapTravel")
+
+
+[node name="WorldMapCombatBridge" type="Node" parent="."]
+script = ExtResource("38_bridge")
+max_enemy_count = 80
+spawner_path = NodePath("")
+ambush_path = NodePath("")
+letterbox_path = NodePath("")
+decision_menu_path = NodePath("../UI/WorldBanditDecisionMenu")
+interaction_camera_path = NodePath("")
+stinger_path = NodePath("")
+stronger_tier = ExtResource("39_stronger")
+equal_tier = ExtResource("40_equal")
+weaker_tier = ExtResource("41_weaker")
+weapon_catalog = ExtResource("46_weapons")
+fight_tracks = Array[AudioStream]([ExtResource("42_fight1"), ExtResource("43_fight2"), ExtResource("44_fight3")])
+
+[node name="RunMapBanditNode" type="Node" parent="."]
+script = ExtResource("37_banditnode")
+director_path = NodePath("../RunMapDirector")
+view_path = NodePath("../RunMapView")
+bridge_path = NodePath("../WorldMapCombatBridge")
+encounters = Array[ExtResource("60_encounter")]([ExtResource("61_egroup"), ExtResource("62_ecamp")])
+
+[node name="RunMapMiniBossNode" type="Node" parent="."]
+script = ExtResource("64_minibossnode")
+director_path = NodePath("../RunMapDirector")
+view_path = NodePath("../RunMapView")
+bridge_path = NodePath("../WorldMapCombatBridge")
+encounters = Array[ExtResource("65_mbencounter")]([ExtResource("66_emboss")])
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="RunMapClock" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 34.0
+offset_top = 34.0
+offset_right = 114.0
+offset_bottom = 114.0
+mouse_filter = 2
+script = ExtResource("14_clock")
+zone_id = &""
+radius = 40.0
+
+[node name="DayLabel" type="Label" parent="UI/RunMapClock"]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 4.0
+offset_right = 320.0
+offset_bottom = 38.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.03, 0.01, 1)
+theme_override_constants/outline_size = 6
+text = "DAY 1"
+
+[node name="PeriodLabel" type="Label" parent="UI/RunMapClock"]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 38.0
+offset_right = 320.0
+offset_bottom = 72.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(0.86, 0.26, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.03, 0.01, 1)
+theme_override_constants/outline_size = 6
+text = "DAWN"
+
+[node name="Panel" type="Control" parent="UI"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = -110.0
+offset_right = 420.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("15_panel")
+view_path = NodePath("../../RunMapView")
+travel_path = NodePath("../../RunMapTravel")
+line_path = NodePath("Line")
+idle_text = "CHOOSE A ROAD NORTH"
+hover_text = "%s  —  %d %s"
+travel_text = "RIDING  —  DAY %d OF %d"
+unknown_name = "UNKNOWN"
+
+[node name="Line" type="Label" parent="UI/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 34
+theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.03, 0.01, 1)
+theme_override_constants/outline_size = 8
+text = "CHOOSE A ROAD NORTH"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+
+[node name="WorldBanditDecisionMenu" parent="UI" instance=ExtResource("45_decision")]
+
+[node name="Sun" type="Node2D" parent="." groups=["sun"]]
+script = ExtResource("18_sun")
+stages = Array[ExtResource("19_sunstage")]([ExtResource("20_sun1"), ExtResource("21_sun2"), ExtResource("22_sun3"), ExtResource("23_sun4"), ExtResource("24_sun5"), ExtResource("25_sun6")])
+projection_mode = 1
+follow_world_time = true
+world_time_blends = false
+measure_height_to_top = true
+solid_casters = true
+minimum_shadow_ratio = 0.45
+anchor_shadows_on_footing = true
+ground_contact_shadows = true
+republish_threshold_degrees = 0.5
+cull_static_rebuilds = true
+
+[node name="DayCycle" type="Node" parent="." groups=["day_cycle"]]
+script = ExtResource("26_daydir")
+stages = Array[ExtResource("27_daystage")]([ExtResource("28_day1"), ExtResource("29_day2"), ExtResource("30_day3"), ExtResource("31_day4"), ExtResource("32_day5"), ExtResource("33_day6")])
+follow_world_time = true
+world_time_blends = true
+
+[node name="FilmPostProcess" parent="." instance=ExtResource("34_film")]
+
+[node name="MusicDirector" type="Node" parent="." groups=["music_director"]]
+script = ExtResource("16_music")
+
+[node name="MusicStateWatcher" type="Node" parent="."]
+script = ExtResource("17_watcher")

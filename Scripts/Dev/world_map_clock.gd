@@ -12,8 +12,14 @@ extends Control
 ## [CanvasLayer] draws over the whole viewport regardless of where the camera
 ## is, and the World Map never leaves the tree.
 
-## The World Map's own [WorldZone], asked whether the player is inside it so
-## this never draws over anywhere else in the game.
+## The [WorldZone] this face belongs to, asked whether the player is inside it
+## so the dial never draws over anywhere else in the game.
+##
+## [b]Left empty the face is simply always shown[/b], which is what a screen that
+## is nothing but the clock and a map wants - the run map has no player body in
+## it to be inside a zone, and the dial there is the readout of the one thing the
+## screen is about. The gate is kept for the maps that are walked across, where a
+## [CanvasLayer] would otherwise draw the dial over the whole game.
 @export var zone_id: StringName = &"world_map"
 ## The World Map's own continuous clock, asked rather than copied - the same
 ## autoload [SunController] and [WorldMapState] resolve it by.
@@ -59,8 +65,11 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	var zone := WorldZone.get_by_id(self, zone_id)
-	visible = zone != null and zone.is_player_inside()
+	if zone_id.is_empty():
+		visible = true
+	else:
+		var zone := WorldZone.get_by_id(self, zone_id)
+		visible = zone != null and zone.is_player_inside()
 	if not visible:
 		return
 

@@ -35,4 +35,5 @@ vertical_alignment = 1
 [node name="ShadowCaster" type="Node2D" parent="." unique_id=237559130]
 script = ExtResource("6_shadow")
 source_sprite_path = NodePath("../Art/Chest")
+ground_contact_size = Vector2(56, 16)
 shadow_pull = 10.0

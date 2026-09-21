@@ -108,6 +108,13 @@ extends Node
 ## map, so the contract is carried across as its bounty id and closed on the
 ## ledger from the arena - which is all the ledger ever needed.
 ##
+## [b]A run map's bandit point opens it through a third.[/b]
+## [method try_begin_site_encounter] is [RunMapBanditNode]'s way in - a point on
+## a generated graph rather than a man standing on the ground - and shares the
+## decision screen, the tiers, the wallet, the music and the staged record with
+## the bandit path above. The arena never learns which of the three doors wrote
+## the record it opens on.
+##
 ## [b]The whole hand-off happens behind the loading curtain.[/b] Both entry points
 ## open [TravelLetterbox]'s loading transition before anything is touched, and the
 ## scene change itself goes through the same [LoadingCurtain] the title screen has
@@ -127,6 +134,24 @@ signal encounter_ended(victory: bool)
 ## which it was handed.
 signal boss_encounter_started(payload: WorldBountyEncounter)
 signal boss_encounter_ended(victory: bool)
+
+## Emitted the instant a run map bandit point's question is answered, with the
+## answer - [code]&"pay"[/code], [code]&"walk_away"[/code],
+## [code]&"take"[/code] or [code]&"fight"[/code]. See
+## [method try_begin_site_encounter]: it fires before the answer is acted on,
+## so a listener may write the point down as dealt with even when the answer is
+## the one that changes scene. There is no matching "ended": a peaceful answer
+## simply leaves the map standing, and a fight ends on
+## [signal encounter_ended] in the arena like every other.
+signal site_encounter_answered(outcome: StringName)
+## Emitted in the arena as a run map mini boss point fight opens, with the man who
+## is coming and how many of his men are standing in the way of him.
+##
+## [b]The fight it announces is only its first half.[/b] The crowd this opens with
+## is the support group; the boss himself is brought in by whatever listens to
+## this - see [RunMiniBossFight] - once they are dealt with, which is also what
+## holds the ending shut in the meantime. See [method hold_the_ending].
+signal mini_boss_encounter_started(boss: MiniBossBrief, support_count: int)
 
 ## Group this joins, so anything can find the one bridge in the world without a
 ## path across a scene it is not a child of.
@@ -209,6 +234,15 @@ const BANDIT_GROUP := &"world_bandit"
 @export var stronger_tier: WorldBanditDecisionTier
 @export var equal_tier: WorldBanditDecisionTier
 @export var weaker_tier: WorldBanditDecisionTier
+
+## The weapon roster, read only where there is no player body in the scene to
+## carry a weapon - a run map. [b]Set it on a map's own bridge, leave it null
+## everywhere else[/b]: wherever a [WeaponMount] exists the live weapon is what
+## the screen is read against and this is never looked at. See
+## [method WorldBanditDecisionEvaluator.medium_range_shot_damage]; without it a
+## run map's screen would read as a player holding nothing, and every small
+## group would look like a fight that cannot be talked out of.
+@export var weapon_catalog: WeaponCatalog
 ## What choosing to pay costs, and what choosing to take is worth, in Blood -
 ## the two peaceful answers that move the carried wallet. Walking away moves
 ## nothing.
@@ -291,6 +325,19 @@ var _staged: Dictionary = {}
 ## Whether the player was on the horse when a fight was opened, so a departure
 ## that turns out to have nowhere to go puts them back on it.
 var _horse_mounted_before: bool = false
+
+## The run map bandit point currently being decided over - which region its
+## fight would be fought in, how strong the group reads as and how many men it
+## is actually worth. Held apart from [member _decision_bandit], which is a
+## node on a map; a point is none. All three are cleared the moment the
+## question is answered. See [method try_begin_site_encounter].
+var _site_region: StringName = &""
+var _site_strength: float = 0.0
+var _site_enemy_count: int = 0
+## Whoever has taken the ending of the running fight away from the crowd - see
+## [method hold_the_ending]. Null whenever the last man down is the end of it,
+## which is every fight but a mini boss point.
+var _ending_holder: Object
 
 @export_group("Combat time")
 ## Degrees the World Map clock advances the instant an ordinary fight ends,
@@ -461,7 +508,18 @@ func _reveal_decision_menu(
 
 
 func _tier_for(bandit: WorldBandit) -> WorldBanditDecisionTier:
-	match WorldBanditDecisionEvaluator.evaluate(bandit, self, _combined_strength(bandit)):
+	return _tier_for_group(
+		&"" if bandit == null else bandit.region_id, _combined_strength(bandit))
+
+
+## Which of the three screens a group of [param strength] met in
+## [param region_id] reads as. Split out of [method _tier_for] so the run map's
+## own door - see [method try_begin_site_encounter] - sorts a bandit point by
+## exactly the same rule a contact on a free-roam map is sorted by, without
+## having to invent a [WorldBandit] to ask it about.
+func _tier_for_group(region_id: StringName, strength: float) -> WorldBanditDecisionTier:
+	match WorldBanditDecisionEvaluator.evaluate_group(
+			region_id, strength, self, weapon_catalog):
 		WorldBanditDecisionEvaluator.Tier.EQUAL:
 			return equal_tier
 		WorldBanditDecisionEvaluator.Tier.STRONGER:
@@ -747,7 +805,20 @@ func _open_staged_fight() -> void:
 
 	_resupply_equipped_weapon()
 
-	if _encounter_kind == &"bounty_boss":
+	if _encounter_kind == &"mini_boss":
+		# The crowd already placed above is his support group. He is not built
+		# here: this class knows when a fight starts, how big it is and where to
+		# go home to, and nothing at all about what a boss is - see
+		# [signal mini_boss_encounter_started].
+		_start_boss_music()
+		var brief := MiniBossBrief.new()
+		brief.contract_id = _staged.get(&"boss_contract_id", &"")
+		brief.display_name = _staged.get(&"boss_display_name", "THE OUTLAW")
+		brief.look_key = _staged.get(&"boss_look_key", &"")
+		brief.health_multiplier = _staged.get(&"boss_health_multiplier", 1.0)
+		brief.known = _staged.get(&"boss_known", 0)
+		mini_boss_encounter_started.emit(brief, _combat_enemy_count)
+	elif _encounter_kind == &"bounty_boss":
 		_start_boss_music()
 		_boss_payload = WorldBountyEncounter.new()
 		_boss_payload.region_id = _staged.get(&"region_id", &"")
@@ -855,7 +926,280 @@ func try_begin_boss_encounter(boss: WorldBountyBoss) -> bool:
 		_abort_encounter()
 		return false
 	return true
+
+
+# --- A run map's own bandit point --------------------------------------------
+
+## A bandit point on a run map, put through the identical screen and into the
+## identical fight - the third door into this same class.
+##
+## [b]It is a door, not a second encounter system.[/b] A run map is a graph of
+## points rather than a place with men standing about in it, so there is no
+## [WorldBandit] to contact, no player body to measure the distance to and no
+## spot on the ground to come back to. Everything else about the encounter is
+## exactly what a contact on a free-roam map gets: the same three authored
+## [WorldBanditDecisionTier] screens through the same
+## [WorldBanditDecisionEvaluator] reading, the same four answers with the same
+## [member decision_pay_amount] and [member decision_take_amount] moving the
+## same carried wallet, the same combat music, and the same
+## [method WorldRegionRouter.go_to_combat] into the region's own arena, which
+## opens the fight from the staged record without ever knowing which door wrote
+## it - see [method _open_staged_fight].
+##
+## [b]The player is never told how many men are waiting.[/b] The screen is
+## asked with no count at all, which is [method WorldBanditDecisionMenu.ask]'s
+## own way of putting the briefing numbers away; the count has already been
+## rolled and is handed to the arena whichever way the question is answered.
+##
+## [param enemy_count] is how many men the FIGHT button leads to, rolled by
+## whatever owns the point - see [RunMapBanditNode]. Answers false when there
+## is already an encounter running or being decided, which the caller reads as
+## "the point will have to wait".
+func try_begin_site_encounter(region_id: StringName, enemy_count: int) -> bool:
+	if _running or _deciding or region_id.is_empty():
+		return false
+
+	var count := clampi(
+		enemy_count, mini(min_enemy_count, max_enemy_count), max_enemy_count)
+	# Read back out through the one conversion this class sizes every fight by,
+	# so a point worth this many men is weighed on the screen as the group that
+	# many men would have come from - see [method _enemy_count_for].
+	var strength := float(count) / maxf(enemy_count_scale, 0.01)
+
+	var menu := _resolve_decision_menu()
+	var tier := _tier_for_group(region_id, strength)
+	if menu == null or tier == null:
+		# The same fallback a contact has always had: a world with no screen, or
+		# no tier authored for what this read as, simply fights. Still announced
+		# as answered, so the point is written down as dealt with rather than
+		# left standing to be fought a second time.
+		if not _stage_site_fight(region_id, strength, count):
+			return false
+		site_encounter_answered.emit(&"fight")
+		return true
+
+	_deciding = true
+	_site_region = region_id
+	_site_strength = strength
+	_site_enemy_count = count
+
+	_play_cue(&"bandit_encounter")
+	_switch_music(decision_state)
+
+	if not menu.answered.is_connected(_on_site_decision_answered):
+		menu.answered.connect(_on_site_decision_answered, CONNECT_ONE_SHOT)
+	menu.ask(tier)
 	return true
+
+
+## A run map mini boss point: the fourth door into this same class.
+##
+## [b]It is a door, not a second encounter system.[/b] What reaches the arena is
+## the same staged record [method _stage_site_fight] writes, through the same
+## [method WorldRegionRouter.go_to_combat], opened by the same
+## [method _open_staged_fight] into the same [AmbushWaveDirector] fight. The one
+## thing that differs is what the record says the fight is worth: a mini boss
+## point opens with its support group and nothing else, and the man himself is
+## brought in by [RunMiniBossFight] once they are down.
+##
+## [b]There is no screen and no choice.[/b] A bandit point asks whether to fight,
+## pay, take or walk away, because a bandit group can be bought off. A mini boss
+## is why the point is on the map: the piece arrives and the fight starts, which
+## is exactly how a bounty boss already works - see
+## [method try_begin_boss_encounter], which asks nothing either.
+##
+## [param boss] is who is waiting, built by whatever owns the point - see
+## [RunMapMiniBossNode]. Answers false when something is already running, which
+## the caller reads as "the point will have to wait".
+func try_begin_mini_boss_encounter(region_id: StringName, support_count: int,
+		boss: MiniBossBrief) -> bool:
+	if _running or _deciding or region_id.is_empty() or boss == null:
+		return false
+
+	var router := WorldRegionRouter.get_active(self)
+	if router == null:
+		return false
+
+	var count := clampi(
+		support_count, mini(min_enemy_count, max_enemy_count), max_enemy_count)
+
+	_open_loading_transition()
+	_start_boss_music()
+
+	_running = true
+	_died = false
+	_encounter_kind = &"mini_boss"
+	_horse_mounted_before = false
+
+	var world_day := 0
+	var world_degree := 0.0
+	var clock := _resolve_world_clock()
+	if clock != null:
+		if clock.has_method(&"get_world_day"):
+			world_day = clock.call(&"get_world_day")
+		if clock.has_method(&"get_world_degree"):
+			world_degree = clock.call(&"get_world_degree")
+		_freeze_world_clock(clock)
+
+	# The man is carried across as the four things he is - see [MiniBossBrief] -
+	# rather than as an object, for the same reason a bounty is carried as its id:
+	# the map that knows him is freed before the arena that builds him exists.
+	var payload := {
+		&"kind": &"mini_boss",
+		&"group_strength": float(count) / maxf(enemy_count_scale, 0.01),
+		&"enemy_count": count,
+		&"region_id": region_id,
+		&"boss_contract_id": boss.contract_id,
+		&"boss_display_name": boss.display_name,
+		&"boss_look_key": boss.look_key,
+		&"boss_health_multiplier": boss.health_multiplier,
+		&"boss_known": boss.known,
+		&"world_day": world_day,
+		&"world_degree": world_degree,
+		&"horse_mounted": false,
+		&"return_region": region_id,
+		# A run map stands its own piece back up from the graph it saved, so there
+		# is no spot on it to put a player at - see [method _stage_site_fight].
+		&"return_position": Vector2.INF,
+	}
+
+	if router.go_to_combat(region_id, payload):
+		return true
+
+	if clock != null:
+		_unfreeze_world_clock(clock, 0.0)
+	_cancel_loading_transition()
+	_abort_encounter()
+	return false
+
+
+# --- An ending somebody else owns --------------------------------------------
+
+## Takes the ending of the running fight away from the crowd being cleared, and
+## gives it to [param holder].
+##
+## [b]Clearing the field is normally the whole of a win, and for a mini boss point
+## it is half of one.[/b] The support group going down is the cue for the man
+## himself to walk in, not the cue to go home - so the thing that brings him in
+## says so here, and [method _on_combat_cleared] then leaves the wind-down alone
+## until [method let_the_ending_go] is called. Nothing else about the fight
+## changes: the same clock is frozen, the same music is playing and the same
+## staged record is waiting to carry the player back.
+##
+## A holder that is freed releases the ending by itself - the check is
+## [method @GlobalScope.is_instance_valid] - so a torn-down arena can never leave
+## a fight that cannot end.
+func hold_the_ending(holder: Object) -> bool:
+	if not _running or holder == null:
+		return false
+	_ending_holder = holder
+	return true
+
+
+## Whether somebody has [method hold_the_ending] on the running fight.
+func is_ending_held() -> bool:
+	return _ending_holder != null and is_instance_valid(_ending_holder)
+
+
+## Hands the ending back and, since the boss going down is the last body on the
+## field, takes it. The ordinary wind-down runs from here exactly as it would
+## have.
+func let_the_ending_go() -> void:
+	_ending_holder = null
+	if _running:
+		_on_combat_cleared()
+
+
+## The answer to [method try_begin_site_encounter]'s question, handled exactly
+## as [method _on_decision_answered] handles a contact's: the cue and the music
+## change on the press itself, never after whatever follows it has begun.
+func _on_site_decision_answered(outcome: StringName) -> void:
+	var region := _site_region
+	var strength := _site_strength
+	var count := _site_enemy_count
+	_deciding = false
+	_site_region = &""
+	_site_strength = 0.0
+	_site_enemy_count = 0
+
+	# Announced before the answer is acted on, so anything that has to write
+	# the point down as dealt with - see [RunMapBanditNode] - has done so before
+	# a FIGHT answer changes scene out from under it.
+	site_encounter_answered.emit(outcome)
+
+	match outcome:
+		&"pay":
+			_resolve_site_peacefully(&"decision_paid", -decision_pay_amount)
+		&"walk_away":
+			_resolve_site_peacefully(&"decision_walk", 0)
+		&"take":
+			_resolve_site_peacefully(&"decision_taken", decision_take_amount)
+		_:
+			_play_cue(&"decision_fight")
+			_stage_site_fight(region, strength, count)
+
+
+## PAY, WALK_AWAY or TAKE at a run map point - the twin of
+## [method _resolve_decision_peacefully], without the part that frees a group
+## off the map, since there was never a group standing anywhere. The map is
+## simply still there when the screen comes down.
+func _resolve_site_peacefully(cue: StringName, blood_delta: int) -> void:
+	_play_cue(cue)
+	_switch_music(travel_state)
+	_settle_blood(blood_delta)
+
+
+## FIGHT at a run map point: the same staged record [method _begin_encounter]
+## writes, through the same router, into the same arena.
+func _stage_site_fight(region_id: StringName, strength: float, count: int) -> bool:
+	var router := WorldRegionRouter.get_active(self)
+	if router == null:
+		return false
+
+	_open_loading_transition()
+	_start_combat_music()
+
+	_running = true
+	_died = false
+	_encounter_kind = &"bandit"
+	_horse_mounted_before = false
+
+	var world_day := 0
+	var world_degree := 0.0
+	var clock := _resolve_world_clock()
+	if clock != null:
+		if clock.has_method(&"get_world_day"):
+			world_day = clock.call(&"get_world_day")
+		if clock.has_method(&"get_world_degree"):
+			world_degree = clock.call(&"get_world_degree")
+		_freeze_world_clock(clock)
+
+	var payload := {
+		&"kind": &"bandit",
+		&"group_strength": strength,
+		&"enemy_count": count,
+		&"region_id": region_id,
+		&"world_day": world_day,
+		&"world_degree": world_degree,
+		&"horse_mounted": false,
+		&"return_region": region_id,
+		# A run map stands its own piece back up from the graph it saved, so
+		# there is no spot on it to put a player at. Infinity is the router's
+		# own way of saying so - see [method WorldRegionRouter.go_to_region],
+		# which then leaves the map's arrival alone entirely.
+		&"return_position": Vector2.INF,
+	}
+
+	if router.go_to_combat(region_id, payload):
+		return true
+
+	if clock != null:
+		_unfreeze_world_clock(clock, 0.0)
+	_cancel_loading_transition()
+	_abort_encounter()
+	return false
+
+
 ## The one path back out that was never actually a fight - nothing could be
 ## spawned. Whatever was contacted stands exactly as it was found rather than
 ## being spent for nothing, as rule 12 of the World Map integration asks for a
@@ -867,6 +1211,7 @@ func try_begin_boss_encounter(boss: WorldBountyBoss) -> bool:
 ## the music. In the arena there is no map left to stand back on, so the way out
 ## is the ordinary way back.
 func _abort_encounter() -> void:
+	_ending_holder = null
 	# The combat or boss music this same call already started is asked back
 	# off, since there is no fight underneath it after all.
 	_switch_music(travel_state)
@@ -1079,6 +1424,11 @@ func _on_combat_cleared() -> void:
 	if not _running:
 		return
 
+	# Somebody else owns this ending - see [method hold_the_ending]. The field
+	# being clear is their cue, not the way home.
+	if is_ending_held():
+		return
+
 	if not _died:
 		var cam := KillCam.get_active(self)
 		if cam != null and cam.is_active():
@@ -1094,6 +1444,9 @@ func _on_combat_cleared() -> void:
 func _finish_combat_cleared() -> void:
 	if not _running:
 		return
+	# Whoever held it has had it - see [method hold_the_ending] - so the next
+	# fight in this arena starts with the crowd owning its own ending again.
+	_ending_holder = null
 
 	var died := _died
 	var kind := _encounter_kind
@@ -1152,7 +1505,10 @@ func _finish_combat_cleared() -> void:
 	# Nothing here reads how long the fight took in real seconds any more -
 	# the progression is the fight's own size, applied the instant it ends,
 	# never a gradual catch-up.
-	var boss_bonus := combat_time_advance_boss_bonus if kind == &"bounty_boss" else 0.0
+	# A mini boss point costs the same day as a bounty boss does: both are one man
+	# and his men, and the World Map time a fight is worth is its size - see rule 4.
+	var fought_a_boss := kind == &"bounty_boss" or kind == &"mini_boss"
+	var boss_bonus := combat_time_advance_boss_bonus if fought_a_boss else 0.0
 	var enemy_bonus := 0.0
 	if combat_time_advance_enemy_step > 0:
 		enemy_bonus = floorf(float(_combat_enemy_count) / float(combat_time_advance_enemy_step)) \

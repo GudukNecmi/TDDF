@@ -59,6 +59,10 @@ const KIND_LOCATION := &"location"
 const KIND_PORTAL := &"portal"
 ## Kind handle for a region's fog of war.
 const KIND_FOG := &"fog"
+## Kind handle for a region's generated run map - the node graph a run is played
+## through, written here as plain data by [RunMapDirector] so that opening a
+## node's event, which is a real scene change, cannot lose the run.
+const KIND_RUN_MAP := &"run_map"
 
 ## Handle for this place, for anything later that asks "which map is this" the
 ## way [method RunSessionState.get_map_id] does for a run.

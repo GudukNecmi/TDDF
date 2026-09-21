@@ -118,6 +118,27 @@ const LOOK_SLACK := 0.004
 ## this sun on the old day-cycle-driven behaviour even with the autoload present -
 ## for a scene that wants to prove the old path still works.
 @export var follow_world_time: bool = true
+## Whether the sun is blended continuously between the clock's current hour and
+## the next, or set once to the hour the clock is in and held there.
+##
+## [b]Off, and the sun no longer moves while the world is being looked at.[/b]
+## The run map spends time in whole day cycles rather than in real seconds - see
+## [member WorldTimeManager.advances_in_real_time] - so a sun blending between
+## two anchors would be blending across a gap nothing is crossing. Off, this sun
+## snaps to the authored [SunStage] for whichever period the clock is in and
+## re-snaps only when the clock crosses into the next one, which is exactly once
+## per travel tick: the shadow length and colour an arrival is seen under are the
+## hour's own authored ones, and they hold until the next road is taken.
+##
+## [b]Nothing about the authored hours changes with it.[/b] The same six
+## [member stages] are read either way; this decides only whether the sun is
+## allowed to stand between two of them.
+##
+## [b]The world's darkness is a separate switch.[/b] The run map has this off
+## and [member DayCycleDirector.world_time_blends] on, so the colour eases from
+## one authored hour into the next across a travel tick while the shadows step
+## between them - see that member for why the two are deliberately not one.
+@export var world_time_blends: bool = false
 
 @export_group("Combat hold")
 ## Whether this sun is set once as the scene opens and then left alone for the
@@ -309,9 +330,17 @@ const LOOK_SLACK := 0.004
 ## every hour, and no authored pull or slide is needed to hold the two together -
 ## see [method ShadowGroup._place], which drops both while a footprint is in play.
 ##
-## Off by default, and it must stay off for the Arena and the Base: their props are
-## authored against the older placement, and a map that has authored no footprints
-## is projected exactly as it always was whatever this says.
+## Off by default, and it is the Base that still has it off: its props are authored
+## against the older placement. The Arena has it on, because the older placement is
+## what made an arena tent look as though its shadow had come unstuck from it - the
+## authored slide walks a mark off its object by a fraction of that object's whole
+## reach, so the taller the prop the worse it reads.
+##
+## It reaches a caster only through that caster's own authored footprint, which is
+## what makes it the shared answer rather than a rule about tents: a prop that has
+## authored one is anchored on it, and anything that has not - a figure, its weapon,
+## anything it is carrying - is projected exactly as it always was, whatever this
+## says.
 @export var ground_contact_shadows: bool = false:
 	set(value):
 		ground_contact_shadows = value
@@ -434,7 +463,8 @@ func _ready() -> void:
 		return
 	if _follows_world_time():
 		_snap_to_world_time()
-		set_process(not stages.is_empty())
+		_follow_world_time_signal()
+		set_process(world_time_blends and not stages.is_empty())
 		return
 	_follow_day_cycle()
 	_snap_to_current_stage()
@@ -610,7 +640,7 @@ func refresh() -> void:
 	_manual = false
 	if _follows_world_time():
 		_snap_to_world_time()
-		set_process(not stages.is_empty())
+		set_process(world_time_blends and not stages.is_empty())
 		return
 
 	var index := _resolve_stage_index()
@@ -890,6 +920,27 @@ func _snap_to_world_time() -> void:
 		_stage_index = -1
 		return
 	snap_to_stage(_world_time_index(), false)
+
+
+## Hangs a non-blending sun off the clock's own announcement, so the one thing
+## that moves it is the clock crossing into a new period - which, with time
+## spent in whole day cycles, is exactly once per travel tick. Connected whether
+## or not blending is on, since [method Node._process] is the only path that
+## would otherwise notice a period change and a blending sun already has one:
+## the handler refuses to act while blending, rather than the connection being
+## made conditionally and then going stale if [member world_time_blends] is
+## changed at runtime.
+func _follow_world_time_signal() -> void:
+	if _world_time == null or not _world_time.has_signal(&"period_changed"):
+		return
+	if not _world_time.is_connected(&"period_changed", _on_world_time_period_changed):
+		_world_time.connect(&"period_changed", _on_world_time_period_changed)
+
+
+func _on_world_time_period_changed(_period: int, _period_index: int) -> void:
+	if world_time_blends or _manual or not _follows_world_time():
+		return
+	_snap_to_world_time()
 
 
 ## Blends the sun directly between the world clock's current period and the next

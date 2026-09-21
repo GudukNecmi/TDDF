@@ -235,6 +235,13 @@ func shake(strength: float, duration: float) -> void:
 	_shake_time_left = maxf(_shake_time_left, duration)
 
 
+## How hard the knock currently playing started, or 0 when the camera is steady.
+## A readout - nothing in play reads it - so a test can tell that something which
+## should have shaken the camera actually did.
+func get_shake_strength() -> float:
+	return _shake_strength if _shake_time_left > 0.0 else 0.0
+
+
 ## Steps are Vector2(target_degrees, seconds). A final return to zero is added
 ## automatically, so the camera always ends level.
 ##

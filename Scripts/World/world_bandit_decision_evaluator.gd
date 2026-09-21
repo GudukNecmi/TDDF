@@ -67,11 +67,27 @@ const GROUP_STRENGTH_THRESHOLD := 40.0
 ## contacted bandit's own, unreinforced strength.
 static func evaluate(bandit: WorldBandit, from_node: Node, strength_override: float = -1.0) -> Tier:
 	var region_id := &"" if bandit == null else bandit.region_id
-	var one_shot := can_one_shot_kill(from_node, region_id)
 	var strength := strength_override if strength_override >= 0.0 \
 		else (0.0 if bandit == null else bandit.group_strength)
-	var group_small := strength < GROUP_STRENGTH_THRESHOLD
-	return _resolve(one_shot, group_small)
+	return evaluate_group(region_id, strength, from_node)
+
+
+## The same reading for a group that is not a [WorldBandit] standing on a map -
+## a run map's own bandit point, which is a fact on a graph rather than a node
+## with a position. [method evaluate] is this same call with the two facts read
+## off the contacted man instead, so both doors sort a contact by exactly one
+## rule and there is never a second copy of it to disagree.
+##
+## [param roster] is how the weapon half of the reading is answered where there
+## is no player body in the scene to carry one - see
+## [method medium_range_shot_damage]. Left null, a screen opened away from the
+## player reads as holding nothing, which would make every small group look
+## like a fight that cannot be talked out of.
+static func evaluate_group(region_id: StringName, strength: float, from_node: Node,
+		roster: WeaponCatalog = null) -> Tier:
+	return _resolve(
+		can_one_shot_kill(from_node, region_id, roster),
+		strength < GROUP_STRENGTH_THRESHOLD)
 
 
 static func _resolve(one_shot: bool, group_small: bool) -> Tier:
@@ -84,31 +100,75 @@ static func _resolve(one_shot: bool, group_small: bool) -> Tier:
 
 ## Whether the weapon currently in the player's hands would kill an ordinary
 ## bandit of [param region_id] with one medium-range shot.
-static func can_one_shot_kill(from_node: Node, region_id: StringName) -> bool:
-	var damage := medium_range_shot_damage(from_node)
+##
+## [param roster] is only read where there is no player in the scene to ask -
+## see [method medium_range_shot_damage].
+static func can_one_shot_kill(from_node: Node, region_id: StringName,
+		roster: WeaponCatalog = null) -> bool:
+	var damage := medium_range_shot_damage(from_node, roster)
 	var health := bandit_health(from_node, region_id)
 	return damage > 0.0 and damage >= health
 
 
 ## One trigger pull's worth of damage at [constant MEDIUM_RANGE_PROGRESS] on
 ## whatever weapon is currently drawn. 0 when there is nothing to read -
-## no [WeaponMount], no weapon built, or a weapon carrying no projectile -
-## which every caller reads as "cannot one-shot anything".
-static func medium_range_shot_damage(from_node: Node) -> float:
-	var mount := WeaponMount.get_active(from_node)
-	if mount == null:
-		return 0.0
-	var weapon := mount.get_weapon()
+## no weapon to find, or one carrying no projectile - which every caller reads
+## as "cannot one-shot anything".
+##
+## [b]The live weapon is always preferred.[/b] [WeaponMount] holds the weapon the
+## player is actually carrying, with whatever a run has done to it, so wherever
+## there is one this reads that and nothing else.
+##
+## [param roster] is the way to ask on a screen where there is no player body at
+## all - a run map, which is a graph of points rather than a place to stand -
+## and is ignored entirely wherever a mount exists. It is read exactly the way
+## [WeaponMount] itself reads it: the weapon id off [RunSessionState], looked up
+## in the same catalogue, and its own scene built and thrown away on the spot,
+## the same one-shot instancing [method _projectile_damage_at] already does for
+## a projectile. Without it - and without a mount - the answer is 0, which is
+## the honest reading for a question asked where the gun is not.
+static func medium_range_shot_damage(from_node: Node,
+		roster: WeaponCatalog = null) -> float:
+	var weapon := _live_weapon(from_node)
+	var built_here: Node = null
+	if weapon == null:
+		built_here = _build_chosen_weapon(from_node, roster)
+		weapon = built_here
 	if weapon == null:
 		return 0.0
 
 	var per_projectile := _projectile_damage_at(weapon, MEDIUM_RANGE_PROGRESS)
-	if per_projectile <= 0.0:
-		return 0.0
-
 	var pellet_count: Variant = weapon.get(&"pellet_count")
 	var pellets := 1 if pellet_count == null else maxi(int(pellet_count), 1)
+	if built_here != null:
+		built_here.queue_free()
+	if per_projectile <= 0.0:
+		return 0.0
 	return per_projectile * float(pellets)
+
+
+## The weapon actually in the player's hands, or null in a scene with no mount
+## in it.
+static func _live_weapon(from_node: Node) -> Node:
+	var mount := WeaponMount.get_active(from_node)
+	return null if mount == null else mount.get_weapon()
+
+
+## A fresh copy of whichever weapon the run is being played with, off
+## [param roster] - built here and freed by the caller. Null when there is no
+## roster to ask, no session to ask it about, or no scene on the entry.
+static func _build_chosen_weapon(from_node: Node, roster: WeaponCatalog) -> Node:
+	if roster == null or from_node == null or not from_node.is_inside_tree():
+		return null
+	var definition: WeaponDefinition = null
+	var session := from_node.get_node_or_null(^"/root/RunSession")
+	if session != null and session.has_method(&"get_weapon_id"):
+		definition = roster.find(session.call(&"get_weapon_id"))
+	if definition == null:
+		definition = roster.get_default()
+	if definition == null or definition.scene == null:
+		return null
+	return definition.scene.instantiate()
 
 
 ## Damage a fresh instance of [param weapon]'s own [member CarriedWeapon.projectile_scene]

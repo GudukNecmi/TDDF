@@ -95,5 +95,6 @@ vertical_alignment = 1
 script = ExtResource("90_shadow")
 cast_mode = 1
 source_sprite_path = NodePath("../Art/Box")
+ground_contact_size = Vector2(28, 8)
 shadow_pull = 6.0
 shadow_softness_override = 0.16

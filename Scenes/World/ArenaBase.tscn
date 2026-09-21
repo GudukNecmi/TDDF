@@ -27,6 +27,8 @@
 [ext_resource type="Texture2D" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2295.PNG" id="25_mw21k"]
 [ext_resource type="Texture2D" path="res://Assets/Maps/Desert/2- Props/CloudShadows/IMG_2296.PNG" id="26_hnwxg"]
 [ext_resource type="Script" path="res://Scripts/World/Sun/sun_controller.gd" id="27_bhnp5"]
+[ext_resource type="Script" path="res://Scripts/World/run_mini_boss_fight.gd" id="90_runminiboss"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/DeathSmoke.tscn" id="91_deathsmoke"]
 [ext_resource type="Script" path="res://Scripts/World/Sun/sun_stage.gd" id="28_tiia4"]
 [ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/1_dawn.tres" id="29_0jrkt"]
 [ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/2_morning.tres" id="30_xwopf"]
@@ -201,6 +203,7 @@ scale_range = Vector2(0.35, 0.85)
 script = ExtResource("27_bhnp5")
 stages = Array[ExtResource("28_tiia4")]([ExtResource("29_0jrkt"), ExtResource("30_xwopf"), ExtResource("31_q0cdg"), ExtResource("32_gqxw4"), ExtResource("33_rp4ck"), ExtResource("34_m1j2a")])
 projection_mode = 1
+ground_contact_shadows = true
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1731179406 groups=["player"] instance=ExtResource("35_el56v")]
 collision_mask = 33
@@ -286,6 +289,14 @@ phases = Array[ExtResource("66_dpkfc")]([ExtResource("67_ryxi3"), ExtResource("6
 [node name="AmmoCrates" type="Node" parent="." unique_id=1592448904 groups=["ammo_crate_spawner"]]
 script = ExtResource("70_aeiko")
 crate_scene = ExtResource("71_ouujn")
+
+[node name="RunMiniBossFight" type="Node" parent="." unique_id=231225628]
+script = ExtResource("90_runminiboss")
+bridge_path = NodePath("../WorldMapCombatBridge")
+ambush_path = NodePath("../AmbushDirector")
+director_path = NodePath("../MiniBossDirector")
+defeat_path = NodePath("../BossDefeat")
+arrival_effect = ExtResource("91_deathsmoke")
 
 [node name="BossDefeat" type="Node" parent="." unique_id=231225627 groups=["boss_defeat"]]
 script = ExtResource("72_p0bau")

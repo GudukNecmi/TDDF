@@ -358,6 +358,100 @@ const LOOK_SLACK := 0.004
 		if is_node_ready():
 			_publish()
 
+@export_group("Shadow colour")
+## Whether a shadow's colour is taken from the hour's darkness rather than from
+## [member SunStage.shadow_color].
+##
+## [b]A shadow is the world's own darkness, blackened.[/b] The map's
+## [DayCycleDirector] already says what colour "dark" is at every hour - its
+## [member DayStage.ambient_colour] - so a shadow here is that same colour taken
+## down towards black by [member darkness_shadow_value]: a dusky orange at dawn, a
+## deep violet at twilight, rather than one near-black whose only change over the
+## day is how see-through it is. The stage the colour is read from is the one at
+## the same index as the sun's own, so the two arrays stay in step exactly as the
+## sun and the darkness already do.
+##
+## Off - or on a map with no day cycle to read - falls back to the authored
+## [member SunStage.shadow_color].
+@export var shadow_color_from_darkness: bool = true:
+	set(value):
+		shadow_color_from_darkness = value
+		_derived_stages.clear()
+		if is_node_ready():
+			_publish()
+## How much of the darkness colour survives into a shadow, 0 to 1. 0 is black; 1
+## would be the darkness colour itself. Low values are a blackened version of the
+## hour's colour, which is what a shadow reads as.
+@export_range(0.0, 1.0, 0.01) var darkness_shadow_value: float = 0.32:
+	set(value):
+		darkness_shadow_value = value
+		_derived_stages.clear()
+		if is_node_ready():
+			_publish()
+## Scales every hour's authored [member SunStage.shadow_opacity] while the colour
+## is taken from the darkness. A tinted shadow is lighter than a black one at the
+## same opacity, so this is what keeps it reading as dark as it did.
+@export_range(0.0, 4.0, 0.01) var darkness_shadow_opacity_scale: float = 1.35:
+	set(value):
+		darkness_shadow_opacity_scale = value
+		_derived_stages.clear()
+		if is_node_ready():
+			_publish()
+
+@export_group("Shadow edge")
+## The softest-edged floor every shadow on this map is held to, 0 to 1 - the same
+## scale as [member SunStage.shadow_softness]. Nothing can be drawn harder than
+## this, including a prop that asked for a harder edge with
+## [member ShadowCaster.shadow_softness_override], so no silhouette ever lands as a
+## pixel-perfect cut-out. 0 removes the floor rather than the softening.
+@export_range(0.0, 1.0, 0.01) var minimum_shadow_softness: float = 0.3:
+	set(value):
+		minimum_shadow_softness = value
+		if is_node_ready():
+			_publish()
+
+@export_group("Overhead sun")
+## The rake at or below which the sun counts as straight overhead, and every
+## shadow on the map is only the soft oval of ground contact under its object -
+## see [method get_contact_shadow_weight]. The rake is
+## [method SunStage.get_length_ratio].
+@export_range(0.0, 4.0, 0.01) var contact_shadow_full_rake: float = 0.08:
+	set(value):
+		contact_shadow_full_rake = value
+		if is_node_ready():
+			_publish()
+## The rake at or above which there is no contact oval at all and every shadow is
+## a cast one. Between the two the oval and the cast shadow are cross-faded, so a
+## sun easing through the hours never switches one for the other.
+@export_range(0.0, 4.0, 0.01) var contact_shadow_fade_rake: float = 0.5:
+	set(value):
+		contact_shadow_fade_rake = value
+		if is_node_ready():
+			_publish()
+## How wide the contact oval is, as a fraction of its object's width seen from
+## straight above - the reach of its own parts, or its authored footprint where
+## that is wider.
+@export_range(0.0, 3.0, 0.01) var contact_shadow_width_ratio: float = 0.95:
+	set(value):
+		contact_shadow_width_ratio = value
+		if is_node_ready():
+			_publish()
+## How deep the oval is, as a fraction of how wide it is. Under 1 is the flattened
+## oval a round footing makes seen from this camera.
+@export_range(0.05, 2.0, 0.01) var contact_shadow_depth_ratio: float = 0.4:
+	set(value):
+		contact_shadow_depth_ratio = value
+		if is_node_ready():
+			_publish()
+## Scales how dark the oval is against the hour's own shadow opacity. The oval's
+## centre is its darkest point and it feathers out to nothing, so it wants a little
+## more than a cast shadow to read as solidly.
+@export_range(0.0, 4.0, 0.01) var contact_shadow_opacity_scale: float = 2.0:
+	set(value):
+		contact_shadow_opacity_scale = value
+		if is_node_ready():
+			_publish()
+
 @export_group("Static shadow cache")
 ## How far the sun has to actually move before the world is told about it, in
 ## degrees, while it is being carried continuously by [WorldTimeManager].
@@ -445,6 +539,10 @@ var _world_time: Node
 var _manual: bool = false
 ## Authored energy of each opted-in lamp, so the hour scales the artist's number.
 var _light_energies: Dictionary = {}
+## The authored stages as the sun actually reads them - see [method _stage_at].
+## Copies, never the resources themselves, so the six shared stage files are not
+## written by any one map.
+var _derived_stages: Array[SunStage] = []
 
 
 ## Joined here rather than in [method Node._ready] for the same reason
@@ -581,6 +679,45 @@ func get_pool_softness() -> float:
 	return clampf(pool_softness, 0.0, 1.0)
 
 
+## The softest-edged floor every shadow here is held to - see
+## [member minimum_shadow_softness].
+func get_minimum_shadow_softness() -> float:
+	return clampf(minimum_shadow_softness, 0.0, 1.0)
+
+
+## How much of every shadow on the map is the soft ground-contact oval straight
+## under its object rather than a shadow thrown along the light, 0 to 1.
+##
+## [b]Read off the sun's own elevation and nothing else.[/b] A sun standing
+## straight overhead throws no shadow sideways at all - all that is left is the
+## patch of shade under each thing's feet - so the answer is 1 at a rake of
+## [member contact_shadow_full_rake] or less, 0 at [member contact_shadow_fade_rake]
+## or more, and eased in between. No hour is named: the noon stage gets its oval by
+## standing its sun overhead, and any other hour authored that way would too.
+func get_contact_shadow_weight() -> float:
+	var full := minf(contact_shadow_full_rake, contact_shadow_fade_rake)
+	var fade := maxf(contact_shadow_fade_rake, full + 0.0001)
+	return 1.0 - smoothstep(full, fade, _state.length_ratio)
+
+
+## How wide the contact oval is as a fraction of its object's footing - see
+## [member contact_shadow_width_ratio].
+func get_contact_shadow_width_ratio() -> float:
+	return maxf(contact_shadow_width_ratio, 0.0)
+
+
+## How deep the contact oval is as a fraction of its width - see
+## [member contact_shadow_depth_ratio].
+func get_contact_shadow_depth_ratio() -> float:
+	return maxf(contact_shadow_depth_ratio, 0.05)
+
+
+## How dark the contact oval is against the hour - see
+## [member contact_shadow_opacity_scale].
+func get_contact_shadow_opacity_scale() -> float:
+	return maxf(contact_shadow_opacity_scale, 0.0)
+
+
 ## Whether shadows on this map may put off a rebuild while nobody can see them -
 ## see [member cull_static_rebuilds]. Asked by [ShadowGroup] rather than read from
 ## it, so the decision stays a property of the map and there is one answer for the
@@ -674,7 +811,7 @@ func snap_to_stage(stage_index: int, mark_manual: bool = true) -> void:
 	if mark_manual:
 		_manual = true
 	_stage_index = posmod(stage_index, stages.size())
-	_to = stages[_stage_index]
+	_to = _stage_at(_stage_index)
 	if _to == null:
 		return
 	_live.copy_from(_to)
@@ -702,13 +839,13 @@ func hold_for_combat() -> int:
 	elif stage_override >= 0:
 		index = stage_override % stages.size()
 
-	var stage := stages[index]
+	var stage := _stage_at(index)
 	if stage == null:
 		return -1
 
 	_live.copy_from(stage)
 	if hold_uses_longest_shadow:
-		var next := stages[posmod(index + 1, stages.size())]
+		var next := _stage_at(posmod(index + 1, stages.size()))
 		if next != null:
 			# The rake is the ratio of the sun's ground distance to its height,
 			# so the longest one this stage reaches is applied by moving the sun
@@ -743,7 +880,7 @@ func _begin_transition(stage_index: int, duration: float = -1.0) -> void:
 	if stages.is_empty():
 		return
 	var index := posmod(stage_index, stages.size())
-	var target := stages[index]
+	var target := _stage_at(index)
 	if target == null:
 		return
 
@@ -961,7 +1098,8 @@ func _update_from_world_time() -> void:
 		_stage_index = index
 		sun_stage_changed.emit(_state, _stage_index)
 
-	SunStage.blend(stages[index], stages[next_index], clampf(progress, 0.0, 1.0), _live)
+	SunStage.blend(
+		_stage_at(index), _stage_at(next_index), clampf(progress, 0.0, 1.0), _live)
 	# Read every frame, announced only when it moved. The live state is the sun as
 	# it genuinely stands this instant, so nothing that asks the sun a question gets
 	# a stale answer; what is weighed is only whether to make every static shadow on
@@ -1001,6 +1139,43 @@ func _follow_day_cycle() -> void:
 
 func _on_stage_applied(_stage: Resource, _stage_index: int) -> void:
 	refresh()
+
+
+## The stage at [param index] as the sun reads it: the authored one, with its
+## shadow colour taken from the day cycle's darkness at the same hour when
+## [member shadow_color_from_darkness] asks for it.
+##
+## [b]Every path the sun takes to an hour goes through here[/b] - a snap, an eased
+## journey, the continuous clock's blend and a fight's held hour - so the derived
+## colour travels with the sun exactly as the authored one did, blended by the same
+## [method SunStage.blend] and never kept anywhere else. The copies are made once
+## and reused; a change to either switch drops them.
+func _stage_at(index: int) -> SunStage:
+	var authored := stages[index]
+	if not shadow_color_from_darkness or authored == null:
+		return authored
+	var cycle := _resolve_day_cycle()
+	var darkness: Variant = cycle.get(&"stages") if cycle != null else null
+	if not (darkness is Array) or (darkness as Array).size() != stages.size():
+		return authored
+
+	if _derived_stages.size() != stages.size():
+		_derived_stages.clear()
+		_derived_stages.resize(stages.size())
+	var derived := _derived_stages[index]
+	if derived == null:
+		var day := (darkness as Array)[index] as DayStage
+		if day == null:
+			return authored
+		derived = SunStage.new()
+		derived.copy_from(authored)
+		var dark := day.ambient_colour
+		var keep := clampf(darkness_shadow_value, 0.0, 1.0)
+		derived.shadow_color = Color(dark.r * keep, dark.g * keep, dark.b * keep, 1.0)
+		derived.shadow_opacity = clampf(
+			authored.shadow_opacity * maxf(darkness_shadow_opacity_scale, 0.0), 0.0, 1.0)
+		_derived_stages[index] = derived
+	return derived
 
 
 func _resolve_day_cycle() -> Node:

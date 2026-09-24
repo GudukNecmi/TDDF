@@ -108,10 +108,21 @@ const POOL_FALLOFF := 4.0
 ## [method _place].
 const POOL_CENTRE := 0.5
 
-## How many texels of blur a softness of 1 asks for. Shared with the shaders, which
-## do the same multiplication, so the padding put round the geometry and the blur
-## drawn into it agree.
-const SOFTNESS_TEXELS := 12.0
+## How many screen pixels of blur a softness of 1 asks for. Shared with the shaders,
+## which do the same multiplication, so the padding put round the geometry and the
+## blur drawn into it agree.
+##
+## [b]Screen pixels, not texture pixels.[/b] Scenery is drawn from artwork many
+## times the size it is shown at, so a feather counted in texels shrank to under a
+## pixel on screen and every prop landed as a hard cut-out. Counted on screen, a
+## cactus and a character feather by the same amount whatever their art was
+## painted at.
+const SOFTNESS_PIXELS := 12.0
+
+## How much wider than the blur itself the geometry is padded, so the feather still
+## has transparent room to fade into once the projection has squeezed a silhouette
+## across the light or the camera has pulled out.
+const EDGE_PAD_HEADROOM := 3.0
 
 ## Where in the frame a group ticks. Last, deliberately: an object's animation, its
 ## aim, its hand, the weapon following that hand and the head soft-following the
@@ -139,6 +150,11 @@ static var _materials: Dictionary = {}
 ## Triangle indices for a grid of a given fineness, worked out once for the whole
 ## game. The vertices move every frame; how they are joined up never does.
 static var _index_cache: Dictionary = {}
+
+## The soft round patch of shade every contact oval is drawn with - see
+## [method _apply_contact_oval]. One small texture for the whole game, feathered all
+## the way out to its rim so the oval has no edge to see.
+static var _oval_texture: Texture2D
 
 # TEMPORARY PROBE - gather, measure+place, apply, vertex loop, set_shape, material,
 # groups updated, parts rebuilt.
@@ -487,6 +503,25 @@ var _pose_slack: float = 0.0
 ## the camera has come back. So the group processes - a rectangle test and nothing
 ## else - for exactly as long as it is waiting.
 var _view_deferred: bool = false
+
+## How much of this shadow is the ground-contact oval under the object rather than
+## the silhouette thrown along the light - the sun's own answer, see
+## [method SunController.get_contact_shadow_weight]. The silhouette is faded by the
+## rest of it, so the two cross-fade rather than stack.
+var _contact_weight: float = 0.0
+## The oval itself, made the first time an overhead sun asks for one and hidden
+## whenever it does not, so a map that never reaches noon never builds it.
+var _contact_oval: Sprite2D
+## How far the object's own parts reach either side of its ground point, in world
+## pixels - the parts standing on the object, not anything it is carrying, so a
+## revolver held at arm's length does not widen the patch of shade under the feet.
+## What the oval is sized from, unless an authored footprint is wider.
+var _own_left: float = 0.0
+## See [member _own_left].
+var _own_right: float = 0.0
+## The fade of the most solid part this frame, so an object fading out - a corpse,
+## something stowed - takes its oval with it just as it takes its silhouette.
+var _own_alpha: float = 1.0
 
 
 func _enter_tree() -> void:
@@ -875,6 +910,8 @@ func update_group(include_static: bool) -> void:
 		return
 	if not enabled or _state == null or _casters.is_empty():
 		_active.visible = false
+		if _contact_oval != null:
+			_contact_oval.visible = false
 		return
 
 	if not include_static and _dynamic_count == 0:
@@ -913,6 +950,7 @@ func update_group(include_static: bool) -> void:
 		_built_look = _look_serial
 
 	_apply_composite_look()
+	_apply_contact_oval()
 	probe[1] += Time.get_ticks_usec() - _t0
 	_t0 = Time.get_ticks_usec()
 
@@ -1039,7 +1077,18 @@ func refresh_processing() -> void:
 ## The alpha the assembled silhouette is finally drawn at - the hour's own opacity,
 ## this object's multiplier and the fade that comes with being off the ground.
 ## Nothing belonging to any one part enters it, which is why an object fades as one.
+##
+## Less whatever share of the shadow the sun has handed to the contact oval - see
+## [member _contact_weight] - so under an overhead sun the silhouette gives way to
+## the oval instead of both being drawn.
 func get_composite_alpha() -> float:
+	return _hour_alpha() * (1.0 - _contact_weight)
+
+
+## The hour's opacity for this object, before any of it is handed to the oval - the
+## hour's own opacity, this object's multiplier and the fade that comes with being
+## off the ground.
+func _hour_alpha() -> float:
 	if _state == null:
 		return 0.0
 	# Height is counted in hundreds of pixels so the falloff reads as "a fraction per
@@ -1050,6 +1099,82 @@ func get_composite_alpha() -> float:
 	return clampf(_state.shadow_opacity * opacity_multiplier * lifted, 0.0, 1.0)
 
 
+## How much of this shadow is the ground-contact oval right now, 0 to 1 - see
+## [method SunController.get_contact_shadow_weight].
+func get_contact_weight() -> float:
+	return _contact_weight
+
+
+## The oval drawn under this object while the sun is overhead, or null while none
+## has been needed. For a test or a debug readout.
+func get_contact_oval() -> Sprite2D:
+	return _contact_oval
+
+
+## Stands the ground-contact oval under the object, or puts it away.
+##
+## [b]It is what a shadow is under an overhead sun[/b]: nothing thrown along the
+## light, only the patch of shade directly beneath the object's lowest point. It is
+## centred on the group's own ground point - the one every other part of the shadow
+## is projected from - sized from the ground the object stands on, and coloured and
+## faded exactly as the silhouette is, by the hour's colour, the object's
+## multiplier and how high off the floor it is. Nothing here knows what the object
+## is: a cactus, a bandit and a horse get the same oval for the same reasons.
+##
+## It is one small shared texture on one node per object, moved only when the
+## object is, and made only once a sun actually asks for it.
+func _apply_contact_oval() -> void:
+	var alpha := 0.0
+	if _sun != null and _contact_weight > 0.0:
+		alpha = clampf(_hour_alpha() * _contact_weight * _own_alpha
+			* _sun.get_contact_shadow_opacity_scale(), 0.0, 1.0)
+	if alpha <= 0.002:
+		if _contact_oval != null:
+			_contact_oval.visible = false
+		return
+
+	if _contact_oval == null:
+		_contact_oval = Sprite2D.new()
+		_contact_oval.name = "ContactOval"
+		_contact_oval.texture = _get_oval_texture()
+		_contact_oval.top_level = true
+		_contact_oval.z_as_relative = false
+		add_child(_contact_oval)
+	_contact_oval.z_index = shadow_z_index
+
+	# What a sun straight overhead shades: the object's whole width seen from above -
+	# the reach of its own parts, or its authored footprint where that is wider.
+	var wide := maxf(_own_right - _own_left, _contact_half_width * 2.0)
+	wide = maxf(wide * _sun.get_contact_shadow_width_ratio(), MIN_SPAN)
+	var deep := wide * _sun.get_contact_shadow_depth_ratio()
+	var size := Vector2(_contact_oval.texture.get_size())
+	_contact_oval.global_transform = Transform2D(
+		0.0, Vector2(wide / size.x, deep / size.y), 0.0, _ground)
+	_contact_oval.modulate = Color(
+		_state.shadow_color.r, _state.shadow_color.g, _state.shadow_color.b, alpha)
+	_contact_oval.visible = true
+
+
+static func _get_oval_texture() -> Texture2D:
+	if _oval_texture != null:
+		return _oval_texture
+	var ramp := Gradient.new()
+	ramp.interpolation_mode = Gradient.GRADIENT_INTERPOLATE_CUBIC
+	ramp.offsets = PackedFloat32Array([0.0, 0.35, 0.7, 1.0])
+	ramp.colors = PackedColorArray([
+		Color(1, 1, 1, 1.0), Color(1, 1, 1, 0.85),
+		Color(1, 1, 1, 0.35), Color(1, 1, 1, 0.0)])
+	var made := GradientTexture2D.new()
+	made.gradient = ramp
+	made.width = 64
+	made.height = 64
+	made.fill = GradientTexture2D.FILL_RADIAL
+	made.fill_from = Vector2(0.5, 0.5)
+	made.fill_to = Vector2(1.0, 0.5)
+	_oval_texture = made
+	return made
+
+
 ## Whether a part has to carry the composite alpha itself. A union fades the
 ## finished picture once, so its parts go into the buffer at their own alpha only;
 ## a plain container draws nothing of its own, so there is nothing to fade and the
@@ -1058,13 +1183,23 @@ func get_caster_alpha_scale() -> float:
 	return 1.0 if is_union() else get_composite_alpha()
 
 
-## How much transparent margin, in texture pixels, has to be left round a part's
+## How much transparent margin, in world pixels, has to be left round a part's
 ## artwork for the blur to fade into. Grown from the hour's softness, so a soft
-## evening does not clip its own edge.
+## evening does not clip its own edge - see [method _texel_padding] for the same
+## margin in one part's own texture pixels.
 func get_edge_padding() -> float:
 	if _state == null:
 		return 0.0
-	return ceilf(_effective_softness() * SOFTNESS_TEXELS) + 1.0
+	return ceilf(_effective_softness() * SOFTNESS_PIXELS * EDGE_PAD_HEADROOM) + 1.0
+
+
+## [method get_edge_padding] in [param source]'s own texture pixels, which is what
+## the artwork's quad is grown by. Whole texels, so a sprite whose scale breathes
+## by a hair is not measured again every frame.
+func _texel_padding(source: Sprite2D) -> float:
+	var drawn := source.global_transform.get_scale().abs()
+	var per_texel := maxf(minf(drawn.x, drawn.y), 0.0001)
+	return ceilf(get_edge_padding() / per_texel) + 1.0
 
 
 ## The softness this object's shadow is actually drawn with - see
@@ -1075,11 +1210,17 @@ func get_edge_padding() -> float:
 ## than a cast shadow, and a hard cut-out is a good part of what makes a very short
 ## shadow read as broken, so the edge softens as the pool takes over. It only ever
 ## softens: a prop that asked for a softer edge than the map's pool keeps its own.
+##
+## [b]And never harder than the map's floor[/b] - see
+## [member SunController.minimum_shadow_softness] - so an override asking for a
+## crisper prop edge still lands feathered rather than as a cut-out.
 func _effective_softness() -> float:
 	if _state == null:
 		return 0.0
 	var own := _state.shadow_softness if softness_override < 0.0 \
 		else clampf(softness_override, 0.0, 1.0)
+	if _sun != null:
+		own = maxf(own, _sun.get_minimum_shadow_softness())
 	if _pool_blend <= 0.0 or _sun == null:
 		return own
 	return clampf(
@@ -1113,7 +1254,7 @@ func apply(caster: ShadowCaster, world: Transform2D, alpha: float) -> bool:
 	# Which patch of artwork is being drawn and where it sits in the source's own
 	# space. None of it can change while the picture has not - see Part.art_stamp -
 	# so it is worked out once per picture rather than once per frame.
-	var pad := get_edge_padding()
+	var pad := _texel_padding(source)
 	if part.art_stamp != part.stamp or not is_equal_approx(part.art_pad, pad):
 		part.art_stamp = part.stamp
 		part.art_pad = pad
@@ -1417,6 +1558,16 @@ func _measure() -> void:
 	var highest := INF
 	var widest := 0.0
 	var found := false
+	# The reach of the object's own parts either side of its ground point, and of
+	# everything it is made of - the first when anything stands on the object, the
+	# second otherwise. See _own_left.
+	var owner_node := get_parent()
+	var own_found := false
+	var own_left := INF
+	var own_right := -INF
+	var all_left := INF
+	var all_right := -INF
+	_own_alpha = 0.0
 	for caster: ShadowCaster in _casters:
 		var part: Part = _parts.get(caster)
 		if part == null or not part.contributing:
@@ -1427,6 +1578,14 @@ func _measure() -> void:
 		if box.size == Vector2.ZERO:
 			continue
 		found = true
+		_own_alpha = maxf(_own_alpha, part.alpha)
+		all_left = minf(all_left, box.position.x)
+		all_right = maxf(all_right, box.end.x)
+		if owner_node != null and (caster.get_ground_root() == owner_node
+				or owner_node.is_ancestor_of(caster)):
+			own_found = true
+			own_left = minf(own_left, box.position.x)
+			own_right = maxf(own_right, box.end.x)
 		lowest = maxf(lowest, box.end.y)
 		highest = minf(highest, box.position.y)
 		# The poses are held against the point the object is standing on, so the
@@ -1439,8 +1598,12 @@ func _measure() -> void:
 		_span = MIN_SPAN
 		_top_height = MIN_SPAN
 		_half_width = MIN_SPAN
+		_own_left = 0.0
+		_own_right = 0.0
 		return
 	_half_width = maxf(widest, MIN_SPAN)
+	_own_left = own_left if own_found else all_left
+	_own_right = own_right if own_found else all_right
 
 	# World Y runs down the screen, so the artwork's own ground line is its lowest
 	# point and its top is its highest. Both are turned into heights above the point
@@ -1554,6 +1717,7 @@ func _unpack_sun() -> void:
 	_ray_sun = _state.position
 	_ray_fall = _state.direction * _state.length_ratio
 	_direction = _state.shadow_direction_at(_ground)
+	_contact_weight = _sun.get_contact_shadow_weight() if _sun != null else 0.0
 
 	# The two halves of the projection - see _norm. The rise written into a vertex is
 	# scaled by the sun's own height, which every object in the map shares, so what a

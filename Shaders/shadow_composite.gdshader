@@ -23,8 +23,8 @@ render_mode unshaded;
 uniform sampler2D group_buffer : hint_screen_texture, repeat_disable, filter_linear;
 
 // How much the outline of the whole figure is blurred, as a fraction of
-// SOFTNESS_TEXELS. Here a texel is a screen pixel, because the buffer holds the
-// shadow already projected.
+// SOFTNESS_PIXELS: screen pixels, the unit the silhouette pass blurs in too, and
+// here the buffer's own texels, because it holds the shadow already projected.
 uniform float softness : hint_range(0.0, 1.0) = 0.35;
 // How much the far end of the shadow fades away, measured against the height each
 // point was drawn at - see below.
@@ -32,27 +32,33 @@ uniform float fade_strength : hint_range(0.0, 1.0) = 0.2;
 // What colour shadows are on this map - see SunStage.shadow_color.
 uniform vec4 shadow_color : source_color = vec4(0.0, 0.0, 0.0, 1.0);
 
-const float SOFTNESS_TEXELS = 12.0;
+const float SOFTNESS_PIXELS = 12.0;
 
+// Two rings of taps - see shadow_silhouette.gdshader - for a graded feather rather
+// than the double outline one ring leaves.
 const vec2 RING[8] = {
 	vec2(1.0, 0.0), vec2(-1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, -1.0),
 	vec2(0.707, 0.707), vec2(-0.707, 0.707), vec2(0.707, -0.707), vec2(-0.707, -0.707)
 };
+const vec2 RING_TURNED[8] = {
+	vec2(0.924, 0.383), vec2(-0.924, -0.383), vec2(0.383, 0.924), vec2(-0.383, -0.924),
+	vec2(-0.383, 0.924), vec2(0.383, -0.924), vec2(-0.924, 0.383), vec2(0.924, -0.383)
+};
 
 
 void fragment() {
-	float radius = softness * SOFTNESS_TEXELS;
+	vec2 reach = softness * SOFTNESS_PIXELS * SCREEN_PIXEL_SIZE;
 
 	// Alpha is the union of every part's coverage - where two parts overlap it is
 	// still one, which is exactly what keeps a head from darkening the body it is
 	// sitting on. Red is that coverage times the height the part was drawn at, so
 	// dividing the two back out recovers the height, averaged where parts meet.
-	vec2 sum = textureLod(group_buffer, SCREEN_UV, 0.0).ra * 2.0;
-	float weight = 2.0;
+	vec2 sum = textureLod(group_buffer, SCREEN_UV, 0.0).ra * 4.0;
+	float weight = 4.0;
 	for (int i = 0; i < 8; i++) {
-		sum += textureLod(group_buffer,
-			SCREEN_UV + RING[i] * radius * SCREEN_PIXEL_SIZE, 0.0).ra;
-		weight += 1.0;
+		sum += textureLod(group_buffer, SCREEN_UV + RING[i] * reach * 0.5, 0.0).ra * 2.0;
+		sum += textureLod(group_buffer, SCREEN_UV + RING_TURNED[i] * reach, 0.0).ra;
+		weight += 3.0;
 	}
 	sum /= weight;
 

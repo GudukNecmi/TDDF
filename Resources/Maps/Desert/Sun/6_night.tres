@@ -5,9 +5,9 @@
 [resource]
 script = ExtResource("1_sun")
 stage_name = &"night"
-sun_direction = Vector2(-0.87, 0.5)
-sun_distance = 3800.0
-sun_height = 10000.0
+sun_direction = Vector2(-0.7071068, -0.7071068)
+sun_distance = 7800.0
+sun_height = 6000.0
 light_color = Color(0.41272807, 0.27884522, 1, 1)
 light_energy = 1.6
 ambient_intensity = 0.7

@@ -18,10 +18,10 @@ render_mode blend_mix;
 //     that [code]shadow_composite.gdshader[/code] will finish. Only coverage and
 //     height go in; the softening, the fade and the colour happen once, up there.
 
-// How much the outline is blurred, as a fraction of SOFTNESS_TEXELS. It is done in
-// texture pixels, which the projection then stretches along the light - so the far
-// end of a shadow is softer than its near end, the way a penumbra grows with
-// distance.
+// How much the outline is blurred, as a fraction of SOFTNESS_PIXELS. It is counted
+// in screen pixels - worked back into this texture through the UV's own rate of
+// change - so artwork painted at many times the size it is drawn at feathers by as
+// much as a character does, instead of by a fraction of a pixel.
 uniform float softness : hint_range(0.0, 1.0) = 0.35;
 // How much the far end of the shadow fades away. Measured against how high up the
 // object each point was drawn - carried in the vertex red channel - and not
@@ -38,14 +38,20 @@ uniform vec4 frame_uv = vec4(0.0, 0.0, 1.0, 1.0);
 // Whether this is the pass that writes into a CanvasGroup buffer.
 uniform bool into_group = false;
 
-// How many texels of blur a softness of 1 asks for. ShadowGroup does the same
-// multiplication when it pads the geometry, so the two always agree.
-const float SOFTNESS_TEXELS = 12.0;
+// How many screen pixels of blur a softness of 1 asks for. ShadowGroup does the
+// same multiplication when it pads the geometry, so the two always agree.
+const float SOFTNESS_PIXELS = 12.0;
 
-// Eight directions on the unit circle, for the ring of the blur.
+// Eight directions on the unit circle. The blur samples two rings of them - one at
+// half the radius, one at the full radius and turned half a step - which gives the
+// edge a graded feather rather than the double outline a single ring leaves.
 const vec2 RING[8] = {
 	vec2(1.0, 0.0), vec2(-1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, -1.0),
 	vec2(0.707, 0.707), vec2(-0.707, 0.707), vec2(0.707, -0.707), vec2(-0.707, -0.707)
+};
+const vec2 RING_TURNED[8] = {
+	vec2(0.924, 0.383), vec2(-0.924, -0.383), vec2(0.383, 0.924), vec2(-0.383, -0.924),
+	vec2(-0.383, 0.924), vec2(0.383, -0.924), vec2(-0.924, 0.383), vec2(0.924, -0.383)
 };
 
 
@@ -69,14 +75,21 @@ void fragment() {
 		// a stowed weapon able to fade out of the silhouette.
 		COLOR = vec4(COLOR.r, 0.0, 0.0, a * COLOR.a);
 	} else {
-		float radius = softness * SOFTNESS_TEXELS;
-		float sum = a * 2.0;
-		float weight = 2.0;
+		// One screen pixel, in this texture's UV: how far the UV moves per pixel
+		// across and down the screen. The projection stretches and squeezes the
+		// mesh, and this follows it, so the feather is even on screen.
+		vec2 per_pixel = abs(dFdx(UV)) + abs(dFdy(UV));
+		vec2 reach = per_pixel * softness * SOFTNESS_PIXELS;
+		float sum = a * 4.0;
+		float weight = 4.0;
 		for (int i = 0; i < 8; i++) {
-			vec2 tap = UV + RING[i] * radius * TEXTURE_PIXEL_SIZE;
-			vec2 covered = step(low, tap) * step(tap, high);
-			sum += texture(TEXTURE, tap).a * covered.x * covered.y;
-			weight += 1.0;
+			vec2 near_tap = UV + RING[i] * reach * 0.5;
+			vec2 near_in = step(low, near_tap) * step(near_tap, high);
+			sum += texture(TEXTURE, near_tap).a * near_in.x * near_in.y * 2.0;
+			vec2 far_tap = UV + RING_TURNED[i] * reach;
+			vec2 far_in = step(low, far_tap) * step(far_tap, high);
+			sum += texture(TEXTURE, far_tap).a * far_in.x * far_in.y;
+			weight += 3.0;
 		}
 		sum /= weight;
 		sum *= mix(1.0, 1.0 - clamp(COLOR.r, 0.0, 1.0), fade_strength);

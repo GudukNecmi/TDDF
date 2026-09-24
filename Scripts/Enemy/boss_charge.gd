@@ -1,7 +1,8 @@
 class_name BossCharge
 extends Node
-## The boss's charge: he plants his feet, marks where the player is standing, and
-## two seconds later runs at that spot and swings at it.
+## The boss's charge: he plants his feet for [member charge_duration] - a fraction
+## of a second on a bounty boss - then runs at where the player is standing and
+## swings at it.
 ##
 ## [b]It is the boss's own movement and the boss's own knife.[/b] There is no second
 ## combat framework here and no charge state machine on the enemy - the run is
@@ -10,10 +11,16 @@ extends Node
 ## one attack. Take this node out of the world and the boss fights exactly as he did
 ## before it existed.
 ##
-## [b]The spot is recorded once, at the start.[/b] That is the whole idea of the
-## attack: the player is told where it is going to land and given two seconds to not
-## be standing there. A charge that re-aimed itself while it ran would be a homing
-## attack with a wind-up on it, which is a different and much worse thing.
+## [b]The spot is recorded once, and never re-aimed during the run.[/b] With
+## [member aim_at_launch] off it is marked as the wind-up starts, so a long wind-up
+## tells the player where it will land; on, it is read as the run begins, so a
+## short one goes straight at where they are now. Either way a charge that re-aimed
+## itself while it ran would be a homing attack with a wind-up on it, which is a
+## different and much worse thing.
+##
+## [b]Something else can hold it.[/b] [BossSwordStorm] owns the boss for its whole
+## sword phase and dash, and asks for the charge to stand down for that long - see
+## [method set_held] - so the two attacks can never be thrown on top of each other.
 ##
 ## The four steps, and how long each lasts:
 ##
@@ -72,8 +79,13 @@ enum Step {
 ## next, so a charge that took a long time to run does not immediately owe another.
 @export var charge_cooldown: float = 10.0
 ## How long the boss stands with his feet planted before he runs, in seconds.
-## [b]This is the warning[/b] - the spot is already chosen when it starts.
+## [b]This is the warning[/b] - see [member aim_at_launch] for when the spot is
+## chosen.
 @export var charge_duration: float = 2.0
+## Whether the spot is read as the run begins rather than as the wind-up starts.
+## On, the charge goes at where the player is at the end of the telegraph; off, at
+## where they were when it began.
+@export var aim_at_launch: bool = false
 ## Seconds after the fight starts before the first charge may be thrown. A fight that
 ## opened with one would land it before the player had finished reading the name on
 ## the card.
@@ -95,6 +107,14 @@ enum Step {
 ## thrown from here rather than from on top of the spot, so the blade travels through
 ## it instead of stopping in it.
 @export var strike_distance: float = 70.0
+
+@export_group("The telegraph")
+## How strongly the boss is washed in [member windup_tint_color] while he winds
+## up, through [method MiniBoss.apply_tint] - the red outline and the hit flash are
+## left alone. 0 leaves the planted feet as the only warning.
+@export_range(0.0, 1.0, 0.01) var windup_tint_strength: float = 0.0
+## The colour of that wash.
+@export var windup_tint_color := Color(1.0, 0.85, 0.3, 1.0)
 
 @export_group("The swing")
 ## What the blade's own wind-up, strike and recovery times are divided by for the
@@ -124,6 +144,8 @@ var _aim_rest: Node2D
 ## The blade's authored timings, taken once so the fast arc can be put back however
 ## often it is thrown.
 var _swing_rest: Dictionary = {}
+## Whether something else has the boss - see [method set_held].
+var _held: bool = false
 
 
 func _enter_tree() -> void:
@@ -182,10 +204,31 @@ func get_boss() -> Node2D:
 ## copy of it. Nothing in play calls it; it is what a smoke check and the developer
 ## panel press.
 func charge_now() -> bool:
-	if not _has_boss() or not _boss_can_charge():
+	if _held or not _has_boss() or not _boss_can_charge():
 		return false
 	_begin_windup()
 	return true
+
+
+## Stands the charge down while [param held], or lets it come back.
+##
+## Holding calls off whatever step is in the air - see [method cancel] - and keeps
+## the next one from starting. Letting go starts a fresh [member charge_cooldown],
+## so the boss is back in his ordinary fight for a full interval before he charges
+## again rather than the instant the holder is done with him.
+func set_held(held: bool) -> void:
+	if held == _held:
+		return
+	_held = held
+	if held:
+		cancel()
+		return
+	_step = Step.WAITING
+	_timer = maxf(charge_cooldown, 0.0)
+
+
+func is_held() -> bool:
+	return _held
 
 
 ## Puts everything the charge borrowed back and leaves the boss walking normally. Safe
@@ -193,6 +236,7 @@ func charge_now() -> bool:
 func cancel() -> void:
 	_release_aim()
 	_restore_swing_times()
+	_set_telegraph(false)
 	if _has_boss() and _boss.has_method(&"end_charge"):
 		_boss.call(&"end_charge")
 	if _step != Step.WAITING:
@@ -214,6 +258,7 @@ func stop() -> void:
 ## Forgets the fight entirely, so a second one can be set up behind it.
 func reset() -> void:
 	stop()
+	_held = false
 	_boss = null
 	_boss_health = null
 	_step = Step.WAITING
@@ -272,6 +317,8 @@ func _process(delta: float) -> void:
 
 
 func _advance_cooldown(delta: float) -> void:
+	if _held:
+		return
 	_timer -= delta
 	if _timer > 0.0:
 		return
@@ -282,12 +329,14 @@ func _advance_cooldown(delta: float) -> void:
 	_begin_windup()
 
 
-## Feet planted, and the spot chosen on this frame and never again.
+## Feet planted. The spot is chosen on this frame, or on the frame he sets off when
+## [member aim_at_launch] says so - and never again after that.
 func _begin_windup() -> void:
 	_point = _player_position()
 	_step = Step.WINDUP
 	_timer = maxf(charge_duration, 0.0)
 	_drive(windup_speed_multiplier)
+	_set_telegraph(true)
 	charge_started.emit(_point)
 
 
@@ -296,6 +345,9 @@ func _advance_windup(delta: float) -> void:
 	if _timer > 0.0:
 		return
 
+	if aim_at_launch:
+		_point = _player_position()
+	_set_telegraph(false)
 	_step = Step.RUN
 	_timer = maxf(run_timeout, 0.05)
 	_drive(run_speed_multiplier)
@@ -342,6 +394,16 @@ func _advance_swing(delta: float) -> void:
 	_step = Step.WAITING
 	_timer = maxf(charge_cooldown, 0.0)
 	charge_finished.emit()
+
+
+## The wind-up's wash on the boss, on or off. Written through his own [MiniBoss]
+## tint, so the outline and the hit flash carry on underneath it.
+func _set_telegraph(on: bool) -> void:
+	if windup_tint_strength <= 0.0 or not _has_boss():
+		return
+	var component := MiniBoss.find_on(_boss)
+	if component != null:
+		component.apply_tint(windup_tint_strength if on else 0.0, windup_tint_color)
 
 
 ## Hands the boss a spot to walk at, at [param multiplier] times his own speed. The

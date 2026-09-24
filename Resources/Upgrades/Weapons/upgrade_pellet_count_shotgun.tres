@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponUpgrade" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_upgrade.gd" id="1_upgrade"]
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_stat_modifier.gd" id="2_modifier"]
+
+[sub_resource type="Resource" id="Resource_mod1"]
+script = ExtResource("2_modifier")
+stat = 15
+amount = 2.0
+label = "PELLETS"
+
+[resource]
+script = ExtResource("1_upgrade")
+id = &"pellet_count"
+display_name = "PELLET COUNT"
+max_level = 3
+level_costs = Array[int]([500, 1000, 1800])
+modifiers_per_level = Array[ExtResource("2_modifier")]([SubResource("Resource_mod1")])
+unique = true

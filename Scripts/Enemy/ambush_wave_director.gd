@@ -295,6 +295,12 @@ var _downed: Array[Node2D] = []
 ## How many go out per release, worked out once as the ambush opens so the whole of
 ## it lands inside [member spawn_window].
 var _group_size: int = 1
+## How many this ambush keeps on the field at once, or 0 for the timed release.
+## Taken once as it opens, like [member _rout] - see [method begin_with].
+var _keep_active: int = 0
+## Whether the count-based release never runs out - see [method sustain]. Only
+## ever true between that call and the ambush breaking or stopping.
+var _endless: bool = false
 var _timer: float = 0.0
 var _player: Node2D
 ## The player's own pool, followed only for as long as an ambush is running - see
@@ -431,12 +437,19 @@ func begin(region: MapRegion) -> int:
 ## and gets whatever a roster's first wave is worth, which for the bomber is
 ## nothing.
 ##
-## The last three are arguments rather than properties written before the call
+## [param keep_active] replaces the timed release with a count. Above zero, the
+## ambush opens with that many on the field - the opening group in view, the rest
+## arriving just off the screen - and every one that stops being an attacker is
+## replaced by the next arrival until [param total] have been put out. Nothing is
+## released on a clock. 0 is the timed release above, which is what every caller
+## that says nothing gets.
+##
+## The last four are arguments rather than properties written before the call
 ## because they belong to [i]this[/i] ambush: one director serves the road and the
 ## Trouble encounters alike, and a Danger that breaks at three-quarters must not
 ## leave the next ambush on the road doing the same.
 func begin_with(total: int, opening: int = -1, rout_at: float = -1.0,
-		wave_number: int = 1) -> int:
+		wave_number: int = 1, keep_active: int = 0) -> int:
 	if _running or _resolve_spawner() == null:
 		return 0
 	if total <= 0:
@@ -444,6 +457,7 @@ func begin_with(total: int, opening: int = -1, rout_at: float = -1.0,
 
 	_running = true
 	_routing = false
+	_endless = false
 	_owed = total
 	_total = total
 	_killed = 0
@@ -460,10 +474,20 @@ func begin_with(total: int, opening: int = -1, rout_at: float = -1.0,
 	# point itself and would otherwise be measured against a fight long over.
 	_spawner.begin_batch()
 
+	_keep_active = maxi(keep_active, 0)
+
 	_follow_player_death()
-	_open_with(mini(_rolled_opening() if opening < 0 else opening, total))
-	_group_size = _sized_group()
-	set_process(true)
+	var opening_size := mini(_rolled_opening() if opening < 0 else opening, total)
+	if _keep_active > 0:
+		opening_size = mini(opening_size, _keep_active)
+	_open_with(opening_size)
+	if _keep_active > 0:
+		# Filled to the count straight away, and from then on only a death or a
+		# surrender puts anybody else out - see [method _top_up].
+		_top_up()
+	else:
+		_group_size = _sized_group()
+		set_process(true)
 
 	began.emit(total)
 	return total
@@ -485,6 +509,7 @@ func stop() -> void:
 		return
 	_running = false
 	_routing = false
+	_endless = false
 	_owed = 0
 	_alive = 0
 	_standing.clear()
@@ -511,6 +536,32 @@ func rout() -> bool:
 		return false
 	_rout_the_rest()
 	return true
+
+
+## Makes the running count-based ambush endless: every man who stops fighting is
+## replaced by the next arrival for as long as the ambush runs, instead of until
+## its total has been put out. Reports whether there was such an ambush to
+## sustain - one opened with a [param keep_active] count by [method begin_with].
+##
+## [b]It is the same release, with the debt never paid off.[/b] Arrivals still
+## come in just off the screen through [method _arrival_point], one per man
+## lost, so the field holds at exactly its count. The only way it ends is being
+## broken - [method rout], or the player's death, which routs it - and from then
+## on it empties and clears through [signal cleared] exactly as any other.
+##
+## What asks for it is a fight whose crowd is support rather than the point:
+## a bounty boss keeps a dozen men on the field for as long as he stands.
+func sustain() -> bool:
+	if not _running or _routing or _keep_active <= 0:
+		return false
+	_endless = true
+	_owed = maxi(_owed, 1)
+	_request_top_up()
+	return true
+
+
+func is_sustained() -> bool:
+	return _endless
 
 
 func _process(delta: float) -> void:
@@ -579,6 +630,28 @@ func _release_group() -> void:
 		if max_active_enemies > 0 and _living() >= max_active_enemies:
 			return
 		_spawn_one(_arrival_point())
+
+
+## Puts out arrivals until [member _keep_active] attackers are standing or nothing
+## more is owed - the whole of the count-based release. Each one comes in exactly
+## where a timed group's would, through [method _arrival_point].
+##
+## Every pass of the loop spends one of [member _owed], built or not, so it cannot
+## run on past what the ambush is worth.
+func _top_up() -> void:
+	while _running and not _routing and _keep_active > 0 and _owed > 0 \
+			and _alive < _keep_active:
+		_spawn_one(_arrival_point())
+
+
+## A replacement for somebody who has just stopped fighting. Deferred, because a
+## death arrives inside the physics step that dealt the killing hit, and a body
+## cannot be added to the world in the middle of it. The ending is never raced by
+## this: [method _check_cleared] waits on [member _owed], which only the top-up
+## itself pays off.
+func _request_top_up() -> void:
+	if _keep_active > 0 and _owed > 0 and not _routing:
+		_top_up.call_deferred()
 
 
 ## Where one arrival comes in: off the screen, but only just, and never outside the
@@ -656,11 +729,14 @@ func _spawn_one(point: Vector2) -> void:
 
 	var enemy := _spawner.spawn_at(point, _next_body())
 	if enemy == null:
+		# Paid off even while sustained, so a spawner that refuses cannot hold
+		# [method _top_up] in a loop that never builds anybody.
 		_owed -= 1
 		_check_cleared()
 		return
 
-	_owed -= 1
+	if not _endless:
+		_owed -= 1
 	var health := _find_health(enemy)
 	if health == null:
 		# Nothing to wait on. Counted out rather than counted in, so an enemy with no
@@ -714,6 +790,7 @@ func _on_enemy_gone(enemy: Node2D) -> void:
 		_killed += 1
 		if _check_rout():
 			return
+	_request_top_up()
 	# The killing hit just landed on the man who leaves nobody else standing
 	# and nobody else owed - the Kill Cam's own moment, ahead of whatever the
 	# floor still has to resolve before [signal cleared] can follow it.
@@ -746,6 +823,7 @@ func _on_enemy_gave_up(enemy: Node2D) -> void:
 		_killed += 1
 		if _check_rout():
 			return
+	_request_top_up()
 	_check_cleared()
 
 
@@ -824,6 +902,7 @@ func _check_rout() -> bool:
 ## [method _check_cleared] every other ending goes through.
 func _rout_the_rest() -> void:
 	_routing = true
+	_endless = false
 	_owed = 0
 
 	var remaining := _standing.size()

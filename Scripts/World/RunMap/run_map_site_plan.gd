@@ -12,9 +12,11 @@ extends Resource
 ## and a matching [RunMapSiteKind] for the art - no threshold, branch or name in
 ## any script.
 ##
-## [b]A count is either promised or drawn.[/b] [member exact_count] promises a
-## number outright - the one final boss, the three bounties - and takes no part
-## in the weighted draw. Everything else promises [member min_count] and then
+## [b]A count is either promised or drawn.[/b] A promise is either a number
+## authored here - [member exact_count], the one final boss - or a number the run
+## itself answers, which is [member one_per_accepted_bounty] and the contracts
+## the player is carrying. Either way a promised kind takes no part in the
+## weighted draw. Everything else promises [member min_count] and then
 ## competes for whatever the map has left over, up to [member max_count]. That
 ## split is what makes a run vary without ever coming out short of the places a
 ## run needs.
@@ -27,8 +29,24 @@ extends Resource
 @export_group("How many")
 ## An exact number of this kind, whatever size the map came out. -1 - the
 ## default - leaves the count to [member min_count], [member max_count] and
-## [member weight] below. [b]This is the whole of "exactly three bounties".[/b]
+## [member weight] below.
 @export var exact_count: int = -1
+## Whether a run gets one of this kind for every contract the player rode out
+## carrying, instead of a number authored here.
+##
+## [b]This is the whole of "a bounty boss per bounty, and none without one".[/b]
+## The count is the outstanding contracts [RunMapDirector] hands
+## [method RunMapGenerator.generate], held to [member max_count] where one is
+## set, and it is promised exactly the way [member exact_count] is - placed
+## before the map is filled and taking no part in the weighted draw. A player
+## who took nothing off the board rides out on a map with no boss point on it at
+## all, because the count is zero rather than because anything checked for it.
+##
+## A map generated without being told how many contracts are being carried -
+## which is a map laid out on its own for tuning - falls back to
+## [member exact_count] and the counts below, so this can never leave a
+## generator unable to answer.
+@export var one_per_accepted_bounty: bool = false
 ## The fewest of this kind a run is guaranteed, placed before the map is filled.
 ## Ignored when [member exact_count] is set.
 @export var min_count: int = 0
@@ -42,10 +60,11 @@ extends Resource
 ## a kind with a guarantee and no weight appears exactly as often as it is
 ## promised and never more.
 @export var weight: float = 0.0
-## Whether this plan takes the northernmost point on the map rather than being
-## placed among the rest. [b]The final boss, and nothing else[/b] - the point at
-## the far end of the map is one site and the first plan flagged here claims it.
-@export var claims_northernmost: bool = false
+## Whether this plan takes the point at the far end of the map - its eastern end,
+## where the run finishes - rather than being placed among the rest. [b]The final
+## boss, and nothing else[/b]: the far end is one site and the first plan flagged
+## here claims it.
+@export var claims_far_end: bool = false
 
 @export_group("Where")
 ## Which spacing band this kind shares. Two points whose plans name the same
@@ -63,3 +82,11 @@ extends Resource
 ## the opening rows. A band no point falls inside is ignored rather than
 ## enforced, so a short map still places everything it promised.
 @export var row_band: Vector2 = Vector2(0.0, 1.0)
+## This kind's share of the map's dead ends - points with a single road - which
+## are dealt out before the rest of the map is filled. Relative to every other
+## plan's, like [member weight], and drawn only from the places of this kind the
+## map was already going to have, so it moves a kind rather than adding more of
+## it. 0 - the default - is never put at a dead end on purpose, which is what the
+## common kinds want: a branch that ends is meant to end in something worth the
+## detour. See [member RunMapGenerator.dead_end_reward_chance].
+@export var dead_end_weight: float = 0.0

@@ -44,6 +44,18 @@ const GROUP := &"run_portal"
 ## instead of to the act of leaving. The machinery is untouched and this is the one
 ## switch: turning it back on restores the old startup question exactly.
 @export var asks_for_weapon: bool = false
+## Whether setting out first raises the wanted board with its confirm button
+## showing - see [method WantedBoardMenu.open_to_confirm] - so the contracts a
+## run is dealt boss points for are settled as the last thing before leaving.
+##
+## Off on the pit, which leaves the board to the board. On in the Base menu,
+## where RIDE OUT is the board and then the road. A world with no board behaves
+## as though this were off.
+@export var asks_for_bounty: bool = false
+## The map a run sets out on when [member asks_for_map] is off, begun on
+## [RunSessionState] exactly as picking it on the map screen would. Empty leaves
+## the session alone, which is what the pit has always done.
+@export var departure_map_id: StringName = &""
 ## Whether pressing B asks the player *where* they are going before the world is
 ## rebuilt. On, the [MapSelectMenu] is raised and the transition below does not
 ## begin until a map has been picked; off, B sets out immediately, which is what
@@ -176,6 +188,8 @@ var _map_chosen: bool = false
 var _weapon_chosen: bool = false
 var _region_chosen: bool = false
 var _time_chosen: bool = false
+var _bounty_confirmed: bool = false
+var _board: WantedBoardMenu
 var _menu: MapSelectMenu
 var _weapon_menu: WeaponSelectMenu
 var _region_menu: RegionSelectMenu
@@ -240,11 +254,17 @@ func start_run() -> void:
 	# added in front of a run, the camera, the delay and the rebuild below stay one
 	# path rather than being duplicated on the far side of each of them. A screen
 	# added later is a line in this list, in the position the question belongs in.
+	if asks_for_bounty and not _bounty_confirmed and _open_board():
+		return
+
 	if asks_for_weapon and not _weapon_chosen and _open_weapon_menu():
 		return
 
 	if asks_for_map and not _map_chosen and _open_map_menu():
 		return
+
+	if not asks_for_map and not departure_map_id.is_empty() and not _map_chosen:
+		_begin_departure_map()
 
 	if asks_for_region and not _region_chosen and _open_region_menu():
 		return
@@ -304,6 +324,40 @@ func _hand_music_over() -> void:
 	var board := MusicStateBoard.get_active(self)
 	if board != null:
 		board.enter(music_state)
+
+
+## Raises the wanted board as the confirming step, if this world has one.
+## Returns whether it was. Backing out of it asks nothing further - the run
+## simply has not started, and pressing again raises the board afresh.
+func _open_board() -> bool:
+	if _board == null or not is_instance_valid(_board):
+		_board = WantedBoardMenu.get_active(self)
+	if _board == null:
+		return false
+
+	if not _board.confirmed.is_connected(_on_bounty_confirmed):
+		_board.confirmed.connect(_on_bounty_confirmed)
+
+	_board.open_to_confirm()
+	return true
+
+
+func _on_bounty_confirmed() -> void:
+	_bounty_confirmed = true
+	start_run()
+
+
+## Begins the run on [member departure_map_id], the same two calls the map screen
+## makes when that map is picked - so a run set out on without the question is the
+## same run as one set out on with it.
+func _begin_departure_map() -> void:
+	var session := get_node_or_null(^"/root/RunSession")
+	if session == null or not session.has_method(&"begin"):
+		return
+	session.call(&"begin", departure_map_id)
+	_map_chosen = true
+	if not asks_for_region:
+		_enter_at_entry_region()
 
 
 ## Raises the weapon selection, if this world has one. Returns whether it was - a

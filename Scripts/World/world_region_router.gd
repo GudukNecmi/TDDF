@@ -33,9 +33,10 @@ extends Node
 ## the answer is the same from the base, a map or an arena.
 const GROUP := &"world_region_router"
 
-## The base's own scene - where the player stands between runs, and what
-## [method go_to_base] changes to.
-@export_file("*.tscn") var base_scene_path: String = "res://Scenes/Base/BaseWorld.tscn"
+## The base's own scene - where the player is between runs, and what
+## [method go_to_base] changes to. The Base menu; the walkable
+## [code]BaseWorld.tscn[/code] is kept but no longer part of the game's flow.
+@export_file("*.tscn") var base_scene_path: String = "res://Scenes/Base/BaseMenu.tscn"
 ## Caption written on the curtain while a region's map is loading.
 @export var region_caption: String = "RIDING"
 ## Caption written while an arena is loading.

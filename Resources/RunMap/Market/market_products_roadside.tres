@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="RunMapMarketProducts" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_market_products.gd" id="1_products"]
+[ext_resource type="Script" path="res://Scripts/Run/run_card.gd" id="2_card"]
+[ext_resource type="Resource" path="res://Resources/Cards/card_headshot.tres" id="3_headshot"]
+[ext_resource type="Resource" path="res://Resources/Cards/card_dead_eye.tres" id="4_dead_eye"]
+[ext_resource type="Resource" path="res://Resources/Cards/card_lucky_coin.tres" id="5_lucky_coin"]
+
+[resource]
+script = ExtResource("1_products")
+upgrade_slots = 4
+card_slots = 1
+unique_chance = 0.05
+cards = Array[ExtResource("2_card")]([ExtResource("3_headshot"), ExtResource("4_dead_eye"), ExtResource("5_lucky_coin")])
+reroll_tip = 15

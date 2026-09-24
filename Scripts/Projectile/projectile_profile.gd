@@ -78,8 +78,12 @@ func progress_for(travelled: float) -> float:
 	return clampf(travelled / maxf(effective_range, 0.001), 0.0, 1.0)
 
 
-func damage_at(progress: float) -> float:
-	return lerpf(damage_near, damage_far, _shape(progress, damage_exponent))
+## [param falloff_scale] is how much of the drop from [member damage_near] to
+## [member damage_far] still applies - 1 all of it, 0 none, which is what the
+## damage falloff upgrade turns down (see [method WeaponStats.falloff_scale]).
+func damage_at(progress: float, falloff_scale: float = 1.0) -> float:
+	var drop := _shape(progress, damage_exponent) * clampf(falloff_scale, 0.0, 1.0)
+	return lerpf(damage_near, damage_far, drop)
 
 
 func speed_at(progress: float) -> float:

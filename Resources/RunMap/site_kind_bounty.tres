@@ -6,8 +6,9 @@
 [resource]
 script = ExtResource("1_kind")
 kind = &"bounty"
-display_name = "BOUNTY"
+display_name = "BOUNTY BOSS"
 icon = ExtResource("2_icon")
 icon_scale = 1.6
 tint = Color(1, 1, 1, 1)
 is_fallback = false
+presented_when_revealed = true

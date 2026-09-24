@@ -20,14 +20,32 @@ extends Control
 
 @export_group("Wording")
 ## Shown while the map is waiting for a choice and the mouse is over nothing.
-@export var idle_text: String = "CHOOSE A ROAD NORTH"
+@export var idle_text: String = "CHOOSE A ROAD EAST"
 ## Shown while the mouse is over a point that may be ridden to. [code]%s[/code]
 ## is the place's name, [code]%d[/code] how many day cycles the road costs, and
 ## [code]%s[/code] again the word for that many - see [member cycle_words].
 @export var hover_text: String = "%s  —  %d %s"
+## Shown while the mouse is over a place with no road from where the piece is
+## standing - one two rows on, or one already behind the player.
+## [code]%s[/code] is the place's name.
+@export var place_text: String = "%s"
+## Shown while the mouse is over the point the piece is standing on, when that
+## point is one that can be walked back into - see
+## [member RunMapSiteKind.re_enterable].
+@export var re_enter_text: String = "%s  —  STEP BACK IN"
+## Shown while the mouse is over the point the piece is standing on and there is
+## nothing there to go back into.
+@export var standing_text: String = "%s  —  YOU ARE HERE"
 ## Shown while the piece is on the road. The two numbers are day cycles spent
 ## and the road's total.
 @export var travel_text: String = "RIDING  —  DAY %d OF %d"
+## Shown while the map is flying the camera out to a place the player has just
+## been told about. Empty - the default - leaves the line blank, which is what a
+## moment being watched rather than acted in wants.
+@export var presenting_text: String = ""
+## Shown the instant a place being presented comes out from under its question
+## mark. [code]%s[/code] is what it turns out to be.
+@export var presented_text: String = "%s  —  MARKED ON YOUR MAP"
 ## What a point whose contents have not been learned is called.
 @export var unknown_name: String = "UNKNOWN"
 ## The word for one day cycle, two, three, and so on - the first entry is one.
@@ -47,8 +65,15 @@ func _ready() -> void:
 	_view = get_node_or_null(view_path) as RunMapView
 	_travel = get_node_or_null(travel_path) as RunMapTravel
 
-	if _view != null and not _view.hover_changed.is_connected(_on_hover_changed):
-		_view.hover_changed.connect(_on_hover_changed)
+	if _view != null:
+		if not _view.hover_changed.is_connected(_on_hover_changed):
+			_view.hover_changed.connect(_on_hover_changed)
+		if not _view.presentation_started.is_connected(_on_presentation_started):
+			_view.presentation_started.connect(_on_presentation_started)
+		if not _view.presentation_revealed.is_connected(_on_presentation_revealed):
+			_view.presentation_revealed.connect(_on_presentation_revealed)
+		if not _view.presentation_finished.is_connected(_on_presentation_finished):
+			_view.presentation_finished.connect(_on_presentation_finished)
 	if _travel != null:
 		if not _travel.travel_started.is_connected(_on_travel_started):
 			_travel.travel_started.connect(_on_travel_started)
@@ -60,13 +85,34 @@ func _ready() -> void:
 	_write(idle_text)
 
 
+## The mouse resting on a place. [b]Any place, not only one that can be ridden
+## to[/b] - the map answers what a point across the graph is called as readily
+## as what the road to the next one costs, and the answer is written in the same
+## line at the foot of the screen. A point with a road from here is priced; the
+## point underfoot says so; anything else is simply named.
 func _on_hover_changed(site_id: int, link: RunMapLink) -> void:
 	if _travel != null and _travel.is_travelling():
 		return
-	if site_id < 0 or link == null:
+	if site_id < 0:
 		_write(idle_text)
 		return
-	_write(hover_text % [_name_of(site_id), link.day_cycles, _word_for(link.day_cycles)])
+	var named := _name_of(site_id)
+	if _is_current(site_id):
+		var can_re_enter := _view != null and _view.can_re_enter(site_id)
+		_write((re_enter_text if can_re_enter else standing_text) % named)
+		return
+	if link == null:
+		_write(place_text % named)
+		return
+	_write(hover_text % [named, link.day_cycles, _word_for(link.day_cycles)])
+
+
+## Whether [param site_id] is the point the piece is standing on.
+func _is_current(site_id: int) -> bool:
+	if _view == null:
+		return false
+	var graph := _view.get_graph()
+	return graph != null and graph.current_id == site_id
 
 
 func _on_travel_started(link: RunMapLink, _from_id: int, _to_id: int) -> void:
@@ -102,3 +148,20 @@ func _word_for(cycles: int) -> String:
 func _write(text: String) -> void:
 	if _line != null:
 		_line.text = text
+
+
+## The map has taken itself away to show the player something. The line goes
+## quiet until the place is actually turned over, so nothing is given away ahead
+## of the camera.
+func _on_presentation_started(_site_id: int) -> void:
+	_write(presenting_text)
+
+
+func _on_presentation_revealed(site_id: int) -> void:
+	if _view == null:
+		return
+	_write(presented_text % _view.true_name_of(site_id))
+
+
+func _on_presentation_finished(_site_id: int) -> void:
+	_write(idle_text)

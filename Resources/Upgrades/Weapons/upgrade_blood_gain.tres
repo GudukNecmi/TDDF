@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgrade" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_upgrade.gd" id="1_upgrade"]
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_stat_modifier.gd" id="2_modifier"]
+
+[sub_resource type="Resource" id="Resource_mod1"]
+script = ExtResource("2_modifier")
+stat = 14
+amount = 0.1
+label = "BLOOD"
+
+[resource]
+script = ExtResource("1_upgrade")
+id = &"blood_gain"
+display_name = "BLOOD GAIN"
+max_level = 5
+level_costs = Array[int]([400, 800, 1300, 1900, 2600])
+modifiers_per_level = Array[ExtResource("2_modifier")]([SubResource("Resource_mod1")])

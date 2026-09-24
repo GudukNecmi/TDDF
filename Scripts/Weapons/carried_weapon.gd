@@ -131,6 +131,16 @@ extends Node2D
 ## Left unset - or pointed at nothing - the weapon fires without consuming
 ## anything, so a test scene with no magazine still works.
 @export var ammo_path: NodePath = ^"Ammo"
+## The locker the ammo capacity upgrade is pushed into - see
+## [method WeaponDefinition.sync_ammo_capacity].
+@export var ammo_locker_path: NodePath = ^"/root/Ammo"
+
+@export_group("Stats")
+## The roster entry this weapon was built from, which carries its upgrades - see
+## [method get_stats]. [WeaponMount] sets it before the weapon enters the tree; a
+## weapon with none - a test scene, a knife picked up off the floor - fires with
+## its authored numbers untouched.
+@export var definition: WeaponDefinition
 
 @export_group("Holster")
 ## Where the weapon sits, relative to the target, once it is fully stowed - the
@@ -172,6 +182,9 @@ var _base_scale: Vector2
 
 func _ready() -> void:
 	_base_scale = scale
+	if definition != null:
+		definition.sync_ammo_capacity(get_node_or_null(ammo_locker_path) as AmmoLocker)
+		definition.changed.connect(_on_stats_changed)
 	# Start already in place, otherwise the weapon visibly slides in from the origin.
 	if _target != null:
 		global_position = _target.global_position + follow_offset + hand_offset.rotated(rotation)
@@ -307,8 +320,53 @@ func is_ready_to_fire() -> bool:
 ## Spends one shot's worth and reports whether it went through. The reserve
 ## refuses a spend it cannot cover in full, so a weapon that checks this can
 ## never fire a shot it did not pay for, and the count can never go below zero.
+##
+## The ammo efficiency stat is rolled here, once per shot: a saved shot still
+## needs the round to be there, it simply is not taken.
 func spend_ammo() -> bool:
-	return _ammo == null or _ammo.consume()
+	if _ammo == null:
+		return true
+	var stats := get_stats()
+	if stats != null and _ammo.can_fire() and randf() < stats.ammo_save_chance():
+		return true
+	return _ammo.consume()
+
+
+## Every stat change this weapon carries, or null for a weapon built from no
+## [member definition] - which every caller reads as "no change".
+func get_stats() -> WeaponStats:
+	return null if definition == null else definition.get_stats()
+
+
+## Rounds the upgrades add to this weapon's own magazine. 0 without a definition.
+func get_magazine_bonus() -> int:
+	var stats := get_stats()
+	return 0 if stats == null else stats.magazine_bonus()
+
+
+## Rolls whether the attack about to leave is a critical hit. Called [b]once per
+## attack[/b] by the weapon, and the answer handed to every projectile of it
+## through [method arm_projectile] - a shotgun blast is one roll, not six.
+func roll_critical() -> bool:
+	var stats := get_stats()
+	return stats != null and randf() < stats.critical_chance()
+
+
+## Hands this weapon's stats to [param projectile] before it enters the tree, and
+## makes it critical when [param critical] - the roll from [method roll_critical].
+func arm_projectile(projectile: Projectile, critical: bool = false) -> void:
+	var stats := get_stats()
+	if projectile == null or stats == null:
+		return
+	projectile.apply_weapon_stats(stats, critical)
+
+
+## The weapon's stats moved - an upgrade bought while it is in hand. The reserve's
+## ceiling follows at once; a weapon with a magazine of its own overrides this to
+## resize it.
+func _on_stats_changed() -> void:
+	if definition != null:
+		definition.sync_ammo_capacity(get_node_or_null(ammo_locker_path) as AmmoLocker)
 
 
 ## One value drives the whole holster: the follow offset, the scale and the

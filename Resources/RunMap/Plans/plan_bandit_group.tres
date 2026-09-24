@@ -6,10 +6,10 @@
 script = ExtResource("1_plan")
 kind = &"bandit_group"
 exact_count = -1
-min_count = 4
+min_count = 12
 max_count = -1
-weight = 30.0
-claims_northernmost = false
+weight = 60.0
+claims_far_end = false
 spacing_group = &""
 is_special = false
 row_band = Vector2(0, 1)

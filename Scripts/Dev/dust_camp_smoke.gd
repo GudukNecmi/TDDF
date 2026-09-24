@@ -282,8 +282,8 @@ func _check_arena() -> void:
 		if node is SunController:
 			sun = node as SunController
 	_ok(sun != null and sun.holds_for_combat, "the arena sun is held for the fight")
-	_ok(sun != null and sun.hold_uses_longest_shadow,
-		"it takes the longest shadow the current day stage reaches")
+	_ok(sun != null and not sun.hold_uses_longest_shadow,
+		"it keeps the current day stage exactly as authored")
 
 	var clock: Node = root.get_node_or_null(^"WorldClock")
 	if clock != null and sun != null:

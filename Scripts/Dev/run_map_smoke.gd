@@ -62,15 +62,19 @@ func _check_graph(generator: RunMapGenerator, map_seed: int) -> void:
 
 	_ok(graph.reachable_from(graph.start_id).has(graph.boss_id),
 		"seed %d: the boss can be reached from the start" % map_seed)
-	_ok(graph.sites.size() >= generator.row_count * 2,
+	_ok(graph.sites.size() >= generator.min_row_count * 2,
 		"seed %d: rejecting over-long roads did not gut the map" % map_seed,
-		"%d points left over %d rows" % [graph.sites.size(), generator.row_count])
+		"%d points left over %d rows" % [graph.sites.size(), generator.min_row_count])
 
 	var boss := graph.get_site(graph.boss_id)
 	var start := graph.get_site(graph.start_id)
-	_ok(boss.position.y < start.position.y,
-		"seed %d: the boss is at the northern end" % map_seed,
-		"boss y %.0f, start y %.0f" % [boss.position.y, start.position.y])
+	_ok(boss.position.x > start.position.x,
+		"seed %d: the boss is at the eastern end" % map_seed,
+		"boss x %.0f, start x %.0f" % [boss.position.x, start.position.x])
+
+	_ok(_crossings(graph) == 0,
+		"seed %d: no two roads cross" % map_seed,
+		"%d crossing pair(s)" % _crossings(graph))
 
 	var by_cycles := {}
 	var bad := 0
@@ -130,11 +134,14 @@ func _check_shape(graph: RunMapGraph) -> void:
 		widest_row = maxi(widest_row, row.size())
 		if row.size() < 2:
 			continue
+		# The map runs west to east, so a rank stands along y by design and it is
+		# the spread in x - the tilt - that says whether it is a straight rank or
+		# a staggered one.
 		var lowest: float = INF
 		var highest: float = -INF
 		for site: RunMapSite in row:
-			lowest = minf(lowest, site.position.y)
-			highest = maxf(highest, site.position.y)
+			lowest = minf(lowest, site.position.x)
+			highest = maxf(highest, site.position.x)
 		if highest - lowest > 1.0:
 			misaligned += 1
 	_ok(widest_row >= 4, "the map is wide", "widest row holds %d points" % widest_row)
@@ -149,6 +156,26 @@ func _check_shape(graph: RunMapGraph) -> void:
 			sideways += 1
 	_ok(sideways >= 1, "the map has at least one sideways road",
 		"%d sideways road(s)" % sideways)
+
+
+## How many pairs of roads cross each other anywhere but at a point they share.
+## The reference map's roads meet only at their ends - see
+## [member RunMapGenerator.prevent_crossings] - so this is 0 on every map.
+func _crossings(graph: RunMapGraph) -> int:
+	var found := 0
+	for first: int in range(graph.links.size()):
+		var one := graph.links[first]
+		for second: int in range(first + 1, graph.links.size()):
+			var two := graph.links[second]
+			if one.touches(two.from_id) or one.touches(two.to_id):
+				continue
+			if Geometry2D.segment_intersects_segment(
+					graph.get_site(one.from_id).position,
+					graph.get_site(one.to_id).position,
+					graph.get_site(two.from_id).position,
+					graph.get_site(two.to_id).position) != null:
+				found += 1
+	return found
 
 
 ## Nothing moves the clock on its own any more: no sun crosses the sky while the
@@ -247,7 +274,16 @@ func _check_travel() -> void:
 
 	_ok(graph.current_id == target, "the piece arrived where it was sent")
 	_ok(graph.get_site(target).revealed, "arriving revealed the point")
-	_ok(view.is_picking(), "the map came back taking a choice")
+	# Unless the point ridden to turned out to be one with something waiting on
+	# it: a saloon raises its own screen over the board and holds the roads shut
+	# until the player leaves, which is the arrival working, not failing. The
+	# map is generated fresh every run, so which of the two this is is not
+	# something a check can decide in advance.
+	var screen := _find_first("RunMapSaloonScreen") as RunMapSaloonScreen
+	var busy := screen != null and screen.is_open()
+	_ok(view.is_picking() or busy,
+		"the map came back taking a choice, or something opened over it",
+		"standing on a %s" % graph.get_site(target).kind)
 
 	var sun := _find_first("SunController") as SunController
 	_ok(sun != null and not sun.is_travelling(),

@@ -2,10 +2,9 @@ class_name TitleScreen
 extends Control
 ## The screen the game opens on: the picture, the choices, and nothing else.
 ##
-## [b]It starts games, it does not contain one.[/b] STORY loads the same world scene
-## the game has always been - see [member world_scene] - with nothing chosen, so
-## [WorldBoot] opens at the base exactly as launching the game used to, and the
-## player walks to the rack, the board and the pit as they always did.
+## [b]It starts games, it does not contain one.[/b] STORY loads the Base menu - see
+## [member world_scene] and [BaseMenu] - with nothing chosen, where the board, the
+## weapon table and the rest of the base are screens and RIDE OUT sets out.
 ##
 ## [b]FREE RUN is a stub.[/b] It once answered the pit's questions in advance and
 ## marked the session a Free Run, booting straight into the old endless
@@ -37,8 +36,8 @@ extends Control
 ## [method SceneTree.change_scene_to_file] this always did, so the game still
 ## starts either way.
 
-## The world STORY loads.
-@export_file("*.tscn") var world_scene: String = "res://Scenes/Base/BaseWorld.tscn"
+## The world STORY loads - the Base menu, not the walkable base.
+@export_file("*.tscn") var world_scene: String = "res://Scenes/Base/BaseMenu.tscn"
 
 ## How long the "coming soon" message stays up after FREE RUN is pressed, in
 ## seconds.

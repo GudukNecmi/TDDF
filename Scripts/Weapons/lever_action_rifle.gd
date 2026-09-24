@@ -348,8 +348,11 @@ func get_magazine_count() -> int:
 	return _in_magazine
 
 
+## The tube's capacity: [member magazine_size] plus the magazine upgrade - see
+## [method CarriedWeapon.get_magazine_bonus]. Read live, so a reload after an
+## upgrade simply fills to the new size.
 func get_magazine_size() -> int:
-	return maxi(magazine_size, 0)
+	return maxi(magazine_size + get_magazine_bonus(), 0)
 
 
 ## Puts rounds in the tube and returns how many went in. [param rounds] of 0 or
@@ -361,7 +364,7 @@ func get_magazine_size() -> int:
 ## well as by the tube. Without that cap a player with two rounds left could load
 ## seven and fire five they never had.
 func _fill_magazine(rounds: int = 0) -> int:
-	var carried := magazine_size if _ammo == null else _ammo.get_current()
+	var carried := get_magazine_size() if _ammo == null else _ammo.get_current()
 	var room := maxi(get_magazine_size() - _in_magazine, 0)
 	var wanted := room if rounds <= 0 else mini(rounds, room)
 	var loaded := mini(wanted, maxi(carried - _in_magazine, 0))
@@ -418,8 +421,10 @@ func _spawn_bullet() -> void:
 		return
 
 	var half_spread := deg_to_rad(spread_angle_degrees) * 0.5
+	var critical := roll_critical()
 	for i in maxi(shots_per_pull, 1):
 		var bullet: Projectile = projectile_scene.instantiate()
+		arm_projectile(bullet, critical)
 		container.add_child(bullet)
 		bullet.global_position = _muzzle.global_position
 		bullet.global_rotation = global_rotation + randf_range(-half_spread, half_spread)

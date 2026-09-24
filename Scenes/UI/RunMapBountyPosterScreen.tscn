@@ -1,0 +1,47 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/run_map_bounty_poster_screen.gd" id="1_screen"]
+[ext_resource type="PackedScene" uid="uid://dton60x7yqk5r" path="res://Scenes/UI/WantedPoster.tscn" id="2_poster"]
+
+[node name="RunMapBountyPosterScreen" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_screen")
+poster_scene = ExtResource("2_poster")
+card_path = NodePath("Card")
+dim_path = NodePath("Dim")
+from_offset = Vector2(260, 700)
+from_degrees = 15.0
+from_scale = 0.6
+card_scale = 1.0
+card_min_size = Vector2(300, 560)
+fly_time = 0.85
+hold_time = 1.9
+leave_time = 0.45
+leave_offset = Vector2(0, -130)
+dim_alpha = 0.55
+dim_time = 0.35
+
+[node name="Dim" type="ColorRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.02, 0.02, 1)
+
+[node name="Card" type="Control" parent="."]
+layout_mode = 0
+offset_right = 300.0
+offset_bottom = 560.0
+pivot_offset = Vector2(150, 280)
+mouse_filter = 2

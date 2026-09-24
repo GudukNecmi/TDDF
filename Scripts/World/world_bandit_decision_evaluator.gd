@@ -29,7 +29,7 @@ extends RefCounted
 ## [constant MEDIUM_RANGE_PROGRESS] reads that curve at its own midpoint -
 ## the natural meaning of "medium" for a curve authored as near/far - rather
 ## than a distance this file invents a threshold for. A shotgun's own
-## [member Shotgun.pellet_count] is folded in as one trigger pull's whole
+## [method Shotgun.get_pellet_count] is folded in as one trigger pull's whole
 ## payload, since "one shot" is what the player fired, not one pellet of it.
 ##
 ## [b]"A bandit" is read off the region the contact happened in.[/b]
@@ -138,7 +138,8 @@ static func medium_range_shot_damage(from_node: Node,
 		return 0.0
 
 	var per_projectile := _projectile_damage_at(weapon, MEDIUM_RANGE_PROGRESS)
-	var pellet_count: Variant = weapon.get(&"pellet_count")
+	var pellet_count: Variant = weapon.call(&"get_pellet_count") \
+			if weapon.has_method(&"get_pellet_count") else weapon.get(&"pellet_count")
 	var pellets := 1 if pellet_count == null else maxi(int(pellet_count), 1)
 	if built_here != null:
 		built_here.queue_free()
@@ -168,7 +169,12 @@ static func _build_chosen_weapon(from_node: Node, roster: WeaponCatalog) -> Node
 		definition = roster.get_default()
 	if definition == null or definition.scene == null:
 		return null
-	return definition.scene.instantiate()
+	var built := definition.scene.instantiate()
+	# Given its roster entry the way [WeaponMount] gives it one, so the estimate
+	# reads the weapon's upgrades too.
+	if built is CarriedWeapon:
+		(built as CarriedWeapon).definition = definition
+	return built
 
 
 ## Damage a fresh instance of [param weapon]'s own [member CarriedWeapon.projectile_scene]
@@ -184,10 +190,13 @@ static func _projectile_damage_at(weapon: Node, progress: float) -> float:
 	var projectile := built as Projectile
 	var damage := 0.0
 	if projectile != null:
-		var profile := projectile.profile
-		if profile == null:
-			profile = ProjectileProfile.new()
-		damage = profile.damage_at(progress)
+		if projectile.profile == null:
+			projectile.profile = ProjectileProfile.new()
+		# Through the weapon's stats, the same as a fired round - never a crit,
+		# since the estimate is of an ordinary shot.
+		if weapon is CarriedWeapon:
+			(weapon as CarriedWeapon).arm_projectile(projectile, false)
+		damage = projectile.damage_at_progress(progress)
 	built.queue_free()
 	return damage
 

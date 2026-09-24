@@ -36,9 +36,18 @@ extends CharacterBody2D
 ## works here. An empty path, or a node without it, leaves movement precisely
 ## as it was.
 @export var dash_path: NodePath = ^"Dash"
+## The shove a hit throws the player with - see [HitReaction], the same
+## component every enemy is knocked about by. Added on top of the walk after
+## everything else, and only while the player is free to move at all, so a death
+## or a sleep that holds them still is never pushed. The player's own reaction is
+## authored with no knockback of its own, so only a hit that carries a
+## [member HitEffects.knockback_push] - a boss's sword - moves them. An empty path
+## leaves movement exactly as it was.
+@export var hit_reaction_path: NodePath = ^"HitReaction"
 
 var _speed_modifiers: Array[Node] = []
 var _dash: Node
+var _hit_reaction: HitReaction
 
 
 ## Resolved once. A path that points at nothing, or at something that does not
@@ -53,15 +62,20 @@ func _ready() -> void:
 	if dash != null and dash.has_method(&"apply_dash_velocity"):
 		_dash = dash
 
+	_hit_reaction = get_node_or_null(hit_reaction_path) as HitReaction
+
 
 func _physics_process(delta: float) -> void:
 	var direction := _read_input_direction()
-	velocity = direction * speed * _get_speed_multiplier()
+	var multiplier := _get_speed_multiplier()
+	velocity = direction * speed * multiplier
 	# The dash rides on top of the walk rather than replacing it, so it decays
 	# to nothing and control is already back the frame it lands.
 	if _dash != null:
 		var launched: Vector2 = _dash.call(&"apply_dash_velocity", velocity, delta)
 		velocity = launched
+	if _hit_reaction != null and multiplier > 0.0:
+		velocity += _hit_reaction.get_knockback()
 	move_and_slide()
 
 

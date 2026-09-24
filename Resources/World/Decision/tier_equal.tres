@@ -15,7 +15,7 @@ outcome = &"walk_away"
 
 [sub_resource type="Resource" id="Choice_fight"]
 script = ExtResource("2_choice")
-label = "Kill them all."
+label = "- Battle -"
 
 [resource]
 script = ExtResource("1_tier")

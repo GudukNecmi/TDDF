@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RunMapSaloonAmmoGood" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_saloon_ammo_good.gd" id="1_good"]
+[ext_resource type="Resource" path="res://Resources/Ammo/ammo_shell.tres" id="2_ammo"]
+
+[resource]
+script = ExtResource("1_good")
+display_name = ""
+note = ""
+stock = -1
+ammo_type = ExtResource("2_ammo")
+bundles = 1
+locker_path = NodePath("/root/Ammo")

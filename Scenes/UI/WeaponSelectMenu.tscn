@@ -1,0 +1,139 @@
+[gd_scene format=3 uid="uid://8uirmlwt47om"]
+
+[ext_resource type="Script" uid="uid://ce732uc2d3dk3" path="res://Scripts/UI/weapon_select_menu.gd" id="1_sr515"]
+[ext_resource type="Resource" uid="uid://dwylkh854xmip" path="res://Resources/Weapons/weapon_catalog.tres" id="2_ajpmy"]
+[ext_resource type="Texture2D" uid="uid://b5tbx3ndtm3yn" path="res://Assets/UI/UI Screens/Button1.PNG" id="3_jbsei"]
+[ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="4_scbkq"]
+[ext_resource type="Shader" uid="uid://c5kbp8xehadhn" path="res://Shaders/pause_blur.gdshader" id="5_8ad7h"]
+[ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="6_dg51j"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_normal"]
+content_margin_left = 28.0
+content_margin_top = 16.0
+content_margin_right = 28.0
+content_margin_bottom = 16.0
+texture = ExtResource("3_jbsei")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_hover"]
+content_margin_left = 28.0
+content_margin_top = 16.0
+content_margin_right = 28.0
+content_margin_bottom = 16.0
+texture = ExtResource("4_scbkq")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_pressed"]
+content_margin_left = 28.0
+content_margin_top = 16.0
+content_margin_right = 28.0
+content_margin_bottom = 16.0
+texture = ExtResource("4_scbkq")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+modulate_color = Color(0.76, 0.7, 0.6, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_button_disabled"]
+content_margin_left = 28.0
+content_margin_top = 16.0
+content_margin_right = 28.0
+content_margin_bottom = 16.0
+texture = ExtResource("3_jbsei")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+modulate_color = Color(0.55, 0.52, 0.48, 0.8)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_upgradeblur"]
+shader = ExtResource("5_8ad7h")
+shader_parameter/blur_amount = 2.8
+shader_parameter/dim = 0.66
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_upgrade_panel"]
+content_margin_left = 44.0
+content_margin_top = 32.0
+content_margin_right = 44.0
+content_margin_bottom = 32.0
+texture = ExtResource("6_dg51j")
+texture_margin_left = 70.0
+texture_margin_top = 70.0
+texture_margin_right = 70.0
+texture_margin_bottom = 70.0
+region_rect = Rect2(92, 26, 2800, 2102)
+
+[node name="WeaponSelectMenu" type="Control" unique_id=1257662543]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_sr515")
+catalog = ExtResource("2_ajpmy")
+button_normal = SubResource("StyleBoxFlat_button_normal")
+button_hover = SubResource("StyleBoxFlat_button_hover")
+button_pressed = SubResource("StyleBoxFlat_button_pressed")
+button_disabled = SubResource("StyleBoxFlat_button_disabled")
+
+[node name="Blur" type="ColorRect" parent="." unique_id=224931759]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="." unique_id=50612276]
+layout_mode = 0
+anchor_left = 0.3
+anchor_top = 0.12
+anchor_right = 0.7
+anchor_bottom = 0.88
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="Panel" unique_id=719605629]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Title" type="Label" parent="Panel/Body" unique_id=1446735128]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 44
+text = "CHOOSE A WEAPON"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="Panel/Body" unique_id=1507686448]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Weapons" type="VBoxContainer" parent="Panel/Body" unique_id=1034194336]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Hint" type="Label" parent="Panel/Body" unique_id=304380842]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "AMMUNITION IS CARRIED PER WEAPON"
+horizontal_alignment = 1

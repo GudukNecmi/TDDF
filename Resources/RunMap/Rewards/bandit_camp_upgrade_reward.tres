@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="RunMapUpgradeReward" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_upgrade_reward.gd" id="1_reward"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Market/market_products_roadside.tres" id="2_pool"]
+
+[resource]
+script = ExtResource("1_reward")
+site_kinds = Array[StringName]([&"bandit_camp"])
+unique_chance = 0.1
+pool = ExtResource("2_pool")
+picks = 2
+choices = 3

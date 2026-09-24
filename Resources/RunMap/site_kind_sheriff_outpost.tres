@@ -11,3 +11,4 @@ icon = ExtResource("2_icon")
 icon_scale = 1.55
 tint = Color(1, 1, 1, 1)
 is_fallback = false
+re_enterable = true

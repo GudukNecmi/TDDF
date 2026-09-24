@@ -15,10 +15,15 @@ extends Node
 ## [member step_hold] is how long the world is left standing at the hour it just
 ## reached, so the ride can be sped up without the beats running into each other -
 ## which is exactly what halving the step alone does. The ride is quick and the
-## pause at the end of it is a whole second, which is what makes each hour
+## pause at the end of it is a beat of its own, which is what makes each hour
 ## arrived at register as its own moment. Neither changes how many
 ## ticks a road costs: that is the road, measured once by
 ## [method RunMapGenerator.day_cycles_for].
+##
+## [b]Each landing is heard.[/b] The frame the piece stops moving on plays
+## [member step_sound] through [member sound_bank_path], so the number of
+## footfalls a ride makes is the number of day cycles the road costs and the two
+## can no more disagree than the clock and the distance can.
 ##
 ## [b]The clock is swept, not jumped.[/b] The degrees are handed to
 ## [method WorldTimeManager.advance_degrees] a frame at a time across the moving
@@ -52,11 +57,21 @@ signal travel_finished(site_id: int)
 @export var step_duration: float = 0.36
 ## How long the piece and the clock stand still at the end of each beat, in
 ## seconds. What makes the beats read as separate steps rather than as one
-## continuous slide, and it is a whole second: the pause is the beat, so it is
-## held at its own authored length whatever the ride itself is sped up to.
-@export var step_hold: float = 1.0
+## continuous slide: the pause is the beat, so it is held at its own authored
+## length whatever the ride itself is sped up to.
+@export var step_hold: float = 0.6
 ## How long the map waits after the final beat before the arrival is announced.
 @export var arrival_hold: float = 0.35
+
+@export_group("Sound")
+## The [SoundBank] the piece's own footfall is played through. Optional: a map
+## with none simply rides in silence, which is what a run map opened on its own
+## for tuning does.
+@export var sound_bank_path: NodePath = ^"StepSound"
+## Which sound in that bank is the piece coming to a stop. [b]It is played once
+## per beat, as the step lands[/b] - so a one-day road is heard once and a
+## three-day road three times - rather than held under the movement.
+@export var step_sound: StringName = &"pawn_stop"
 
 enum Phase { IDLE, STEPPING, HOLDING, ARRIVING }
 
@@ -75,11 +90,13 @@ var _beat_degrees: float = 0.0
 ## difference rather than a share that would drift.
 var _beat_swept: float = 0.0
 var _clock: Node
+var _sounds: SoundBank
 
 
 func _ready() -> void:
 	set_physics_process(false)
 	_clock = get_node_or_null(world_clock_path)
+	_sounds = get_node_or_null(sound_bank_path) as SoundBank
 
 
 func is_travelling() -> bool:
@@ -148,6 +165,11 @@ func _advance_step() -> void:
 		_clock.call(&"snap_to_period_start")
 
 	_spent += 1
+	# The footfall belongs here rather than to the hold that follows it: this is
+	# the frame the piece stops moving on, so the sound lands on the step whether
+	# the beat is followed by a pause or by the arrival.
+	if _sounds != null and step_sound != &"":
+		_sounds.play(step_sound)
 	day_cycle_spent.emit(_spent, _total)
 	_elapsed = 0.0
 	_phase = Phase.ARRIVING if _spent >= _total else Phase.HOLDING

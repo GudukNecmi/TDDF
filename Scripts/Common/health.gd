@@ -36,7 +36,13 @@ signal invulnerability_changed(invulnerable: bool)
 
 var _current: float
 var _invulnerable_left: float = 0.0
+## Held invulnerability, on until whoever raised it lowers it - see
+## [method set_shielded]. Separate from the timed grace window above, so the two
+## can never cut each other short.
+var _shielded: bool = false
 var _removed: bool = false
+## See [method get_last_hit_effects].
+var _last_hit_effects: HitEffects
 ## The ceiling the character was authored with, captured the first time anything
 ## moves it. Below 0 while nothing has, which reads as "the ceiling is still the
 ## authored one".
@@ -65,7 +71,19 @@ func _physics_process(delta: float) -> void:
 
 
 func is_invulnerable() -> bool:
-	return _invulnerable_left > 0.0
+	return _shielded or _invulnerable_left > 0.0
+
+
+## Holds this pool untouchable until it is called again with false, whatever
+## the grace window is doing. For an ability with its own length - a boss's
+## sword circle - rather than a per-hit grace; it drops hits at the same single
+## point every damage source already funnels through.
+func set_shielded(shielded: bool) -> void:
+	_shielded = shielded
+
+
+func is_shielded() -> bool:
+	return _shielded
 
 
 ## Seconds of grace left, for a flicker or a UI readout to follow.
@@ -177,9 +195,17 @@ func set_max_health(value: float, fill: bool = true) -> void:
 ## A hit arriving inside the grace window is dropped here, at the single point
 ## every damage source already funnels through, rather than each source having to
 ## know about invulnerability.
-func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO) -> void:
+##
+## [param effects] is what the hit does beyond damage - see [HitEffects]. It is
+## kept as the last hit's effects before anything is announced, so a listener to
+## [signal damaged] or [signal died] reads the hit that just landed through
+## [method get_last_hit_effects].
+func take_damage(amount: float, hit_direction: Vector2 = Vector2.ZERO,
+		effects: HitEffects = null) -> void:
 	if _current <= 0.0 or is_invulnerable():
 		return
+
+	_last_hit_effects = effects
 
 	if invulnerable_seconds > 0.0:
 		_invulnerable_left = invulnerable_seconds
@@ -243,5 +269,11 @@ func remove(hit_direction: Vector2 = Vector2.ZERO) -> void:
 
 ## Whether the death this pool has just been through was a removal rather than a
 ## kill. False for a character that is alive, and false for one killed normally.
+## What the last hit to land does beyond damage. An ordinary hit - one that
+## carried no [HitEffects] - reads as a fresh, unchanged set.
+func get_last_hit_effects() -> HitEffects:
+	return _last_hit_effects if _last_hit_effects != null else HitEffects.new()
+
+
 func was_removed() -> bool:
 	return _removed

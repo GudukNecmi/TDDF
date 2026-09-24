@@ -22,6 +22,11 @@ extends Resource
 ## never shown before the fight.
 @export var min_enemies: int = 20
 @export var max_enemies: int = 40
+## How many of those men are on the field at once. The fight opens with this many
+## and every one that goes down is replaced until the point's whole count has been
+## put out - see [method AmbushWaveDirector.begin_with]. 0 leaves the fight on the
+## ambush's own timed release.
+@export var active_enemies: int = 10
 ## What the point is rewritten as once its question has been answered, whichever
 ## way it was answered. A point the piece rides back through is not a second
 ## encounter - the men there have been paid, robbed, walked away from or killed.

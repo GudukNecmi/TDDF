@@ -6,10 +6,11 @@
 script = ExtResource("1_plan")
 kind = &"event"
 exact_count = -1
-min_count = 3
+min_count = 2
 max_count = -1
-weight = 22.0
-claims_northernmost = false
+weight = 8.0
+claims_far_end = false
 spacing_group = &""
 is_special = false
-row_band = Vector2(0, 1)
+row_band = Vector2(0.15, 1)
+dead_end_weight = 1.0

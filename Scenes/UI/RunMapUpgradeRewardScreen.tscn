@@ -1,0 +1,196 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/run_map_upgrade_reward_screen.gd" id="1_script"]
+[ext_resource type="Shader" uid="uid://c5kbp8xehadhn" path="res://Shaders/pause_blur.gdshader" id="2_blur"]
+[ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="3_panel"]
+[ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="4_button"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Rewards/bandit_group_upgrade_reward.tres" id="5_group_reward"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_upgrade_reward.gd" id="6_reward_script"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Rewards/bandit_camp_upgrade_reward.tres" id="7_camp_reward"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rewardblur"]
+shader = ExtResource("2_blur")
+shader_parameter/blur_amount = 2.8
+shader_parameter/dim = 0.66
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_reward_panel"]
+content_margin_left = 40.0
+content_margin_top = 26.0
+content_margin_right = 40.0
+content_margin_bottom = 26.0
+texture = ExtResource("3_panel")
+texture_margin_left = 70.0
+texture_margin_top = 70.0
+texture_margin_right = 70.0
+texture_margin_bottom = 70.0
+region_rect = Rect2(92, 26, 2800, 2102)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_reward_button"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+texture = ExtResource("4_button")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_reward_button_pressed"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+texture = ExtResource("4_button")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+modulate_color = Color(0.76, 0.7, 0.6, 1)
+
+[node name="RunMapUpgradeRewardScreen" type="Control"]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+rewards = Array[ExtResource("6_reward_script")]([ExtResource("5_group_reward"), ExtResource("7_camp_reward")])
+
+[node name="Blur" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_rewardblur")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_top = 0.2
+anchor_right = 0.7
+anchor_bottom = 0.8
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_reward_panel")
+
+[node name="Body" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Title" type="Label" parent="Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 30
+text = "SPOILS OF THE FIGHT"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="Panel/Body"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Heading" type="Label" parent="Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.66, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 19
+text = "WEAPON UPGRADE"
+horizontal_alignment = 1
+
+[node name="Weapon" type="Label" parent="Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.86, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 19
+text = "WEAPON"
+horizontal_alignment = 1
+
+[node name="UpgradeName" type="Label" parent="Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.13, 0.12, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 34
+text = "UPGRADE"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Effect" type="Label" parent="Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.86, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 22
+text = "EFFECT"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Level" type="Label" parent="Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.13, 0.12, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 25
+text = "RUN LEVEL 1"
+horizontal_alignment = 1
+
+[node name="Choices" type="VBoxContainer" parent="Panel/Body"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Choice" type="Button" parent="Panel/Body/Choices"]
+visible = false
+custom_minimum_size = Vector2(0, 104)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("StyleBoxTexture_reward_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_reward_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_reward_button")
+theme_override_styles/focus = SubResource("StyleBoxTexture_reward_button")
+text = "UPGRADE
+EFFECT
+RUN LEVEL 1"
+autowrap_mode = 3
+
+[node name="Note" type="Label" parent="Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.66, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 17
+text = "FREE  -  FOR THIS RUN ONLY"
+horizontal_alignment = 1
+
+[node name="Take" type="Button" parent="Panel/Body"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxTexture_reward_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_reward_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_reward_button")
+theme_override_styles/focus = SubResource("StyleBoxTexture_reward_button")
+text = "TAKE"

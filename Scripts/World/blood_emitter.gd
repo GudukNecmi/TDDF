@@ -196,6 +196,10 @@ func _drop_blood(at: Vector2, direction: Vector2) -> void:
 	# Resolved here rather than in any branch, so "below 0 means the field
 	# decides" holds whichever way the blood is delivered.
 	var count := blood_value if blood_value >= 0 else field.specks_per_splash
+	# The killing blow's blood gain - the weapon's stat - scales what the kill is
+	# worth, in specks, so the drop and its value still cannot drift apart.
+	if _health != null:
+		count = roundi(count * _health.get_last_hit_effects().blood_gain_scale)
 	if count <= 0:
 		return
 

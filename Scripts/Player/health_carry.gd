@@ -63,7 +63,12 @@ func _on_health_changed(_current: float, _maximum: float) -> void:
 
 ## Only a run's wounds are worth keeping. In the base the pool is left alone, so
 ## the memory cannot be overwritten by a player standing about at home.
+##
+## The ceiling is the exception: it is not a wound, and a screen with no player on
+## it needs it to read the carried pool, so it is recorded wherever the player is.
 func _remember() -> void:
+	if _vitals != null and _health != null:
+		_vitals.record_maximum(_health.get_max())
 	if _vitals == null or _health == null or not _is_running():
 		return
 	_vitals.carry(_health.get_current())

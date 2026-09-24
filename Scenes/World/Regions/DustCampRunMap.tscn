@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_view.gd" id="1_view"]
 [ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_travel.gd" id="2_travel"]
+[ext_resource type="Script" path="res://Scripts/Common/sound_bank.gd" id="67_bank"]
+[ext_resource type="AudioStream" uid="uid://c53t3rpdh8hx3" path="res://Sound/Maps/BoardMap/PawnSoundEfect.WAV" id="68_pawn"]
 [ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_director.gd" id="3_director"]
 [ext_resource type="Resource" path="res://Resources/RunMap/dust_camp_run_map.tres" id="4_generator"]
 [ext_resource type="PackedScene" path="res://Scenes/World/RunMap/RunMapSite.tscn" id="5_site"]
@@ -48,7 +50,6 @@
 [ext_resource type="Resource" path="res://Resources/RunMap/site_kind_bandit_camp.tres" id="48_kcamp"]
 [ext_resource type="Resource" path="res://Resources/RunMap/site_kind_bandit_group_cleared.tres" id="49_kgroupdone"]
 [ext_resource type="Resource" path="res://Resources/RunMap/site_kind_bandit_camp_cleared.tres" id="50_kcampdone"]
-[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_mini_boss.tres" id="51_kminiboss"]
 [ext_resource type="Resource" path="res://Resources/RunMap/site_kind_market.tres" id="52_kmarket"]
 [ext_resource type="Resource" path="res://Resources/RunMap/site_kind_saloon.tres" id="53_ksaloon"]
 [ext_resource type="Resource" path="res://Resources/RunMap/site_kind_treasure.tres" id="54_ktreasure"]
@@ -60,10 +61,27 @@
 [ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_bandit_encounter.gd" id="60_encounter"]
 [ext_resource type="Resource" path="res://Resources/RunMap/bandit_group_encounter.tres" id="61_egroup"]
 [ext_resource type="Resource" path="res://Resources/RunMap/bandit_camp_encounter.tres" id="62_ecamp"]
-[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_mini_boss_cleared.tres" id="63_kminibossdone"]
-[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_mini_boss_node.gd" id="64_minibossnode"]
-[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_mini_boss_encounter.gd" id="65_mbencounter"]
-[ext_resource type="Resource" path="res://Resources/RunMap/mini_boss_encounter.tres" id="66_emboss"]
+[ext_resource type="Resource" path="res://Resources/RunMap/site_kind_bounty_cleared.tres" id="63_kbountydone"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_bounty_boss_node.gd" id="64_bossnode"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_bounty_boss_encounter.gd" id="65_bbencounter"]
+[ext_resource type="Resource" path="res://Resources/RunMap/bounty_boss_encounter.tres" id="66_ebboss"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_saloon_node.gd" id="69_saloonnode"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/RunMapSaloonScreen.tscn" id="70_saloon"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_saloon_topic.gd" id="71_topic"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Saloon/topic_bounties.tres" id="72_tbounty"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Saloon/topic_covered_places.tres" id="73_tcovered"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Saloon/topic_road_ahead.tres" id="74_troad"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_saloon_good.gd" id="75_good"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Saloon/good_revolver_rounds.tres" id="76_grevolver"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Saloon/good_shotgun_shells.tres" id="77_gshells"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Saloon/good_rifle_rounds.tres" id="78_grifle"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_saloon_information.gd" id="79_salooninfo"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/RunMapBountyPosterScreen.tscn" id="80_posterscreen"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/TravelLetterbox.tscn" id="81_letterbox"]
+[ext_resource type="Script" path="res://Scripts/World/world_map_extraction_service.gd" id="82_extractservice"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_extraction_node.gd" id="83_extractnode"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_market_node.gd" id="84_marketnode"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/RunMapMarketScreen.tscn" id="85_market"]
 
 [node name="DustCampRunMap" type="Node2D"]
 
@@ -74,12 +92,12 @@ color = Color(0.36, 0.27, 0.21, 1)
 z_index = -20
 texture_filter = 4
 texture_repeat = 2
-position = Vector2(-3200, -8200)
+position = Vector2(-1800, -4200)
 texture = ExtResource("12_ground")
 texture_scale = Vector2(4, 4)
-polygon = PackedVector2Array(0, 0, 6400, 0, 6400, 10000, 0, 10000)
+polygon = PackedVector2Array(0, 0, 10000, 0, 10000, 8400, 0, 8400)
 script = ExtResource("13_surface")
-surface_size = Vector2(6400, 10000)
+surface_size = Vector2(10000, 8400)
 tile_size = 900.0
 
 [node name="RunMapView" type="Node2D" parent="."]
@@ -89,7 +107,7 @@ sites_container_path = NodePath("Sites")
 token_path = NodePath("Token")
 camera_path = NodePath("Camera")
 site_scene = ExtResource("5_site")
-site_kinds = Array[ExtResource("6_kind")]([ExtResource("7_unknown"), ExtResource("8_start"), ExtResource("9_boss"), ExtResource("47_kgroup"), ExtResource("48_kcamp"), ExtResource("49_kgroupdone"), ExtResource("50_kcampdone"), ExtResource("51_kminiboss"), ExtResource("63_kminibossdone"), ExtResource("52_kmarket"), ExtResource("53_ksaloon"), ExtResource("54_ktreasure"), ExtResource("55_kevent"), ExtResource("56_kbounty"), ExtResource("57_kdeposit"), ExtResource("58_kextraction"), ExtResource("59_ksheriff")])
+site_kinds = Array[ExtResource("6_kind")]([ExtResource("7_unknown"), ExtResource("8_start"), ExtResource("9_boss"), ExtResource("47_kgroup"), ExtResource("48_kcamp"), ExtResource("49_kgroupdone"), ExtResource("50_kcampdone"), ExtResource("52_kmarket"), ExtResource("53_ksaloon"), ExtResource("54_ktreasure"), ExtResource("55_kevent"), ExtResource("56_kbounty"), ExtResource("63_kbountydone"), ExtResource("57_kdeposit"), ExtResource("58_kextraction"), ExtResource("59_ksheriff")])
 fog_kind = &"unknown"
 link_texture = ExtResource("10_dash")
 link_width = 20.0
@@ -104,6 +122,10 @@ zoom_step = 0.08
 camera_speed = 6.0
 camera_margin = 420.0
 camera_lead = 320.0
+presentation_zoom_scale = 4.0
+presentation_travel_time = 1.2
+presentation_hold_time = 1.4
+presentation_return_time = 1.0
 
 [node name="Links" type="Node2D" parent="RunMapView"]
 z_index = -5
@@ -124,8 +146,20 @@ zoom = Vector2(0.42, 0.42)
 [node name="RunMapTravel" type="Node" parent="."]
 script = ExtResource("2_travel")
 step_duration = 0.36
-step_hold = 1.0
+step_hold = 0.6
 arrival_hold = 0.35
+sound_bank_path = NodePath("StepSound")
+step_sound = &"pawn_stop"
+
+[node name="StepSound" type="Node" parent="RunMapTravel"]
+script = ExtResource("67_bank")
+sounds = {
+&"pawn_stop": ExtResource("68_pawn")
+}
+voice_count = 2
+bus = &"Game"
+volume_db = -4.0
+pitch_variation = 0.05
 
 [node name="RunMapDirector" type="Node" parent="."]
 script = ExtResource("3_director")
@@ -134,10 +168,12 @@ generator = ExtResource("4_generator")
 map_seed = 0
 view_path = NodePath("../RunMapView")
 travel_path = NodePath("../RunMapTravel")
+reveal_depth = 1
 
 
 [node name="WorldMapCombatBridge" type="Node" parent="."]
 script = ExtResource("38_bridge")
+travel_state = &"run_map"
 max_enemy_count = 80
 spawner_path = NodePath("")
 ambush_path = NodePath("")
@@ -158,12 +194,48 @@ view_path = NodePath("../RunMapView")
 bridge_path = NodePath("../WorldMapCombatBridge")
 encounters = Array[ExtResource("60_encounter")]([ExtResource("61_egroup"), ExtResource("62_ecamp")])
 
-[node name="RunMapMiniBossNode" type="Node" parent="."]
-script = ExtResource("64_minibossnode")
+[node name="RunMapBountyBossNode" type="Node" parent="."]
+script = ExtResource("64_bossnode")
 director_path = NodePath("../RunMapDirector")
 view_path = NodePath("../RunMapView")
 bridge_path = NodePath("../WorldMapCombatBridge")
-encounters = Array[ExtResource("65_mbencounter")]([ExtResource("66_emboss")])
+poster_path = NodePath("../UI/RunMapBountyPosterScreen")
+encounters = Array[ExtResource("65_bbencounter")]([ExtResource("66_ebboss")])
+music_state = &"bounty_boss"
+
+[node name="RunMapSaloonNode" type="Node" parent="."]
+script = ExtResource("69_saloonnode")
+director_path = NodePath("../RunMapDirector")
+view_path = NodePath("../RunMapView")
+screen_path = NodePath("../UI/RunMapSaloonScreen")
+kinds = Array[StringName]([&"saloon"])
+
+[node name="RunMapSaloonInformation" type="Node" parent="."]
+script = ExtResource("79_salooninfo")
+director_path = NodePath("../RunMapDirector")
+view_path = NodePath("../RunMapView")
+screen_path = NodePath("../UI/RunMapSaloonScreen")
+
+[node name="RunMapMarketNode" type="Node" parent="."]
+script = ExtResource("84_marketnode")
+director_path = NodePath("../RunMapDirector")
+view_path = NodePath("../RunMapView")
+screen_path = NodePath("../UI/RunMapMarketScreen")
+kinds = Array[StringName]([&"market"])
+
+[node name="WorldMapExtractionService" type="Node" parent="."]
+script = ExtResource("82_extractservice")
+max_active_extractions = 0
+result_screen_path = NodePath("")
+settle_bounties_from_ledger = true
+return_by_scene_change = true
+
+[node name="RunMapExtractionNode" type="Node" parent="."]
+script = ExtResource("83_extractnode")
+director_path = NodePath("../RunMapDirector")
+view_path = NodePath("../RunMapView")
+service_path = NodePath("../WorldMapExtractionService")
+kinds = Array[StringName]([&"extraction"])
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -171,9 +243,9 @@ encounters = Array[ExtResource("65_mbencounter")]([ExtResource("66_emboss")])
 layout_mode = 3
 anchors_preset = 0
 offset_left = 34.0
-offset_top = 34.0
+offset_top = 76.0
 offset_right = 114.0
-offset_bottom = 114.0
+offset_bottom = 156.0
 mouse_filter = 2
 script = ExtResource("14_clock")
 zone_id = &""
@@ -213,9 +285,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -420.0
-offset_top = -110.0
+offset_top = -146.0
 offset_right = 420.0
-offset_bottom = -40.0
+offset_bottom = -76.0
 grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
@@ -223,10 +295,15 @@ script = ExtResource("15_panel")
 view_path = NodePath("../../RunMapView")
 travel_path = NodePath("../../RunMapTravel")
 line_path = NodePath("Line")
-idle_text = "CHOOSE A ROAD NORTH"
+idle_text = "CHOOSE A ROAD EAST"
 hover_text = "%s  —  %d %s"
 travel_text = "RIDING  —  DAY %d OF %d"
 unknown_name = "UNKNOWN"
+place_text = "%s"
+re_enter_text = "%s  —  STEP BACK IN"
+standing_text = "%s  —  YOU ARE HERE"
+presenting_text = ""
+presented_text = "%s  —  MARKED ON YOUR MAP"
 
 [node name="Line" type="Label" parent="UI/Panel"]
 layout_mode = 1
@@ -240,12 +317,24 @@ theme_override_font_sizes/font_size = 34
 theme_override_colors/font_color = Color(1, 0.9, 0.6, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.03, 0.01, 1)
 theme_override_constants/outline_size = 8
-text = "CHOOSE A ROAD NORTH"
+text = "CHOOSE A ROAD EAST"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 
+[node name="TravelLetterbox" parent="UI" instance=ExtResource("81_letterbox")]
+show_on_ready = true
+
 [node name="WorldBanditDecisionMenu" parent="UI" instance=ExtResource("45_decision")]
+
+[node name="RunMapBountyPosterScreen" parent="UI" instance=ExtResource("80_posterscreen")]
+
+[node name="RunMapSaloonScreen" parent="UI" instance=ExtResource("70_saloon")]
+rest_day_cycles = 4
+topics = Array[ExtResource("71_topic")]([ExtResource("72_tbounty"), ExtResource("73_tcovered"), ExtResource("74_troad")])
+goods = Array[ExtResource("75_good")]([ExtResource("76_grevolver"), ExtResource("77_gshells"), ExtResource("78_grifle")])
+
+[node name="RunMapMarketScreen" parent="UI" instance=ExtResource("85_market")]
 
 [node name="Sun" type="Node2D" parent="." groups=["sun"]]
 script = ExtResource("18_sun")
@@ -274,3 +363,4 @@ script = ExtResource("16_music")
 
 [node name="MusicStateWatcher" type="Node" parent="."]
 script = ExtResource("17_watcher")
+travel_state = &"run_map"

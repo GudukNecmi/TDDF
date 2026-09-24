@@ -1,16 +1,38 @@
-[gd_scene load_steps=3 format=3 uid="uid://cgotikrunmapsite"]
+[gd_scene load_steps=5 format=3 uid="uid://cgotikrunmapsite"]
 
 [ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_site_marker.gd" id="1_marker"]
 [ext_resource type="Texture2D" path="res://Assets/RunMap/Sites/SiteHalo.png" id="2_halo"]
+[ext_resource type="Texture2D" path="res://Assets/RunMap/Sites/SiteVisitedRing.png" id="3_visitedring"]
+[ext_resource type="Texture2D" path="res://Assets/RunMap/Sites/SiteCurrentRing.png" id="4_currentring"]
 
 [node name="RunMapSite" type="Node2D"]
 script = ExtResource("1_marker")
+icon_path = NodePath("Icon")
+halo_path = NodePath("Halo")
+visited_ring_path = NodePath("VisitedRing")
+current_ring_path = NodePath("CurrentRing")
 pick_radius = 130.0
 halo_pulse_scale = 1.12
 halo_pulse_period = 1.4
+current_pulse_scale = 1.06
+current_pulse_period = 2.2
 hover_scale = 1.15
 hover_speed = 14.0
-visited_dim = 0.55
+ring_follows_icon = 1.0
+visited_dim = 0.25
+
+[node name="VisitedRing" type="Sprite2D" parent="."]
+visible = false
+modulate = Color(1, 1, 1, 0.95)
+texture_filter = 1
+scale = Vector2(0.92, 0.92)
+texture = ExtResource("3_visitedring")
+
+[node name="CurrentRing" type="Sprite2D" parent="."]
+visible = false
+texture_filter = 1
+scale = Vector2(1.12, 1.12)
+texture = ExtResource("4_currentring")
 
 [node name="Halo" type="Sprite2D" parent="."]
 visible = false

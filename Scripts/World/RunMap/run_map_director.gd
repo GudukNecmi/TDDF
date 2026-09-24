@@ -23,9 +23,9 @@ extends Node
 ## [member RunMapGenerator.site_plans] - and what [i]happens[/i] at one is a
 ## listener on [signal site_reached] that runs its own encounter and comes back,
 ## not a branch added to this file. [RunMapBanditNode] is the first of them,
-## answering the two sizes of bandit point; the mini boss, market, saloon,
-## treasure, deposit, extraction, event, bounty and sheriff outpost are already
-## on the map and arrive the same way once each has a listener of its own.
+## answering the two sizes of bandit point; the market, saloon, treasure,
+## deposit, extraction, event and sheriff outpost are already on the map and
+## arrive the same way once each has a listener of its own.
 
 ## Emitted the moment the piece arrives somewhere, before the map's choices open
 ## again. [b]The seam every node event will hang off.[/b]
@@ -45,11 +45,27 @@ signal map_generated(graph: RunMapGraph)
 ## a real run uses - makes a different map every run.
 @export var map_seed: int = 0
 
+@export_group("Discovery")
+## How far the fog lifts around a point the piece arrives on, counted in roads.
+## [b]One[/b]: standing somewhere turns over every point its own roads lead to,
+## so the map opens out one ring at a time as it is walked and the player
+## chooses between places they can see rather than between question marks. 0
+## learns only the point underfoot, which is the map as it was before; a larger
+## number is a map that gives itself away faster. Nothing here reaches past the
+## roads that exist, so a distant unconnected point is never turned over.
+@export var reveal_depth: int = 1
+
 @export_group("Wiring")
 @export var view_path: NodePath = ^"../RunMapView"
 @export var travel_path: NodePath = ^"../RunMapTravel"
 @export var world_state_path: NodePath = ^"/root/WorldState"
 @export var session_path: NodePath = ^"/root/RunSession"
+## The contract ledger - the [code]Bounties[/code] autoload. Read for one number
+## only, at the moment a map is made: how many contracts the player rode out
+## carrying, which is what the plans flagged
+## [member RunMapSitePlan.one_per_accepted_bounty] are counted off. A map with no
+## ledger to ask is made as though nothing had been taken off the board.
+@export var ledger_path: NodePath = ^"/root/Bounties"
 
 var _graph: RunMapGraph
 var _view: RunMapView
@@ -67,10 +83,16 @@ func _ready() -> void:
 	_graph = _load_graph()
 	if _graph == null:
 		_graph = _make_graph()
+	# The point the run opens on gives its own roads away exactly as every point
+	# reached after it does, so the map is never first seen as an unbroken field
+	# of question marks.
+	_discover(_graph.current_id if _graph != null else -1)
 
 	if _view != null:
 		if not _view.site_chosen.is_connected(_on_site_chosen):
 			_view.site_chosen.connect(_on_site_chosen)
+		if not _view.site_re_entered.is_connected(_on_site_re_entered):
+			_view.site_re_entered.connect(_on_site_re_entered)
 		_view.build(_graph)
 		_view.set_picking(true)
 
@@ -107,10 +129,19 @@ func _make_graph() -> RunMapGraph:
 		push_warning("RunMapDirector: no generator on '%s' - there is no map to make."
 			% region_id)
 		return null
-	var graph := generator.generate(map_seed)
+	var graph := generator.generate(map_seed, accepted_bounty_count())
 	_store(graph)
 	map_generated.emit(graph)
 	return graph
+
+
+## How many contracts the player is carrying into this run. What decides how many
+## bounty boss points the map is dealt - see
+## [member RunMapSitePlan.one_per_accepted_bounty] - and public so the listener
+## that binds those points to their men can count off the same list.
+func accepted_bounty_count() -> int:
+	var ledger := get_node_or_null(ledger_path) as BountyLedger
+	return 0 if ledger == null else ledger.get_outstanding().size()
 
 
 ## The graph this run already has, or null when there is none - which includes a
@@ -163,9 +194,39 @@ func _on_travel_finished(site_id: int) -> void:
 	if _graph == null:
 		return
 	_graph.move_to(site_id)
+	# Arriving somewhere is also learning what its roads lead to - see
+	# [member reveal_depth].
+	_graph.reveal_around(site_id, reveal_depth)
 	_store(_graph)
 	if _view != null:
 		_view.refresh()
 	site_reached.emit(_graph.get_site(site_id))
 	if _view != null:
 		_view.set_picking(true)
+
+
+## Clicking the point the piece is already standing on. [b]Nothing moves and
+## nothing is spent[/b] - the arrival is simply announced again, so a saloon or
+## a market is walked back into through the very seam it opened through the
+## first time and no listener needs a second entry point. Which points answer
+## this at all is each kind's own [member RunMapSiteKind.re_enterable], read by
+## [RunMapView] before the click ever reaches here, so a fight already had is
+## not had again.
+func _on_site_re_entered(site_id: int) -> void:
+	if _graph == null or site_id != _graph.current_id:
+		return
+	site_reached.emit(_graph.get_site(site_id))
+
+
+## Turns over [param site_id] and everything within [member reveal_depth] roads
+## of it, and writes the map down if that actually learned anything. Kept in one
+## place because the run's opening point and every arrival after it discover by
+## exactly the same rule.
+func _discover(site_id: int) -> void:
+	if _graph == null or site_id < 0:
+		return
+	if _graph.reveal_around(site_id, reveal_depth).is_empty():
+		return
+	_store(_graph)
+	if _view != null:
+		_view.refresh()

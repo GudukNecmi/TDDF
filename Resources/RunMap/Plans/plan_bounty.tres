@@ -5,11 +5,13 @@
 [resource]
 script = ExtResource("1_plan")
 kind = &"bounty"
-exact_count = 3
+exact_count = -1
+one_per_accepted_bounty = true
 min_count = 0
 max_count = 3
 weight = 0.0
-claims_northernmost = false
+claims_far_end = false
 spacing_group = &"bounty"
 is_special = true
 row_band = Vector2(0.1, 1)
+dead_end_weight = 0.5

@@ -44,6 +44,7 @@ BanditPopulation="*res://Scripts/World/bandit_population.gd"
 MCPScreenshot="*res://addons/godot_mcp/mcp_screenshot_service.gd"
 MCPInputService="*res://addons/godot_mcp/mcp_input_service.gd"
 MCPGameInspector="*res://addons/godot_mcp/mcp_game_inspector_service.gd"
+RunCards="*res://Scripts/Run/run_card_holder.gd"
 
 [debug]
 

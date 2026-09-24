@@ -110,6 +110,22 @@ const EXTRACTION_TYPE := MapLocation.LocationType.EXTRACTION
 @export var session_path: NodePath = ^"/root/RunSession"
 @export var result_screen_path: NodePath = ^"../RunHUD/ExtractionResultScreen"
 
+@export_group("Run Map")
+## Where the carried bounty posters are read from. Off - the default, and what a
+## region map uses - judges the [code]bounty_poster[/code] stacks in the
+## player's [RunInventory], exactly as before. On judges the ledger's own taken
+## contracts instead, for a scene with no player body and so no inventory: the
+## run map, where the ledger is the only place a contract is held. A completed
+## contract paid this way is closed out of the ledger - see
+## [method BountyLedger.close_out] - so it is never paid a second time.
+@export var settle_bounties_from_ledger: bool = false
+## How the player is carried home. Off - the default, and what a region map
+## uses - is the player's own [Teleporter], see [method _return_to_base]. On
+## ends the run and asks [method WorldRegionRouter.go_to_base] for the Base
+## scene, the same journey [PlayerDeathSequence] makes from a scene with
+## nowhere to teleport to.
+@export var return_by_scene_change: bool = false
+
 @export_group("Bounty settlement")
 ## Rule 10's flat reward for a bounty poster that was completed by the time
 ## the player extracted. Deliberately not [member Bounty.reward] - that
@@ -270,10 +286,21 @@ func _region_difficulty(region_id: StringName) -> float:
 ## service never activated: a location whose signal fires without ever being
 ## in [member _active_ids] simply changes nothing.
 func _on_location_interacted(location: WorldMapLocation) -> void:
-	if not run_active or _extracted:
-		return
 	if not is_active(location.get_location_id()):
 		return
+	extract(location)
+
+
+## Extracts now: settles the run, empties the run's wallets into the bank and
+## carries the player home - the whole of what reaching an active Extraction
+## point does, for a caller that decides for itself that the player has
+## reached one. [RunMapExtractionNode] is that caller for the run map's
+## EXTRACTION points. [param location] is only passed on to
+## [signal extraction_triggered] and may be null. Returns false, changing
+## nothing, once this run has already extracted.
+func extract(location: WorldMapLocation = null) -> bool:
+	if not run_active or _extracted:
+		return false
 
 	_extracted = true
 	run_active = false
@@ -286,6 +313,7 @@ func _on_location_interacted(location: WorldMapLocation) -> void:
 	run_extracted.emit(settlement)
 
 	_show_result(settlement)
+	return true
 
 
 func _freeze_player() -> void:
@@ -343,6 +371,10 @@ func _settle() -> ExtractionSettlement:
 ## leaves its board slot bare until the ride home refills it, which
 ## [method RunSessionState.end] triggers a beat later in [method _return_to_base].
 func _settle_bounties(settlement: ExtractionSettlement, ledger: BountyLedger) -> void:
+	if settle_bounties_from_ledger:
+		_settle_ledger_bounties(settlement, ledger)
+		return
+
 	var inventory := get_tree().get_first_node_in_group(inventory_group) as RunInventory
 	if inventory == null:
 		return
@@ -362,6 +394,27 @@ func _settle_bounties(settlement: ExtractionSettlement, ledger: BountyLedger) ->
 			settlement.bounty_penalty_total += _penalty_for(bounty)
 			if ledger != null:
 				ledger.cancel(bounty.bounty_id)
+
+
+## [method _settle_bounties] read off the ledger rather than the inventory -
+## see [member settle_bounties_from_ledger]. The same reward, the same penalty
+## and the same cancel for an unfinished contract; a finished one is closed out
+## as well, since nothing else takes it off the ledger once it has been paid.
+func _settle_ledger_bounties(settlement: ExtractionSettlement, ledger: BountyLedger) -> void:
+	if ledger == null:
+		return
+
+	for bounty: Bounty in ledger.get_active().duplicate():
+		if bounty == null:
+			continue
+		if bounty.completed:
+			settlement.completed_bounties.append(bounty)
+			settlement.bounty_reward_total += maxi(completed_bounty_reward, 0)
+			ledger.close_out(bounty.bounty_id)
+		elif bounty.is_outstanding():
+			settlement.incomplete_bounties.append(bounty)
+			settlement.bounty_penalty_total += _penalty_for(bounty)
+			ledger.cancel(bounty.bounty_id)
 
 
 func _penalty_for(bounty: Bounty) -> int:
@@ -433,6 +486,15 @@ func _show_result(settlement: ExtractionSettlement) -> void:
 ## rule 15's "World Map run must be completely terminated before Base
 ## arrival" is still pending by the time the body actually moves.
 func _return_to_base() -> void:
+	if return_by_scene_change:
+		# Ended first, as [PlayerDeathSequence] does: the Base scene that comes
+		# up is the one that reads whether a run is still under way.
+		_end_session()
+		var router := WorldRegionRouter.get_active(self)
+		if router != null:
+			router.go_to_base()
+		return
+
 	var player := get_tree().get_first_node_in_group(player_group) as Node
 	var teleporter: Teleporter = null
 	if player != null:

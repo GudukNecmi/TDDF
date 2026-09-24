@@ -121,6 +121,11 @@ func _run() -> void:
 	# What the last man dying does. The fight itself is not played out here -
 	# that is Arena combat's own check, not this one's.
 	ambush.cleared.emit()
+	# A Bandit Group win holds the ride home behind its upgrade reward - see
+	# [RunMapUpgradeRewardScreen] and run_map_upgrade_reward_smoke.gd.
+	var reward := _find("RunMapUpgradeRewardScreen") as RunMapUpgradeRewardScreen
+	if reward != null and reward.visible:
+		reward.take()
 	await _settle()
 	_ok(_scene_name() == "DustCampRunMap", "the run map came back", _scene_name())
 	_ok(_count("DustCampArena") == 0, "the arena is unloaded, not kept around")

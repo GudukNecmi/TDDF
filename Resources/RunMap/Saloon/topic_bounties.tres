@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RunMapSaloonTopic" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_saloon_topic.gd" id="1_topic"]
+
+[resource]
+script = ExtResource("1_topic")
+id = &"bounties"
+label = "WANTED MEN"
+cost = 0
+placeholder_line = "SHE WIPES THE BAR DOWN. \"PLENTY OF NAMES PASS THROUGH. ASK ME AGAIN WHEN YOU ARE CARRYING A POSTER.\""
+reveals_kinds = Array[StringName]([&"bounty", &"boss"])
+reveal_line = "SHE LOWERS HER VOICE. \"THERE IS A NAME WORTH MONEY OUT AT THE %s. I MARKED IT ON YOUR MAP.\""
+nothing_left_line = "\"EVERY NAME I HAVE IS ALREADY ON THAT MAP OF YOURS. GO EARN ONE.\""

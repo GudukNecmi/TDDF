@@ -204,7 +204,7 @@ shape = SubResource("RectangleShape2D_e37so")
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("8_jg6oh")
-damage_multiplier = 1.5
+region = &"head"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HeadHitbox" unique_id=888211722]
 position = Vector2(-3.4, -47.6)
@@ -320,3 +320,4 @@ script = ExtResource("65_shadowgroup")
 [node name="ShadowCaster" type="Node2D" parent="." unique_id=1389352987]
 script = ExtResource("64_shadow")
 source_sprite_path = NodePath("../Visual/Body")
+ground_contact_size = Vector2(10, 10)

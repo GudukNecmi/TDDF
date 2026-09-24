@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgrade" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_upgrade.gd" id="1_upgrade"]
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_stat_modifier.gd" id="2_modifier"]
+
+[sub_resource type="Resource" id="Resource_mod1"]
+script = ExtResource("2_modifier")
+stat = 9
+amount = 0.2
+label = "KNOCKBACK"
+
+[resource]
+script = ExtResource("1_upgrade")
+id = &"knockback"
+display_name = "KNOCKBACK"
+max_level = 5
+level_costs = Array[int]([150, 300, 550, 850, 1250])
+modifiers_per_level = Array[ExtResource("2_modifier")]([SubResource("Resource_mod1")])

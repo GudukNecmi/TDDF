@@ -36,12 +36,33 @@ extends Resource
 ## layout numbers rather than written into this file. A map is a different size
 ## every run as well as a different shape; see [member min_total_sites].
 ##
-## [b]The rows are a scaffold, not a ladder.[/b] Points are laid out in rows
-## running south to north so the map has a direction, but every row is shifted,
-## jittered and differently populated, roads are made sideways and two rows at a
-## time as well as forward, and the graph handed back is undirected - so a route
-## may run northeast, northwest or briefly back on itself wherever the layout
-## happened to allow it. Nothing downstream reads a row as permission to move.
+## [b]The map runs west to east.[/b] A "row" here is a rank of points standing
+## north to south, and the ranks are stacked left to right - so the start is on
+## the far west of the map, the boss on the far east, and the run as a whole
+## reads across the screen rather than up it. That is the shape
+## [code]res://BoardMap/MapLogic.PNG[/code] draws, and it is the one thing about
+## the layout that is not authored on this resource: every number below is a
+## distance or a jitter, and none of them names an axis.
+##
+## [b]It is about twice as wide as it is tall.[/b] That is not written down
+## anywhere either: the width is the number of ranks times the gap between them,
+## and the height is [member max_row_sites] times [member column_spacing] plus
+## the wandering [member row_shift_jitter] adds - so the board keeps roughly the
+## proportions of the reference map, and there is as much room to branch north
+## and south as there is to press on east.
+##
+## [b]The ranks are a scaffold, not a ladder.[/b] Every rank is shifted, jittered
+## and differently populated, roads are made sideways and two ranks at a time as
+## well as forward, and the graph handed back is undirected - so a route may run
+## northeast, southeast or briefly back on itself wherever the layout happened to
+## allow it. Nothing downstream reads a rank as permission to move.
+##
+## [b]Roads do not cross.[/b] The reference map's roads meet at points and
+## nowhere else, and [method _join] enforces that: a road that would cut across
+## one already made, or pass through a point it does not end at, is refused, and
+## a final pass unpicks any crossing the layout repairs left behind - see
+## [method _untangle]. It is a preference with one exception, the repair that
+## guarantees no point is stranded, which is why the final pass exists at all.
 
 @export_group("How big")
 ## Fewest and most points a run map may hold, counting the start's and the
@@ -59,7 +80,11 @@ extends Resource
 @export var max_row_count: int = 13
 ## Fewest points in a row between the start and the boss.
 @export var min_row_sites: int = 3
-## Most points in a row. This is what makes the map wide.
+## Most points in a row - and since a row is a rank standing north to south,
+## [b]this is what makes the map tall[/b]. It is a cap rather than a count: the
+## rows start at [member min_row_sites] each and the points left over are handed
+## out at random, so raising it makes the map taller by making its fullest ranks
+## fuller, not by adding points.
 @export var max_row_sites: int = 5
 
 @export_group("Road length")
@@ -74,46 +99,87 @@ extends Resource
 @export_range(0.0, 0.5, 0.01) var band_tolerance: float = 0.16
 
 @export_group("Layout")
-## How much of the chosen band's distance a row gap takes up vertically, as a
-## range. Kept below 1 so that the sideways offset between two points has room to
-## make up the rest of the distance without pushing it out of the band - which is
-## what "generate positions around those target distances" means in practice.
+## How much of the chosen band's distance the gap between two ranks takes up
+## along the map's east-west run, as a range. Kept below 1 so that the
+## north-south offset between two points has room to make up the rest of the
+## distance without pushing it out of the band - which is what "generate
+## positions around those target distances" means in practice.
 @export var row_gap_fraction := Vector2(0.82, 0.96)
-## How far apart the points in one row are laid out, before jitter.
+## How far apart the points standing in one rank are laid out, before jitter -
+## the height of the map, together with [member max_row_sites].
+##
+## [b]It is worth keeping this near one of [member band_distances][/b]. Two
+## points in the same rank are joined by a road running straight up or down the
+## map - see [member sideways_link_chance] - and that road, like every other, is
+## only allowed if its length lands on a band. Spaced a band apart, most of a
+## rank's neighbours can be joined and the map branches up and down as freely as
+## it branches east; spaced halfway between two bands, almost none of them can
+## and the rank becomes a row of points that only reach forwards.
 @export var column_spacing: float = 300.0
-## How far a point may wander sideways from its column.
+## How far a point may wander north or south of its place in the rank.
 @export var column_jitter: float = 90.0
-## How far a whole row may slide east or west. What stops the map reading as a
-## grid.
+## How far a whole rank may slide north or south. What stops the map reading as
+## a grid.
 @export var row_shift_jitter: float = 170.0
-## How far a point may wander north or south of its own row's line. What stops
-## the rows from being perfectly aligned.
+## How far a point may wander east or west of its own rank's line. What stops
+## the ranks from being perfectly aligned.
 @export var row_tilt_jitter: float = 110.0
 
 @export_group("Branching")
-## Fewest roads a point sends on to the next row.
+## Fewest roads a point sends on to the next rank.
 @export var min_forward_links: int = 1
-## Most roads a point sends on to the next row - the widest branch the map can
+## Most roads a point sends on to the next rank - the widest branch the map can
 ## offer.
 @export var max_forward_links: int = 4
 ## The chance of taking one more forward road than the last, rolled repeatedly up
 ## to [member max_forward_links]. Higher is a busier, less linear map.
 @export_range(0.0, 1.0, 0.01) var extra_forward_chance: float = 0.55
-## The chance of joining two neighbouring points in the same row - a sideways
-## move, and a way for two routes to meet again without either going north.
+## The chance of joining two neighbouring points in the same row - a road
+## running straight north or south, and a way for two routes to meet again
+## without either going on east. [b]This and [member column_spacing] are the
+## map's up-and-down branching[/b]: the spacing decides how many of a rank's
+## neighbours could be joined at all, and this decides how many of them are.
 @export_range(0.0, 1.0, 0.01) var sideways_link_chance: float = 0.3
-## The chance of joining a point to one two rows ahead, where the distance allows
-## it - a long road that skips a row.
+## The chance of joining a point to one two ranks ahead, where the distance allows
+## it - a long road that skips a rank.
 @export_range(0.0, 1.0, 0.01) var skip_link_chance: float = 0.22
 ## Most roads any one point may have, counting every direction. A cap on how
 ## tangled a junction can get.
 @export var max_links_per_site: int = 5
+## The chance that a point left with a single road - a dead end - is given one
+## more road on east, where a legal, clear one exists within the next two ranks.
+## Rolled once per dead end after every other road is down; see
+## [method _link_dead_ends]. [b]This is what thins the dead ends out without
+## removing them[/b]: 0 leaves every one the layout made, 1 joins every one that
+## has anywhere to go, and whatever is not joined is dealt a reward instead - see
+## [member dead_end_reward_chance].
+@export_range(0.0, 1.0, 0.01) var dead_end_link_chance: float = 0.0
+
+@export_group("Road overlap")
+## Whether two roads that do not share a point are allowed to cross.
+##
+## [b]Off is what makes the map read as a road network rather than as a mesh.[/b]
+## The reference map's roads meet only at the points they run between, and with
+## this on no road is ever laid across another - the only crossings that can
+## survive are the ones a stranded-point repair had to make, and
+## [method _untangle] takes those out again afterwards.
+@export var prevent_crossings: bool = true
+## How close a road may pass to a point it does not end at, in map pixels. A
+## road running within this of a point looks like it stops there, so it is
+## refused. 0 allows a road to pass straight through a point.
+@export var site_clearance: float = 140.0
+## How many crossings [method _untangle] may unpick on one map before it gives
+## up. Each round takes out one road, so this is also the most roads a map may
+## lose to the rule; the pass stops early the moment nothing crosses, so a map
+## laid out cleanly costs nothing at all. 0 leaves the layout exactly as the
+## linking passes left it.
+@export_range(0, 256, 1) var untangle_rounds: int = 96
 
 @export_group("Fog")
-## Whether the boss at the northern end is known from the moment the map opens.
+## Whether the boss at the eastern end is known from the moment the map opens.
 ##
 ## On, and it is the one landmark the fog does not cover: the run is a ride
-## towards a boss the player can see waiting at the top of the map, and every
+## towards a boss the player can see waiting at the far right of the map, and every
 ## other point between here and there is an unknown one. Off, the boss is fogged
 ## like everything else and the map's far end is simply the last unknown point.
 @export var boss_known_from_the_start: bool = true
@@ -176,17 +242,38 @@ extends Resource
 ## never drawn while one that keeps it exists. 0 is strictly the best spot every
 ## time.
 @export var placement_slack: float = 40.0
+## The chance that a dead end - a point with a single road - is claimed for
+## something worth the detour before the rest of the map is filled, rolled once
+## per dead end. What it can hold is each plan's
+## [member RunMapSitePlan.dead_end_weight]; [b]it is drawn from the places the
+## map was already going to have[/b], so the counts, and with them the bandit
+## density, are exactly what they would have been - only where they stand
+## changes. 0 leaves dead ends to the ordinary fill.
+@export_range(0.0, 1.0, 0.01) var dead_end_reward_chance: float = 0.0
 
 @export_group("Generation")
 ## How many whole maps to try before handing back the best of a bad lot. A map is
 ## rejected when the boss cannot be reached from the start.
 @export var attempts: int = 24
 
+## How many contracts the player rode out carrying, for the run currently being
+## laid out. Held for the length of one [method generate] rather than authored,
+## because it is a fact about the run and not about the map - see
+## [member RunMapSitePlan.one_per_accepted_bounty]. -1 is "nobody said", which
+## leaves every plan on its own authored counts.
+var _accepted_bounties: int = -1
+
 
 ## Makes a map. [param map_seed] of 0 asks for a random one, which is what a real
 ## run does; any other value makes exactly the same map every time, which is what
 ## a smoke check and a bug report want.
-func generate(map_seed: int = 0) -> RunMapGraph:
+##
+## [param accepted_bounties] is how many contracts the player set out holding,
+## which is what the plans flagged [member RunMapSitePlan.one_per_accepted_bounty]
+## are counted off. -1 leaves those plans on their authored counts, which is what
+## a map laid out on its own for tuning wants.
+func generate(map_seed: int = 0, accepted_bounties: int = -1) -> RunMapGraph:
+	_accepted_bounties = accepted_bounties
 	var rng := RandomNumberGenerator.new()
 	if map_seed == 0:
 		rng.randomize()
@@ -263,14 +350,18 @@ func _lay_out(rng: RandomNumberGenerator) -> RunMapGraph:
 	for row: int in range(rows.size() - 1):
 		_link_forward(graph, rows[row], rows[row + 1], rng)
 		_repair_inbound(graph, rows[row], rows[row + 1], rng)
-		_sort_row_by_x(graph, rows[row + 1])
+		_sort_row_across(graph, rows[row + 1])
 
 	for row: int in range(rows.size()):
 		_link_sideways(graph, rows[row], rng)
 		if row + 2 < rows.size():
 			_link_skipping(graph, rows[row], rows[row + 2], rng)
 
+	# Measured first, so the crossings unpicked below are only ones a road the
+	# map is actually keeping is involved in.
 	_remeasure(graph)
+	_untangle(graph)
+	_link_dead_ends(graph, rows, rng)
 	graph.rebuild_index()
 	graph.current_id = graph.start_id
 	graph.move_to(graph.start_id)
@@ -329,13 +420,13 @@ func _plan_rows(rng: RandomNumberGenerator) -> PackedInt32Array:
 	return sizes
 
 
-## Every point on the map, row by row, with the start alone at the south end and
-## the boss alone at the north.
+## Every point on the map, rank by rank, with the start alone at the western end
+## and the boss alone at the eastern one.
 func _place_sites(graph: RunMapGraph, rng: RandomNumberGenerator) -> Array:
 	var rows: Array = []
 	var sizes := _plan_rows(rng)
 	var total := sizes.size()
-	var y := 0.0
+	var x := 0.0
 	var previous_centre := 0.0
 
 	for row: int in range(total):
@@ -343,13 +434,13 @@ func _place_sites(graph: RunMapGraph, rng: RandomNumberGenerator) -> Array:
 
 		if row > 0:
 			var band := band_distances[rng.randi_range(0, maxi(band_distances.size() - 1, 0))]
-			y -= band * rng.randf_range(row_gap_fraction.x, row_gap_fraction.y)
+			x += band * rng.randf_range(row_gap_fraction.x, row_gap_fraction.y)
 
 		var span := float(count - 1) * column_spacing
 		var centre := previous_centre + rng.randf_range(-row_shift_jitter, row_shift_jitter)
 		if row == 0 or row == total - 1:
 			# The start and the boss sit on the line the map as a whole runs along,
-			# so the run reads as beginning at the bottom and ending at the top
+			# so the run reads as beginning at the left and ending at the right
 			# rather than off to one side.
 			centre = previous_centre
 		previous_centre = centre
@@ -357,11 +448,11 @@ func _place_sites(graph: RunMapGraph, rng: RandomNumberGenerator) -> Array:
 		var ids := PackedInt32Array()
 		for index: int in range(count):
 			var at := Vector2(
+				x + rng.randf_range(-row_tilt_jitter, row_tilt_jitter),
 				centre - span * 0.5 + float(index) * column_spacing
-					+ rng.randf_range(-column_jitter, column_jitter),
-				y + rng.randf_range(-row_tilt_jitter, row_tilt_jitter))
+					+ rng.randf_range(-column_jitter, column_jitter))
 			if count == 1:
-				at.x = centre
+				at.y = centre
 			var kind := RunMapSite.KIND_UNKNOWN
 			if row == 0:
 				kind = RunMapSite.KIND_START
@@ -413,20 +504,28 @@ func _link_forward(graph: RunMapGraph, from_row: PackedInt32Array,
 			allowed.remove_at(pick)
 
 
-## Any point in the next row that nothing reached is joined to the nearest point
+## Any point in the next rank that nothing reached is joined to the nearest point
 ## behind it, moving it onto a band first so the road is a legal length. This is
-## what guarantees the map has no dead row and no unreachable point.
+## what guarantees the map has no dead rank and no unreachable point.
+##
+## [b]It is the one caller allowed to lay a road across another[/b] - a point
+## with no way into it is worse than a crossing - and it first tries for a
+## partner that needs no crossing at all, so the exception is taken only where
+## the map genuinely leaves no clear road in. See [method _untangle].
 func _repair_inbound(graph: RunMapGraph, from_row: PackedInt32Array,
 		to_row: PackedInt32Array, _rng: RandomNumberGenerator) -> void:
 	for b: int in to_row:
 		if _has_link_into(graph, b, from_row):
 			continue
-		var a := _nearest_in(graph, b, from_row)
+		var a := _nearest_clear_in(graph, b, from_row)
+		if a >= 0 and _join(graph, a, b):
+			continue
+		a = _nearest_in(graph, b, from_row)
 		if a < 0:
 			continue
 		if day_cycles_for(_distance(graph, a, b)) <= 0:
 			_snap_to_band(graph, a, b)
-		_join(graph, a, b)
+		_join(graph, a, b, true)
 
 
 ## Roads between neighbouring points in the same row: the map's sideways moves,
@@ -450,10 +549,42 @@ func _link_skipping(graph: RunMapGraph, from_row: PackedInt32Array,
 			_join(graph, a, b)
 
 
-## Adds one road, if it is a legal length and neither end is already full. The
-## single gate every road in the map passes through, so no caller can make one
-## that breaks the distance rule or the junction cap.
-func _join(graph: RunMapGraph, a: int, b: int) -> bool:
+## Gives some of the map's dead ends one more road on east - see
+## [member dead_end_link_chance]. Runs last, after [method _untangle], so every
+## road it adds passes the same [method _join] gate as the rest and none of them
+## can cross anything; and never backwards - east where it can, otherwise to a
+## neighbour in the same rank - so a dead end becomes a way on rather than a way
+## back.
+func _link_dead_ends(graph: RunMapGraph, rows: Array,
+		rng: RandomNumberGenerator) -> void:
+	if dead_end_link_chance <= 0.0:
+		return
+	for row: int in range(1, rows.size() - 1):
+		for a: int in rows[row]:
+			if _degree(graph, a) != 1 or rng.randf() >= dead_end_link_chance:
+				continue
+			var ahead := PackedInt32Array()
+			for next: int in range(row + 1, mini(row + 3, rows.size())):
+				ahead.append_array(rows[next])
+			# East first; failing that, a neighbour in its own rank, which has a
+			# way on east of its own - the same sideways road the map already makes.
+			var partners := _allowed_partners(graph, a, ahead)
+			partners.append_array(_allowed_partners(graph, a, rows[row]))
+			for b: int in partners:
+				if b != a and _join(graph, a, b):
+					break
+
+
+## Adds one road, if it is a legal length, neither end is already full, and it
+## lies clear of every road and every point it has nothing to do with. The single
+## gate every road in the map passes through, so no caller can make one that
+## breaks the distance rule, the junction cap or the overlap rule.
+##
+## [param may_overlap] is the one exception, and only [method _repair_inbound]
+## takes it: a point with no road at all is worse than a crossing, so the repair
+## is allowed to make one and [method _untangle] is what takes it out again
+## afterwards if it can be spared.
+func _join(graph: RunMapGraph, a: int, b: int, may_overlap: bool = false) -> bool:
 	if a == b or a < 0 or b < 0:
 		return false
 	if graph.has_link(a, b):
@@ -464,21 +595,129 @@ func _join(graph: RunMapGraph, a: int, b: int) -> bool:
 	var cycles := day_cycles_for(distance)
 	if cycles <= 0:
 		return false
+	if not may_overlap and not _lies_clear(graph, a, b):
+		return false
 	return graph.add_link(RunMapLink.make(a, b, distance, cycles))
+
+
+# --- Keeping the roads apart -----------------------------------------------------
+
+## Whether a road from [param a] to [param b] could be drawn without running
+## across anything: no road it does not share a point with, and no point it does
+## not end at.
+func _lies_clear(graph: RunMapGraph, a: int, b: int) -> bool:
+	if not prevent_crossings:
+		return true
+	var from := graph.get_site(a)
+	var to := graph.get_site(b)
+	if from == null or to == null:
+		return false
+
+	for link: RunMapLink in graph.links:
+		if link.touches(a) or link.touches(b):
+			continue
+		if _segments_cross(from.position, to.position,
+				graph.get_site(link.from_id).position,
+				graph.get_site(link.to_id).position):
+			return false
+
+	if site_clearance > 0.0:
+		for site: RunMapSite in graph.sites:
+			if site.id == a or site.id == b:
+				continue
+			var near := Geometry2D.get_closest_point_to_segment(
+				site.position, from.position, to.position)
+			if site.position.distance_to(near) < site_clearance:
+				return false
+	return true
+
+
+## Whether two road segments meet anywhere other than at a shared end. The ends
+## are excluded by the callers rather than here: every road that shares a point
+## with the one being tested is skipped before this is asked.
+func _segments_cross(a1: Vector2, a2: Vector2, b1: Vector2, b2: Vector2) -> bool:
+	return Geometry2D.segment_intersects_segment(a1, a2, b1, b2) != null
+
+
+## Takes out every crossing the layout ended up with, one road at a time.
+##
+## [b]A crossing can outlive [method _join]'s refusal in two ways[/b], which is
+## why this pass exists: [method _repair_inbound] is allowed to make one rather
+## than strand a point, and [method _snap_to_band] moves a point that other roads
+## already run to - so a road that was clear when it was made can be laid across
+## another afterwards. Each round finds one crossing pair and drops the road the
+## map can better spare: the one whose ends both have somewhere else to go, and
+## of those the longer, since a long road is the one that reaches across the map
+## and the one another route most likely duplicates. A crossing where both roads
+## are somebody's only way out is left alone rather than orphaning a point.
+func _untangle(graph: RunMapGraph) -> void:
+	if not prevent_crossings:
+		return
+	for _round: int in range(maxi(untangle_rounds, 0)):
+		var drop := _worst_crossing(graph)
+		if drop < 0:
+			return
+		graph.links.remove_at(drop)
+		graph.rebuild_index()
+
+
+## Which road to drop for the first crossing found, or -1 when nothing crosses.
+func _worst_crossing(graph: RunMapGraph) -> int:
+	for first: int in range(graph.links.size()):
+		var one := graph.links[first]
+		for second: int in range(first + 1, graph.links.size()):
+			var two := graph.links[second]
+			if one.touches(two.from_id) or one.touches(two.to_id):
+				continue
+			if not _segments_cross(
+					graph.get_site(one.from_id).position,
+					graph.get_site(one.to_id).position,
+					graph.get_site(two.from_id).position,
+					graph.get_site(two.to_id).position):
+				continue
+
+			var one_spare := _is_spare(graph, one)
+			var two_spare := _is_spare(graph, two)
+			if one_spare and not two_spare:
+				return first
+			if two_spare and not one_spare:
+				return second
+			if not one_spare and not two_spare:
+				continue
+			return first if _distance(graph, one.from_id, one.to_id) \
+				>= _distance(graph, two.from_id, two.to_id) else second
+	return -1
+
+
+## Whether a road can be taken out without leaving either of its ends with no
+## road at all.
+func _is_spare(graph: RunMapGraph, link: RunMapLink) -> bool:
+	return _degree(graph, link.from_id) > 1 and _degree(graph, link.to_id) > 1
 
 
 ## Moves [param b] along the line from [param a] until the two are exactly the
 ## nearest band's distance apart. [b]The positions are generated around the
 ## target distances, so this is the generator correcting its own layout rather
-## than a duration being fudged to fit a length.[/b]
+## than a duration being fudged to fit a length.[/b] The start and the boss are
+## the exception: they are the map's two ends and are never moved.
 func _snap_to_band(graph: RunMapGraph, a: int, b: int) -> void:
 	var from := graph.get_site(a)
 	var to := graph.get_site(b)
 	if from == null or to == null:
 		return
+	if b == graph.start_id or b == graph.boss_id:
+		# The two ends of the map are the one thing the layout is measured against:
+		# the boss is the point the run finishes on, at the far east of the board,
+		# and dragging it back along a road from some far-flung point in the rank
+		# before it is how it ends up standing west of its own neighbours. The road
+		# is refused instead, and a rank that genuinely cannot reach the boss makes
+		# the whole attempt unplayable - which is what [member attempts] is for.
+		return
 	var offset := to.position - from.position
 	if offset.length() < 1.0:
-		offset = Vector2(0.0, -1.0)
+		# Two points exactly on top of each other have no direction to be moved
+		# along, so the one the map as a whole runs in is used: east.
+		offset = Vector2(1.0, 0.0)
 	var band := nearest_band(offset.length())
 	if band <= 0.0:
 		return
@@ -522,6 +761,25 @@ func _allowed_partners(graph: RunMapGraph, a: int, row: PackedInt32Array) -> Arr
 	for entry: Array in scored:
 		ids.append(entry[1])
 	return ids
+
+
+## The nearest point in [param row] a legal road could be run to without
+## crossing anything, or -1 when none can. What [method _repair_inbound] asks
+## for before it falls back to making a crossing.
+func _nearest_clear_in(graph: RunMapGraph, a: int, row: PackedInt32Array) -> int:
+	var best := -1
+	var best_distance := INF
+	for b: int in row:
+		if b == a:
+			continue
+		var distance := _distance(graph, a, b)
+		if distance >= best_distance or day_cycles_for(distance) <= 0:
+			continue
+		if not _lies_clear(graph, a, b):
+			continue
+		best_distance = distance
+		best = b
+	return best
 
 
 func _nearest_in(graph: RunMapGraph, a: int, row: PackedInt32Array) -> int:
@@ -572,12 +830,16 @@ func _distance(graph: RunMapGraph, a: int, b: int) -> float:
 	return from.position.distance_to(to.position)
 
 
-func _sort_row_by_x(graph: RunMapGraph, row: PackedInt32Array) -> void:
+## Puts a rank back in the order it actually stands in, north to south, after a
+## repair has moved one of its points. What [method _link_sideways] reads as
+## "neighbouring", so a sideways road always joins two points that really are
+## next to each other - which is half of what keeps the roads from crossing.
+func _sort_row_across(graph: RunMapGraph, row: PackedInt32Array) -> void:
 	var ids: Array[int] = []
 	for site_id: int in row:
 		ids.append(site_id)
 	ids.sort_custom(func(a: int, b: int) -> bool:
-		return graph.get_site(a).position.x < graph.get_site(b).position.x)
+		return graph.get_site(a).position.y < graph.get_site(b).position.y)
 	for index: int in range(ids.size()):
 		row[index] = ids[index]
 
@@ -632,7 +894,7 @@ func _prune_unreachable(graph: RunMapGraph) -> void:
 ## It is deliberately not a second pass over a second map: the same
 ## [RunMapGraph] the roads were measured on is the one written into here.
 ##
-## The order is what makes the rules hold. The northernmost point is claimed
+## The order is what makes the rules hold. The map's far end is claimed
 ## first - the final boss is a position, not a draw. Then every promise is
 ## collected: the exact counts a run must have, then each plan's
 ## [member RunMapSitePlan.min_count]. Whatever the map has left over is filled by
@@ -645,9 +907,9 @@ func _assign_kinds(graph: RunMapGraph, rng: RandomNumberGenerator) -> void:
 	if graph == null or site_plans.is_empty():
 		return
 
-	var north := _north_plan()
-	if north != null and graph.boss_id >= 0:
-		graph.get_site(graph.boss_id).kind = north.kind
+	var far_end := _far_end_plan()
+	if far_end != null and graph.boss_id >= 0:
+		graph.get_site(graph.boss_id).kind = far_end.kind
 
 	var free: Array[int] = []
 	for site: RunMapSite in graph.sites:
@@ -662,24 +924,121 @@ func _assign_kinds(graph: RunMapGraph, rng: RandomNumberGenerator) -> void:
 	# Which plan ended up on which point, for the repair pass below to re-score.
 	var placed: Dictionary = {}
 
-	for plan: RunMapSitePlan in _plan_demands(free.size(), rng):
+	var demands := _plan_demands(free.size(), rng)
+	# Dead ends are dealt their reward before anything else is placed, out of the
+	# same demands, and are then held there - see [member dead_end_reward_chance].
+	var pinned := _claim_dead_ends(graph, demands, free, rng, groups, specials, placed)
+
+	for plan: RunMapSitePlan in demands:
 		if free.is_empty():
 			break
 		var chosen := _pick_site_for(plan, free, graph, rng, groups, specials)
 		if chosen < 0:
 			continue
-		free.erase(chosen)
-		var site := graph.get_site(chosen)
-		site.kind = plan.kind
-		if not plan.spacing_group.is_empty():
-			var peers: Array = groups.get(plan.spacing_group, [])
-			peers.append(site)
-			groups[plan.spacing_group] = peers
-		if plan.is_special:
-			specials.append(site)
-		placed[chosen] = plan
+		_place(graph, plan, chosen, free, groups, specials, placed)
 
-	_repair_spacing(graph, placed, rng)
+	_repair_spacing(graph, placed, rng, pinned)
+
+
+## Writes [param plan] onto [param site_id] and records it everywhere the
+## spacing rules read from.
+func _place(graph: RunMapGraph, plan: RunMapSitePlan, site_id: int, free: Array[int],
+		groups: Dictionary, specials: Array[RunMapSite], placed: Dictionary) -> void:
+	free.erase(site_id)
+	var site := graph.get_site(site_id)
+	site.kind = plan.kind
+	if not plan.spacing_group.is_empty():
+		var peers: Array = groups.get(plan.spacing_group, [])
+		peers.append(site)
+		groups[plan.spacing_group] = peers
+	if plan.is_special:
+		specials.append(site)
+	placed[site_id] = plan
+
+
+## Deals the map's dead ends - points with a single road - something worth the
+## ride out and back, and returns the points it claimed so nothing trades them
+## away afterwards.
+##
+## [b]Nothing is added to the map here.[/b] Each reward is one of
+## [param demands] - a place the map was already going to have - drawn by its
+## plan's [member RunMapSitePlan.dead_end_weight] and taken out of the list, so
+## the counts come out exactly as they would have and only the positions change.
+## Which dead end it goes to is chosen by the same spacing rules as everything
+## else, so a treasure at a dead end is still kept clear of the other treasures.
+## A dead end whose roll fails, or that no remaining plan may stand on, is left
+## to the ordinary fill.
+func _claim_dead_ends(graph: RunMapGraph, demands: Array[RunMapSitePlan],
+		free: Array[int], rng: RandomNumberGenerator, groups: Dictionary,
+		specials: Array[RunMapSite], placed: Dictionary) -> Dictionary:
+	var pinned: Dictionary = {}
+	if dead_end_reward_chance <= 0.0:
+		return pinned
+
+	var ends: Array[int] = []
+	for site_id: int in free:
+		if _degree(graph, site_id) != 1:
+			continue
+		# A point hanging off the start is one of the run's first choices, not
+		# the end of a branch, and those are left to the ordinary fill.
+		if graph.has_link(graph.start_id, site_id):
+			continue
+		if rng.randf() < dead_end_reward_chance:
+			ends.append(site_id)
+
+	# Plans whose best dead end left would break a spacing rule - they are placed
+	# with the rest of the map instead, where there is room to keep it.
+	var refused: Dictionary = {}
+	while not ends.is_empty():
+		# Only plans that still have a place to hand over and may stand on at
+		# least one of the dead ends left.
+		var total := 0.0
+		var offered: Array[RunMapSitePlan] = []
+		for plan: RunMapSitePlan in site_plans:
+			if plan == null or plan.dead_end_weight <= 0.0 or not demands.has(plan):
+				continue
+			if refused.has(plan):
+				continue
+			if _strictly_in_band(plan, ends, graph).is_empty():
+				continue
+			offered.append(plan)
+			total += plan.dead_end_weight
+		if offered.is_empty():
+			break
+
+		var chosen_plan: RunMapSitePlan = offered[offered.size() - 1]
+		var roll := rng.randf() * total
+		for plan: RunMapSitePlan in offered:
+			roll -= plan.dead_end_weight
+			if roll <= 0.0:
+				chosen_plan = plan
+				break
+
+		var chosen := _pick_site_for(chosen_plan,
+			_strictly_in_band(chosen_plan, ends, graph), graph, rng, groups, specials)
+		if chosen < 0:
+			break
+		if _wants_room(chosen_plan) and _placement_score(
+				graph.get_site(chosen), chosen_plan, groups, specials) < -spacing_penalty:
+			refused[chosen_plan] = true
+			continue
+		demands.remove_at(demands.find(chosen_plan))
+		ends.erase(chosen)
+		_place(graph, chosen_plan, chosen, free, groups, specials, placed)
+		pinned[chosen] = true
+	return pinned
+
+
+## The points of [param ids] inside [param plan]'s own stretch of the map, with
+## no fallback to the rest - a dead end outside a kind's band is simply not one
+## that kind is offered.
+func _strictly_in_band(plan: RunMapSitePlan, ids: Array[int],
+		graph: RunMapGraph) -> Array[int]:
+	var kept: Array[int] = []
+	for site_id: int in ids:
+		if _in_row_band(plan, graph.get_site(site_id), graph):
+			kept.append(site_id)
+	return kept
 
 
 ## Which plan claims each point, in the order they are placed - promises first,
@@ -692,14 +1051,15 @@ func _plan_demands(capacity: int, rng: RandomNumberGenerator) -> Array[RunMapSit
 	# An exact count is a promise the map keeps whatever else it has to give up,
 	# so these are collected first and are the last thing a small map drops.
 	for plan: RunMapSitePlan in site_plans:
-		if plan == null or plan.claims_northernmost or plan.exact_count < 0:
+		var promised := promised_count(plan)
+		if plan == null or plan.claims_far_end or promised < 0:
 			continue
-		for _one: int in range(maxi(plan.exact_count, 0)):
+		for _one: int in range(promised):
 			demands.append(plan)
-		counts[plan.kind] = maxi(plan.exact_count, 0)
+		counts[plan.kind] = promised
 
 	for plan: RunMapSitePlan in site_plans:
-		if plan == null or plan.claims_northernmost or plan.exact_count >= 0:
+		if plan == null or plan.claims_far_end or promised_count(plan) >= 0:
 			continue
 		for _one: int in range(maxi(plan.min_count, 0)):
 			demands.append(plan)
@@ -885,7 +1245,7 @@ func _weighted_plan(rng: RandomNumberGenerator, counts: Dictionary,
 
 func _fill_weight(plan: RunMapSitePlan, counts: Dictionary,
 		no_more_room: bool = false) -> float:
-	if plan == null or plan.claims_northernmost or plan.exact_count >= 0:
+	if plan == null or plan.claims_far_end or promised_count(plan) >= 0:
 		return 0.0
 	if no_more_room and _wants_room(plan):
 		return 0.0
@@ -896,6 +1256,28 @@ func _fill_weight(plan: RunMapSitePlan, counts: Dictionary,
 	return plan.weight
 
 
+## How many of [param plan] this map promises outright, or -1 for a plan that
+## promises no exact number and takes its chances in the weighted fill.
+##
+## [b]It is the one place a promise is read[/b], so the two things that can make
+## one - a number authored on the plan, and a contract the player is carrying -
+## cannot disagree about which plans are promised, which are filled and which are
+## capped. See [member RunMapSitePlan.one_per_accepted_bounty].
+##
+## Public because the checks that measure a distribution have to be able to ask
+## for the same answer the layout used - see
+## [code]Scripts/Dev/run_map_distribution_smoke.gd[/code].
+func promised_count(plan: RunMapSitePlan) -> int:
+	if plan == null:
+		return -1
+	if plan.one_per_accepted_bounty and _accepted_bounties >= 0:
+		var wanted := _accepted_bounties
+		if plan.max_count >= 0:
+			wanted = mini(wanted, plan.max_count)
+		return maxi(wanted, 0)
+	return maxi(plan.exact_count, -1)
+
+
 ## Whether this kind is one the spacing rules have anything to say about - it
 ## shares a distance band with something, or it is high-value enough to be kept
 ## out of a cluster. These are placed before the common kinds, so they choose
@@ -904,9 +1286,12 @@ func _wants_room(plan: RunMapSitePlan) -> bool:
 	return plan != null and (plan.is_special or not plan.spacing_group.is_empty())
 
 
-func _north_plan() -> RunMapSitePlan:
+## The plan that takes the map's far end - the point the run finishes on -
+## rather than being dealt out over the rest of the map. Null when no plan
+## claims it, which leaves the boss's point as whatever the layout made it.
+func _far_end_plan() -> RunMapSitePlan:
 	for plan: RunMapSitePlan in site_plans:
-		if plan != null and plan.claims_northernmost:
+		if plan != null and plan.claims_far_end:
 			return plan
 	return null
 
@@ -938,10 +1323,14 @@ func _shuffle(plans: Array[RunMapSitePlan], rng: RandomNumberGenerator) -> void:
 ## so this always terminates and can never make the map worse than the pass that
 ## laid it out.
 func _repair_spacing(graph: RunMapGraph, placed: Dictionary,
-		rng: RandomNumberGenerator) -> void:
+		rng: RandomNumberGenerator, pinned: Dictionary = {}) -> void:
 	var roomy: Array[int] = []
 	var plain: Array[int] = []
 	for site_id: int in placed:
+		# A dead end's reward is where it is on purpose - see
+		# [method _claim_dead_ends] - so it is neither moved nor moved onto.
+		if pinned.has(site_id):
+			continue
 		if _wants_room(placed[site_id]):
 			roomy.append(site_id)
 		else:

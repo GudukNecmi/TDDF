@@ -69,6 +69,13 @@ func _run() -> void:
 	print("--- how the bandit points read ---")
 	_report_tiers(bandits, bridge, director.region_id, graph)
 
+	# A fresh run carries no Blood, and the wallet refuses a payment it cannot
+	# cover - so the player is handed enough for the bridge's own pay amount
+	# before a peaceful answer is measured.
+	var wallet := root.get_node_or_null(^"Blood") as BloodWallet
+	if wallet != null and not wallet.can_afford(bridge.decision_pay_amount):
+		wallet.add(bridge.decision_pay_amount - wallet.get_total())
+
 	print("--- arriving, and talking the way out ---")
 	await _check_answer(director, view, travel, menu, bandits, bridge, graph, true)
 
@@ -222,10 +229,17 @@ func _check_answer(director: RunMapDirector, view: RunMapView, travel: RunMapTra
 	if not menu.is_open() or entry == null:
 		return
 
-	# The one thing the screen must not say: how many men are waiting.
+	# How many men are waiting, and the same number the arena would be built with.
 	var count_row := menu.get_node_or_null(^"Panel/Body/Enemies") as CanvasItem
-	_ok(count_row != null and not count_row.visible,
-		"the screen does not say how many men are waiting")
+	var count_label := menu.get_node_or_null(^"Panel/Body/Enemies/Count") as Label
+	_ok(count_row != null and count_row.visible and count_label != null
+			and count_label.text == str(bridge._site_enemy_count),
+		"the screen says how many men are waiting",
+		"" if count_label == null else "%s shown, %d staged"
+			% [count_label.text, bridge._site_enemy_count])
+	var blood_label := menu.get_node_or_null(^"Panel/Body/Resources/Blood/Value") as Label
+	_ok(blood_label != null and blood_label.text == str(_blood()),
+		"the screen shows the Blood being carried")
 	var art := menu.get_node_or_null(^"Panel/Body/Art") as CanvasItem
 	_ok(art != null and art.visible, "the bandits are still pictured")
 	var line := menu.get_node_or_null(^"Panel/Body/Line") as Label
@@ -238,6 +252,14 @@ func _check_answer(director: RunMapDirector, view: RunMapView, travel: RunMapTra
 		return
 	var wanted: StringName = button.get_meta(&"outcome", &"fight")
 	print("       pressed '%s' - \"%s\"" % [wanted, button.text])
+	var tag := button.get_node_or_null(^"Blood") as Label
+	if wanted == &"pay" or wanted == &"take":
+		var sign := "-" if wanted == &"pay" else "+"
+		_ok(tag != null and tag.visible and tag.text.begins_with(sign),
+			"the answer shows its Blood as %s" % sign,
+			"" if tag == null else "\"%s\"" % tag.text)
+	else:
+		_ok(tag == null or not tag.visible, "the answer shows no Blood")
 
 	var before_blood := _blood()
 	var owed := bandits.enemy_count_for(graph, graph.get_site(target))
@@ -336,8 +358,25 @@ func _route_to_bandits(bandits: RunMapBanditNode, bridge: WorldMapCombatBridge,
 						== WorldBanditDecisionEvaluator.Tier.STRONGER:
 					continue
 				return _walk_back(came_from, next, graph.current_id)
+			if _raises_a_screen(site):
+				# A saloon on the way would put its own screen up and hold the
+				# world still, which is somebody else's check - so the route goes
+				# round one rather than through it. This is the other half of
+				# "every point on the way raises nothing".
+				continue
 			queue.append(next)
 	return PackedInt32Array()
+
+
+## Whether standing on [param site] would raise a screen of its own. Asked of
+## the map's own listeners rather than listed here, so a kind of point that
+## starts or stops raising one is not a name to keep up to date in this file.
+func _raises_a_screen(site: RunMapSite) -> bool:
+	var saloons := _find("RunMapSaloonNode") as RunMapSaloonNode
+	if saloons != null and saloons.answers(site.kind):
+		return true
+	var bosses := _find("RunMapBountyBossNode") as RunMapBountyBossNode
+	return bosses != null and bosses.encounter_for(site.kind) != null
 
 
 func _walk_back(came_from: Dictionary, to_id: int, from_id: int) -> PackedInt32Array:

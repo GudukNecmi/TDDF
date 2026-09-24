@@ -1,0 +1,285 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/run_map_saloon_screen.gd" id="1_script"]
+[ext_resource type="Shader" uid="uid://c5kbp8xehadhn" path="res://Shaders/pause_blur.gdshader" id="2_blur"]
+[ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="3_panel"]
+[ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="4_button"]
+[ext_resource type="Texture2D" uid="uid://bdmurgfs6xsho" path="res://Assets/UI/HUD/Letterbox.PNG" id="5_bars"]
+[ext_resource type="Texture2D" path="res://Assets/UI/SaloonScreen/SaloonInterior.png" id="6_art"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_saloonblur"]
+shader = ExtResource("2_blur")
+shader_parameter/blur_amount = 2.8
+shader_parameter/dim = 0.66
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_saloon_panel"]
+content_margin_left = 40.0
+content_margin_top = 26.0
+content_margin_right = 40.0
+content_margin_bottom = 26.0
+texture = ExtResource("3_panel")
+texture_margin_left = 70.0
+texture_margin_top = 70.0
+texture_margin_right = 70.0
+texture_margin_bottom = 70.0
+region_rect = Rect2(92, 26, 2800, 2102)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_saloon_button"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+texture = ExtResource("4_button")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_saloon_button_pressed"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+texture = ExtResource("4_button")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+modulate_color = Color(0.76, 0.7, 0.6, 1)
+
+[node name="RunMapSaloonScreen" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+process_mode = 3
+script = ExtResource("1_script")
+
+[node name="Blur" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_saloonblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 0
+anchor_left = 0.22
+anchor_top = 0.05
+anchor_right = 0.78
+anchor_bottom = 0.95
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_saloon_panel")
+
+[node name="Body" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 9
+
+[node name="Title" type="Label" parent="Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 30
+text = "SALOON"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="Panel/Body"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Art" type="Control" parent="Panel/Body"]
+custom_minimum_size = Vector2(0, 148)
+clip_contents = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Picture" type="TextureRect" parent="Panel/Body/Art"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_art")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="TopBar" type="TextureRect" parent="Panel/Body/Art"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.08
+anchor_right = 1.1
+offset_top = -4.0
+offset_bottom = 16.0
+mouse_filter = 2
+texture = ExtResource("5_bars")
+expand_mode = 1
+
+[node name="BottomBar" type="TextureRect" parent="Panel/Body/Art"]
+layout_mode = 0
+anchor_left = -0.08
+anchor_top = 1.0
+anchor_right = 1.1
+anchor_bottom = 1.0
+offset_top = -16.0
+offset_bottom = 4.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+texture = ExtResource("5_bars")
+expand_mode = 1
+flip_v = true
+
+[node name="Line" type="Label" parent="Panel/Body"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.86, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 21
+text = "WHAT WILL IT BE?"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Blood" type="HBoxContainer" parent="Panel/Body"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Title" type="Label" parent="Panel/Body/Blood"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.66, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 19
+text = "CARRYING"
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Panel/Body/Blood"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.13, 0.12, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 27
+text = "0 BLOOD"
+vertical_alignment = 1
+
+[node name="Pages" type="ScrollContainer" parent="Panel/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Stack" type="VBoxContainer" parent="Panel/Body/Pages"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 9
+
+[node name="Menu" type="VBoxContainer" parent="Panel/Body/Pages/Stack"]
+layout_mode = 2
+theme_override_constants/separation = 9
+
+[node name="Information" type="Button" parent="Panel/Body/Pages/Stack/Menu"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_saloon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/focus = SubResource("StyleBoxTexture_saloon_button")
+text = "ASK AROUND"
+
+[node name="Rest" type="Button" parent="Panel/Body/Pages/Stack/Menu"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_saloon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/focus = SubResource("StyleBoxTexture_saloon_button")
+text = "TAKE A ROOM"
+
+[node name="Shop" type="Button" parent="Panel/Body/Pages/Stack/Menu"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_saloon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/focus = SubResource("StyleBoxTexture_saloon_button")
+text = "SEE WHAT THEY SELL"
+
+[node name="Leave" type="Button" parent="Panel/Body/Pages/Stack/Menu"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_saloon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/focus = SubResource("StyleBoxTexture_saloon_button")
+text = "BACK TO THE ROAD"
+
+[node name="List" type="VBoxContainer" parent="Panel/Body/Pages/Stack"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 9
+
+[node name="Row" type="Button" parent="Panel/Body/Pages/Stack/List"]
+visible = false
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_disabled_color = Color(0.42, 0.34, 0.3, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_saloon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/focus = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_saloon_button_pressed")
+text = "ROW"
+
+[node name="Back" type="Button" parent="Panel/Body"]
+visible = false
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_saloon_button_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_saloon_button")
+theme_override_styles/focus = SubResource("StyleBoxTexture_saloon_button")
+text = "BACK"

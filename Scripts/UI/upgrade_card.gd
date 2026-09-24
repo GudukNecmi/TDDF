@@ -28,9 +28,29 @@ signal buy_requested(card: UpgradeCard)
 @export var placeholder_title: String = "???"
 ## What a bought card reads instead of its price.
 @export var bought_text: String = "BOUGHT"
+## What the card is called, for a card that is selling something real - see
+## [BaseUpgradeScreen]. Empty leaves [member placeholder_title].
+@export var title_text: String = "":
+	set(value):
+		title_text = value
+		_refresh()
+## A line written into the card's slot saying what it does. Empty leaves the slot
+## as the scene authored it.
+@export_multiline var detail_text: String = "":
+	set(value):
+		detail_text = value
+		_refresh()
+## Size the title is written at, wrapping onto a second line when it has to - for
+## a screen of smaller cards with longer names. 0 leaves the title as the scene
+## authored it.
+@export var title_font_size: int = 0:
+	set(value):
+		title_font_size = value
+		_refresh()
 
 @export_group("Nodes")
 @export var title_label_path: NodePath = ^"Layout/Title"
+@export var detail_label_path: NodePath = ^"Layout/Slot/Placeholder"
 @export var cost_label_path: NodePath = ^"Layout/Cost"
 @export var buy_button_path: NodePath = ^"Layout/BuyButton"
 
@@ -42,6 +62,7 @@ signal buy_requested(card: UpgradeCard)
 @export_range(0.0, 1.0) var bought_alpha: float = 0.3
 
 @onready var _title: Label = get_node_or_null(title_label_path) as Label
+@onready var _detail: Label = get_node_or_null(detail_label_path) as Label
 @onready var _cost: Label = get_node_or_null(cost_label_path) as Label
 @onready var _buy: Button = get_node_or_null(buy_button_path) as Button
 
@@ -87,7 +108,14 @@ func _on_buy_pressed() -> void:
 ## out of step with each other.
 func _refresh() -> void:
 	if _title != null:
-		_title.text = placeholder_title
+		_title.text = placeholder_title if title_text.is_empty() else title_text
+		if title_font_size > 0:
+			_title.add_theme_font_size_override(&"font_size", title_font_size)
+			_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+	if _detail != null and not detail_text.is_empty():
+		_detail.text = detail_text
+		_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 	if _cost != null:
 		_cost.text = bought_text if _bought else cost_format % cost

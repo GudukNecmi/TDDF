@@ -37,6 +37,12 @@ extends Node
 ## chases them directly, slot or no slot - which is what lets the man in front
 ## swing while the rest are still finding a side to come in from, rather than
 ## the whole crowd waiting on one man's position before anybody may close in.
+##
+## [b]A slot never sends a man backwards.[/b] It decides which side he comes in
+## from, not how far out he stands: the point he steers at is pulled nearer the
+## player than he already is - see [member approach_ratio] - and his walk never
+## points further off the player than [member min_advance] allows. So a crowd
+## still spreads round the player, but every man in it is always closing.
 
 ## How far from the player a claimed slot sits, in pixels, before
 ## [member radius_spread] is rolled on top. The "surrounding radius" dial.
@@ -56,6 +62,23 @@ extends Node
 ## the "attack pressure" the brief asks for, so the crowd's front rank is never
 ## held up waiting for the rest to find a side.
 @export var engage_radius: float = 100.0
+## How far a bandit that has closed in has to be pushed back before he goes
+## looking for a side again, in pixels. Held above [member engage_radius] so a man
+## knocked back a step, or a player stepping away, does not flip him between
+## attacking and re-rolling a slot - which could be on the far side of the player.
+@export var disengage_radius: float = 170.0
+## How close to the player a slot is pulled while a bandit is closing in, as a
+## fraction of his own current distance. The slot picks the [i]side[/i] he comes
+## in from; this keeps it nearer the player than he is, so steering towards it
+## always gains ground and a man already inside [member surround_radius] spirals
+## in rather than walking back out to it. Lower is more direct, higher flanks
+## wider.
+@export_range(0.0, 0.95, 0.01) var approach_ratio: float = 0.7
+## The least a bandit's walk points at the player while he is closing in, as the
+## cosine of the widest angle allowed - 0.35 is about seventy degrees off. A floor
+## rather than a pull: it only bites when turning onto a fresh slot would
+## otherwise swing the walk away from the player.
+@export_range(0.0, 1.0, 0.01) var min_advance: float = 0.35
 ## How many candidate angles are rolled for a new slot, the best of which is
 ## kept - see [method _pick_slot]. Higher spreads a crowd more evenly for a
 ## little more cost; the search is still a handful of dot products against a
@@ -84,6 +107,8 @@ static var _slots: Dictionary = {}
 
 @onready var _enemy: Node = get_node_or_null(^"..")
 @onready var _inner: Node = get_node_or_null(inner_steering_path)
+## Found once rather than asked for every frame; null on a man who cannot enrage.
+@onready var _rage: EnemyEnrage = EnemyEnrage.find_on(_enemy)
 
 var _player: Node2D
 var _angle: float = 0.0
@@ -91,6 +116,9 @@ var _radius: float = 0.0
 var _timer: float = 0.0
 var _heading: Vector2 = Vector2.ZERO
 var _has_heading: bool = false
+## True from reaching [member engage_radius] until pushed past
+## [member disengage_radius].
+var _engaged: bool = false
 
 
 func _ready() -> void:
@@ -119,21 +147,40 @@ func steer(chase: Vector2, delta: float) -> Vector2:
 	if _player == null or not is_instance_valid(_player):
 		return walk
 
+	# Running home or charging a place: the walk is already pointed where it has
+	# to go, and a slot around the player is the one thing it must not be bent to.
+	if _is_off_the_chase():
+		_leave_formation()
+		return walk
+
+	# Enraged: he has stopped caring which side he comes in from. No slot, no
+	# circling - the straight chase, until he dies. See [EnemyEnrage].
+	if _rage != null and _rage.is_enraged_now():
+		_leave_formation()
+		return walk
+
 	var to_player := _player.global_position - host.global_position
 	var distance := to_player.length()
 
 	# Close enough to fight: the slot stops mattering and the man in front
 	# simply attacks, exactly as an ordinary enemy would - see [member engage_radius].
-	if distance <= engage_radius:
-		_release_slot()
+	# He stays on the attack until pushed out past [member disengage_radius].
+	if distance <= engage_radius or \
+			(_engaged and distance <= maxf(disengage_radius, engage_radius)):
+		_engaged = true
+		_leave_formation()
 		return walk
+	_engaged = false
 
 	_timer -= delta
 	if _timer <= 0.0 or not _has_heading:
 		_pick_slot(host)
 		_timer = reposition_interval * (1.0 + randf_range(-reposition_jitter, reposition_jitter))
 
-	var target := _player.global_position + Vector2.RIGHT.rotated(_angle) * _radius
+	# The slot's side, pulled in nearer the player than he is - see
+	# [member approach_ratio] - so heading for it always closes the distance.
+	var radius := minf(_radius, distance * clampf(approach_ratio, 0.0, 0.95))
+	var target := _player.global_position + Vector2.RIGHT.rotated(_angle) * radius
 	var wanted := host.global_position.direction_to(target)
 	if wanted.is_zero_approx():
 		return walk
@@ -146,7 +193,38 @@ func steer(chase: Vector2, delta: float) -> Vector2:
 	else:
 		_heading = _heading.slerp(wanted, 1.0 - exp(-maxf(turn_speed, 0.01) * delta))
 	_has_heading = true
-	return _heading
+	return _held_to_advance(_heading, to_player / distance)
+
+
+## [param heading], turned just far enough towards [param toward] that it points
+## at the player by at least [member min_advance]. Keeps whichever side it was
+## bending to, so a flanker still comes round the same way.
+func _held_to_advance(heading: Vector2, toward: Vector2) -> Vector2:
+	var floor_dot := clampf(min_advance, 0.0, 1.0)
+	var along := heading.dot(toward)
+	if along >= floor_dot:
+		return heading
+	var side := heading - toward * along
+	if side.is_zero_approx():
+		side = toward.orthogonal()
+	return toward * floor_dot + side.normalized() * sqrt(1.0 - floor_dot * floor_dot)
+
+
+## Whether the enemy's walk is pointed somewhere other than the player - fleeing
+## or charging - which is not this component's to bend.
+func _is_off_the_chase() -> bool:
+	if _enemy == null:
+		return false
+	if _enemy.has_method(&"is_fleeing") and _enemy.call(&"is_fleeing"):
+		return true
+	return _enemy.has_method(&"is_charging") and _enemy.call(&"is_charging")
+
+
+## Gives the slot up and forgets the eased heading, so coming back to the
+## formation later starts from the direction then wanted rather than a stale one.
+func _leave_formation() -> void:
+	_release_slot()
+	_has_heading = false
 
 
 ## Rolls a handful of candidate angles around the player and keeps the one

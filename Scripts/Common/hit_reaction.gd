@@ -38,6 +38,9 @@ extends Node
 
 var _knockback := Vector2.ZERO
 var _slow_left: float = 0.0
+## How long the current slow lasts in all - [member slow_duration], stretched by
+## the hit's stagger.
+var _slow_window: float = 0.0
 var _flash_left: float = 0.0
 var _materials: Array[ShaderMaterial] = []
 
@@ -74,10 +77,10 @@ func get_knockback() -> Vector2:
 ## [member slow_duration]. The character's own speed value is never written to,
 ## so nothing about it is permanently changed.
 func get_speed_multiplier() -> float:
-	if _slow_left <= 0.0 or slow_duration <= 0.0:
+	if _slow_left <= 0.0 or _slow_window <= 0.0:
 		return 1.0
 
-	var recovered := 1.0 - (_slow_left / slow_duration)
+	var recovered := 1.0 - (_slow_left / _slow_window)
 	return lerpf(slow_multiplier, 1.0, smoothstep(0.0, 1.0, recovered))
 
 
@@ -102,11 +105,18 @@ func get_flash_materials() -> Array[ShaderMaterial]:
 ## fast the hits arrive the shove cannot build up, the slow cannot deepen or
 ## stretch beyond one window, and the flash cannot latch on. That is what keeps
 ## a shotgun's worth of pellets landing at once from wrecking the movement.
+##
+## The hit's own [HitEffects] - the firing weapon's knockback and stagger stats -
+## scale the shove and the length of the slow; the authored values here are what
+## an ordinary hit does.
 func _on_damaged(_amount: float, hit_direction: Vector2) -> void:
+	var effects := HitEffects.new() if _health == null else _health.get_last_hit_effects()
 	if not hit_direction.is_zero_approx():
-		_knockback = hit_direction.normalized() * knockback_speed
+		_knockback = hit_direction.normalized() \
+			* (knockback_speed * effects.knockback_scale + maxf(effects.knockback_push, 0.0))
 
-	_slow_left = slow_duration
+	_slow_window = slow_duration * effects.stagger_scale
+	_slow_left = _slow_window
 	_flash_left = flash_time
 	_set_flash(1.0)
 

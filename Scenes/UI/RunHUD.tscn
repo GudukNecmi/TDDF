@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://cy0ks7dq08aeq" path="res://Assets/UI/Revolver/ChamberEmpty.PNG" id="6_6l81s"]
 [ext_resource type="Texture2D" uid="uid://bgwntnh84wy7d" path="res://Assets/Logo.PNG" id="6_logo"]
 [ext_resource type="Script" uid="uid://crtbm2yaqh2hc" path="res://Scripts/UI/heart_bar.gd" id="7_hearts"]
+[ext_resource type="Script" path="res://Scripts/UI/health_bar.gd" id="7_healthbar"]
 [ext_resource type="Texture2D" uid="uid://cjkmutgfnbygx" path="res://Assets/UI/Revolver/CylinderPlate.PNG" id="7_tcleo"]
 [ext_resource type="Texture2D" uid="uid://0ohkmrl7tcof" path="res://Assets/UI/heart_full.PNG" id="8_heartfull"]
 [ext_resource type="Texture2D" uid="uid://15xc2s51huyx" path="res://Assets/UI/heart_empty.PNG" id="9_heartempty"]
@@ -76,15 +77,13 @@
 [ext_resource type="Resource" uid="uid://q6h0onksryq4" path="res://Resources/Ammo/ammo_revolver_round.tres" id="88_lcsd5"]
 [ext_resource type="Script" uid="uid://l5wae7bhe014" path="res://Scripts/UI/horse_cart_screen.gd" id="88_tm2pe"]
 [ext_resource type="Resource" uid="uid://bmvv4uadff8iq" path="res://Resources/Ammo/ammo_rifle_round.tres" id="89_0n8ik"]
-[ext_resource type="Script" uid="uid://b23f8aucu8nnh" path="res://Scripts/UI/travel_letterbox.gd" id="94_c3dsp"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/TravelLetterbox.tscn" id="94_c3dsp"]
 [ext_resource type="Script" uid="uid://bujkit8uh4rih" path="res://Scripts/UI/travel_letterbox_gate.gd" id="95_kkjxy"]
-[ext_resource type="Texture2D" uid="uid://bdmurgfs6xsho" path="res://Assets/UI/HUD/Letterbox.PNG" id="95_rpvh4"]
 [ext_resource type="Script" uid="uid://dl5c4x2bsjq2j" path="res://Scripts/Common/stinger_board.gd" id="97_jkgqu"]
 [ext_resource type="AudioStream" uid="uid://c0wbdscivk6ja" path="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#1-1788289897255.wav" id="98_m7q3r"]
 [ext_resource type="AudioStream" uid="uid://c4xjf3u745c1y" path="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#1-1788289900028.wav" id="99_0s5ly"]
 [ext_resource type="AudioStream" uid="uid://bey2cd6gt2v6x" path="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#2-1788289900028.wav" id="100_xjin7"]
 [ext_resource type="AudioStream" uid="uid://cqddah8xf2ox2" path="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#3-1788289895005.wav" id="101_oiwit"]
-[ext_resource type="Script" uid="uid://dybivjr6jldml" path="res://Scripts/UI/battle_preview_enemy_type.gd" id="101_wc512"]
 [ext_resource type="AudioStream" uid="uid://dxoq5pllabtk8" path="res://Sound/Efect/Decision Screen/Start/Ultra-short_tense_we_#3-1788289906480.wav" id="102_1q0a7"]
 [ext_resource type="AudioStream" uid="uid://8th2uonng0q4" path="res://Sound/Efect/Decision Screen/Para verdik/Ultra-short_western__#3-1788290832494.wav" id="103_jks2j"]
 [ext_resource type="Script" uid="uid://c0eby5h27vgr0" path="res://Scripts/UI/world_map_horse_stamina_hud.gd" id="103_m43cp"]
@@ -96,7 +95,6 @@
 [ext_resource type="AudioStream" uid="uid://bgu76h16mqw1e" path="res://Sound/Efect/Win/Ultra-short_western__#3-1788289240415.wav" id="109_ald0n"]
 [ext_resource type="AudioStream" uid="uid://hj3rvd2itlrw" path="res://Sound/Efect/Win/Ultra-short_western__#4-1788289243465.wav" id="110_74nph"]
 [ext_resource type="PackedScene" uid="uid://82ydc1svu2fb" path="res://Scenes/Common/FilmPostProcess.tscn" id="110_m7q3r"]
-[ext_resource type="Script" uid="uid://yxetrm4456uw" path="res://Scripts/UI/world_bandit_decision_menu.gd" id="111_jkgqu"]
 [ext_resource type="Script" uid="uid://duc2mbbnofr2" path="res://Scripts/UI/extraction_result_screen.gd" id="200_extractresult"]
 [ext_resource type="Texture2D" uid="uid://b5tbx3ndtm3yn" path="res://Assets/UI/UI Screens/Button1.PNG" id="200_uibtn1"]
 [ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="200_uibtn2"]
@@ -104,10 +102,8 @@
 [ext_resource type="AudioStream" uid="uid://drc3k1kfec4qx" path="res://Sound/Music/Ambush/Ambush.WAV" id="201_ambushwav"]
 [ext_resource type="Script" uid="uid://c7wm7iv1m8o32" path="res://Scripts/UI/ambush_banner.gd" id="201_banner"]
 [ext_resource type="Script" uid="uid://dp1gtpx5p6xpn" path="res://Scripts/UI/world_map_wanted_board_menu.gd" id="202_wmwanted"]
-[ext_resource type="Texture2D" uid="uid://bdle714qvg88e" path="res://Assets/UI/BeforeFightScreen/BanditAtack.png" id="204_banditatk"]
-[ext_resource type="Resource" uid="uid://b2653t5mv6vgp" path="res://Resources/UI/battle_preview_bandit.tres" id="205_prevbandit"]
-[ext_resource type="Resource" uid="uid://b2653t5nb5tcn" path="res://Resources/UI/battle_preview_bomber.tres" id="206_prevbomber"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/WorldBanditDecisionMenu.tscn" id="207_decision"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/RunMapUpgradeRewardScreen.tscn" id="208_upgrade_reward"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("29_vignette")
@@ -261,6 +257,33 @@ texture_margin_right = 20.0
 texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
 modulate_color = Color(1, 0.84, 0.66, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_back"]
+bg_color = Color(0.07, 0.02, 0.02, 0.85)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.3, 0.04, 0.04, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_fill"]
+bg_color = Color(0.72, 0.09, 0.1, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0, 0, 0)
+border_blend = true
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [node name="RunHUD" type="CanvasLayer" unique_id=1615544819]
 process_mode = 3
@@ -468,6 +491,40 @@ alignment = 2
 script = ExtResource("7_hearts")
 full_texture = ExtResource("8_heartfull")
 empty_texture = ExtResource("9_heartempty")
+
+[node name="HealthBar" type="ProgressBar" parent="." unique_id=1167495301]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -304.0
+offset_top = 26.0
+offset_right = -24.0
+offset_bottom = 60.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_health_back")
+theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
+max_value = 1.0
+step = 0.0
+value = 1.0
+show_percentage = false
+script = ExtResource("7_healthbar")
+
+[node name="Percent" type="Label" parent="HealthBar" unique_id=1167495302]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.93, 0.87, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
+text = "100%"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="BloodScreen" type="Control" parent="." unique_id=1249090543]
 visible = false
@@ -2282,84 +2339,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("88_tm2pe")
 
-[node name="TravelLetterbox" type="Control" parent="." unique_id=1226891288]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("94_c3dsp")
-
-[node name="TopBar" type="TextureRect" parent="TravelLetterbox" unique_id=968408929]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = -0.08
-anchor_right = 1.1
-offset_top = -12.0
-offset_bottom = 52.0
-mouse_filter = 2
-texture = ExtResource("95_rpvh4")
-expand_mode = 1
-
-[node name="BottomBar" type="TextureRect" parent="TravelLetterbox" unique_id=2113508241]
-layout_mode = 0
-anchor_left = -0.08
-anchor_top = 1.0
-anchor_right = 1.1
-anchor_bottom = 1.0
-offset_top = -52.0
-offset_bottom = 12.0
-grow_horizontal = 2
-grow_vertical = 0
-mouse_filter = 2
-texture = ExtResource("95_rpvh4")
-expand_mode = 1
-flip_v = true
-
-[node name="Loading" type="Control" parent="TravelLetterbox" unique_id=1604243225]
-visible = false
-anchors_preset = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Row" type="HBoxContainer" parent="TravelLetterbox/Loading" unique_id=57765123]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_constants/separation = 14
-alignment = 1
-
-[node name="Label" type="Label" parent="TravelLetterbox/Loading/Row" unique_id=373245138]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.93, 0.87, 0.8, 1)
-theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 44
-text = "Loading"
-vertical_alignment = 1
-
-[node name="DotOrbit" type="Control" parent="TravelLetterbox/Loading/Row" unique_id=1732266480]
-custom_minimum_size = Vector2(32, 32)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Dot" type="ColorRect" parent="TravelLetterbox/Loading/Row/DotOrbit" unique_id=926244151]
-layout_mode = 0
-offset_right = 8.0
-offset_bottom = 8.0
-mouse_filter = 2
-color = Color(0.85, 0.11, 0.11, 1)
+[node name="TravelLetterbox" parent="." unique_id=1226891288 instance=ExtResource("94_c3dsp")]
 
 [node name="Gate" type="Node" parent="TravelLetterbox" unique_id=2131985065]
 script = ExtResource("95_kkjxy")
@@ -2495,3 +2475,5 @@ offset_bottom = -78.0
 grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("103_m43cp")
+
+[node name="RunMapUpgradeRewardScreen" parent="." unique_id=300100040 instance=ExtResource("208_upgrade_reward")]

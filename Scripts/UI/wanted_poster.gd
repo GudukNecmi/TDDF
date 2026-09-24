@@ -81,6 +81,15 @@ signal accept_requested(poster: WantedPoster)
 ## How far the sheet is faded once the contract has been taken, so a poster the
 ## player already holds is obviously spent.
 @export_range(0.0, 1.0) var accepted_alpha: float = 0.42
+## Whether the sheet carries its TAKE button at all.
+##
+## Off is a poster that is being [i]shown[/i] rather than offered - the contract
+## held up as the player rides into the man it names, see
+## [RunMapBountyPosterScreen]. It is a property of the sheet rather than of the
+## screen showing it so that there is still exactly one poster in the game, and
+## it is kept apart from [method set_acceptable], which greys a button that is
+## still there because the answer may change.
+@export var shows_take_button: bool = true
 
 @onready var _heading: Label = get_node_or_null(heading_label_path) as Label
 @onready var _portrait: TextureRect = get_node_or_null(portrait_path) as TextureRect
@@ -184,6 +193,7 @@ func _refresh() -> void:
 		_reward.text = reward_format % (0 if _bounty == null else _bounty.reward)
 
 	if _accept != null:
+		_accept.visible = shows_take_button
 		_accept.text = accepted_text if taken else accept_text
 		_accept.disabled = _bounty == null or taken or not _acceptable
 

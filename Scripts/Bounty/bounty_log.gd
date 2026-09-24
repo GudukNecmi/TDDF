@@ -36,6 +36,12 @@ signal knowledge_revealed(bounty: Bounty, category_id: StringName)
 ## Emitted when the player gives a contract up. The slot it came off is not
 ## refilled here - see [method cancel].
 signal bounty_cancelled(bounty: Bounty)
+## Emitted when the Bounty Board's capacity level changes, with the new number of
+## contracts that may be held.
+signal capacity_changed(active_slots: int)
+## Emitted when what became of a beaten outlaw is written down - see
+## [method record_fate].
+signal fate_recorded(outlaw_id: StringName, fate: StringName, killed: bool)
 
 ## The tuning resource. Everything adjustable about bounties - slot count, reward
 ## ranges, the rounding step, the categories, the outlaws - is inspector fields
@@ -56,6 +62,14 @@ var _board: Array[Bounty] = []
 var _active: Array[Bounty] = []
 var _issued: int = 0
 var _stocked: bool = false
+## Which entry of [member BountySettings.active_slot_levels] the board is on. Kept
+## here with the contracts for the same reason they are: the autoload is what
+## survives a run. See [method upgrade_capacity].
+var _capacity_level: int = 0
+## What became of every outlaw the player has beaten, keyed by the man - see
+## [method fate_key_for]. Plain values, kept here for the reason the contracts
+## are: this is the story the run carries, and the autoload is what survives it.
+var _fates: Dictionary = {}
 
 
 func _ready() -> void:
@@ -132,9 +146,49 @@ func get_outstanding() -> Array[Bounty]:
 	return open
 
 
-## How many contracts may be held at once.
+## How many contracts may be held at once - the Bounty Board's capacity at its
+## current level.
 func get_active_slots() -> int:
-	return get_settings().get_active_slots()
+	return get_settings().get_active_slots(_capacity_level)
+
+
+## Which entry of [member BountySettings.active_slot_levels] the board is on. 0 is
+## the board before any upgrade.
+func get_capacity_level() -> int:
+	return _capacity_level
+
+
+func get_max_capacity_level() -> int:
+	return get_settings().get_max_capacity_level()
+
+
+func can_upgrade_capacity() -> bool:
+	return _capacity_level < get_max_capacity_level()
+
+
+## Raises the board one capacity level. [b]This is the seam the Base upgrade
+## shop calls[/b]; nothing in play calls it yet. Returns false at the top level,
+## so a caller can offer the purchase and let this be the place that refuses.
+func upgrade_capacity() -> bool:
+	if not can_upgrade_capacity():
+		return false
+	set_capacity_level(_capacity_level + 1)
+	return true
+
+
+## Puts the board on capacity [param level], clamped to the levels there are. For
+## a save being restored and for a debug reset. Contracts already held above a
+## lowered capacity are kept - the board just refuses new ones until there is
+## room again, the same way it does when it is full.
+func set_capacity_level(level: int) -> void:
+	var clamped := clampi(level, 0, get_max_capacity_level())
+	if clamped == _capacity_level:
+		return
+	_capacity_level = clamped
+	capacity_changed.emit(get_active_slots())
+	# Every board readout already rebuilds on this, so the new "held / capacity"
+	# shows without any screen being told about upgrades.
+	board_changed.emit()
 
 
 ## How many of those are taken. A finished contract still holds its slot until
@@ -201,6 +255,20 @@ func cancel(bounty_id: StringName) -> bool:
 
 	_active.erase(bounty)
 	bounty_cancelled.emit(bounty)
+	board_changed.emit()
+	return true
+
+
+## Takes a finished contract off the taken list once its reward has been paid,
+## freeing the slot it held - see [method get_used_slots]. Called by
+## [WorldMapExtractionService] when it settles bounties off the ledger. An
+## unfinished contract is refused; giving one of those up is [method cancel].
+func close_out(bounty_id: StringName) -> bool:
+	var bounty := find_active(bounty_id)
+	if bounty == null or not bounty.completed:
+		return false
+
+	_active.erase(bounty)
 	board_changed.emit()
 	return true
 
@@ -316,13 +384,72 @@ func refresh_board() -> void:
 	board_changed.emit()
 
 
+## Writes down what became of the outlaw behind [param bounty_id] once he was
+## beaten - [param fate] is the choice that was made over him, [param killed]
+## whether he died of it - and reports whether it was written.
+##
+## [b]This is story state, not bookkeeping.[/b] Nothing in the game reads it yet:
+## it exists so a later event can ask whether a particular man is alive - see
+## [method was_killed] - and branch on that together with the hour. It is keyed by
+## the man rather than the paper, so it outlives the contract being closed out,
+## and a second poster on the same outlaw finds the first one's answer.
+func record_fate(bounty_id: StringName, fate: StringName, killed: bool) -> bool:
+	if bounty_id.is_empty() or fate.is_empty():
+		return false
+	var bounty := find_bounty(bounty_id)
+	var key := fate_key_for(bounty) if bounty != null else bounty_id
+	_fates[key] = {
+		"fate": fate,
+		"killed": killed,
+		"bounty_id": bounty_id,
+		"name": bounty.target.display_name if bounty != null and bounty.target != null else "",
+	}
+	fate_recorded.emit(key, fate, killed)
+	return true
+
+
+## Which man [param bounty] is about, as fates are keyed: the outlaw on it, or
+## the contract itself where it names none - the same rule
+## [method MiniBossDirector.look_key_for] draws his face by.
+func fate_key_for(bounty: Bounty) -> StringName:
+	if bounty == null:
+		return &""
+	if bounty.target != null and bounty.target.target_id != &"":
+		return bounty.target.target_id
+	return bounty.bounty_id
+
+
+## What became of [param outlaw_id] - a dictionary with [code]fate[/code],
+## [code]killed[/code], [code]bounty_id[/code] and [code]name[/code] - or an empty
+## one for a man who has not been beaten.
+func get_fate(outlaw_id: StringName) -> Dictionary:
+	return (_fates.get(outlaw_id, {}) as Dictionary).duplicate()
+
+
+func has_fate(outlaw_id: StringName) -> bool:
+	return _fates.has(outlaw_id)
+
+
+## Whether [param outlaw_id] was beaten and then killed. False for a man spared, and
+## for one who has not been beaten at all - see [method has_fate] to tell those apart.
+func was_killed(outlaw_id: StringName) -> bool:
+	return bool((_fates.get(outlaw_id, {}) as Dictionary).get("killed", false))
+
+
+## Every fate written down, keyed by the man. A copy.
+func get_fates() -> Dictionary:
+	return _fates.duplicate(true)
+
+
 ## Back to no board and no contracts. For a new save or a debug reset; nothing in
 ## a run calls it, the same way nothing calls [method BloodWallet.reset].
 func reset() -> void:
 	_board.clear()
 	_active.clear()
+	_fates.clear()
 	_issued = 0
 	_stocked = false
+	_capacity_level = 0
 	board_changed.emit()
 
 

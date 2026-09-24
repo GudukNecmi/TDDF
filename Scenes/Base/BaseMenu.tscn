@@ -1,0 +1,601 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/base_menu.gd" id="1_menu"]
+[ext_resource type="Script" path="res://Scripts/UI/base_menu_entry.gd" id="2_entry"]
+[ext_resource type="Texture2D" path="res://Assets/Base/Environment/base_backdrop.png" id="3_backdrop"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="4_uipanel"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UI Screens/Button1.PNG" id="5_btn1"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UI Screens/Button2.PNG" id="6_btn2"]
+[ext_resource type="PackedScene" path="res://Scenes/Base/BloodPool.tscn" id="7_pool"]
+[ext_resource type="Script" path="res://Scripts/UI/blood_counter.gd" id="8_counter"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/WantedBoardMenu.tscn" id="9_board"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/WeaponSelectMenu.tscn" id="10_weapons"]
+[ext_resource type="Script" path="res://Scripts/UI/trader_menu.gd" id="11_trader"]
+[ext_resource type="Resource" path="res://Resources/Ammo/ammo_shell.tres" id="12_shell"]
+[ext_resource type="Resource" path="res://Resources/Ammo/ammo_revolver_round.tres" id="13_revolver"]
+[ext_resource type="Resource" path="res://Resources/Ammo/ammo_rifle_round.tres" id="14_rifle"]
+[ext_resource type="Script" path="res://Scripts/World/run_portal.gd" id="15_portal"]
+[ext_resource type="Script" path="res://Scripts/World/run_inventory.gd" id="16_inventory"]
+[ext_resource type="Script" path="res://Scripts/World/music_state_watcher.gd" id="17_music"]
+[ext_resource type="Script" path="res://Scripts/UI/hover_scale.gd" id="18_hover"]
+[ext_resource type="Script" path="res://Scripts/UI/game_cursor.gd" id="19_cursor"]
+[ext_resource type="Texture2D" path="res://Assets/Cursor/DefaultCursor.PNG" id="20_cursorart"]
+[ext_resource type="Texture2D" path="res://Assets/Cursor/OnButtonCursor.PNG" id="21_cursorhover"]
+[ext_resource type="PackedScene" path="res://Scenes/Common/FilmPostProcess.tscn" id="22_film"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/BaseUpgradeScreen.tscn" id="23_upgrades"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/BuyWeaponScreen.tscn" id="24_buyweapon"]
+[ext_resource type="Shader" path="res://Shaders/pause_blur.gdshader" id="25_blur"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_panel"]
+content_margin_left = 48.0
+content_margin_top = 40.0
+content_margin_right = 48.0
+content_margin_bottom = 40.0
+texture = ExtResource("4_uipanel")
+texture_margin_left = 70.0
+texture_margin_top = 70.0
+texture_margin_right = 70.0
+texture_margin_bottom = 70.0
+region_rect = Rect2(92, 26, 2800, 2102)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_normal"]
+content_margin_left = 30.0
+content_margin_top = 15.0
+content_margin_right = 30.0
+content_margin_bottom = 12.0
+texture = ExtResource("5_btn1")
+texture_margin_left = 20.0
+texture_margin_right = 20.0
+region_rect = Rect2(22, 20, 991, 202)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_hover"]
+content_margin_left = 30.0
+content_margin_top = 15.0
+content_margin_right = 30.0
+content_margin_bottom = 12.0
+texture = ExtResource("6_btn2")
+texture_margin_left = 20.0
+texture_margin_right = 20.0
+region_rect = Rect2(24, 16, 987, 202)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_pressed"]
+content_margin_left = 30.0
+content_margin_top = 15.0
+content_margin_right = 30.0
+content_margin_bottom = 12.0
+texture = ExtResource("6_btn2")
+texture_margin_left = 20.0
+texture_margin_right = 20.0
+region_rect = Rect2(24, 16, 987, 202)
+modulate_color = Color(0.76, 0.7, 0.6, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_disabled"]
+content_margin_left = 30.0
+content_margin_top = 15.0
+content_margin_right = 30.0
+content_margin_bottom = 12.0
+texture = ExtResource("5_btn1")
+texture_margin_left = 20.0
+texture_margin_right = 20.0
+region_rect = Rect2(22, 20, 991, 202)
+modulate_color = Color(0.55, 0.52, 0.48, 0.8)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_trader_blur"]
+shader = ExtResource("25_blur")
+shader_parameter/blur_amount = 2.8
+shader_parameter/dim = 0.66
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_trader_panel"]
+content_margin_left = 44.0
+content_margin_top = 32.0
+content_margin_right = 44.0
+content_margin_bottom = 32.0
+texture = ExtResource("4_uipanel")
+texture_margin_left = 70.0
+texture_margin_top = 70.0
+texture_margin_right = 70.0
+texture_margin_bottom = 70.0
+region_rect = Rect2(92, 26, 2800, 2102)
+
+[sub_resource type="Theme" id="Theme_trader_stock"]
+Button/colors/font_color = Color(0.16, 0.06, 0.05, 1)
+Button/colors/font_disabled_color = Color(0.3, 0.2, 0.18, 1)
+Button/colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+Button/colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+Button/colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+Button/font_sizes/font_size = 26
+Button/styles/disabled = SubResource("StyleBoxTexture_btn_disabled")
+Button/styles/focus = SubResource("StyleBoxTexture_btn_normal")
+Button/styles/hover = SubResource("StyleBoxTexture_btn_hover")
+Button/styles/normal = SubResource("StyleBoxTexture_btn_normal")
+Button/styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+Label/colors/font_color = Color(0.72, 0.09, 0.1, 1)
+Label/colors/font_outline_color = Color(0, 0, 0, 1)
+Label/constants/outline_size = 6
+Label/font_sizes/font_size = 30
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ride_normal"]
+content_margin_left = 44.0
+content_margin_top = 16.0
+content_margin_right = 44.0
+content_margin_bottom = 16.0
+bg_color = Color(0.2, 0.035, 0.035, 0.94)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.72, 0.09, 0.1, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ride_hover"]
+content_margin_left = 44.0
+content_margin_top = 16.0
+content_margin_right = 44.0
+content_margin_bottom = 16.0
+bg_color = Color(0.36, 0.05, 0.05, 0.96)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.93, 0.16, 0.14, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ride_pressed"]
+content_margin_left = 44.0
+content_margin_top = 16.0
+content_margin_right = 44.0
+content_margin_bottom = 16.0
+bg_color = Color(0.12, 0.02, 0.02, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.93, 0.16, 0.14, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="BaseMenu" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_menu")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_backdrop")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.02, 0.006, 0.008, 0.45)
+
+[node name="PoolAnchor" type="Control" parent="."]
+process_mode = 1
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.62
+anchor_top = 0.56
+anchor_right = 0.62
+anchor_bottom = 0.56
+mouse_filter = 2
+
+[node name="BloodPool" parent="PoolAnchor" instance=ExtResource("7_pool")]
+scale = Vector2(0.78, 0.78)
+
+[node name="PoolHint" type="Label" parent="PoolAnchor"]
+layout_mode = 0
+offset_left = -260.0
+offset_top = 150.0
+offset_right = 260.0
+offset_bottom = 184.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.84, 0.76, 0.73, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 18
+text = "LEFT CLICK THE POOL TO BANK  -  RIGHT CLICK TO DRAW"
+horizontal_alignment = 1
+
+[node name="Layout" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Menu" type="MarginContainer" parent="Layout"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.04
+anchor_bottom = 0.96
+offset_left = 36.0
+offset_right = 426.0
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Frame" type="PanelContainer" parent="Layout/Menu"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+
+[node name="Body" type="VBoxContainer" parent="Layout/Menu/Frame"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Layout/Menu/Frame/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.16, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 42
+text = "THE BASE"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="Layout/Menu/Frame/Body"]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Entries" type="VBoxContainer" parent="Layout/Menu/Frame/Body"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BountyBoardButton" type="Button" parent="Layout/Menu/Frame/Body/Entries"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
+text = "BOUNTY BOARD"
+script = ExtResource("2_entry")
+screen_group = &"wanted_board_menu"
+
+[node name="SelectWeaponButton" type="Button" parent="Layout/Menu/Frame/Body/Entries"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
+text = "SELECT WEAPON"
+script = ExtResource("2_entry")
+screen_group = &"weapon_select_menu"
+
+[node name="UpgradeButton" type="Button" parent="Layout/Menu/Frame/Body/Entries"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
+text = "UPGRADE"
+script = ExtResource("2_entry")
+screen_group = &"base_upgrade_menu"
+
+[node name="BuyWeaponButton" type="Button" parent="Layout/Menu/Frame/Body/Entries"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
+text = "BUY WEAPON"
+script = ExtResource("2_entry")
+screen_group = &"buy_weapon_menu"
+
+[node name="ShopButton" type="Button" parent="Layout/Menu/Frame/Body/Entries"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
+text = "SHOP"
+script = ExtResource("2_entry")
+screen_group = &"trader_menu"
+
+[node name="Wallets" type="VBoxContainer" parent="Layout"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -380.0
+offset_top = 24.0
+offset_right = -36.0
+offset_bottom = 110.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="Carried" type="Label" parent="Layout/Wallets"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
+text = "BLOOD 0"
+horizontal_alignment = 2
+script = ExtResource("8_counter")
+
+[node name="Banked" type="Label" parent="Layout/Wallets"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 24
+text = "BANKED 0"
+horizontal_alignment = 2
+script = ExtResource("8_counter")
+wallet_path = NodePath("/root/BloodBank")
+prefix = "BANKED "
+
+[node name="RideOutButton" type="Button" parent="Layout"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -330.0
+offset_top = -118.0
+offset_right = -36.0
+offset_bottom = -36.0
+grow_horizontal = 0
+grow_vertical = 0
+focus_mode = 0
+theme_override_colors/font_color = Color(0.93, 0.16, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(1, 0.86, 0.72, 1)
+theme_override_colors/font_pressed_color = Color(0.93, 0.16, 0.14, 1)
+theme_override_colors/font_focus_color = Color(0.93, 0.16, 0.14, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 44
+theme_override_styles/normal = SubResource("StyleBoxFlat_ride_normal")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ride_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ride_pressed")
+theme_override_styles/focus = SubResource("StyleBoxFlat_ride_normal")
+text = "RIDE OUT"
+
+[node name="ComingSoonLabel" type="Label" parent="Layout"]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.35
+anchor_top = 0.08
+anchor_right = 0.9
+anchor_bottom = 0.16
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.93, 0.16, 0.14, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
+text = "COMING SOON"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WantedBoardMenu" parent="." instance=ExtResource("9_board")]
+z_index = 40
+layout_mode = 1
+
+[node name="WeaponSelectMenu" parent="." instance=ExtResource("10_weapons")]
+z_index = 40
+layout_mode = 1
+
+[node name="TraderMenu" type="Control" parent="."]
+z_index = 40
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("11_trader")
+wallet_path = NodePath("/root/BloodBank")
+sells_hearts = false
+sells_ammo = false
+shotgun_ammo = ExtResource("12_shell")
+revolver_ammo = ExtResource("13_revolver")
+lever_ammo = ExtResource("14_rifle")
+status_text = "PURCHASES ARE PAID FROM YOUR BANKED BLOOD"
+stock_path = NodePath("Panel/Body/Stock")
+title_label_path = NodePath("Panel/Body/Header/Title")
+status_label_path = NodePath("Panel/Body/Hint")
+blood_label_path = NodePath("Panel/Body/Header/Blood")
+
+[node name="Blur" type="ColorRect" parent="TraderMenu"]
+material = SubResource("ShaderMaterial_trader_blur")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="TraderMenu"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.25
+anchor_top = 0.12
+anchor_right = 0.75
+anchor_bottom = 0.88
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_trader_panel")
+
+[node name="Body" type="VBoxContainer" parent="TraderMenu/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Header" type="VBoxContainer" parent="TraderMenu/Panel/Body"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="TraderMenu/Panel/Body/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 44
+text = "TRADER"
+horizontal_alignment = 1
+
+[node name="Blood" type="Label" parent="TraderMenu/Panel/Body/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 24
+text = "BANKED 0"
+horizontal_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="TraderMenu/Panel/Body"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Stock" type="VBoxContainer" parent="TraderMenu/Panel/Body"]
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+theme = SubResource("Theme_trader_stock")
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Hint" type="Label" parent="TraderMenu/Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "PURCHASES ARE PAID FROM YOUR BANKED BLOOD"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="BaseUpgradeScreen" parent="." instance=ExtResource("23_upgrades")]
+z_index = 40
+layout_mode = 1
+
+[node name="BuyWeaponScreen" parent="." instance=ExtResource("24_buyweapon")]
+z_index = 40
+layout_mode = 1
+
+[node name="BackButton" type="Button" parent="."]
+visible = false
+z_index = 41
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = -92.0
+offset_right = 204.0
+offset_bottom = -36.0
+grow_vertical = 0
+focus_mode = 0
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
+text = "BACK"
+
+[node name="RunPortal" type="Node2D" parent="."]
+script = ExtResource("15_portal")
+asks_for_bounty = true
+departure_map_id = &"desert"
+asks_for_map = false
+prompt_path = NodePath("")
+
+[node name="RunInventory" type="Node" parent="."]
+script = ExtResource("16_inventory")
+
+[node name="MusicStateWatcher" type="Node" parent="."]
+script = ExtResource("17_music")
+
+[node name="ButtonSound" type="AudioStreamPlayer" parent="."]
+bus = &"Game"
+
+[node name="HoverScale" type="Node" parent="."]
+script = ExtResource("18_hover")
+root_path = NodePath("../Layout")
+
+[node name="GameCursor" type="Control" parent="."]
+z_index = 250
+layout_mode = 1
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("19_cursor")
+default_texture = ExtResource("20_cursorart")
+hover_texture = ExtResource("21_cursorhover")
+cursor_size = Vector2(46, 46)
+always_shown = true
+shown_while_unarmed = false
+crosshair_path = NodePath("")
+
+[node name="FilmPostProcess" parent="." instance=ExtResource("22_film")]
+layout_mode = 0

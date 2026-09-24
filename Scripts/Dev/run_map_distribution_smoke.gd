@@ -19,6 +19,11 @@ const GENERATOR := "res://Resources/RunMap/dust_camp_run_map.tres"
 ## How many whole runs to lay out. Enough for the spread to mean something
 ## without the check taking longer than it is worth.
 const RUNS := 60
+## How many contracts every run in the sample is laid out for. Fixed rather than
+## rolled, so a plan counted off the contracts carried - see
+## [member RunMapSitePlan.one_per_accepted_bounty] - promises the same number on
+## every map in the sample and the counts below can be checked against it.
+const CARRIED := 3
 
 var _failures: int = 0
 
@@ -34,7 +39,7 @@ func _initialize() -> void:
 	var graphs: Array[RunMapGraph] = []
 	for run: int in range(RUNS):
 		# A seed per run rather than 0, so a failure can be reproduced exactly.
-		graphs.append(generator.generate(100000 + run))
+		graphs.append(generator.generate(100000 + run, CARRIED))
 
 	print("--- how big a map is ---")
 	_check_size(generator, graphs)
@@ -47,6 +52,12 @@ func _initialize() -> void:
 
 	print("--- where the special points ended up ---")
 	_check_spacing(generator, graphs)
+
+	print("--- what the player is offered next ---")
+	_check_frontier(generator, graphs)
+
+	print("--- where the branches end ---")
+	_check_dead_ends(generator, graphs)
 
 	print("--- the map is still a map ---")
 	_check_shape(graphs)
@@ -98,8 +109,9 @@ func _check_counts(generator: RunMapGenerator, graphs: Array[RunMapGraph]) -> vo
 
 		for plan: RunMapSitePlan in generator.site_plans:
 			var have := int(counted.get(plan.kind, 0))
-			if plan.exact_count >= 0:
-				if have != plan.exact_count:
+			var promised := generator.promised_count(plan)
+			if promised >= 0:
+				if have != promised:
 					broken_exact += 1
 				continue
 			if have < plan.min_count:
@@ -117,7 +129,7 @@ func _check_counts(generator: RunMapGenerator, graphs: Array[RunMapGraph]) -> vo
 			last_row = maxi(last_row, site.row)
 		for site: RunMapSite in graph.sites:
 			for plan: RunMapSitePlan in generator.site_plans:
-				if plan.kind != site.kind or plan.claims_northernmost:
+				if plan.kind != site.kind or plan.claims_far_end:
 					continue
 				var along := float(site.row) / maxf(float(last_row), 1.0)
 				if along < minf(plan.row_band.x, plan.row_band.y) - 0.001 \
@@ -143,10 +155,15 @@ func _check_counts(generator: RunMapGenerator, graphs: Array[RunMapGraph]) -> vo
 		points += graph.sites.size()
 	_ok(camp < group, "a bandit camp is less common than a bandit group",
 		"%d camps against %d groups" % [camp, group])
-	_ok(float(group) / float(points) > 0.15, "bandit groups are common",
+	_ok(float(group) / float(points) > 0.45, "bandit groups are the map's backbone",
 		"%.0f%% of all points" % (100.0 * float(group) / float(points)))
-	_ok(float(event) / float(points) > 0.10, "events are common",
+	_ok(float(group) / float(points) < 0.8, "the map is not only bandit groups",
+		"%.0f%% of all points" % (100.0 * float(group) / float(points)))
+	_ok(float(event) / float(points) > 0.04, "events still appear",
 		"%.0f%% of all points" % (100.0 * float(event) / float(points)))
+	print("       bandit groups %.0f%%, camps %.0f%%, events %.0f%% of all points"
+		% [100.0 * float(group) / float(points), 100.0 * float(camp) / float(points),
+			100.0 * float(event) / float(points)])
 
 	for plan: RunMapSitePlan in generator.site_plans:
 		var absent := int(missing.get(plan.kind, 0))
@@ -167,11 +184,11 @@ func _check_variety(graphs: Array[RunMapGraph]) -> void:
 		"%d different over %d runs" % [shapes.size(), graphs.size()])
 
 
-## The spacing rules: the final boss is the northernmost point, no two points
+## The spacing rules: the final boss is the map's easternmost point, no two points
 ## of one spacing group are on top of each other, and the high-value points are
 ## not all in one pocket of the map.
 func _check_spacing(generator: RunMapGenerator, graphs: Array[RunMapGraph]) -> void:
-	var north_broken := 0
+	var far_end_broken := 0
 	var too_close := 0
 	var clustered := 0
 	var pairs := 0
@@ -180,26 +197,26 @@ func _check_spacing(generator: RunMapGenerator, graphs: Array[RunMapGraph]) -> v
 	var nearest_furthest := 0.0
 	var in_band := 0
 
-	var north := _north_kind(generator)
+	var far_end := _far_end_kind(generator)
 	var specials := _special_kinds(generator)
 	var groups := _spacing_groups(generator)
 	var inner := generator.spacing_target * (1.0 - generator.spacing_tolerance)
 	var outer := generator.spacing_target * (1.0 + generator.spacing_tolerance)
 
 	for graph: RunMapGraph in graphs:
-		# Exactly one final boss, and nothing further north than it.
+		# Exactly one final boss, and nothing further east than it.
 		var boss: RunMapSite = null
 		var found := 0
 		for site: RunMapSite in graph.sites:
-			if site.kind == north:
+			if site.kind == far_end:
 				boss = site
 				found += 1
 		if found != 1:
-			north_broken += 1
+			far_end_broken += 1
 		elif boss != null:
 			for site: RunMapSite in graph.sites:
-				if site.position.y < boss.position.y - 1.0:
-					north_broken += 1
+				if site.position.x > boss.position.x + 1.0:
+					far_end_broken += 1
 					break
 
 		# Two points of one spacing group are never beside each other, and the
@@ -222,7 +239,9 @@ func _check_spacing(generator: RunMapGenerator, graphs: Array[RunMapGraph]) -> v
 				nearest_total += nearest
 				nearest_worst = minf(nearest_worst, nearest)
 				nearest_furthest = maxf(nearest_furthest, nearest)
-				if nearest < generator.spacing_minimum:
+				# The minimum is a penalty, not a refusal - see its notes - so a small
+				# map may land a little inside it; well inside it is a failure.
+				if nearest < generator.spacing_minimum * 0.85:
 					too_close += 1
 				if nearest >= inner and nearest <= outer:
 					in_band += 1
@@ -244,10 +263,10 @@ func _check_spacing(generator: RunMapGenerator, graphs: Array[RunMapGraph]) -> v
 			if near > generator.max_specials_per_cluster:
 				clustered += 1
 
-	_ok(north_broken == 0, "every map has exactly one final boss, at its northern end",
-		"%d broken" % north_broken)
+	_ok(far_end_broken == 0, "every map has exactly one final boss, at its eastern end",
+		"%d broken" % far_end_broken)
 	_ok(too_close == 0, "no two points of one kind are side by side",
-		"%d closer than %.0f px" % [too_close, generator.spacing_minimum])
+		"%d closer than %.0f px" % [too_close, generator.spacing_minimum * 0.85])
 	_ok(clustered == 0, "no pocket of the map holds more than %d high-value points"
 			% generator.max_specials_per_cluster, "%d crowded" % clustered)
 	if pairs > 0:
@@ -259,6 +278,103 @@ func _check_spacing(generator: RunMapGenerator, graphs: Array[RunMapGraph]) -> v
 			% [nearest_total / float(pairs), nearest_worst, nearest_furthest]
 			+ "%.0f%% inside the %.0f-%.0f band"
 			% [100.0 * float(in_band) / float(pairs), inner, outer])
+
+
+## What the road out of a point actually offers: the start's first choices are
+## bandit groups, a cleared bandit group leads on to more of them, and two
+## services never share a road.
+func _check_frontier(generator: RunMapGenerator, graphs: Array[RunMapGraph]) -> void:
+	var opening := 0
+	var opening_group := 0
+	var onward := 0
+	var onward_group := 0
+	var groupless_frontiers := 0
+	var frontiers := 0
+	var services_touching := 0
+	var service := _spacing_groups(generator).get(&"service", {}) as Dictionary
+
+	for graph: RunMapGraph in graphs:
+		for neighbour: int in graph.neighbours_of(graph.start_id):
+			opening += 1
+			if graph.get_site(neighbour).kind == &"bandit_group":
+				opening_group += 1
+
+		for site: RunMapSite in graph.sites:
+			if site.kind != &"bandit_group":
+				continue
+			var ahead := 0
+			var ahead_group := 0
+			for neighbour: int in graph.neighbours_of(site.id):
+				var next := graph.get_site(neighbour)
+				if next.row <= site.row:
+					continue
+				ahead += 1
+				if next.kind == &"bandit_group":
+					ahead_group += 1
+			if ahead == 0:
+				continue
+			frontiers += 1
+			onward += ahead
+			onward_group += ahead_group
+			if ahead_group == 0:
+				groupless_frontiers += 1
+
+		for link: RunMapLink in graph.links:
+			if service.has(graph.get_site(link.from_id).kind) \
+					and service.has(graph.get_site(link.to_id).kind):
+				services_touching += 1
+
+	var opening_share := float(opening_group) / maxf(float(opening), 1.0)
+	var onward_share := float(onward_group) / maxf(float(onward), 1.0)
+	_ok(opening_share >= 0.8, "the start's first choices are bandit groups",
+		"%.0f%% of them" % (100.0 * opening_share))
+	_ok(onward_share >= 0.45, "a cleared bandit group leads on to more of them",
+		"%.0f%% of the roads onward" % (100.0 * onward_share))
+	_ok(services_touching == 0, "no two services share a road",
+		"%d roads" % services_touching)
+	print("       opening choices %.0f%% bandit groups; onward from a group %.0f%%, "
+		% [100.0 * opening_share, 100.0 * onward_share]
+		+ "%.0f%% of group frontiers offer none"
+		% (100.0 * float(groupless_frontiers) / maxf(float(frontiers), 1.0)))
+
+
+## Dead ends - points with a single road - are few, and a branch that ends
+## normally ends in something worth the detour rather than a basic stop, without
+## every one of them being the same thing.
+func _check_dead_ends(generator: RunMapGenerator, graphs: Array[RunMapGraph]) -> void:
+	var ends := 0
+	var rewarded := 0
+	var kinds := {}
+	var rewards := {}
+	for plan: RunMapSitePlan in generator.site_plans:
+		if plan != null and plan.dead_end_weight > 0.0:
+			rewards[plan.kind] = true
+
+	for graph: RunMapGraph in graphs:
+		for site: RunMapSite in graph.sites:
+			if site.id == graph.start_id or site.id == graph.boss_id:
+				continue
+			if graph.neighbours_of(site.id).size() != 1:
+				continue
+			# One of the start's own first choices is not the end of a branch -
+			# those are the opening bandit groups, checked above.
+			if graph.has_link(graph.start_id, site.id):
+				continue
+			ends += 1
+			kinds[site.kind] = int(kinds.get(site.kind, 0)) + 1
+			if rewards.has(site.kind):
+				rewarded += 1
+
+	var per_map := float(ends) / maxf(float(graphs.size()), 1.0)
+	var share := float(rewarded) / maxf(float(ends), 1.0)
+	var camps := float(int(kinds.get(&"bandit_camp", 0))) / maxf(float(ends), 1.0)
+	_ok(per_map < 2.1, "dead ends are fewer than they were", "%.2f per map" % per_map)
+	_ok(share >= 0.7, "a dead end normally holds something worth the detour",
+		"%.0f%% do" % (100.0 * share))
+	_ok(int(kinds.get(&"treasure", 0)) > 0 and camps < 0.5,
+		"dead ends are varied - treasure among them, not all bandit camps",
+		"%.0f%% camps" % (100.0 * camps))
+	print("       %.2f dead ends per map, %.0f%% rewarded: %s" % [per_map, 100.0 * share, kinds])
 
 
 ## The distribution did not break the graph it was dealt onto: the start is
@@ -300,9 +416,9 @@ func _count_kinds(graph: RunMapGraph) -> Dictionary:
 	return counted
 
 
-func _north_kind(generator: RunMapGenerator) -> StringName:
+func _far_end_kind(generator: RunMapGenerator) -> StringName:
 	for plan: RunMapSitePlan in generator.site_plans:
-		if plan != null and plan.claims_northernmost:
+		if plan != null and plan.claims_far_end:
 			return plan.kind
 	return RunMapSite.KIND_BOSS
 
@@ -310,7 +426,7 @@ func _north_kind(generator: RunMapGenerator) -> StringName:
 func _special_kinds(generator: RunMapGenerator) -> Dictionary:
 	var kinds := {}
 	for plan: RunMapSitePlan in generator.site_plans:
-		if plan != null and plan.is_special and not plan.claims_northernmost:
+		if plan != null and plan.is_special and not plan.claims_far_end:
 			kinds[plan.kind] = true
 	return kinds
 

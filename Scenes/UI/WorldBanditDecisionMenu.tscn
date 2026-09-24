@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" uid="uid://yxetrm4456uw" path="res://Scripts/UI/world_bandit_decision_menu.gd" id="1_script"]
 [ext_resource type="Script" uid="uid://dybivjr6jldml" path="res://Scripts/UI/battle_preview_enemy_type.gd" id="2_type"]
@@ -17,9 +17,9 @@ shader_parameter/dim = 0.66
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxFlat_upgrade_panel"]
 content_margin_left = 44.0
-content_margin_top = 32.0
+content_margin_top = 24.0
 content_margin_right = 44.0
-content_margin_bottom = 32.0
+content_margin_bottom = 24.0
 texture = ExtResource("8_panel")
 texture_margin_left = 70.0
 texture_margin_top = 70.0
@@ -52,6 +52,30 @@ texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
 modulate_color = Color(0.76, 0.7, 0.6, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_back"]
+bg_color = Color(0.07, 0.02, 0.02, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.04, 0.04, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_fill"]
+bg_color = Color(0.72, 0.09, 0.1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 0)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
 [node name="WorldBanditDecisionMenu" type="Control"]
 visible = false
 layout_mode = 3
@@ -63,7 +87,7 @@ grow_vertical = 2
 process_mode = 3
 script = ExtResource("1_script")
 enemy_types = Array[ExtResource("2_type")]([ExtResource("3_bandit"), ExtResource("4_bomber")])
-briefing_paths = Array[NodePath]([NodePath("Panel/Body/Enemies"), NodePath("Panel/Body/Resources"), NodePath("Panel/Body/Risk"), NodePath("Panel/Body/Types")])
+briefing_paths = Array[NodePath]([NodePath("Panel/Body/Enemies"), NodePath("Panel/Body/Resources")])
 
 [node name="Blur" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_upgradeblur")
@@ -76,21 +100,21 @@ grow_vertical = 2
 [node name="Panel" type="PanelContainer" parent="."]
 layout_mode = 0
 anchor_left = 0.21
-anchor_top = 0.05
+anchor_top = 0.03
 anchor_right = 0.79
-anchor_bottom = 0.95
+anchor_bottom = 0.97
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
 
 [node name="Body" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Title" type="Label" parent="Panel/Body"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 34
 text = "TROUBLE"
 horizontal_alignment = 1
 
@@ -101,7 +125,7 @@ mouse_filter = 2
 color = Color(0.42, 0.055, 0.06, 1)
 
 [node name="Art" type="Control" parent="Panel/Body"]
-custom_minimum_size = Vector2(0, 200)
+custom_minimum_size = Vector2(0, 120)
 clip_contents = true
 layout_mode = 2
 mouse_filter = 2
@@ -145,10 +169,9 @@ expand_mode = 1
 flip_v = true
 
 [node name="Line" type="Label" parent="Panel/Body"]
-custom_minimum_size = Vector2(0, 70)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.86, 0.8, 1)
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 22
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
@@ -156,15 +179,44 @@ autowrap_mode = 3
 [node name="Enemies" type="HBoxContainer" parent="Panel/Body"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 alignment = 1
+
+[node name="Types" type="HBoxContainer" parent="Panel/Body/Enemies"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="Entry" type="HBoxContainer" parent="Panel/Body/Enemies/Types"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = -14
+alignment = 1
+
+[node name="Icon" type="TextureRect" parent="Panel/Body/Enemies/Types/Entry"]
+custom_minimum_size = Vector2(84, 84)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="Panel/Body/Enemies/Types/Entry"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.62, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
+text = "TYPE"
+vertical_alignment = 1
 
 [node name="Count" type="Label" parent="Panel/Body/Enemies"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.88, 0.13, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 9
-theme_override_font_sizes/font_size = 60
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 44
 text = "0"
 vertical_alignment = 1
 
@@ -172,28 +224,28 @@ vertical_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.93, 0.87, 0.8, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 7
-theme_override_font_sizes/font_size = 30
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 24
 text = "ENEMIES"
 vertical_alignment = 1
 
 [node name="Resources" type="HBoxContainer" parent="Panel/Body"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 96
+theme_override_constants/separation = 64
 alignment = 1
 
 [node name="Hearts" type="VBoxContainer" parent="Panel/Body/Resources"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 2
+theme_override_constants/separation = 0
 
 [node name="Title" type="Label" parent="Panel/Body/Resources/Hearts"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.66, 0.6, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 22
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 16
 text = "HEARTS"
 horizontal_alignment = 1
 
@@ -201,90 +253,71 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.88, 0.13, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 40
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 30
 text = "0"
 horizontal_alignment = 1
 
-[node name="Ammo" type="VBoxContainer" parent="Panel/Body/Resources"]
+[node name="Bar" type="ProgressBar" parent="Panel/Body/Resources/Hearts"]
+custom_minimum_size = Vector2(150, 12)
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_health_back")
+theme_override_styles/fill = SubResource("StyleBoxFlat_health_fill")
+max_value = 1.0
+step = 0.0
+value = 1.0
+show_percentage = false
 
-[node name="Title" type="Label" parent="Panel/Body/Resources/Ammo"]
+[node name="Blood" type="VBoxContainer" parent="Panel/Body/Resources"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Title" type="Label" parent="Panel/Body/Resources/Blood"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.72, 0.66, 0.6, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 22
-text = "AMMO"
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 16
+text = "BLOOD"
 horizontal_alignment = 1
 
-[node name="Value" type="Label" parent="Panel/Body/Resources/Ammo"]
+[node name="Value" type="Label" parent="Panel/Body/Resources/Blood"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.93, 0.87, 0.8, 1)
-theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 40
-text = "0"
-horizontal_alignment = 1
-
-[node name="Risk" type="HBoxContainer" parent="Panel/Body"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 18
-alignment = 1
-
-[node name="Title" type="Label" parent="Panel/Body/Risk"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.72, 0.66, 0.6, 1)
-theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 22
-text = "RISK"
-vertical_alignment = 1
-
-[node name="Value" type="Label" parent="Panel/Body/Risk"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.93, 0.87, 0.8, 1)
-theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
-theme_override_constants/outline_size = 9
-theme_override_font_sizes/font_size = 44
-text = "SAFE"
-vertical_alignment = 1
-
-[node name="Types" type="HBoxContainer" parent="Panel/Body"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 40
-alignment = 1
-
-[node name="Entry" type="HBoxContainer" parent="Panel/Body/Types"]
-visible = false
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="Icon" type="TextureRect" parent="Panel/Body/Types/Entry"]
-custom_minimum_size = Vector2(76, 76)
-layout_mode = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Name" type="Label" parent="Panel/Body/Types/Entry"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.62, 0.2, 1)
+theme_override_colors/font_color = Color(0.88, 0.13, 0.12, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
 theme_override_constants/outline_size = 7
-theme_override_font_sizes/font_size = 26
-text = "TYPE"
-vertical_alignment = 1
+theme_override_font_sizes/font_size = 30
+text = "0"
+horizontal_alignment = 1
+
+[node name="Risk" type="VBoxContainer" parent="Panel/Body/Resources"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Title" type="Label" parent="Panel/Body/Resources/Risk"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.66, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 16
+text = "RISK"
+horizontal_alignment = 1
+
+[node name="Value" type="Label" parent="Panel/Body/Resources/Risk"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.87, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 30
+text = "SAFE"
+horizontal_alignment = 1
 
 [node name="Buttons" type="VBoxContainer" parent="Panel/Body"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 8
 
 [node name="Choice1" type="Button" parent="Panel/Body/Buttons"]
 custom_minimum_size = Vector2(0, 56)
@@ -300,6 +333,29 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_button_hover")
 text = "Choice 1"
 
+[node name="Blood" type="Label" parent="Panel/Body/Buttons/Choice1"]
+visible = false
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -170.0
+offset_top = -18.0
+offset_right = -30.0
+offset_bottom = 18.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.88, 0.13, 0.12, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 24
+text = "-0 Blood"
+horizontal_alignment = 2
+vertical_alignment = 1
+
 [node name="Choice2" type="Button" parent="Panel/Body/Buttons"]
 custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
@@ -313,6 +369,29 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_button_hover")
 text = "Choice 2"
+
+[node name="Blood" type="Label" parent="Panel/Body/Buttons/Choice2"]
+visible = false
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -170.0
+offset_top = -18.0
+offset_right = -30.0
+offset_bottom = 18.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.88, 0.13, 0.12, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 24
+text = "-0 Blood"
+horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="Choice3" type="Button" parent="Panel/Body/Buttons"]
 custom_minimum_size = Vector2(0, 56)
@@ -328,3 +407,25 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_button_hover")
 text = "Choice 3"
 
+[node name="Blood" type="Label" parent="Panel/Body/Buttons/Choice3"]
+visible = false
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -170.0
+offset_top = -18.0
+offset_right = -30.0
+offset_bottom = 18.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.88, 0.13, 0.12, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 24
+text = "-0 Blood"
+horizontal_alignment = 2
+vertical_alignment = 1

@@ -54,6 +54,7 @@
 [ext_resource type="Script" path="res://Scripts/Player/player_dash.gd" id="52_dash"]
 [ext_resource type="PackedScene" uid="uid://cgotikhornflare" path="res://Scenes/Effects/HornFlare.tscn" id="53_flare"]
 [ext_resource type="AudioStream" uid="uid://cu1p1uspqv0sn" path="res://Sound/Character/Dash.WAV" id="54_dashsfx"]
+[ext_resource type="Script" path="res://Scripts/Common/hit_reaction.gd" id="55_hitreact"]
 
 [sub_resource type="Gradient" id="Gradient_smokepuff"]
 offsets = PackedFloat32Array(0, 0.45, 1)
@@ -305,9 +306,15 @@ daylight_energy = 0.35
 
 [node name="Health" type="Node" parent="." unique_id=1973417999 groups=["player_health"]]
 script = ExtResource("13_health")
-max_health = 3.0
+max_health = 4.0
 free_owner_on_death = false
 invulnerable_seconds = 2.0
+
+[node name="HitReaction" type="Node" parent="." unique_id=1973417311]
+script = ExtResource("55_hitreact")
+knockback_speed = 0.0
+knockback_decay = 9.0
+slow_duration = 0.0
 
 [node name="HealthCarry" type="Node" parent="." unique_id=343167102]
 script = ExtResource("26_ui31c")
@@ -394,6 +401,7 @@ script = ExtResource("43_shadowgroup")
 [node name="ShadowCaster" type="Node2D" parent="." unique_id=338264848]
 script = ExtResource("41_shadow")
 source_sprite_path = NodePath("../Visual/Body")
+ground_contact_size = Vector2(10, 10)
 
 [node name="RunInventory" type="Node" parent="." unique_id=2053097734]
 script = ExtResource("46_w4oha")

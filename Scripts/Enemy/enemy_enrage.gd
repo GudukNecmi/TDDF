@@ -20,6 +20,12 @@ extends Node
 ##   colour       HitReaction's own materials -> the tint uniform
 ##   [/codeblock]
 ##
+## [b]He does not flank and he does not run.[/b] The two steering hooks an
+## ordinary Bandit walks through - [BanditFormation]'s slot around the player and
+## [BlastReaction]'s panic and detour round a lit bomber - both ask
+## [method is_enraged] and hand his walk back untouched, so he comes straight at
+## the player until he dies.
+##
 ## [b]The pursuit is the interesting one.[/b] An ordinary enemy steers away from
 ## the men it is shouldering past - see [method Enemy._separation_push] - which is
 ## what makes a crowd spread out and come at the player from several sides. An
@@ -101,31 +107,39 @@ const GROUP := &"enraged_enemy"
 
 @export_group("What he shouts")
 ## The bubble. Left empty he goes berserk in silence.
-@export var bubble_scene: PackedScene
-## What he shouts when there is no specific friend to shout for - see
-## [method _make_him_shout]. Drawn at random.
 ##
-## [b]The fallback, not the ordinary case.[/b] An enrage over
-## [constant MoraleDirector.Source.ALLY_DIED] - the whole reason this man is
-## enraged at all, most of the time - shouts that friend's own
-## [BanditIdentity] name instead of anything here. This list is what is left for
-## every other way in: a near miss with nobody's death behind it.
-@export var shouts: PackedStringArray = [
-	"JOOOOHN!",
-	"MAAAAAK!",
-	"BILLYYY!",
-	"NOOOO!",
-	"AAAAARGH!",
-]
-## How long the bubble stays up before it fades on its own, in seconds.
-@export var bubble_hold: float = 4.0
+## [b]He shouts one name, over and over, until he dies.[/b] It is the dead
+## friend's own [BanditIdentity] name when there is one, and otherwise one drawn
+## from the same forty - see [method BanditIdentity.draw_rage_name], which is also
+## what stops two enraged men in a row shouting the same name.
+@export var bubble_scene: PackedScene
+## How long each shout stays up before it fades, in seconds.
+@export var bubble_hold: float = 1.3
 ## How long it takes to fade at the end of that.
-@export var bubble_fade: float = 0.5
-## How long it is given to go when he is killed before it has finished. Never
-## instant - a bubble snatched off on the frame of the kill reads as a bug.
-@export var death_bubble_fade: float = 1.0
+@export var bubble_fade: float = 0.3
+## Seconds from the start of one shout to the start of the next. Never shorter
+## than a shout's own hold and fade, so a new one never lands on top of the last.
+@export var shout_interval: float = 2.0
+## How long the last shout is given to go when he is killed. 0 - the shouting
+## stops the moment he dies, and his apology takes its place.
+@export var death_bubble_fade: float = 0.0
 ## Where the bubble hangs relative to his feet.
 @export var bubble_offset := Vector2(52.0, -104.0)
+
+@export_group("His apology")
+## What he says as he dies, one drawn at random. [code]{name}[/code] is replaced
+## with the name he was shouting, as it is said rather than screamed - see
+## [method BanditIdentity.spoken_name]. Left empty he dies without a word.
+@export var apology_lines: PackedStringArray = [
+	"I'm sorry, {name}.",
+	"Forgive me, {name}.",
+	"I'm sorry, {name}...",
+	"I failed you, {name}.",
+]
+## How long the apology is on screen in all, in seconds, fade included.
+@export var apology_time: float = 2.0
+## How much of [member apology_time] is spent fading out at the end.
+@export var apology_fade: float = 0.25
 
 @export_group("His ending")
 ## Whether the camera is briefly taken as he dies.
@@ -157,9 +171,16 @@ const GROUP := &"enraged_enemy"
 var _enraged: bool = false
 var _bubble: SpeechBubble
 var _materials: Array[ShaderMaterial] = []
+## The name this rage is about, in its screamed form. Chosen once, in
+## [method enrage], and kept until he dies.
+var _rage_name: StringName = &""
+## Seconds since the current shout went up. Only counted while he is shouting.
+var _shout_clock: float = 0.0
 
 
 func _ready() -> void:
+	# The shouting is the only thing that runs per frame, and only once he is berserk.
+	set_process(false)
 	if _health != null:
 		_health.died.connect(_on_died)
 
@@ -200,9 +221,8 @@ func is_enraged_now() -> bool:
 ## [param dead_ally] is the friend whose death is *why* - handed straight through
 ## from [method MoraleDirector.check]'s own [constant MoraleDirector.Source.ALLY_DIED]
 ## roll, and null for every other way in (a near miss, a test calling this
-## directly). See [method _make_him_shout]: with a name to shout it is shouted
-## instead of one drawn from [member shouts], and without one nothing here
-## changes at all.
+## directly). See [method _make_him_shout]: with a name to shout it is shouted,
+## and without one a name is drawn from the same pool instead.
 func enrage(dead_ally: Node2D = null) -> bool:
 	if _enraged or not can_enrage or not is_inside_tree():
 		return false
@@ -289,52 +309,70 @@ func _collect_materials() -> void:
 		_materials.append(own)
 
 
-## The bubble, put into the running scene rather than onto the man, so it keeps
-## hanging in the air at a steady angle while he is knocked about, and survives him
-## long enough to fade.
+## Chooses the name this rage is about and shouts it for the first time. The rest
+## of the shouting is [method _process]'s, which repeats it until he dies.
 ##
-## [b]The line itself has two sources.[/b] [param dead_ally]'s own
-## [BanditIdentity] - the friend this rage is actually about - is asked first,
-## and its name is what gets shouted when he has one: this is the man screaming
-## a name because that is the friend he just watched die, not a line drawn at
-## random. Only when there is no such friend - every enrage that is not
-## [constant MoraleDirector.Source.ALLY_DIED] - does this fall back to
-## [member shouts], exactly as it always did.
-func _make_him_shout(host: Node, dead_ally: Node2D = null) -> void:
-	var line := BanditIdentity.name_for(dead_ally)
-	if line == &"" and not shouts.is_empty():
-		line = shouts[randi() % shouts.size()]
-	if line == &"" or bubble_scene == null:
+## [b]The name has two sources.[/b] [param dead_ally]'s own [BanditIdentity] -
+## the friend this rage is actually about - is asked first: this is a man
+## screaming a name because that is the friend he just watched die. When there is
+## no such friend - every enrage that is not
+## [constant MoraleDirector.Source.ALLY_DIED] - one is drawn from the same forty.
+## Either way it goes through [method BanditIdentity.draw_rage_name], which is what
+## keeps two enraged men in a row from shouting the same name.
+func _make_him_shout(_host: Node, dead_ally: Node2D = null) -> void:
+	_rage_name = BanditIdentity.draw_rage_name(BanditIdentity.name_for(dead_ally))
+	if _rage_name == &"" or bubble_scene == null:
 		return
+	_shout_once()
+	set_process(true)
 
-	var body := host as Node2D
-	if body == null:
-		return
+
+## Repeats the shout: each one held for [member bubble_hold], faded over
+## [member bubble_fade], and the next put up [member shout_interval] after the last.
+func _process(delta: float) -> void:
+	_shout_clock += delta
+	if _shout_clock >= bubble_hold and _bubble != null and is_instance_valid(_bubble) \
+			and not _bubble.is_leaving():
+		_bubble.dismiss(bubble_fade)
+	if _shout_clock >= maxf(shout_interval, bubble_hold + bubble_fade):
+		_shout_once()
+
+
+func _shout_once() -> void:
+	_shout_clock = 0.0
+	_fade_bubble(0.0)
+	_bubble = _put_up_bubble(String(_rage_name))
+
+
+## A bubble over this man saying [param line], put into the running scene rather
+## than onto the man, so it keeps hanging in the air at a steady angle while he is
+## knocked about, and survives him long enough to fade.
+func _put_up_bubble(line: String) -> SpeechBubble:
+	var body := get_parent() as Node2D
+	if body == null or bubble_scene == null or line.is_empty():
+		return null
 
 	var bubble := bubble_scene.instantiate() as SpeechBubble
 	if bubble == null:
-		return
+		return null
 
 	bubble.head_offset = bubble_offset
 	var keeper: Node = get_tree().current_scene
 	if keeper == null:
 		keeper = body.get_parent()
 	if keeper == null:
-		return
+		bubble.free()
+		return null
 
 	keeper.add_child(bubble)
 	bubble.global_position = body.global_position + bubble_offset
 	bubble.set_subject(body)
-	bubble.show_bubble(String(line))
-	_bubble = bubble
-
-	if bubble_hold > 0.0:
-		var timer := get_tree().create_timer(bubble_hold, true, false, true)
-		timer.timeout.connect(_fade_bubble.bind(bubble_fade))
+	bubble.show_bubble(line)
+	return bubble
 
 
 ## Takes the bubble down. Safe to call twice - the bubble refuses a second dismissal
-## itself - which is what lets the timer and the death both ask without either
+## itself - which is what lets the shouting and the death both ask without either
 ## having to know about the other.
 func _fade_bubble(fade: float) -> void:
 	if _bubble == null or not is_instance_valid(_bubble):
@@ -346,16 +384,40 @@ func _fade_bubble(fade: float) -> void:
 ##
 ## [b]Nothing about the ordinary death is touched.[/b] [EnemyDefeat] still plays it,
 ## [EnemyHeadPop] still takes the head off, [BloodEmitter] still pays out and
-## [DeathFade] still frees the body. This lays two things on top - a moment of the
-## camera and a tear - and lets his bubble finish rather than snatching it away.
+## [DeathFade] still frees the body. This lays things on top - the shouting stops,
+## he apologises to the friend he was shouting for, a moment of the camera and a
+## tear.
 func _on_died() -> void:
 	if not _enraged:
 		return
 
 	enraged_death.emit()
+	set_process(false)
 	_fade_bubble(death_bubble_fade)
+	_apologise()
 	_show_tear()
 	_take_the_camera()
+
+
+## His last line, to the friend he failed, gone again after [member apology_time].
+##
+## The take-down is a timer on the tree bound to the bubble itself rather than to
+## this node, because this node is on a body that is about to be frozen and freed -
+## and the bubble must still go on time whether or not the corpse is there.
+func _apologise() -> void:
+	if apology_lines.is_empty() or _rage_name == &"":
+		return
+
+	var line := apology_lines[randi() % apology_lines.size()]
+	line = line.format({"name": BanditIdentity.spoken_name(_rage_name)})
+	var bubble := _put_up_bubble(line)
+	if bubble == null:
+		return
+	_bubble = bubble
+
+	var fade := clampf(apology_fade, 0.0, maxf(apology_time, 0.0))
+	var timer := get_tree().create_timer(maxf(apology_time - fade, 0.0), true, false, true)
+	timer.timeout.connect(bubble.dismiss.bind(fade))
 
 
 ## The tear, faded up beneath the X marks the ordinary death already put in his

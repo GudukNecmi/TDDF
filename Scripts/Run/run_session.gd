@@ -117,6 +117,9 @@ var _horse: Horse
 ## Setting out is always at full health and coming home always arrives whole; only
 ## the rounds inside one run carry their wounds forward.
 @export var vitals_path: NodePath = ^"/root/Vitals"
+## The ammunition locker a weapon's capacity bonus is pushed back into once the
+## run-only upgrade levels are forgotten - see [method _clear_run_upgrades].
+@export var ammo_locker_path: NodePath = ^"/root/Ammo"
 
 ## Whether the player still has a resupply owed to them for this run.
 ##
@@ -168,7 +171,26 @@ var _free_run: bool = false
 ## See [method RunMapDirector._ready].
 var _run_index: int = 0
 
+## Where the weapon roster is read from. Held by the session for the life of the
+## game because a weapon bought in the base is owned by flipping
+## [member WeaponDefinition.unlocked] on the shared resource - and a resource no
+## scene holds any more is dropped and read back from disk as it was authored.
+## Keeping it loaded here is what makes a purchase outlast the scene change.
+@export var weapon_catalog_path: String = "res://Resources/Weapons/weapon_catalog.tres"
+
 var _catalog: MapCatalog
+var _weapon_catalog: WeaponCatalog
+
+
+func _ready() -> void:
+	get_weapon_catalog()
+
+
+## The weapon roster, loaded once and kept - see [member weapon_catalog_path].
+func get_weapon_catalog() -> WeaponCatalog:
+	if _weapon_catalog == null and ResourceLoader.exists(weapon_catalog_path):
+		_weapon_catalog = load(weapon_catalog_path) as WeaponCatalog
+	return _weapon_catalog
 
 
 ## True once a map has been chosen. The world reads this on the way up to decide
@@ -517,6 +539,7 @@ func begin(map_id: StringName) -> void:
 	# yet - see [method take_outfit] and [RunVitals].
 	_outfit_owed = true
 	_clear_vitals()
+	_clear_run_upgrades()
 	run_began.emit(_map_id)
 
 
@@ -567,6 +590,20 @@ func _clear_vitals() -> void:
 		vitals.call(&"clear")
 
 
+## Forgets every weapon upgrade level bought at a run map market - see
+## [method WeaponDefinition.clear_run_levels]. Done as a run begins and as it ends,
+## for the same reason the vitals are: what a run bought belongs to that run.
+func _clear_run_upgrades() -> void:
+	var catalog := get_weapon_catalog()
+	if catalog == null:
+		return
+	var locker := get_node_or_null(ammo_locker_path) as AmmoLocker
+	for weapon: WeaponDefinition in catalog.weapons:
+		if weapon != null:
+			weapon.clear_run_levels()
+			weapon.sync_ammo_capacity(locker)
+
+
 ## Back to no run. Nothing calls it during play yet - a death carries the player
 ## home without ending the session - but it is what a "quit to base" would use,
 ## and it keeps the state something that can be put back rather than only set.
@@ -590,6 +627,7 @@ func end() -> void:
 	# in whole, which is also what stops a player who went home on half a heart from
 	# being stuck with it.
 	_clear_vitals()
+	_clear_run_upgrades()
 	run_ended.emit()
 
 

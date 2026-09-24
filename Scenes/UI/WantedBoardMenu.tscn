@@ -1,0 +1,151 @@
+[gd_scene format=3 uid="uid://qbq6ru2q82jo"]
+
+[ext_resource type="Script" uid="uid://b0kr6l6fq3exh" path="res://Scripts/UI/wanted_board_menu.gd" id="1_fhkgw"]
+[ext_resource type="PackedScene" uid="uid://dton60x7yqk5r" path="res://Scenes/UI/WantedPoster.tscn" id="2_rjfpc"]
+[ext_resource type="Shader" uid="uid://c5kbp8xehadhn" path="res://Shaders/pause_blur.gdshader" id="3_aaf87"]
+[ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="4_ysx6c"]
+[ext_resource type="Texture2D" uid="uid://b5tbx3ndtm3yn" path="res://Assets/UI/UI Screens/Button1.PNG" id="5_btn1"]
+[ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="6_btn2"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_upgradeblur"]
+shader = ExtResource("3_aaf87")
+shader_parameter/blur_amount = 2.8
+shader_parameter/dim = 0.66
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxFlat_upgrade_panel"]
+content_margin_left = 44.0
+content_margin_top = 32.0
+content_margin_right = 44.0
+content_margin_bottom = 32.0
+texture = ExtResource("4_ysx6c")
+texture_margin_left = 70.0
+texture_margin_top = 70.0
+texture_margin_right = 70.0
+texture_margin_bottom = 70.0
+region_rect = Rect2(92, 26, 2800, 2102)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_normal"]
+content_margin_left = 44.0
+content_margin_top = 14.0
+content_margin_right = 44.0
+content_margin_bottom = 14.0
+texture = ExtResource("5_btn1")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_hover"]
+content_margin_left = 44.0
+content_margin_top = 14.0
+content_margin_right = 44.0
+content_margin_bottom = 14.0
+texture = ExtResource("6_btn2")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_pressed"]
+content_margin_left = 44.0
+content_margin_top = 14.0
+content_margin_right = 44.0
+content_margin_bottom = 14.0
+texture = ExtResource("6_btn2")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+modulate_color = Color(0.76, 0.7, 0.6, 1)
+
+[node name="WantedBoardMenu" type="Control" unique_id=1650904040 groups=["wanted_board_menu"]]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_fhkgw")
+poster_scene = ExtResource("2_rjfpc")
+
+[node name="Blur" type="ColorRect" parent="." unique_id=1762676325]
+material = SubResource("ShaderMaterial_upgradeblur")
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="." unique_id=1316617529]
+layout_mode = 0
+anchor_left = 0.03
+anchor_top = 0.04
+anchor_right = 0.97
+anchor_bottom = 0.96
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_upgrade_panel")
+
+[node name="Body" type="VBoxContainer" parent="Panel" unique_id=1686419295]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="Panel/Body" unique_id=867915851]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Panel/Body/Header" unique_id=321280646]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 38
+text = "WANTED BOARD"
+vertical_alignment = 1
+
+[node name="Slots" type="Label" parent="Panel/Body/Header" unique_id=727306682]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_font_sizes/font_size = 24
+text = "CONTRACTS  0 / 5"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Rule" type="ColorRect" parent="Panel/Body" unique_id=167928263]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Posters" type="HBoxContainer" parent="Panel/Body" unique_id=644205670]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Hint" type="Label" parent="Panel/Body" unique_id=1566079512]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "THE LESS THE POSTER KNOWS, THE MORE IT PAYS"
+horizontal_alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="Panel/Body" unique_id=1566079513]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 8
+focus_mode = 0
+theme_override_colors/font_color = Color(0.16, 0.06, 0.05, 1)
+theme_override_colors/font_focus_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_colors/font_pressed_color = Color(0.08, 0.03, 0.02, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.07, 0.06, 1)
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_normal")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pressed")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_hover")
+theme_override_styles/focus = SubResource("StyleBoxTexture_btn_normal")
+text = "RIDE OUT"

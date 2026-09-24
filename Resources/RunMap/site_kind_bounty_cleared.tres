@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="RunMapSiteKind" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_site_kind.gd" id="1_kind"]
+[ext_resource type="Texture2D" path="res://Assets/RunMap/Sites/SiteBountyCleared.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_kind")
+kind = &"bounty_cleared"
+display_name = "BOUNTY BOSS"
+icon = ExtResource("2_icon")
+visited_icon = ExtResource("2_icon")
+icon_scale = 1.6
+tint = Color(1, 1, 1, 1)
+is_fallback = false

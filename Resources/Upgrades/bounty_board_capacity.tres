@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="BountyCapacityUpgrade" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Upgrades/bounty_capacity_upgrade.gd" id="1_upgrade"]
+
+[resource]
+script = ExtResource("1_upgrade")
+display_name = "BOUNTY BOARD"
+level_costs = Array[int]([1500, 3000])

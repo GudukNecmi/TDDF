@@ -25,8 +25,14 @@ extends Area2D
 ## hit is the one that kills.
 signal hit_landed(damage: float, hit_direction: Vector2, hit_position: Vector2)
 
-## 1.0 for an ordinary body part, higher for weak spots.
+## 1.0 for an ordinary body part, higher for weak spots. Every region is at 1.0
+## today - a headshot does no extra damage by default - but the mechanism is kept
+## whole for a Headshot card to turn up.
 @export var damage_multiplier: float = 1.0
+## Which part of the body this is - [code]&"head"[/code] on the head hitbox - so
+## anything that rewards hitting a particular region can tell it apart without
+## relying on its multiplier.
+@export var region: StringName = &"body"
 ## Health component that owns the hit points.
 @export var health_path: NodePath = ^"../Health"
 
@@ -58,11 +64,16 @@ var _numbers: DamageNumbers
 ## like the pair the coin sends out. It reads through to the damage figure exactly
 ## as a hit heavy enough to qualify on its own does, so there is one critical hit
 ## in the game and two ways of earning it.
+##
+## [param effects] is what the hit does beyond damage - the firing weapon's
+## knockback, stagger and blood gain - passed straight on to [Health]. Left out,
+## the hit is an ordinary one.
 func take_hit(
 	damage: float,
 	hit_direction: Vector2 = Vector2.ZERO,
 	hit_position: Vector2 = Vector2.INF,
-	critical: bool = false
+	critical: bool = false,
+	effects: HitEffects = null
 ) -> void:
 	if _health == null:
 		return
@@ -75,7 +86,7 @@ func take_hit(
 	if shows_damage_numbers:
 		_pop_number(dealt, at + damage_number_offset, critical)
 
-	_health.take_damage(dealt, hit_direction)
+	_health.take_damage(dealt, hit_direction, effects)
 
 
 ## Looked up lazily and re-looked-up if it goes away, matching how every other

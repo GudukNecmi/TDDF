@@ -15,7 +15,9 @@ extends Area2D
 ## is to where it is about to be is traced, and the *nearest* hitbox along it
 ## stops it. Sweeping is also what makes "one pellet, one victim" true by
 ## construction, since a segment has a first thing on it however many are lined
-## up behind. There is no piercing, and nothing here to configure it with.
+## up behind. A round with a pierce left in it (see [member pierce_count]) is the
+## one exception: it lands, then carries straight on and is swept again from the
+## body it just passed through.
 ##
 ## Everything that changes with distance - damage, speed, colour, glow and the
 ## light it casts - is read from ONE normalised number, [method get_progress],
@@ -53,6 +55,11 @@ signal landed(hitbox: Hitbox)
 ## Tuning them together is what stops a bullet from reading as a floodlight with a
 ## dot in the middle. 0 leaves the light exactly as authored.
 @export var light_radius: float = 0.0
+## Half the width of the round as far as hitting things goes, in pixels. The trace
+## is a line at the authored size; once the projectile size stat has grown the
+## round, two more lines this far out (times the growth) either side of it are
+## traced as well, so a bigger round really does catch more.
+@export var hit_half_width: float = 2.0
 
 @export_group("Seeking")
 ## How many enemies this can carry on to after the one it hits. 0 is a round that
@@ -86,6 +93,18 @@ signal landed(hitbox: Hitbox)
 ## the whole way.
 @export var retire_on_lost_target: bool = false
 
+@export_group("Piercing")
+## How many enemies this passes straight through after the one it hits, carrying
+## on along the line it was already flying. 0 is a round that stops where it
+## lands, which is every projectile the scenes author.
+##
+## Like [member bounce_count] it lives on the projectile rather than on a weapon:
+## the lever action's PIERCE upgrade adds to it through the weapon's stats (see
+## [method WeaponStats.pierce_bonus]). Every body passed through is landed on the
+## ordinary way - same damage calculation, same hit effects - and is remembered
+## with the bounces' victims, so no enemy is struck twice in one flight.
+@export var pierce_count: int = 0
+
 @onready var _sprite: Sprite2D = get_node_or_null(^"Sprite2D") as Sprite2D
 @onready var _glow: Sprite2D = get_node_or_null(^"Glow") as Sprite2D
 @onready var _light: PointLight2D = get_node_or_null(^"Light") as PointLight2D
@@ -101,6 +120,9 @@ var _target: Node2D
 ## Bounces still to come. Counted down from [member bounce_count] as each one is
 ## spent.
 var _bounces_left: int = 0
+## Pierces still to come, counted down from [member pierce_count] plus the
+## weapon's pierce stat as each body is passed through.
+var _pierces_left: int = 0
 ## Everything already struck on this flight, so a bounce cannot go straight back
 ## into the enemy it just came out of.
 var _struck: Array[Node] = []
@@ -119,6 +141,19 @@ var _time_compensation: float = 1.0
 ## profile says. 1 is a round flying at exactly the speed it was authored at,
 ## which is every round unless something has hurried it along.
 var _speed_scale: float = 1.0
+## The firing weapon's stats - see [method apply_weapon_stats]. Null is a round
+## flying on its authored numbers alone.
+var _stats: WeaponStats
+## What a critical hit multiplies this round's damage by. 1 until
+## [method apply_weapon_stats] makes it critical.
+var _critical_scale: float = 1.0
+## What the hit does beyond damage - knockback, stagger, blood - handed to the
+## hitbox as it lands. Null is an ordinary hit.
+var _hit_effects: HitEffects
+## Set by [method ricochet] from inside a deflector's
+## [code]take_projectile_hit[/code], so the round that deflector just took flies
+## on instead of being retired for having no target. Spent on that same step.
+var _ricocheted: bool = false
 
 
 func _ready() -> void:
@@ -126,6 +161,11 @@ func _ready() -> void:
 	# range at all and it really could fly forever.
 	if profile == null:
 		profile = ProjectileProfile.new()
+
+	# Grown as a whole - artwork, glow, light and overlap shape together - before
+	# anything below captures a base scale off it.
+	if _stats != null and not is_equal_approx(_stats.size_scale(), 1.0):
+		scale *= _stats.size_scale()
 
 	if _glow != null:
 		# Sized before the base scale is captured, so everything the profile does to
@@ -139,7 +179,11 @@ func _ready() -> void:
 		_apply_light_radius()
 		_light_base_scale = _light.texture_scale
 
-	_bounces_left = maxi(bounce_count, 0)
+	# The weapon's bounce stat - the revolver's ricochet upgrade - adds to whatever
+	# the scene authored, so an un-upgraded round keeps exactly the bounces it had.
+	_bounces_left = maxi(bounce_count, 0) + (0 if _stats == null else _stats.bounce_bonus())
+	# The lever action's pierce upgrade adds the same way.
+	_pierces_left = maxi(pierce_count, 0) + (0 if _stats == null else _stats.pierce_bonus())
 	area_entered.connect(_on_area_entered)
 	_apply_progress()
 
@@ -153,7 +197,7 @@ func _physics_process(delta: float) -> void:
 
 	# Speed comes from the same progression as everything else, so the pellet
 	# visibly loses steam exactly as its damage, colour and light fade.
-	var step := profile.speed_at(progress) * _speed_scale * delta
+	var step := profile.speed_at(progress) * _speed_scale * _stat_speed_scale() * delta
 	# transform.x is the node's own +X axis, already rotated.
 	var to := global_position + transform.x * step
 
@@ -169,7 +213,7 @@ func _physics_process(delta: float) -> void:
 
 	# Retired at the end of its range - the same range every effect is scaled
 	# against. The age check is a belt-and-braces stop so nothing can persist.
-	if _travelled >= profile.effective_range or _age >= profile.max_lifetime:
+	if _travelled >= get_effective_range() or _age >= profile.max_lifetime * maxf(_stat_range_scale(), 1.0):
 		queue_free()
 
 
@@ -223,6 +267,22 @@ func redirect_to(target: Node2D, keep_distance: bool = false) -> void:
 			global_rotation = to_target.angle()
 
 
+## Turns this round onto [param direction] off something that is not a body -
+## a boss's spinning blade - and lets it fly on, the same round with the same
+## profile and range, pointed away.
+##
+## [b]Meant to be called from a deflector's own
+## [code]take_projectile_hit[/code][/b]: taking a shot normally retires one that
+## was not given a target, and this is what tells [method _sweep_to] this one
+## was sent somewhere instead. It hits nothing it was already heading for.
+func ricochet(direction: Vector2) -> void:
+	if direction.is_zero_approx():
+		return
+	_target = null
+	_ricocheted = true
+	global_rotation = direction.angle()
+
+
 ## Makes this round hit harder than it otherwise would, and optionally makes it
 ## land as a critical.
 ##
@@ -253,6 +313,37 @@ func set_speed_scale(multiplier: float) -> void:
 	_speed_scale = maxf(multiplier, 0.0)
 
 
+## Hands this round the firing weapon's [WeaponStats]: its damage, range, speed,
+## size and fall-off are read through them from here on, and its hits carry the
+## weapon's knockback, stagger and blood gain. [param critical] is the weapon's
+## one roll for the attack this round belongs to - see
+## [method CarriedWeapon.roll_critical].
+##
+## [b]Called before the round enters the tree[/b], so its size is in place before
+## [method _ready] measures anything. Kept apart from [method empower] and
+## [method set_speed_scale], which stay the coin's and the spin's own dials and
+## multiply on top of these.
+func apply_weapon_stats(stats: WeaponStats, critical: bool = false) -> void:
+	_stats = stats
+	_hit_effects = null if stats == null else stats.make_hit_effects()
+	if critical and stats != null:
+		_critical = true
+		_critical_scale = stats.critical_multiplier()
+
+
+## How far this round reaches: its profile's range, stretched by the range stat.
+func get_effective_range() -> float:
+	return profile.effective_range * _stat_range_scale()
+
+
+func _stat_range_scale() -> float:
+	return 1.0 if _stats == null else _stats.range_scale()
+
+
+func _stat_speed_scale() -> float:
+	return 1.0 if _stats == null else _stats.speed_scale()
+
+
 ## Excuses this round from a world time scale, so it flies at its ordinary speed
 ## while everything around it is slowed.
 ##
@@ -269,6 +360,11 @@ func exempt_from_time_scale(world_scale: float) -> void:
 ## projectile it has caught.
 func get_bounces_left() -> int:
 	return _bounces_left
+
+
+## How many more bodies this can pass straight through.
+func get_pierces_left() -> int:
+	return _pierces_left
 
 
 ## Turns onto the target it was given. A projectile with no target flies dead
@@ -304,15 +400,31 @@ func _steer(delta: float) -> void:
 ## The one shared distance progression: 0 at the muzzle, 1 at the end of the
 ## profile's effective range. Every distance-driven effect on this pellet is
 ## derived from this single value.
+##
+## The range stat stretches the flight rather than the profile: the distance is
+## measured against the profile's range times the stat, so everything that falls
+## off with distance falls off over the longer flight together.
 func get_progress() -> float:
-	return profile.progress_for(_travelled)
+	return profile.progress_for(_travelled / _stat_range_scale())
 
 
 ## Damage this pellet would land right now, before the hitbox's own multiplier -
-## so the headshot bonus still applies on top, at any distance, and on top of
-## whatever [method empower] has done to it.
+## so a hitbox's weak-spot multiplier still applies on top, at any distance, and
+## on top of whatever [method empower] has done to it.
 func get_current_damage() -> float:
-	return profile.damage_at(get_progress()) * _damage_scale
+	return damage_at_progress(get_progress())
+
+
+## Damage this round lands at [param progress] along its flight: the profile's
+## figure with the weapon's fall-off stat, times the weapon's damage stats, the
+## critical multiplier and anything [method empower] added. What
+## [method get_current_damage] reads, and what a readout can ask without flying
+## the round.
+func damage_at_progress(progress: float) -> float:
+	if _stats == null:
+		return profile.damage_at(progress) * _damage_scale * _critical_scale
+	return (profile.damage_at(progress, _stats.falloff_scale())
+		* _stats.damage_scale_at(progress) * _damage_scale * _critical_scale)
 
 
 ## Whether this round's hits are announced as critical. Set by [method empower].
@@ -374,7 +486,18 @@ func _sweep_to(to: Vector2) -> bool:
 	# coin appear to carry on through its target.
 	query.exclude = [get_rid()]
 
-	var hit := get_world_2d().direct_space_state.intersect_ray(query)
+	var hit := _trace(query)
+	# A bounced round sets off from inside the enemy it just left, and each enemy
+	# has more than one hitbox, so any hitbox belonging to somebody already struck
+	# on this flight is traced through rather than landed on again. Bounded by how
+	# many hitboxes those enemies can have; a round that never bounced struck no one
+	# and never loops.
+	for _pass in 8:
+		var passed := hit.get("collider") as Hitbox
+		if passed == null or not _struck.has(_victim_of(passed)):
+			break
+		query.exclude = query.exclude + [passed.get_rid()]
+		hit = _trace(query)
 	if hit.is_empty():
 		return false
 
@@ -394,7 +517,9 @@ func _sweep_to(to: Vector2) -> bool:
 	if collider != null and collider.has_method(&"take_projectile_hit"):
 		if collider.call(&"take_projectile_hit", self, contact):
 			global_position = contact
-			if _target == null:
+			if _ricocheted:
+				_ricocheted = false
+			elif _target == null:
 				_retire()
 			return true
 		return false
@@ -403,9 +528,57 @@ func _sweep_to(to: Vector2) -> bool:
 	if hitbox == null:
 		return false
 
+	var start := global_position
 	global_position = hit.get("position", to) as Vector2
-	_land(hitbox)
+	if _land(hitbox):
+		# Pierced: the stretch up to the body still counts against the range, and
+		# the next step is swept onwards from here.
+		_travelled += start.distance_to(global_position)
 	return true
+
+
+## The nearest hit along [param query]'s segment. A round grown by the projectile
+## size stat also traces the same segment either side of its centre line, at its
+## grown half width, and takes whichever line meets something first - with the
+## contact moved back onto the centre line, so the round still stops on its own
+## path. A round at its authored size traces the one line it always did.
+func _trace(query: PhysicsRayQueryParameters2D) -> Dictionary:
+	var space := get_world_2d().direct_space_state
+	var hit := space.intersect_ray(query)
+	var reach := _widened_half_width()
+	if reach <= 0.0:
+		return hit
+
+	var from := query.from
+	var to := query.to
+	var side := (to - from).orthogonal().normalized()
+	if side.is_zero_approx():
+		return hit
+
+	var best := hit
+	var best_distance := INF if hit.is_empty() else from.distance_to(hit.get("position", to))
+	for offset: Vector2 in [side * reach, -side * reach]:
+		query.from = from + offset
+		query.to = to + offset
+		var lateral := space.intersect_ray(query)
+		if lateral.is_empty():
+			continue
+		var distance := query.from.distance_to(lateral.get("position", query.to))
+		if distance < best_distance:
+			best_distance = distance
+			lateral["position"] = (lateral.get("position", query.to) as Vector2) - offset
+			best = lateral
+	query.from = from
+	query.to = to
+	return best
+
+
+## How far either side of the centre line a grown round reaches, or 0 for a round
+## at its authored size.
+func _widened_half_width() -> float:
+	if _stats == null or _stats.size_scale() <= 1.0:
+		return 0.0
+	return maxf(hit_half_width, 0.0) * _stats.size_scale()
 
 
 ## The area path is kept as well as the sweep, for the case the sweep cannot see:
@@ -420,14 +593,22 @@ func _on_area_entered(area: Area2D) -> void:
 
 ## Spends the pellet on one hitbox. Everything that stops it happens here, so
 ## there is one answer to "what does a pellet do when it hits something" however
-## the hit was noticed.
-func _land(hitbox: Hitbox) -> void:
+## the hit was noticed. Returns true when the round pierced the body and is flying
+## straight on.
+func _land(hitbox: Hitbox) -> bool:
 	# Overlapping hitboxes can both report in the same frame, and the sweep and
 	# the area can both notice the same impact - a pellet must only ever land once,
 	# on one victim.
 	if _spent:
-		return
+		return false
+	# Somebody this round has already hit on this flight - it is passing back out
+	# through them on the way to its next bounce or pierce, not striking them again.
+	var victim := _victim_of(hitbox)
+	if _struck.has(victim):
+		return false
 	_spent = true
+	if victim != null:
+		_struck.append(victim)
 
 	# The direction of travel is handed over so the victim can react away from
 	# the shot. The hitbox still applies its own multiplier to the damage - which
@@ -437,13 +618,36 @@ func _land(hitbox: Hitbox) -> void:
 	# The pellet's own position is the impact point - the sweep already moved it
 	# there - so the damage figure lands where the pellet did rather than at the
 	# middle of whatever it hit.
-	hitbox.take_hit(get_current_damage(), transform.x, global_position, _critical)
+	hitbox.take_hit(get_current_damage(), transform.x, global_position, _critical, _hit_effects)
 	landed.emit(hitbox)
 
+	if _pierce_onward():
+		return true
+
 	if _bounce_onward(hitbox):
-		return
+		return false
 
 	_retire()
+	return false
+
+
+## Lets the shot carry straight on through the body it just struck, if it has a
+## pierce left. Returns whether it did.
+##
+## Nothing else changes: the round keeps its heading, its distance travelled and
+## everything it was armed with, so each body further down the line is landed on
+## by the same calculation at its own point along the range. The victim is
+## already in [member _struck], which is what makes the sweep pass through the
+## rest of that body instead of landing on its other hitbox.
+func _pierce_onward() -> bool:
+	if _pierces_left <= 0:
+		return false
+	_pierces_left -= 1
+	_spent = false
+	# A round that was steering at the body it just went through has nobody left
+	# to steer at - it flies on the line it came in on.
+	_target = null
+	return true
 
 
 ## Carries the shot on to the next enemy, if it has a bounce left and there is
@@ -455,10 +659,6 @@ func _land(hitbox: Hitbox) -> void:
 func _bounce_onward(hitbox: Hitbox) -> bool:
 	if _bounces_left <= 0:
 		return false
-
-	var victim := hitbox.owner if hitbox.owner != null else hitbox.get_parent()
-	if victim != null and not _struck.has(victim):
-		_struck.append(victim)
 
 	var next := EnemyTargeting.nearest(
 		self, global_position, target_search_radius, _struck)
@@ -472,6 +672,12 @@ func _bounce_onward(hitbox: Hitbox) -> bool:
 	_spent = false
 	redirect_to(next)
 	return true
+
+
+## The enemy [param hitbox] belongs to - its scene's root - so a head and a body
+## hitbox on one enemy are one victim.
+func _victim_of(hitbox: Hitbox) -> Node:
+	return hitbox.owner if hitbox.owner != null else hitbox.get_parent()
 
 
 ## Takes the projectile off the board.

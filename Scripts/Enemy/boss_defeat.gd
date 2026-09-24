@@ -92,6 +92,10 @@ enum Stage {
 @export var arena_path: NodePath = ^"../BossArena"
 ## The phase system, stopped so no further support is sent.
 @export var phases_path: NodePath = ^"../BossPhases"
+## The crowd that keeps his men on the field - a run map bounty boss's support,
+## see [method AmbushWaveDirector.sustain]. Broken as he goes down, so nobody
+## replaces the men who run and the crowd empties through its own ending.
+@export var ambush_path: NodePath = ^"../AmbushDirector"
 ## The ledger the contract is closed out in.
 @export var ledger_path: NodePath = ^"/root/Bounties"
 ## The player's carried blood, which the reward is paid into.
@@ -214,14 +218,16 @@ enum Stage {
 ## so it cannot be cut off by anything the world is doing and cannot reach the
 ## music.
 @export var sound_bank_path: NodePath = ^"SoundBank"
-## What is played [b]the instant the line is drawn through the name[/b], and at no
-## other moment: not on the killing hit, which is the fall rather than the ending,
-## and not when the body on the ground is finished off later. It is the full stop
-## on the sentence the card is writing, so it is fired from the same line the strike
-## is - see [method _strike_the_name].
+## What is played once as the boss is beaten - on the killing hit or as the line is
+## drawn through the name, whichever [member strike_sound_on_killing_hit] picks - and
+## at no other moment: never again when the body on the ground is finished off later.
 ##
 ## Empty, or a name the bank has no stream for, simply plays nothing.
 @export var strike_sound: StringName = &"defeat"
+## True plays [member strike_sound] on the final killing hit itself - see
+## [method _begin_defeat]. False holds it back to the moment the line is drawn
+## through the name - see [method _strike_the_name]. Either way it plays once.
+@export var strike_sound_on_killing_hit: bool = true
 ## Level it is played at against the rest of that bank, in decibels.
 @export var strike_sound_volume_db: float = 0.0
 
@@ -354,6 +360,17 @@ func is_corpse_killed() -> bool:
 	return _stage == Stage.KILLED
 
 
+## Finishes the body on the ground off now, exactly as a shot into it would - the X
+## over the eyes, the drained colour, the blood - and reports whether there was a
+## body lying there to finish. For a decision made over him rather than a bullet
+## fired at him; see [RunMiniBossFight].
+func finish_off() -> bool:
+	if _stage != Stage.DOWN:
+		return false
+	_kill_the_corpse()
+	return true
+
+
 # --- Arming ---------------------------------------------------------------------
 
 ## The fight has begun. From here the boss's own pool is what this node watches, and the
@@ -446,6 +463,9 @@ func _begin_defeat() -> void:
 	# First, before anything else can look at the pool: the body is not dying today.
 	_set_health(corpse_health)
 	_shield(true)
+
+	if strike_sound_on_killing_hit:
+		_play_strike_sound()
 
 	var bounty := _pay_reward()
 	_extend_the_streak()
@@ -594,6 +614,14 @@ func _stop_the_fight() -> void:
 	if phases != null:
 		phases.stop()
 
+	# Broken first, so the crowd sends its own men home through the retreat it
+	# already carries and is waiting on each of them - the loop below then finds
+	# them already running and leaves them be.
+	if support_escapes:
+		var ambush := get_node_or_null(ambush_path) as AmbushWaveDirector
+		if ambush != null and ambush.is_sustained():
+			ambush.rout()
+
 	if not support_escapes:
 		return
 
@@ -708,13 +736,14 @@ func _strike_the_name() -> void:
 	_strike_tween.tween_property(strike, "scale", Vector2.ONE, maxf(strike_time, 0.0001)) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
-	_play_strike_sound()
+	if not strike_sound_on_killing_hit:
+		_play_strike_sound()
 	name_struck.emit()
 	_after(maxf(strike_time, 0.0) + maxf(title_hold_after_strike, 0.0), _let_the_arena_go)
 
 
-## The one sound this whole presentation makes, on the one frame the line starts
-## being drawn.
+## The one sound this whole presentation makes - see
+## [member strike_sound_on_killing_hit] for which frame it lands on.
 func _play_strike_sound() -> void:
 	if strike_sound == &"":
 		return

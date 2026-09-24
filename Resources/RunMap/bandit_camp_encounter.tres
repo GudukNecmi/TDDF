@@ -7,4 +7,5 @@ script = ExtResource("1_enc")
 kind = &"bandit_camp"
 min_enemies = 40
 max_enemies = 80
+active_enemies = 15
 cleared_kind = &"bandit_camp_cleared"

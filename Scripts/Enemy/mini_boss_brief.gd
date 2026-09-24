@@ -6,22 +6,20 @@ extends RefCounted
 ## [b]It exists so there is one boss builder rather than two.[/b] A bounty
 ## contract answers four questions about the man - what he is called, whose face
 ## he wears, how much health he carries and which contract to close when he falls
-## - and until the run map there was nowhere else those answers could come from,
-## so [method MiniBossDirector._build_boss] simply read a [Bounty]. A run map's
-## mini boss point has no contract behind it and never will: it is a place on a
-## graph, not a piece of paper the player is holding. Rather than teach the
-## builder about a second kind of origin, the four answers are lifted out into
-## this, and both origins fill one in.
+## - and [method MiniBossDirector._build_boss] used to simply read a [Bounty] to
+## get them. It cannot always: a run map bounty boss point is dealt on one side
+## of a scene change and fought on the other, and only the contract's id survives
+## the crossing. Rather than teach the builder about a second kind of origin, the
+## four answers are lifted out into this, and every origin fills one in.
 ##
-## [b]Nothing here is authored.[/b] A contract's brief is derived from the
-## contract - see [method from_bounty] - and a run map point's from its own
-## [RunMapMiniBossEncounter], so there is no third place a boss's numbers could
-## be written down and drift out of step with the two real ones.
+## [b]Nothing here is authored.[/b] Every brief the game builds is derived from a
+## contract - see [method from_bounty] - so there is nowhere a boss's numbers
+## could be written down and drift out of step with the poster.
 
 ## The contract this man answers, or empty for one who answers none. What
-## [BossDefeat] closes out when he falls; empty means there is nothing to close
-## and nothing to pay, which is exactly what a run map boss wants until his own
-## rewards are built.
+## [MiniBossDirector.place_encounter] picks the ledger's copy up by and what
+## [BossDefeat] pays and closes out when he falls; empty means there is nothing
+## to close and nothing to pay.
 var contract_id: StringName = &""
 ## What the title card and the poster call him.
 var display_name: String = "THE OUTLAW"

@@ -16,6 +16,11 @@ extends HBoxContainer
 ## The health it follows is found by group rather than by a path into another
 ## branch of the scene, the same way [CameraController] and [ScreenFlash] are, so
 ## the HUD is not wired to the player.
+##
+## [b]It is the optional presentation, not the default.[/b] A run shows its health
+## as [HealthBar] until something - a card - switches [RunVitals] to hearts; this
+## row keeps following the pool the whole time and simply stays hidden until then,
+## so the switch is instant and neither readout ever holds a number of its own.
 
 ## Health this mirrors. Found by group, so nothing is wired up.
 @export var health_group: StringName = &"player_health"
@@ -25,6 +30,11 @@ extends HBoxContainer
 @export var empty_texture: Texture2D
 ## Size one heart is drawn at.
 @export var heart_size := Vector2(46.0, 46.0)
+## Which presentation this row belongs to. It is shown only while [RunVitals] is
+## set to it, and follows the switch live.
+@export var shown_for: RunVitals.HealthDisplay = RunVitals.HealthDisplay.HEARTS
+## The autoload the presentation is read from. With none, the row is always shown.
+@export var vitals_path: NodePath = ^"/root/Vitals"
 
 @export_group("Reaction")
 ## How far a heart is punched out as it is lost, as a fraction.
@@ -43,6 +53,7 @@ var _shown: int = -1
 
 
 func _ready() -> void:
+	_bind_display()
 	_bind_health()
 
 
@@ -131,3 +142,15 @@ func _pulse(index: int, amount: float, out_time: float, back_time: float) -> voi
 	var tween := heart.create_tween().set_trans(Tween.TRANS_QUAD)
 	tween.tween_property(heart, "scale", Vector2.ONE * amount, out_time).set_ease(Tween.EASE_OUT)
 	tween.tween_property(heart, "scale", Vector2.ONE, back_time).set_ease(Tween.EASE_IN)
+
+
+func _bind_display() -> void:
+	var vitals := get_node_or_null(vitals_path) as RunVitals
+	if vitals == null:
+		return
+	vitals.display_changed.connect(_on_display_changed)
+	_on_display_changed(vitals.get_display())
+
+
+func _on_display_changed(display: RunVitals.HealthDisplay) -> void:
+	visible = display == shown_for

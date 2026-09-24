@@ -165,7 +165,7 @@ var _lock_left: float = 0.0
 
 
 func _ready() -> void:
-	_chambers.resize(maxi(chamber_count, 1))
+	_chambers.resize(get_chamber_total())
 	_apply_look()
 	_apply_art_transform()
 	super._ready()
@@ -187,6 +187,21 @@ func _weapon_input(event: InputEvent) -> void:
 		_try_manual_reload()
 	elif event.is_action_pressed(coin_action):
 		_try_throw_coin()
+
+
+## How many chambers the cylinder has: [member chamber_count] plus the magazine
+## upgrade - see [method CarriedWeapon.get_magazine_bonus].
+func get_chamber_total() -> int:
+	return maxi(chamber_count + get_magazine_bonus(), 1)
+
+
+## A bought magazine upgrade adds its chambers at once, loaded from the reserve
+## like the rest of the ring.
+func _on_stats_changed() -> void:
+	super._on_stats_changed()
+	if _chambers.size() != get_chamber_total():
+		_chambers.resize(get_chamber_total())
+		_fill_from_reserve()
 
 
 ## The ring as it stands, loaded first at the top. For a display, and for a test.
@@ -365,6 +380,7 @@ func _spawn_bullet() -> void:
 		return
 
 	var bullet: Projectile = projectile_scene.instantiate()
+	arm_projectile(bullet, roll_critical())
 	container.add_child(bullet)
 	bullet.global_position = _muzzle.global_position
 	var half_spread := deg_to_rad(spread_angle_degrees) * 0.5

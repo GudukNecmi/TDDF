@@ -430,14 +430,19 @@ func _current_damage() -> float:
 ## Read off the weapon by property name rather than by a typed reference, so the
 ## feedback keeps working against anything that announces the same signals - and
 ## a weapon that does not carry the stat falls back to the reference rather than
-## erroring.
+## erroring. The upgraded figure is asked for first, so a bought pellet or a
+## tighter cone shows in the burst as well as in the shot.
 func _current_spread_degrees() -> float:
+	if _source != null and _source.has_method(&"get_spread_degrees"):
+		return _source.call(&"get_spread_degrees")
 	if _source != null and "spread_angle_degrees" in _source:
 		return _source.get(&"spread_angle_degrees")
 	return reference_spread_degrees
 
 
 func _current_pellet_count() -> int:
+	if _source != null and _source.has_method(&"get_pellet_count"):
+		return _source.call(&"get_pellet_count")
 	if _source != null and "pellet_count" in _source:
 		return _source.get(&"pellet_count")
 	return reference_pellet_count

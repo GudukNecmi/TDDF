@@ -29,6 +29,10 @@
 [ext_resource type="Script" path="res://Scripts/World/Sun/sun_controller.gd" id="27_bhnp5"]
 [ext_resource type="Script" path="res://Scripts/World/run_mini_boss_fight.gd" id="90_runminiboss"]
 [ext_resource type="PackedScene" path="res://Scenes/Effects/DeathSmoke.tscn" id="91_deathsmoke"]
+[ext_resource type="Script" path="res://Scripts/Enemy/boss_sword_storm.gd" id="101_swordstorm"]
+[ext_resource type="PackedScene" uid="uid://cgotikexplosion" path="res://Scenes/Effects/Explosion.tscn" id="102_explosion"]
+[ext_resource type="Texture2D" path="res://Assets/Enemies/Bosses/Attacks/SwordCircle.png" id="103_swordcircle"]
+[ext_resource type="Resource" path="res://Resources/Bounty/bounty_boss_fate.tres" id="104_bossfate"]
 [ext_resource type="Script" path="res://Scripts/World/Sun/sun_stage.gd" id="28_tiia4"]
 [ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/1_dawn.tres" id="29_0jrkt"]
 [ext_resource type="Resource" path="res://Resources/Maps/Desert/Sun/2_morning.tres" id="30_xwopf"]
@@ -66,11 +70,6 @@
 [ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_tier_0.tres" id="62_pyo2h"]
 [ext_resource type="PackedScene" path="res://Scenes/World/DestinationMarker.tscn" id="63_jb2n0"]
 [ext_resource type="Resource" path="res://Resources/Enemy/mini_boss1_wardrobe.tres" id="64_d1wce"]
-[ext_resource type="Script" path="res://Scripts/Enemy/boss_phases.gd" id="65_qwk4c"]
-[ext_resource type="Script" path="res://Scripts/Enemy/mini_boss_phase.gd" id="66_dpkfc"]
-[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_phase_1_opening.tres" id="67_ryxi3"]
-[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_phase_2_pressed.tres" id="68_k7lo5"]
-[ext_resource type="Resource" path="res://Resources/Enemy/mini_boss_phase_3_enraged.tres" id="69_au7h4"]
 [ext_resource type="Script" path="res://Scripts/World/ammo_crate_spawner.gd" id="70_aeiko"]
 [ext_resource type="PackedScene" path="res://Scenes/World/AmmoCrate.tscn" id="71_ouujn"]
 [ext_resource type="Script" path="res://Scripts/Enemy/boss_defeat.gd" id="72_p0bau"]
@@ -102,6 +101,7 @@
 [ext_resource type="Script" path="res://Scripts/World/combat_loot_director.gd" id="98_a2h04"]
 [ext_resource type="Script" path="res://Scripts/World/world_map_interaction_camera.gd" id="99_acs7o"]
 [ext_resource type="Script" path="res://Scripts/World/arena_region.gd" id="100_0ujmy"]
+[ext_resource type="PackedScene" path="res://Scenes/Common/HeatHaze.tscn" id="120_heathaze"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xf6vi"]
 size = Vector2(2048, 64)
@@ -203,6 +203,7 @@ scale_range = Vector2(0.35, 0.85)
 script = ExtResource("27_bhnp5")
 stages = Array[ExtResource("28_tiia4")]([ExtResource("29_0jrkt"), ExtResource("30_xwopf"), ExtResource("31_q0cdg"), ExtResource("32_gqxw4"), ExtResource("33_rp4ck"), ExtResource("34_m1j2a")])
 projection_mode = 1
+anchor_shadows_on_footing = true
 ground_contact_shadows = true
 
 [node name="Player" type="CharacterBody2D" parent="." unique_id=1731179406 groups=["player"] instance=ExtResource("35_el56v")]
@@ -282,10 +283,6 @@ tiers = Array[ExtResource("58_60kgb")]([ExtResource("59_wn0fg"), ExtResource("60
 marker_scene = ExtResource("63_jb2n0")
 wardrobe = ExtResource("64_d1wce")
 
-[node name="BossPhases" type="Node" parent="." unique_id=1592448903 groups=["boss_phases"]]
-script = ExtResource("65_qwk4c")
-phases = Array[ExtResource("66_dpkfc")]([ExtResource("67_ryxi3"), ExtResource("68_k7lo5"), ExtResource("69_au7h4")])
-
 [node name="AmmoCrates" type="Node" parent="." unique_id=1592448904 groups=["ammo_crate_spawner"]]
 script = ExtResource("70_aeiko")
 crate_scene = ExtResource("71_ouujn")
@@ -296,7 +293,14 @@ bridge_path = NodePath("../WorldMapCombatBridge")
 ambush_path = NodePath("../AmbushDirector")
 director_path = NodePath("../MiniBossDirector")
 defeat_path = NodePath("../BossDefeat")
+arrival_delay = 0.8
 arrival_effect = ExtResource("91_deathsmoke")
+fate_tier = ExtResource("104_bossfate")
+
+[node name="FateSounds" type="Node" parent="RunMiniBossFight" unique_id=231225629]
+script = ExtResource("73_04ncn")
+voice_count = 2
+bus = &"Game"
 
 [node name="BossDefeat" type="Node" parent="." unique_id=231225627 groups=["boss_defeat"]]
 script = ExtResource("72_p0bau")
@@ -319,6 +323,7 @@ script = ExtResource("76_46gt6")
 
 [node name="MusicStateWatcher" type="Node" parent="." unique_id=977416575]
 script = ExtResource("77_ak4we")
+held_states = Array[StringName]([&"bounty_boss"])
 
 [node name="WorldReset" type="Node" parent="." unique_id=1592448932 groups=["world_reset"]]
 script = ExtResource("78_sw1ke")
@@ -328,6 +333,16 @@ script = ExtResource("79_s3q3m")
 
 [node name="BossCharge" type="Node" parent="." unique_id=1592448934 groups=["boss_charge"]]
 script = ExtResource("80_2pgyy")
+charge_cooldown = 4.0
+charge_duration = 0.3
+aim_at_launch = true
+first_charge_delay = 2.0
+windup_tint_strength = 0.55
+
+[node name="BossSwordStorm" type="Node" parent="." unique_id=1592448937 groups=["boss_sword_storm"]]
+script = ExtResource("101_swordstorm")
+circle_texture = ExtResource("103_swordcircle")
+gore_effect = ExtResource("102_explosion")
 
 [node name="BossFootsteps" type="Node" parent="." unique_id=1592448935 groups=["boss_footsteps"]]
 script = ExtResource("81_0el0k")
@@ -363,3 +378,5 @@ script = ExtResource("99_acs7o")
 
 [node name="ArenaRegion" type="Node" parent="." unique_id=1568383242]
 script = ExtResource("100_0ujmy")
+
+[node name="HeatHaze" parent="." instance=ExtResource("120_heathaze")]

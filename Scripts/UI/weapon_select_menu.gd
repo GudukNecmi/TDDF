@@ -87,6 +87,9 @@ func open() -> void:
 		return
 
 	_choosing = false
+	# Rebuilt on every open, so a weapon bought since the screen was last up is
+	# already pickable.
+	_build()
 	show()
 	# Deliberately unfocused, for the same reason every other menu is: the accept
 	# key is bound to gameplay too, and a focused button would swallow it.
@@ -121,11 +124,15 @@ func _unhandled_input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 
 
-## One button per weapon in the catalogue, built once. A screen with no catalogue
-## offers nothing rather than erroring.
+## One button per weapon in the catalogue, built afresh each time. A screen with no
+## catalogue offers nothing rather than erroring.
 func _build() -> void:
 	if _list == null or catalog == null:
 		return
+
+	for child: Node in _list.get_children():
+		_list.remove_child(child)
+		child.queue_free()
 
 	for weapon: WeaponDefinition in catalog.weapons:
 		if weapon == null:

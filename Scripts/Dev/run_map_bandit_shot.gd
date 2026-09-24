@@ -3,7 +3,7 @@ extends SceneTree
 ## than only measured, and quits.
 ##
 ## The bandit smoke checks prove the numbers - that a camp is worth 20 to 40
-## men, that the screen never says how many, and that the answer ends where it
+## men, that the screen says how many, and that the answer ends where it
 ## should. This is the other half: the camp on the map before it is ridden to,
 ## the decision screen as the player meets it, and the same map afterwards with
 ## the camp struck through.

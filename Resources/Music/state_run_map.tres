@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="MusicState" format=3]
+
+[ext_resource type="Script" uid="uid://c6ylwt4xp2d23" path="res://Scripts/Common/music_state.gd" id="1_state"]
+[ext_resource type="AudioStream" uid="uid://cou3uihl1vkhd" path="res://Sound/Maps/Desert/DesertBacgroundSound.wav" id="2_track"]
+
+[resource]
+script = ExtResource("1_state")
+state_id = &"run_map"
+stream = ExtResource("2_track")
+volume_db = -8.0

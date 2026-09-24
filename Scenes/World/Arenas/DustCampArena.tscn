@@ -10,4 +10,4 @@ region = ExtResource("1_region")
 
 [node name="Sun" parent="Arena"]
 holds_for_combat = true
-hold_uses_longest_shadow = true
+hold_uses_longest_shadow = false

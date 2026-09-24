@@ -200,6 +200,8 @@ signal shouted(line: String)
 
 @onready var _enemy: Node = get_node_or_null(enemy_path)
 @onready var _inner: Node = get_node_or_null(inner_steering_path)
+## Found once rather than asked for every frame; null on a man who cannot enrage.
+@onready var _rage: EnemyEnrage = EnemyEnrage.find_on(_enemy)
 
 var _threats: Array[BomberFuse] = []
 var _threat: BomberFuse
@@ -280,7 +282,8 @@ func steer(chase: Vector2, delta: float) -> Vector2:
 		walk = _inner.steer(chase, delta)
 
 	_forget_the_dead()
-	if _threats.is_empty():
+	# An enraged man does not detour round a bomb any more than he runs from one.
+	if _threats.is_empty() or _is_enraged():
 		return walk
 
 	var host := _enemy as Node2D
@@ -504,7 +507,9 @@ func _look_around() -> void:
 	_threats = _threats_worth_minding()
 	_lock_what_he_has_cleared()
 
-	if not panics or _is_a_boss():
+	# An enraged man never retreats - see [EnemyEnrage]. One already running when
+	# he loses his temper is stopped here, which gives his knife back too.
+	if not panics or _is_a_boss() or _is_enraged():
 		if _panicking:
 			_stop()
 		return
@@ -725,6 +730,10 @@ func _find_surrender() -> EnemySurrender:
 ## enemy after it has been built.
 func _is_a_boss() -> bool:
 	return ignores_bosses and _enemy != null and MiniBoss.find_on(_enemy) != null
+
+
+func _is_enraged() -> bool:
+	return _rage != null and _rage.is_enraged_now()
 
 
 func _fade(bubble: SpeechBubble, fade: float) -> void:

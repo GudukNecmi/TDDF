@@ -23,18 +23,18 @@ extends RefCounted
 ## The handle for a point whose contents the player has not learned. Every
 ## generated site starts as this.
 const KIND_UNKNOWN := &"unknown"
-## The handle for the point the run opens on, at the southern end.
+## The handle for the point the run opens on, at the western end.
 const KIND_START := &"start"
-## The handle for the point the run ends at, at the northern end.
+## The handle for the point the run ends at, at the eastern end.
 const KIND_BOSS := &"boss"
 
 ## Which site this is, unique within one graph. Links name their two ends by this
 ## rather than by holding references, so the graph survives being written out to a
 ## dictionary and read back.
 var id: int = -1
-## Where the site sits on the map, in map pixels. North is -Y, exactly as it is
-## everywhere else in the game, so "progressing northward" is progressing towards
-## smaller Y.
+## Where the site sits on the map, in map pixels. East is +X, exactly as it is
+## everywhere else in the game, so "progressing towards the boss" is progressing
+## towards larger X.
 var position: Vector2 = Vector2.ZERO
 ## Which generated row the site belongs to, counted from 0 at the start. Rows are
 ## a scaffold for generation and for reasoning about progress; they are
@@ -50,6 +50,17 @@ var kind: StringName = KIND_UNKNOWN
 var revealed: bool = false
 ## Whether the player's piece has ever stood here.
 var visited: bool = false
+## The contract this point stands for, or empty for a point that stands for none
+## - which is every kind but the bounty boss.
+##
+## [b]It is written onto the point rather than counted up when the point is
+## arrived on.[/b] A run map deals one bounty boss point per contract the player
+## rode out carrying, and which point is which man has to be the same answer
+## every time it is asked: the map is stored, the scene is torn down to fight and
+## built again on the way back, and a contract closed out in between would shift
+## any answer that was counted live. So the binding is made once, on a fresh
+## graph, and travels with it - see [RunMapBountyBossNode].
+var contract_id: StringName = &""
 
 
 static func make(site_id: int, at: Vector2, site_row: int,
@@ -70,6 +81,7 @@ func to_dict() -> Dictionary:
 		&"kind": kind,
 		&"revealed": revealed,
 		&"visited": visited,
+		&"contract_id": contract_id,
 	}
 
 
@@ -81,4 +93,5 @@ static func from_dict(data: Dictionary) -> RunMapSite:
 	site.kind = data.get(&"kind", KIND_UNKNOWN)
 	site.revealed = bool(data.get(&"revealed", false))
 	site.visited = bool(data.get(&"visited", false))
+	site.contract_id = data.get(&"contract_id", &"")
 	return site

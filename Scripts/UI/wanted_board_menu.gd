@@ -24,6 +24,10 @@ signal opened
 signal closed
 ## Emitted when a contract is actually taken.
 signal bounty_taken(bounty: Bounty)
+## Emitted when the board was opened as the last step before setting out - see
+## [method open_to_confirm] - and the player pressed its confirm button. The
+## board has already closed by the time this is heard.
+signal confirmed
 
 ## Group the menu joins, so the base's board can find it without a path across
 ## the scene.
@@ -48,6 +52,10 @@ const GROUP := &"wanted_board_menu"
 @export var slots_label_path: NodePath = ^"Panel/Body/Header/Slots"
 ## Line along the bottom.
 @export var hint_label_path: NodePath = ^"Panel/Body/Hint"
+## The button that confirms the contracts held and sets out. Only shown when the
+## board is raised through [method open_to_confirm]; an ordinary visit to the
+## board never shows it. Optional.
+@export var confirm_button_path: NodePath = ^"Panel/Body/ConfirmButton"
 
 @export_group("Empty slots")
 ## Whether a slot with nothing dealt into it is drawn as a bare patch of board.
@@ -74,6 +82,7 @@ const GROUP := &"wanted_board_menu"
 @onready var _list: Container = get_node_or_null(list_path) as Container
 @onready var _slots: Label = get_node_or_null(slots_label_path) as Label
 @onready var _hint: Label = get_node_or_null(hint_label_path) as Label
+@onready var _confirm: BaseButton = get_node_or_null(confirm_button_path) as BaseButton
 
 var _ledger: BountyLedger
 var _posters: Array[WantedPoster] = []
@@ -86,6 +95,10 @@ func _ready() -> void:
 	var ledger := _get_ledger()
 	if ledger != null and not ledger.board_changed.is_connected(_rebuild):
 		ledger.board_changed.connect(_rebuild)
+
+	if _confirm != null:
+		_confirm.hide()
+		_confirm.pressed.connect(_on_confirm_pressed)
 
 
 ## The board the base should open. Null means this world has none, which the
@@ -110,6 +123,8 @@ func open() -> void:
 	if visible:
 		return
 
+	if _confirm != null:
+		_confirm.hide()
 	_rebuild()
 	show()
 	# Deliberately unfocused, for the same reason the pause, upgrade and map
@@ -119,6 +134,18 @@ func open() -> void:
 	if pauses_game:
 		get_tree().paused = true
 	opened.emit()
+
+
+## The same board, raised as the last question before a run - with the confirm
+## button showing, so taking contracts ends in setting out rather than in closing
+## the board. Nothing about taking a contract differs; backing out closes it
+## exactly as an ordinary visit does and [signal confirmed] is never emitted.
+func open_to_confirm() -> void:
+	if visible:
+		return
+	open()
+	if _confirm != null:
+		_confirm.show()
 
 
 func close() -> void:
@@ -240,6 +267,13 @@ func _on_accept_requested(poster: WantedPoster) -> void:
 		bounty_taken.emit(bounty)
 	else:
 		_refresh_state()
+
+
+## Closed first, so whatever answers [signal confirmed] finds the tree unpaused
+## and the board out of the way.
+func _on_confirm_pressed() -> void:
+	close()
+	confirmed.emit()
 
 
 ## Looked up lazily and re-looked-up if it goes away, the same way the rest of

@@ -27,11 +27,15 @@ extends Control
 ## [b]It describes this encounter, not another one.[/b] The count is the count
 ## [method WorldMapCombatBridge._enemy_count_for] will hand the arena if FIGHT
 ## is pressed - the same reinforced group strength through the same conversion -
-## rather than a second reading of the same group. Hearts are the player's own
-## [Health], one heart per point exactly as [HeartBar] draws them, and
-## ammunition is the equipped reserve on the shared [AmmoLocker], the same
-## number [AmmoCounter] shows in the corner - so the panel and the HUD can never
-## disagree.
+## rather than a second reading of the same group. Health is the player's own
+## [Health] - or, on the World Map, the pool [RunVitals] carries - drawn as a bar
+## and a percentage by default, or as hearts once [RunVitals] says so, and Blood is
+## the carried [BloodWallet] total the HUD's own counter shows - so the panel
+## and the HUD can never disagree.
+##
+## [b]What an answer costs is written on its button.[/b] The Blood each outcome
+## moves is handed in by [WorldMapCombatBridge], which owns those amounts, and
+## drawn as a red cost or a green reward beside the reply it belongs to.
 
 signal answered(outcome: StringName)
 
@@ -57,6 +61,38 @@ enum Risk {
 ## The shared ammunition locker. The equipped reserve on it is what the player
 ## is actually going to fight with.
 @export var locker_path: NodePath = ^"/root/Ammo"
+## The run's health memory and presentation - the [code]Vitals[/code] autoload.
+## Where there is no player on the screen, as on the World Map, the pool is read
+## from here: what the player carried out of the last fight, over the ceiling
+## their [Health] last had. It also says whether health is drawn as a bar or as
+## hearts.
+@export var vitals_path: NodePath = ^"/root/Vitals"
+## The player's own scene, read - never instanced - for the ceiling their [Health]
+## is authored with, only when nothing has recorded one yet: a World Map opened
+## directly, with no base or arena behind it. The number is still the player
+## scene's own, not one written here.
+@export_file("*.tscn") var player_scene_path: String = "res://Scenes/Player/Player.tscn"
+## The carried Blood wallet - the [code]Blood[/code] autoload the bridge pays
+## out of and into, so the total shown is the one the answer will change.
+@export var wallet_path: NodePath = ^"/root/Blood"
+
+@export_group("Blood on the buttons")
+## How a reply that costs Blood is labelled; [code]%d[/code] is the amount.
+@export var cost_format: String = "-%d Blood"
+## How a reply that earns Blood is labelled.
+@export var reward_format: String = "+%d Blood"
+@export var cost_color: Color = Color(0.88, 0.13, 0.12)
+@export var reward_color: Color = Color(0.42, 0.86, 0.34)
+## The tag inside each button, as a path relative to that button. A button
+## without one simply shows no amount.
+@export var button_blood_label_path: NodePath = ^"Blood"
+
+@export_group("Health readout")
+## The column's heading while health is a bar, and while it is hearts.
+@export var health_title: String = "HEALTH"
+@export var hearts_title: String = "HEARTS"
+## How the bar's percentage is written; [code]%d[/code] is the whole percent.
+@export var health_percent_format: String = "%d%%"
 
 @export_group("Risk rules")
 ## Ammunition below this fraction of the enemy count is [constant Risk.RISKY] -
@@ -100,22 +136,24 @@ enum Risk {
 ## opened without a count to show - so a caller that says nothing about the
 ## fight gets exactly the screen that existed before the briefing did.
 @export var briefing_paths: Array[NodePath] = [
-	^"Panel/Body/Art",
 	^"Panel/Body/Enemies",
 	^"Panel/Body/Resources",
-	^"Panel/Body/Risk",
-	^"Panel/Body/Types",
 ]
 @export var enemy_count_label_path: NodePath = ^"Panel/Body/Enemies/Count"
+## The health column's heading, and the bar drawn under its value - shown only
+## while health is presented as a bar.
+@export var hearts_title_label_path: NodePath = ^"Panel/Body/Resources/Hearts/Title"
+@export var health_bar_path: NodePath = ^"Panel/Body/Resources/Hearts/Bar"
 @export var hearts_label_path: NodePath = ^"Panel/Body/Resources/Hearts/Value"
-@export var ammo_label_path: NodePath = ^"Panel/Body/Resources/Ammo/Value"
-@export var risk_label_path: NodePath = ^"Panel/Body/Risk/Value"
-## Where one row per present enemy type is put.
-@export var types_box_path: NodePath = ^"Panel/Body/Types"
+@export var blood_label_path: NodePath = ^"Panel/Body/Resources/Blood/Value"
+@export var risk_label_path: NodePath = ^"Panel/Body/Resources/Risk/Value"
+## Where one row per present enemy type is put - beside the count, so the heads
+## and the number read as one line.
+@export var types_box_path: NodePath = ^"Panel/Body/Enemies/Types"
 ## The row copied for each type. It is authored in the scene and kept hidden, so
 ## every portrait's size, spacing and lettering is an Inspector value rather than
 ## anything built in code.
-@export var type_entry_path: NodePath = ^"Panel/Body/Types/Entry"
+@export var type_entry_path: NodePath = ^"Panel/Body/Enemies/Types/Entry"
 ## The icon and the name inside that row, as paths relative to it.
 @export var entry_icon_path: NodePath = ^"Icon"
 @export var entry_name_path: NodePath = ^"Name"
@@ -123,7 +161,9 @@ enum Risk {
 @onready var _line: Label = get_node_or_null(line_label_path) as Label
 @onready var _enemy_count_label: Label = get_node_or_null(enemy_count_label_path) as Label
 @onready var _hearts_label: Label = get_node_or_null(hearts_label_path) as Label
-@onready var _ammo_label: Label = get_node_or_null(ammo_label_path) as Label
+@onready var _hearts_title: Label = get_node_or_null(hearts_title_label_path) as Label
+@onready var _health_bar: Range = get_node_or_null(health_bar_path) as Range
+@onready var _blood_label: Label = get_node_or_null(blood_label_path) as Label
 @onready var _risk_label: Label = get_node_or_null(risk_label_path) as Label
 @onready var _types_box: Control = get_node_or_null(types_box_path) as Control
 @onready var _type_entry: Control = get_node_or_null(type_entry_path) as Control
@@ -177,8 +217,13 @@ func is_open() -> bool:
 ## and is not asked until the fight opens - so an empty array is the ordinary
 ## case and reads as what a contact on the road is worth: the spawner's own men,
 ## every one of them, which is exactly what the roster's first wave hands back.
+##
+## [param blood_by_outcome] is how much Blood each answer moves, keyed by
+## [member WorldBanditDecisionChoice.outcome] - negative for what the player
+## pays, positive for what they are given. An outcome missing from it, or worth
+## nothing, shows no amount.
 func ask(tier: WorldBanditDecisionTier, enemy_count: int = -1,
-		bodies: Array[PackedScene] = []) -> void:
+		bodies: Array[PackedScene] = [], blood_by_outcome: Dictionary = {}) -> void:
 	if tier == null or visible:
 		return
 
@@ -194,8 +239,10 @@ func ask(tier: WorldBanditDecisionTier, enemy_count: int = -1,
 			continue
 		if i < tier.choices.size():
 			var choice := tier.choices[i]
+			var outcome: StringName = &"fight" if choice == null else choice.outcome
 			button.text = choice.label if choice != null else ""
-			button.set_meta(&"outcome", &"fight" if choice == null else choice.outcome)
+			button.set_meta(&"outcome", outcome)
+			_write_blood_tag(button, int(blood_by_outcome.get(outcome, 0)))
 			button.visible = true
 		else:
 			button.visible = false
@@ -220,15 +267,77 @@ func close() -> void:
 
 
 ## The player's hearts - one per point of health, exactly as [HeartBar] draws
-## them. 0 when there is no player to ask, which is what stops this inventing a
-## number on a HUD with no run behind it.
+## them. 0 when nothing can say, which is what stops this inventing a number on a
+## HUD with no run behind it.
 func get_player_hearts() -> int:
-	if not is_inside_tree():
+	return int(round(get_player_health().x))
+
+
+## What is left of the player's pool, 0 to 1 - what the bar and its percentage show.
+func get_player_health_fraction() -> float:
+	var pool := get_player_health()
+	return clampf(pool.x / pool.y, 0.0, 1.0) if pool.y > 0.0 else 0.0
+
+
+## The player's pool as [code](current, maximum)[/code], asked of whatever holds it.
+##
+## A live [Health] in the tree is the answer whenever there is one. The World Map
+## has none - the player is not built there - so there it is [RunVitals]: the pool
+## carried out of the last fight, or a full one when nothing is being carried,
+## which is the same reading [HealthCarry] gives the next arena. Nothing here
+## counts health; it only asks.
+func get_player_health() -> Vector2:
+	if is_inside_tree():
+		var health := get_tree().get_first_node_in_group(health_group) as Health
+		if health != null:
+			return Vector2(health.get_current(), health.get_max())
+
+	var vitals := get_node_or_null(vitals_path) as RunVitals
+	var maximum := -1.0
+	if vitals != null and vitals.has_maximum():
+		maximum = vitals.get_maximum()
+	else:
+		maximum = _authored_player_maximum()
+	if maximum <= 0.0:
+		return Vector2.ZERO
+
+	var current := maximum
+	if vitals != null and vitals.has_carried():
+		current = minf(vitals.get_carried(), maximum)
+	return Vector2(current, maximum)
+
+
+## The ceiling the player scene's [Health] is authored with, read off the packed
+## scene's state without building it. Below 0 when it cannot be found.
+func _authored_player_maximum() -> float:
+	if player_scene_path.is_empty() or not ResourceLoader.exists(player_scene_path):
+		return -1.0
+	var scene := load(player_scene_path) as PackedScene
+	if scene == null:
+		return -1.0
+	var state := scene.get_state()
+	for i in state.get_node_count():
+		if not state.get_node_groups(i).has(health_group):
+			continue
+		for p in state.get_node_property_count(i):
+			if state.get_node_property_name(i, p) == &"max_health":
+				return float(state.get_node_property_value(i, p))
+	return -1.0
+
+
+## Whether health is drawn as a bar - the default - rather than as hearts.
+func _shows_health_bar() -> bool:
+	var vitals := get_node_or_null(vitals_path) as RunVitals
+	return vitals == null or not vitals.uses_hearts()
+
+
+## The carried Blood total - what paying comes out of. 0 when there is no
+## wallet to ask.
+func get_player_blood() -> int:
+	var wallet := get_node_or_null(wallet_path) as BloodWallet
+	if wallet == null:
 		return 0
-	var health := get_tree().get_first_node_in_group(health_group) as Health
-	if health == null:
-		return 0
-	return int(round(health.get_current()))
+	return wallet.get_total()
 
 
 ## Rounds in the equipped weapon's reserve. 0 when nothing is equipped or there
@@ -277,7 +386,7 @@ func evaluate_risk(enemy_count: int, ammo: int, hearts: int) -> Risk:
 
 ## Fills the read-out in, or puts it away when there is no fight to describe.
 ##
-## Hearts and ammunition are read here, at the instant the question goes up,
+## Hearts, Blood and ammunition are read here, at the instant the question goes up,
 ## rather than being passed in - so what the player is shown is what they are
 ## holding now and not what they were holding when contact was made.
 func _write_briefing(enemy_count: int, bodies: Array[PackedScene]) -> void:
@@ -292,10 +401,19 @@ func _write_briefing(enemy_count: int, bodies: Array[PackedScene]) -> void:
 
 	if _enemy_count_label != null:
 		_enemy_count_label.text = str(enemy_count)
+	# The same pool either way; only its presentation follows [RunVitals].
+	var as_bar := _shows_health_bar()
+	var fraction := get_player_health_fraction()
+	if _hearts_title != null:
+		_hearts_title.text = health_title if as_bar else hearts_title
 	if _hearts_label != null:
-		_hearts_label.text = str(hearts)
-	if _ammo_label != null:
-		_ammo_label.text = str(ammo)
+		_hearts_label.text = health_percent_format % roundi(fraction * 100.0) \
+				if as_bar else str(hearts)
+	if _health_bar != null:
+		_health_bar.visible = as_bar
+		_health_bar.value = fraction
+	if _blood_label != null:
+		_blood_label.text = str(get_player_blood())
 	if _risk_label != null:
 		_risk_label.text = _risk_name(risk)
 		_risk_label.add_theme_color_override(&"font_color", _risk_color(risk))
@@ -398,6 +516,20 @@ func _clear_type_rows() -> void:
 		if is_instance_valid(row):
 			row.queue_free()
 	_type_rows.clear()
+
+
+## The amount inside [param button]: a red cost, a green reward, or nothing when
+## the answer moves no Blood.
+func _write_blood_tag(button: Button, blood_delta: int) -> void:
+	var tag := button.get_node_or_null(button_blood_label_path) as Label
+	if tag == null:
+		return
+	tag.visible = blood_delta != 0
+	if blood_delta == 0:
+		return
+	var paying := blood_delta < 0
+	tag.text = (cost_format if paying else reward_format) % absi(blood_delta)
+	tag.add_theme_color_override(&"font_color", cost_color if paying else reward_color)
 
 
 func _risk_name(level: Risk) -> String:

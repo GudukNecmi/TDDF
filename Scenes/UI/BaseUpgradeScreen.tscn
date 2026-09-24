@@ -1,0 +1,117 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/base_upgrade_screen.gd" id="1_screen"]
+[ext_resource type="Resource" path="res://Resources/Upgrades/bounty_board_capacity.tres" id="2_board"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/UpgradeCard.tscn" id="3_card"]
+[ext_resource type="Shader" path="res://Shaders/pause_blur.gdshader" id="4_blur"]
+[ext_resource type="Texture2D" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="5_panel"]
+[ext_resource type="Script" path="res://Scripts/Upgrades/base_upgrade.gd" id="6_type"]
+[ext_resource type="Resource" uid="uid://dwylkh854xmip" path="res://Resources/Weapons/weapon_catalog.tres" id="7_catalog"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/UpgradeTab.tscn" id="8_tab"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_blur"]
+shader = ExtResource("4_blur")
+shader_parameter/blur_amount = 2.8
+shader_parameter/dim = 0.66
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_panel"]
+content_margin_left = 44.0
+content_margin_top = 32.0
+content_margin_right = 44.0
+content_margin_bottom = 32.0
+texture = ExtResource("5_panel")
+texture_margin_left = 70.0
+texture_margin_top = 70.0
+texture_margin_right = 70.0
+texture_margin_bottom = 70.0
+region_rect = Rect2(92, 26, 2800, 2102)
+
+[node name="BaseUpgradeScreen" type="Control"]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_screen")
+upgrades = Array[ExtResource("6_type")]([ExtResource("2_board")])
+weapon_catalog = ExtResource("7_catalog")
+card_scene = ExtResource("3_card")
+tab_scene = ExtResource("8_tab")
+
+[node name="Blur" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_blur")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.08
+anchor_top = 0.06
+anchor_right = 0.92
+anchor_bottom = 0.94
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+
+[node name="Body" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Header" type="VBoxContainer" parent="Panel/Body"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="Panel/Body/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.1, 0.1, 1)
+theme_override_font_sizes/font_size = 44
+text = "UPGRADES"
+horizontal_alignment = 1
+
+[node name="Blood" type="Label" parent="Panel/Body/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.09, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 24
+text = "BANKED 0"
+horizontal_alignment = 1
+
+[node name="Tabs" type="HBoxContainer" parent="Panel/Body"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Rule" type="ColorRect" parent="Panel/Body"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.055, 0.06, 1)
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Cards" type="HFlowContainer" parent="Panel/Body/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 14
+alignment = 1
+
+[node name="Hint" type="Label" parent="Panel/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "PAID FROM THE BLOOD BANKED IN THE POOL"
+horizontal_alignment = 1

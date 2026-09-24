@@ -205,6 +205,10 @@ func _build() -> void:
 	# fact about that weapon's artwork, so it is authored in the weapon's own
 	# scene rather than imposed here on all of them.
 	built.target_path = _resolved_target()
+	# Handed over before _ready for the same reason: the magazine is sized and the
+	# ammo capacity pushed from the weapon's upgrades as it arrives.
+	if catalog != null and built.definition == null:
+		built.definition = catalog.find(_chosen_id())
 	add_child(built)
 
 	_weapon = built

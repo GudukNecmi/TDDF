@@ -15,7 +15,7 @@ extends RefCounted
 ## [b]Roads are undirected and the graph is not a ladder.[/b] [member sites] carry
 ## a row only because the generator lays them out in rows; movement reads
 ## [member links] alone, so a road the generator happened to make sideways or
-## back down the map is a move the player may take. Riding north is what the
+## back down the map is a move the player may take. Riding east is what the
 ## shape of the graph encourages, not what a rule here enforces.
 
 ## Every point on the map, in the order the generator made them. A site's
@@ -26,7 +26,7 @@ var sites: Array[RunMapSite] = []
 var links: Array[RunMapLink] = []
 ## Which site the run opens on.
 var start_id: int = -1
-## Which site ends it - the boss, at the northern end.
+## Which site ends it - the boss, at the eastern end.
 var boss_id: int = -1
 ## Where the player's piece is standing now.
 var current_id: int = -1
@@ -162,6 +162,37 @@ func reveal(site_id: int) -> bool:
 		return false
 	site.revealed = true
 	return true
+
+
+## Learns [param site_id] and everything within [param depth] roads of it,
+## answering every site this actually turned over. [b]This is the map's
+## discovery[/b]: standing somewhere does not only tell the player what is under
+## their feet, it tells them what the roads out of it lead to - so a point
+## reached shows its neighbours' real kinds and the map opens out one ring at a
+## time as it is walked. A depth of 0 learns only the point itself, and nothing
+## here reaches past the roads that actually exist, so a distant point is never
+## turned over by accident.
+func reveal_around(site_id: int, depth: int = 1) -> PackedInt32Array:
+	var learned := PackedInt32Array()
+	if get_site(site_id) == null:
+		return learned
+	if reveal(site_id):
+		learned.append(site_id)
+
+	var seen := {site_id: true}
+	var edge: PackedInt32Array = PackedInt32Array([site_id])
+	for _step: int in range(maxi(depth, 0)):
+		var next := PackedInt32Array()
+		for at: int in edge:
+			for neighbour: int in neighbours_of(at):
+				if seen.has(neighbour):
+					continue
+				seen[neighbour] = true
+				next.append(neighbour)
+				if reveal(neighbour):
+					learned.append(neighbour)
+		edge = next
+	return learned
 
 
 func _note(site_id: int, link_index: int) -> void:

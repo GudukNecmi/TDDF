@@ -605,10 +605,16 @@ func begin() -> int:
 ## bodies that came to. 0 means nothing was built and nothing was changed.
 ##
 ## [b]This is [method begin] with the paperwork taken off the front.[/b] Everything
-## between "who is he" and "he is standing there" is here and only here, so a run
-## map's mini boss point - which has no contract and never will - is the same man,
-## at the same rung, with the same men round him, built by the same spawner, as one
-## the player found by holding a poster. See [MiniBossBrief].
+## between "who is he" and "he is standing there" is here and only here, so a boss
+## the player rode into on a run map point is the same man, at the same rung, with
+## the same men round him, built by the same spawner, as one the player found by
+## walking up to him. See [MiniBossBrief].
+##
+## [b]A brief that names a contract is a contract fight, whichever door it came
+## through.[/b] The ledger's copy of it is picked up here, so [BossDefeat] pays and
+## closes out the same paper it would have if [method begin] had found the man -
+## which is what makes a run map bounty boss worth his reward without a second
+## reward path existing anywhere.
 ##
 ## [param support] is how many men stand with him, -1 taking the rung's own answer.
 ## [param centre] is where he waits, [constant Vector2.INF] leaving
@@ -632,6 +638,13 @@ func place_encounter(brief: MiniBossBrief, tier: MiniBossTier, support: int = -1
 	var boss := _build_boss(spawner, point, tier, brief)
 	if boss == null:
 		return 0
+
+	# Picked up only now that there is a man standing there to answer for it, so a
+	# placement that came to nothing leaves the ledger exactly as it found it.
+	if _bounty == null and not brief.contract_id.is_empty():
+		var ledger := _get_ledger()
+		if ledger != null:
+			_bounty = ledger.find_active(brief.contract_id)
 
 	_tier = tier
 	_boss = boss

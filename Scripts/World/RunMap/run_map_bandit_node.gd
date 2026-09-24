@@ -113,7 +113,8 @@ func _on_site_reached(site: RunMapSite) -> void:
 	_asking_encounter = entry
 	if not bridge.site_encounter_answered.is_connected(_on_answered):
 		bridge.site_encounter_answered.connect(_on_answered, CONNECT_ONE_SHOT)
-	if bridge.try_begin_site_encounter(region, enemy_count_for(graph, site)):
+	if bridge.try_begin_site_encounter(
+			region, enemy_count_for(graph, site), entry.active_enemies, site.kind):
 		return
 
 	# Refused - something else is already running - so the point is left exactly

@@ -10,7 +10,7 @@ outcome = &"take"
 
 [sub_resource type="Resource" id="Choice_fight"]
 script = ExtResource("2_choice")
-label = "You think I'm scared of you?"
+label = "- Battle -"
 
 [resource]
 script = ExtResource("1_tier")

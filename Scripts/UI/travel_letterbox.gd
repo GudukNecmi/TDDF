@@ -84,6 +84,10 @@ enum State {
 ## How long [method show_letterbox] and [method hide_letterbox] take to slide
 ## the bars into or out of place when [param animated] is left on.
 @export var show_hide_time: float = 0.5
+## Whether the bars start framed instead of hidden - for a scene that is framed
+## the whole time it is open, like the Board Map, where no gate is needed to
+## pick them up. Left off, the bars start hidden and wait to be asked.
+@export var show_on_ready: bool = false
 
 @export_group("Loading")
 ## What the loading word says by default - overridable per call, see
@@ -140,7 +144,7 @@ func _ready() -> void:
 		_top_rest_y = _top_bar.position.y
 	if _bottom_bar != null:
 		_bottom_rest_y = _bottom_bar.position.y
-	_snap_to(State.HIDDEN)
+	_snap_to(State.SHOWN if show_on_ready else State.HIDDEN)
 
 
 ## The letterbox in the scene, or null when this world has none - which every

@@ -128,9 +128,10 @@ const STATE_NAMES := {
 @export var muzzle_path: NodePath = ^"MuzzleRig/Muzzle"
 ## Pellet scene spawned on each shot.
 @export var projectile_scene: PackedScene
-## Pellets released per shot.
+## Pellets released per shot before any upgrade - see [method get_pellet_count].
 @export var pellet_count: int = 6
-## Total cone the pellets are randomly spread across, in degrees.
+## Total cone the pellets are randomly spread across, in degrees, before any
+## upgrade - see [method get_spread_degrees].
 @export var spread_angle_degrees: float = 12.0
 ## How many rounds are lost when the action is worked on a *loaded* gun - the
 ## live shell thrown out of the breech. One for a weapon that chambers one round
@@ -248,15 +249,33 @@ func _spawn_pellets() -> void:
 	if container == null:
 		return
 
-	var half_spread := deg_to_rad(spread_angle_degrees) * 0.5
-	for i in pellet_count:
+	var half_spread := deg_to_rad(get_spread_degrees()) * 0.5
+	# One roll for the whole blast - a critical shotgun shot is every pellet of it.
+	var critical := roll_critical()
+	for i in get_pellet_count():
 		var pellet: Projectile = projectile_scene.instantiate()
+		arm_projectile(pellet, critical)
 		container.add_child(pellet)
 		pellet.global_position = _muzzle.global_position
 		pellet.global_rotation = global_rotation + randf_range(-half_spread, half_spread)
 		# Speed is not set here on purpose: it falls off with distance now, and
 		# lives with the rest of the pellet's range profile so one value governs
 		# damage, speed, colour, glow and light together.
+
+
+## Pellets one shot really releases: the authored [member pellet_count] plus the
+## weapon's pellet count upgrades. Never fewer than one.
+func get_pellet_count() -> int:
+	var stats := get_stats()
+	var bonus := 0 if stats == null else stats.pellet_bonus()
+	return maxi(pellet_count + bonus, 1)
+
+
+## The cone one shot really uses: the authored [member spread_angle_degrees]
+## tightened by the weapon's accuracy upgrades.
+func get_spread_degrees() -> float:
+	var stats := get_stats()
+	return spread_angle_degrees * (1.0 if stats == null else stats.spread_scale())
 
 
 ## One reload press racks the action open, the next drives it shut and rearms it.

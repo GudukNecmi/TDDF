@@ -259,6 +259,42 @@ func play() -> void:
 	timer.timeout.connect(queue_free)
 
 
+## Kills [param body] and tears him into this explosion's gore where he stands,
+## with none of the blast: no flare, no light, no scorch, no smoke, no blood
+## spray of its own and nobody else hurt. Reports whether it happened.
+##
+## [b]It is the gore a blast kill already gets, asked for on its own[/b] - see
+## [method _hurt_the_man]. The ordinary death is called off, the man dies through
+## his own [Health] (so he still bleeds, counts and pays what he was worth), the
+## pieces are the same [member gore_textures] thrown by [method _throw_gore], and
+## the same [member gore_impact_sounds] are heard as he comes apart and again as
+## each piece lands. A boss's sword going through a man is the caller today.
+##
+## Place the scene anywhere in the world first; it moves itself onto him. It is
+## spent by this exactly as [method play] spends it, and frees itself once the
+## last piece has had time to land.
+func tear_apart(body: Node2D, hit_direction: Vector2 = Vector2.ZERO) -> bool:
+	if _played or body == null or not is_instance_valid(body) or not is_inside_tree():
+		return false
+	_played = true
+
+	var at := body.global_position + gore_body_offset
+	global_position = body.global_position
+
+	var health := _find_health(body)
+	if health != null and health.is_alive():
+		_call_off_the_ordinary_death(body)
+		health.kill(hit_direction)
+
+	_tear_apart(body)
+	_gore_impact_sound(at)
+	exploded.emit(at)
+
+	var life := maxf(gore_settle_time, 0.0) + maxf(gore_fade_time, 0.0) + 1.0
+	get_tree().create_timer(life, true, false, true).timeout.connect(queue_free)
+	return true
+
+
 ## The flare: up at once, swelling slightly, gone. The swell is what stops a
 ## single sprite reading as a decal.
 func _flare() -> void:

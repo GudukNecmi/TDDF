@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="RunMapSaloonTopic" format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_saloon_topic.gd" id="1_topic"]
+
+[resource]
+script = ExtResource("1_topic")
+id = &"covered_places"
+label = "WHAT THE SANDSTORM COVERED"
+cost = 0
+placeholder_line = "\"THE STORM TOOK HALF THE ROAD SIGNS WITH IT. NOBODY HAS COME BACK THROUGH TO TELL ME WHAT IS STILL STANDING.\""
+reveals_kinds = Array[StringName]([&"market", &"saloon", &"treasure", &"deposit", &"extraction", &"sheriff_outpost", &"event"])
+reveal_line = "\"THE STORM DID NOT TAKE EVERYTHING. THERE IS STILL A %s STANDING OUT THAT WAY.\""
+nothing_left_line = "\"YOU HAVE WALKED MORE OF THIS COUNTRY THAN I HAVE. NOTHING LEFT I COULD TELL YOU.\""

@@ -65,8 +65,17 @@ extends Resource
 @export_group("Board")
 ## How many posters are pinned up at once.
 @export var poster_count: int = 5
-## How many contracts the player may hold at a time.
-@export var active_slots: int = 5
+## How many contracts the player may hold at a time, one entry per Bounty Board
+## capacity level.
+##
+## [b]The first entry is the board before any upgrade[/b], and each upgrade moves
+## one entry along - see [method BountyLedger.upgrade_capacity]. The last entry is
+## the most the board can ever be raised to, so a fourth level is a fourth number
+## here and nothing else. The ledger only ever stores which entry it is on.
+##
+## This is also how many bounty bosses a run can be dealt: the Run Map deals one
+## per contract carried - see [member RunMapSitePlan.one_per_accepted_bounty].
+@export var active_slot_levels: Array[int] = [1, 2, 3]
 ## Whether taking a poster down puts a fresh one up in its place.
 ##
 ## [b]Off.[/b] A poster taken is a gap on the board, and the gap is meant to stay
@@ -141,9 +150,19 @@ func get_max_knowledge() -> int:
 	return count
 
 
-## How many contracts may be held at once, never below one.
-func get_active_slots() -> int:
-	return maxi(active_slots, 1)
+## How many contracts may be held at once at capacity [param level], never below
+## one. A level past either end of [member active_slot_levels] reads as the
+## nearest entry, so a stored level can never go out of range.
+func get_active_slots(level: int = 0) -> int:
+	if active_slot_levels.is_empty():
+		return 1
+	var index := clampi(level, 0, active_slot_levels.size() - 1)
+	return maxi(active_slot_levels[index], 1)
+
+
+## The highest capacity level - the last entry of [member active_slot_levels].
+func get_max_capacity_level() -> int:
+	return maxi(active_slot_levels.size() - 1, 0)
 
 
 ## The rung a contract generated with [param knowledge_count] pieces belongs to,

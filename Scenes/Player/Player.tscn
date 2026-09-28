@@ -55,6 +55,7 @@
 [ext_resource type="PackedScene" uid="uid://cgotikhornflare" path="res://Scenes/Effects/HornFlare.tscn" id="53_flare"]
 [ext_resource type="AudioStream" uid="uid://cu1p1uspqv0sn" path="res://Sound/Character/Dash.WAV" id="54_dashsfx"]
 [ext_resource type="Script" path="res://Scripts/Common/hit_reaction.gd" id="55_hitreact"]
+[ext_resource type="Script" path="res://Scripts/Player/player_recoil.gd" id="56_recoil"]
 
 [sub_resource type="Gradient" id="Gradient_smokepuff"]
 offsets = PackedFloat32Array(0, 0.45, 1)
@@ -457,3 +458,6 @@ sounds = {
 voice_count = 2
 bus = &"Game"
 pitch_variation = 0.05
+
+[node name="Recoil" type="Node" parent="."]
+script = ExtResource("56_recoil")

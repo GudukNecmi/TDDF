@@ -150,10 +150,43 @@ var _critical_scale: float = 1.0
 ## What the hit does beyond damage - knockback, stagger, blood - handed to the
 ## hitbox as it lands. Null is an ordinary hit.
 var _hit_effects: HitEffects
+## What this round sets off as it lands or runs out - DEVIL'S BREATH. Taken from the
+## weapon's stats by [method apply_weapon_stats]; null is a round that only hits.
+var _explosion: ShotExplosion
 ## Set by [method ricochet] from inside a deflector's
 ## [code]take_projectile_hit[/code], so the round that deflector just took flies
 ## on instead of being retired for having no target. Spent on that same step.
 var _ricocheted: bool = false
+## Weave set by [method set_wave]: how far either side of the heading, over what
+## distance one weave runs, where in the weave it starts, and over what distance
+## it grows to full. 0 amplitude is a round that flies straight, which is every
+## round unless a [ShotPattern] bends it.
+var _wave_amplitude: float = 0.0
+var _wave_length: float = 1.0
+var _wave_phase: float = 0.0
+var _wave_ramp: float = 0.0
+## Distance flown along the heading for the weave alone - never reset by a
+## redirect, so the weave carries on without a jump.
+var _wave_distance: float = 0.0
+## How far the round currently sits off its heading.
+var _wave_offset: float = 0.0
+## Homing set by [method set_homing]: how fast the heading may turn towards the
+## nearest enemy, the most it may turn in one tick, how far it looks, and how often
+## it looks again. 0 turn rate is a round that never homes, which is every round
+## unless a [ShotPattern] makes it.
+var _home_turn_rate: float = 0.0
+var _home_max_step: float = 0.0
+var _home_radius: float = 0.0
+var _home_interval: float = 0.1
+var _home_timer: float = 0.0
+var _home_target: Node2D
+var _home_aim_offset := Vector2.ZERO
+## Look set by [method set_look]. 0 strength leaves the profile's colours alone.
+var _tint := Color.WHITE
+var _tint_strength: float = 0.0
+var _glow_scale: float = 1.0
+var _glow_pulse: float = 0.0
+var _glow_pulse_rate: float = 0.0
 
 
 func _ready() -> void:
@@ -172,6 +205,7 @@ func _ready() -> void:
 		# the glow afterwards is measured against the radius that was asked for
 		# rather than against the artwork's authored size.
 		_apply_glow_radius()
+		_glow.scale *= _glow_scale
 		_glow_base_scale = _glow.scale
 	if _light != null:
 		# Sized before the base is captured, for the same reason the glow is: the
@@ -193,16 +227,18 @@ func _physics_process(delta: float) -> void:
 	# exempt from all of it at once - its flight, its steering and its lifetime.
 	delta *= _time_compensation
 	_steer(delta)
+	_home(delta)
 	var progress := get_progress()
 
 	# Speed comes from the same progression as everything else, so the pellet
 	# visibly loses steam exactly as its damage, colour and light fade.
 	var step := profile.speed_at(progress) * _speed_scale * _stat_speed_scale() * delta
 	# transform.x is the node's own +X axis, already rotated.
-	var to := global_position + transform.x * step
+	var to := global_position + transform.x * step + _wave_step(step)
 
 	# Checked before the move is committed, so a pellet that lands stops at the
-	# body rather than a step past it.
+	# body rather than a step past it. The weave is part of the step, so the sweep
+	# traces the path the round really takes.
 	if _sweep_to(to):
 		return
 
@@ -212,9 +248,30 @@ func _physics_process(delta: float) -> void:
 	_apply_progress()
 
 	# Retired at the end of its range - the same range every effect is scaled
-	# against. The age check is a belt-and-braces stop so nothing can persist.
-	if _travelled >= get_effective_range() or _age >= profile.max_lifetime * maxf(_stat_range_scale(), 1.0):
+	# against. The age check is a belt-and-braces stop so nothing can persist; a
+	# round slowed below its profile's speed is given the longer time it needs to
+	# fly the same range.
+	var lifetime := profile.max_lifetime * maxf(_stat_range_scale(), 1.0) / clampf(_speed_scale, 0.05, 1.0)
+	if _travelled >= get_effective_range() or _age >= lifetime:
+		# Its end in the dirt - an explosive round goes off where it drops.
+		if _explosion != null and _explosion.explode_at_range_end:
+			_explode()
 		queue_free()
+
+
+## The sideways part of this step's move for a weaving round, and nothing for a
+## straight one. The heading - [code]transform.x[/code] - is never turned by the
+## weave, so steering, bouncing, piercing and knockback all keep working off the
+## line the round is really following.
+func _wave_step(step: float) -> Vector2:
+	if is_zero_approx(_wave_amplitude):
+		return Vector2.ZERO
+	_wave_distance += step
+	var grown := 1.0 if _wave_ramp <= 0.0 else clampf(_wave_distance / _wave_ramp, 0.0, 1.0)
+	var offset := _wave_amplitude * grown * sin(TAU * _wave_distance / _wave_length + _wave_phase)
+	var sideways := transform.y.normalized() * (offset - _wave_offset)
+	_wave_offset = offset
+	return sideways
 
 
 ## Scales the glow sprite so it is drawn [member glow_radius] pixels across from
@@ -313,6 +370,47 @@ func set_speed_scale(multiplier: float) -> void:
 	_speed_scale = maxf(multiplier, 0.0)
 
 
+## Makes this round weave either side of its heading as it flies: [param amplitude]
+## pixels out, one full weave every [param wavelength] pixels travelled, starting
+## [param phase] radians into the weave and growing to full over [param ramp]
+## pixels. Range, damage and hits are unaffected - the weave is sideways only. 0
+## amplitude flies straight again. See [ShotPattern].
+func set_wave(amplitude: float, wavelength: float, phase: float = 0.0, ramp: float = 0.0) -> void:
+	_wave_amplitude = amplitude
+	_wave_length = maxf(wavelength, 1.0)
+	_wave_phase = phase
+	_wave_ramp = maxf(ramp, 0.0)
+
+
+## Makes this round curve gently towards the nearest living enemy as it flies:
+## its heading turns at most [param turn_rate] radians a second and never more
+## than [param max_step] radians in one tick (0 is no per-tick cap). Only enemies
+## within [param radius] pixels are looked for (0 is the whole arena), and the
+## nearest is looked for again every [param interval] seconds so the round can
+## switch to a closer one. 0 turn rate never homes. See [ShotPattern].
+## [param aim_offset] is the point on the enemy curved towards, from its origin.
+func set_homing(turn_rate: float, max_step: float = 0.0, radius: float = 0.0,
+		interval: float = 0.1, aim_offset := Vector2.ZERO) -> void:
+	_home_aim_offset = aim_offset
+	_home_turn_rate = maxf(turn_rate, 0.0)
+	_home_max_step = maxf(max_step, 0.0)
+	_home_radius = maxf(radius, 0.0)
+	_home_interval = maxf(interval, 0.0)
+
+
+## Pulls this round's sprite, glow and light [param strength] of the way towards
+## [param tint], grows its glow by [param glow_scale] and throbs the glow's
+## brightness by [param pulse] either way, [param pulse_rate] times a second. Call
+## before it enters the tree. See [ShotPattern].
+func set_look(tint: Color, strength: float, glow_scale: float = 1.0,
+		pulse: float = 0.0, pulse_rate: float = 0.0) -> void:
+	_tint = tint
+	_tint_strength = clampf(strength, 0.0, 1.0)
+	_glow_scale = maxf(glow_scale, 0.0)
+	_glow_pulse = clampf(pulse, 0.0, 1.0)
+	_glow_pulse_rate = pulse_rate
+
+
 ## Hands this round the firing weapon's [WeaponStats]: its damage, range, speed,
 ## size and fall-off are read through them from here on, and its hits carry the
 ## weapon's knockback, stagger and blood gain. [param critical] is the weapon's
@@ -326,6 +424,7 @@ func set_speed_scale(multiplier: float) -> void:
 func apply_weapon_stats(stats: WeaponStats, critical: bool = false) -> void:
 	_stats = stats
 	_hit_effects = null if stats == null else stats.make_hit_effects()
+	_explosion = null if stats == null else stats.shot_explosion
 	if critical and stats != null:
 		_critical = true
 		_critical_scale = stats.critical_multiplier()
@@ -397,6 +496,32 @@ func _steer(delta: float) -> void:
 	global_rotation = rotate_toward(global_rotation, wanted, seek_turn_speed * delta)
 
 
+## Turns the heading a limited amount towards the nearest living enemy, for a round
+## given [method set_homing]. The weave rides on the heading, so a homing round
+## still weaves while it curves in. A round a bounce or a deflector has sent at
+## somebody is left to [method _steer]; a round with nobody in reach flies on as
+## it was.
+func _home(delta: float) -> void:
+	if _home_turn_rate <= 0.0 or _target != null:
+		return
+	_home_timer -= delta
+	# A target that died is looked past at once; otherwise the search waits for its
+	# interval, so a round with nobody in reach is not searching every tick.
+	if _home_target != null and not EnemyTargeting.is_valid(_home_target):
+		_home_target = null
+		_home_timer = 0.0
+	if _home_timer <= 0.0:
+		_home_timer = _home_interval
+		_home_target = EnemyTargeting.nearest(self, global_position, _home_radius, _struck)
+	if _home_target == null:
+		return
+	var wanted := (_home_target.global_position + _home_aim_offset - global_position).angle()
+	var turn := _home_turn_rate * delta
+	if _home_max_step > 0.0:
+		turn = minf(turn, _home_max_step)
+	global_rotation = rotate_toward(global_rotation, wanted, turn)
+
+
 ## The one shared distance progression: 0 at the muzzle, 1 at the end of the
 ## profile's effective range. Every distance-driven effect on this pellet is
 ## derived from this single value.
@@ -437,17 +562,23 @@ func is_critical() -> bool:
 ## its damage or its speed.
 func _apply_progress() -> void:
 	var progress := get_progress()
+	var color := profile.color_at(progress)
+	if _tint_strength > 0.0:
+		color = color.lerp(Color(_tint, color.a), _tint_strength)
 
 	if _sprite != null:
-		_sprite.modulate = profile.color_at(progress)
+		_sprite.modulate = color
 
 	if _glow != null:
-		var glow_color := profile.color_at(progress)
-		glow_color.a = clampf(profile.glow_at(progress), 0.0, 1.0)
+		var glow_color := color
+		var glow := profile.glow_at(progress)
+		if _glow_pulse > 0.0:
+			glow *= 1.0 + _glow_pulse * sin(TAU * _glow_pulse_rate * _age)
+		glow_color.a = clampf(glow, 0.0, 1.0)
 		_glow.modulate = glow_color
 
 	if _light != null:
-		_light.color = profile.color_at(progress)
+		_light.color = color
 		_light.energy = profile.light_energy_at(progress)
 		_light.texture_scale = _light_base_scale * profile.light_scale_at(progress)
 
@@ -498,6 +629,19 @@ func _sweep_to(to: Vector2) -> bool:
 			break
 		query.exclude = query.exclude + [passed.get_rid()]
 		hit = _trace(query)
+
+	# An explosive round goes off against solid world nearer than anything it would
+	# hit, and stops there. A round that is not explosive never looks.
+	var surface := _trace_surface(to)
+	if not surface.is_empty():
+		var surface_at := surface.get("position", to) as Vector2
+		if hit.is_empty() or global_position.distance_to(surface_at) \
+				< global_position.distance_to(hit.get("position", to) as Vector2):
+			global_position = surface_at
+			_explode()
+			_retire()
+			return true
+
 	if hit.is_empty():
 		return false
 
@@ -621,8 +765,15 @@ func _land(hitbox: Hitbox) -> bool:
 	hitbox.take_hit(get_current_damage(), transform.x, global_position, _critical, _hit_effects)
 	landed.emit(hitbox)
 
+	# The blast follows the hit it belongs to - one per landing, and [member _spent]
+	# above is what keeps one landing from being noticed twice.
 	if _pierce_onward():
+		if _explosion != null and _explosion.explode_on_pierce:
+			_explode()
 		return true
+
+	if _explosion != null and _explosion.explode_on_hit:
+		_explode()
 
 	if _bounce_onward(hitbox):
 		return false
@@ -672,6 +823,34 @@ func _bounce_onward(hitbox: Hitbox) -> bool:
 	_spent = false
 	redirect_to(next)
 	return true
+
+
+## The first solid surface along this step for an explosive round - see
+## [member ShotExplosion.surface_mask] - or empty. Bodies in the explosion's ignore
+## group, the player, are traced through.
+func _trace_surface(to: Vector2) -> Dictionary:
+	if _explosion == null or _explosion.surface_mask == 0:
+		return {}
+	var query := PhysicsRayQueryParameters2D.create(global_position, to, _explosion.surface_mask)
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	var space := get_world_2d().direct_space_state
+	for _pass in 4:
+		var hit := space.intersect_ray(query)
+		if hit.is_empty():
+			return hit
+		var body := hit.get("collider") as Node
+		var ignored := _explosion.surface_ignore_group
+		if body == null or ignored.is_empty() or not body.is_in_group(ignored):
+			return hit
+		query.exclude = query.exclude + [hit.get("rid") as RID]
+	return {}
+
+
+## Sets off this round's explosion where it is now.
+func _explode() -> void:
+	if _explosion != null:
+		_explosion.detonate(self, global_position, _stats, collision_mask)
 
 
 ## The enemy [param hitbox] belongs to - its scene's root - so a head and a body

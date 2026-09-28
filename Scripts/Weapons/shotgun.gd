@@ -56,6 +56,26 @@ signal pumped_back
 signal shell_ejected
 ## Emitted when a valid reload press drives the pump forward and rearms it.
 signal pumped_forward
+## Emitted whenever the banked pump charge moves - a cycle completed, a shot
+## spending it, a reset. Only ever above 0 while a [PumpCharge] is active; see
+## [method get_pump_charge]. Sent [b]before[/b] [signal pumped_forward] on the
+## stroke that earned it, so feedback can be tuned to the new charge by the time
+## the stroke's own sound plays.
+signal pump_charge_changed(charge: int, max_charge: int)
+## Emitted as a charged shot leaves, [b]before[/b] [signal fired], with the charge
+## it spent. An uncharged shot sends nothing.
+signal charge_released(charge: int)
+## Emitted when one pump press runs the whole cycle with the trigger held - see
+## [FanHammer]. Sent after [signal pumped_back] and [signal pumped_forward], which
+## the stroke still announces as ever.
+signal fan_pumped
+## Emitted as a shot that followed a fanned cycle leaves, [b]before[/b]
+## [signal fired], with the heat that shot leaves the weapon at, 0..1.
+signal fanned_shot(heat: float)
+## Emitted once per shot, [b]after[/b] [signal fired], while a [ShotRecoil] is
+## active, with the velocity change the shot gave its holder and the holder it
+## went to - see [method _kick_holder]. Never per pellet.
+signal recoil_kicked(push: Vector2, holder: Node2D)
 
 enum State {
 	## Loaded, action closed, and the only state a shot can leave from.
@@ -140,6 +160,15 @@ const STATE_NAMES := {
 ## A spent case never costs anything whatever this is set to: the shot that
 ## emptied it already paid for it.
 @export var rounds_lost_on_eject: int = 1
+## Where, under the node the weapon follows, a [ShotRecoil]'s shove is handed -
+## see [PlayerRecoil]. A holder without it is simply not pushed.
+@export var recoil_receiver_path: NodePath = ^"Recoil"
+
+@export_group("Charge")
+## Group a weapon's charge joins, so the sight and the readout over the ammunition
+## find it without being wired to a weapon - the same group the revolver's twirl
+## joins. See [Crosshair] and [SpinMultiplier].
+@export var charge_group: StringName = &"weapon_charge"
 
 @onready var _body: Sprite2D = get_node_or_null(body_sprite_path) as Sprite2D
 @onready var _pump: Sprite2D = get_node_or_null(pump_sprite_path) as Sprite2D
@@ -149,9 +178,21 @@ var _state: State = State.READY
 var _pump_rest_position: Vector2
 var _pump_tween: Tween
 var _firing_flash: bool = false
+## Full pump cycles banked into the next shot. Only ever above 0 while the weapon's
+## stats carry a [PumpCharge].
+var _charge: int = 0
+## Whether the last cycle was fanned, so the shot that follows is a fanned shot.
+var _fanned: bool = false
+## Rapid-fire heat, 0..1 - see [FanHammer]. Only ever above 0 while one is active.
+var _fan_heat: float = 0.0
+var _since_fan_shot: float = 0.0
+## Bumped whenever a pending held-trigger shot must be dropped.
+var _hammer_serial: int = 0
 
 
 func _ready() -> void:
+	if not charge_group.is_empty():
+		add_to_group(charge_group)
 	# Captured once. Every stroke is measured from and returned to this, so a
 	# hammered R key cannot walk the fore-end off the end of the gun.
 	if _pump != null:
@@ -169,7 +210,24 @@ func _weapon_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"fire"):
 		_try_fire()
 	elif event.is_action_pressed(&"pump"):
-		_try_pump()
+		if _fan_hammer() != null and Input.is_action_pressed(&"fire"):
+			_fan_pump()
+		else:
+			_fanned = false
+			_try_pump()
+
+
+## Heat drains and the aim loosens back up once the fanning stops. With no
+## [FanHammer] active the weapon is put straight back to itself.
+func _process(delta: float) -> void:
+	var fan := _fan_hammer()
+	if fan == null:
+		_fan_heat = 0.0
+		aim_scale = 1.0
+		return
+	_since_fan_shot += delta
+	_fan_heat = fan.cooled(_fan_heat, _since_fan_shot, delta)
+	aim_scale = fan.aim_scale_at(_fan_heat)
 
 
 ## Breech closed on a live shell, fore-end home. A round should never begin with
@@ -180,6 +238,10 @@ func _weapon_input(event: InputEvent) -> void:
 ## were resupplied before this was called.
 func reload_to_ready() -> void:
 	_set_state(State.READY)
+	_set_charge(0)
+	_fanned = false
+	_fan_heat = 0.0
+	_hammer_serial += 1
 
 
 ## Ready is READY and nothing else - the same test [method _try_fire] itself
@@ -208,12 +270,33 @@ func _try_fire() -> void:
 		dry_fired.emit()
 		return
 	print("Fire")
+	var released := _charge
+	var fan := _fan_hammer() if _fanned else null
+	_fanned = false
+	# Read before the charge is spent, so a charged shot's pellets are counted.
+	var recoil_pellets := get_pellet_count()
+	# The aim the pellets leave along, before a fanned shot throws it.
+	var aim := Vector2.from_angle(global_rotation)
 	_spawn_pellets()
 	_set_state(State.SPENT)
 	# After the state, so the flash sits on top of the artwork the new state just
 	# chose rather than being wiped by it.
 	_show_firing_texture()
+	if released > 0:
+		charge_released.emit(released)
+	# The charge is still banked while the shot is announced, so the muzzle burst
+	# reads the charged spread off [method get_spread_degrees]; it is spent after.
+	if fan != null:
+		fanned_shot.emit(fan.heat_after_shot(_fan_heat))
 	fired.emit()
+	_kick_holder(aim, recoil_pellets)
+	_set_charge(0)
+	# Heat and the throw of the aim land after the shot, so they unsettle the next
+	# one rather than this.
+	if fan != null:
+		_fan_heat = fan.heat_after_shot(_fan_heat)
+		_since_fan_shot = 0.0
+		rotation += deg_to_rad(randf_range(-1.0, 1.0) * fan.aim_kick_at(_fan_heat))
 
 
 ## Puts the firing artwork up and takes it down again a moment later.
@@ -242,6 +325,11 @@ func _end_firing_texture() -> void:
 ## Pellets leave the muzzle along the barrel, each nudged by a random angle
 ## inside the spread cone. They are added to the scene rather than to the
 ## shotgun, so they keep flying straight while the weapon keeps turning.
+##
+## An active Legendary's [ShotPattern] - Devil's Barrel - takes over where each
+## pellet points, how it flies and what it trails; see [member WeaponStats.shot_pattern].
+## A full BLOOD PUMP charge arms every pellet to pierce through the same
+## [WeaponStats] block - see [member PumpCharge.max_charge_modifiers].
 func _spawn_pellets() -> void:
 	if projectile_scene == null or _muzzle == null:
 		return
@@ -249,15 +337,33 @@ func _spawn_pellets() -> void:
 	if container == null:
 		return
 
+	# The charged block when charge is banked, so damage, range and spread all come
+	# out of the ordinary stat code with the charge already in them.
+	var stats := _shot_stats()
+	var charged := stats != null and stats != get_stats()
+	var pattern: ShotPattern = null if stats == null else stats.shot_pattern
+	# DEVIL'S BREATH rides beside any pattern rather than replacing it: the pellets
+	# fly however they were going to and explode on top - see [ShotExplosion].
+	var explosion: ShotExplosion = null if stats == null else stats.shot_explosion
 	var half_spread := deg_to_rad(get_spread_degrees()) * 0.5
 	# One roll for the whole blast - a critical shotgun shot is every pellet of it.
 	var critical := roll_critical()
 	for i in get_pellet_count():
 		var pellet: Projectile = projectile_scene.instantiate()
-		arm_projectile(pellet, critical)
+		arm_projectile(pellet, critical, stats if charged else null)
+		if pattern != null:
+			pattern.prepare(pellet)
+		if explosion != null:
+			explosion.prepare(pellet, pattern != null)
 		container.add_child(pellet)
 		pellet.global_position = _muzzle.global_position
-		pellet.global_rotation = global_rotation + randf_range(-half_spread, half_spread)
+		if pattern != null:
+			pellet.global_rotation = pattern.heading(global_rotation, half_spread)
+			pattern.attach_trail(pellet, container, stats.size_scale())
+		else:
+			pellet.global_rotation = global_rotation + randf_range(-half_spread, half_spread)
+		if explosion != null:
+			explosion.attach_trail(pellet, container, stats.size_scale())
 		# Speed is not set here on purpose: it falls off with distance now, and
 		# lives with the rest of the pellet's range profile so one value governs
 		# damage, speed, colour, glow and light together.
@@ -266,16 +372,174 @@ func _spawn_pellets() -> void:
 ## Pellets one shot really releases: the authored [member pellet_count] plus the
 ## weapon's pellet count upgrades. Never fewer than one.
 func get_pellet_count() -> int:
-	var stats := get_stats()
+	var stats := _shot_stats()
 	var bonus := 0 if stats == null else stats.pellet_bonus()
 	return maxi(pellet_count + bonus, 1)
 
 
 ## The cone one shot really uses: the authored [member spread_angle_degrees]
-## tightened by the weapon's accuracy upgrades.
+## tightened by the weapon's accuracy upgrades, then widened by any banked charge -
+## see [method WeaponStats.spread_scale], which keeps accuracy from cancelling it.
 func get_spread_degrees() -> float:
-	var stats := get_stats()
+	var stats := _shot_stats()
 	return spread_angle_degrees * (1.0 if stats == null else stats.spread_scale())
+
+
+## The stats the next shot leaves with: the weapon's own block, or - with charge
+## banked - a copy of it with the charge folded in. See [method PumpCharge.charged_stats].
+##
+## Rapid-fire heat widens it further the same way - see [method FanHammer.unsteady_stats].
+func _shot_stats() -> WeaponStats:
+	var stats := get_stats()
+	if stats == null:
+		return null
+	if stats.pump_charge != null and _charge > 0:
+		stats = stats.pump_charge.charged_stats(stats, _charge)
+	if stats.fan_hammer != null and _fan_heat > 0.0:
+		stats = stats.fan_hammer.unsteady_stats(stats, _fan_heat)
+	return stats
+
+
+# --- Recoil ----------------------------------------------------------------------
+
+## RECOIL DEVIL: the shot throws whoever is holding the weapon straight back from
+## the aim - see [ShotRecoil]. The shove is the holder's own [PlayerRecoil] to
+## carry; this only works out how hard and which way, once per shot.
+func _kick_holder(aim: Vector2, pellets: int) -> void:
+	var stats := get_stats()
+	var recoil: ShotRecoil = null if stats == null else stats.shot_recoil
+	if recoil == null or _target == null:
+		return
+	var push := recoil.push_for(aim, pellets)
+	var receiver := _target.get_node_or_null(recoil_receiver_path)
+	if receiver != null and receiver.has_method(&"kick"):
+		receiver.call(&"kick", push, recoil)
+	recoil_kicked.emit(push, _target)
+
+
+# --- Fan the hammer --------------------------------------------------------------
+
+## Rapid-fire heat, 0..1, and always 0 while no [FanHammer] is active.
+func get_fan_heat() -> float:
+	return _fan_heat
+
+
+func _fan_hammer() -> FanHammer:
+	var stats := get_stats()
+	return null if stats == null else stats.fan_hammer
+
+
+## One press, the whole cycle: both strokes are worked through [method _try_pump]
+## exactly as two presses would work them, so what a stroke costs, what it throws
+## out and what charge it banks are unchanged. Then the held trigger drops the
+## hammer - see [member FanHammer.held_trigger_fires].
+func _fan_pump() -> void:
+	var fan := _fan_hammer()
+	if _state != State.PUMP_BACK:
+		_try_pump()
+	_try_pump()
+	_fanned = true
+	_slide_pump_cycle(fan)
+	fan_pumped.emit()
+
+	_hammer_serial += 1
+	if not fan.held_trigger_fires:
+		return
+	if fan.hammer_delay <= 0.0:
+		_drop_hammer(_hammer_serial)
+	else:
+		# Paused with the tree, so the developer panel cannot fire the weapon.
+		get_tree().create_timer(fan.hammer_delay, false).timeout.connect(
+			_drop_hammer.bind(_hammer_serial))
+
+
+## The held trigger firing the freshly closed action - an ordinary trigger pull,
+## so it spends a real shell or clicks dry like any other.
+func _drop_hammer(serial: int) -> void:
+	if serial != _hammer_serial or _state != State.READY or _fan_hammer() == null:
+		return
+	if not Input.is_action_pressed(&"fire") or _holster > 0.0 or _fire_blocked_by_zone():
+		return
+	_try_fire()
+
+
+## The fore-end slammed back and home in one go, showing the open action for the
+## back stroke. The state is already READY by now; this is only the picture.
+func _slide_pump_cycle(fan: FanHammer) -> void:
+	if _pump == null:
+		return
+	if _pump_tween != null and _pump_tween.is_running():
+		_pump_tween.kill()
+	if _body != null and pumped_texture != null and not _firing_flash:
+		_body.texture = pumped_texture
+	_pump_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_pump_tween.tween_property(_pump, "position",
+		_pump_rest_position + pump_back_offset, maxf(fan.stroke_back_time, 0.001))
+	_pump_tween.tween_callback(_end_fan_stroke)
+	_pump_tween.tween_property(_pump, "position",
+		_pump_rest_position, maxf(fan.stroke_forward_time, 0.001))
+
+
+func _end_fan_stroke() -> void:
+	if not _firing_flash:
+		_apply_look()
+
+
+# --- Pump charge -----------------------------------------------------------------
+
+## Full pump cycles banked into the next shot, 0 when nothing is - and always 0
+## while no [PumpCharge] is active.
+func get_pump_charge() -> int:
+	return _charge
+
+
+## Most that can be banked, or 0 while no [PumpCharge] is active.
+func get_max_pump_charge() -> int:
+	var charge := _pump_charge()
+	return 0 if charge == null else maxi(charge.max_charges, 1)
+
+
+## Drops whatever charge is banked without firing it. The developer panel's reset.
+func reset_pump_charge() -> void:
+	_set_charge(0)
+
+
+## How full the charge is, 0..1. Read by [Crosshair] through [member charge_group].
+func get_charge_ratio() -> float:
+	var most := get_max_pump_charge()
+	return 0.0 if most <= 0 else clampf(float(_charge) / float(most), 0.0, 1.0)
+
+
+## The readout over the ammunition - see [SpinMultiplier]. Empty with nothing banked.
+func get_stage_label() -> String:
+	var charge := _pump_charge()
+	return "" if charge == null else charge.label_for(_charge)
+
+
+func get_stage_label_scale() -> float:
+	var charge := _pump_charge()
+	return 1.0 if charge == null else charge.label_scale_for(_charge)
+
+
+func _pump_charge() -> PumpCharge:
+	var stats := get_stats()
+	return null if stats == null else stats.pump_charge
+
+
+func _set_charge(value: int) -> void:
+	var most := get_max_pump_charge()
+	var clamped := clampi(value, 0, most)
+	if clamped == _charge:
+		return
+	_charge = clamped
+	pump_charge_changed.emit(_charge, most)
+
+
+## The Legendary switched off takes its charge with it at once, so the shotgun is
+## back to an ordinary pump the moment the panel says OFF.
+func _on_stats_changed() -> void:
+	super._on_stats_changed()
+	_set_charge(_charge)
 
 
 ## One reload press racks the action open, the next drives it shut and rearms it.
@@ -303,10 +567,13 @@ func get_spread_degrees() -> float:
 func _try_pump() -> void:
 	match _state:
 		State.READY, State.SPENT:
+			# Working a loaded gun with a pump charge active is charging it, not
+			# clearing it: the live round stays where it is and nothing is thrown.
+			var charging := _state == State.READY and _charging_keeps_round()
 			# Asked before the round is spent, because spending it is what would
 			# make the breech look empty.
-			var ejecting := _breech_holds_shell()
-			if _state == State.READY and _ammo != null:
+			var ejecting := not charging and _breech_holds_shell()
+			if _state == State.READY and _ammo != null and not charging:
 				_ammo.discard_rounds(rounds_lost_on_eject)
 			_set_state(State.PUMP_BACK)
 			pumped_back.emit()
@@ -314,7 +581,16 @@ func _try_pump() -> void:
 				shell_ejected.emit()
 		State.PUMP_BACK:
 			_set_state(State.READY)
+			# One full cycle, one charge - the reload after a shot included - and
+			# announced before the stroke so its sound is already tuned to it.
+			if _pump_charge() != null:
+				_set_charge(_charge + 1)
 			pumped_forward.emit()
+
+
+func _charging_keeps_round() -> bool:
+	var charge := _pump_charge()
+	return charge != null and charge.charging_keeps_round
 
 
 ## Whether there is anything in the breech for the next stroke to throw out.

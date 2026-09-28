@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponLegendary" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_legendary.gd" id="1_legendary"]
+[ext_resource type="Script" path="res://Scripts/Weapons/shot_recoil.gd" id="2_recoil"]
+
+[sub_resource type="Resource" id="Resource_recoil"]
+script = ExtResource("2_recoil")
+
+[resource]
+script = ExtResource("1_legendary")
+id = &"recoil_devil"
+display_name = "RECOIL DEVIL"
+description = "EVERY SHOT THROWS YOU HARD THE OTHER WAY - AIM BEHIND YOU TO FLY. CHAIN SHOTS TO KEEP MOVING; YOU CAN STILL STEER AND AIM."
+shot_recoil = SubResource("Resource_recoil")

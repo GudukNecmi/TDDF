@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cgotiktestgate"]
+[gd_scene format=3 uid="uid://82ydqw03lnfu"]
 
 [ext_resource type="Script" uid="uid://bjp7hsnq31h5f" path="res://Scripts/Dev/test_map_gate.gd" id="1_gate"]
 [ext_resource type="Texture2D" uid="uid://dai6sklgss1vm" path="res://Assets/Base/TeleportPit/pit.png" id="2_pit"]
@@ -8,58 +8,55 @@
 [ext_resource type="Texture2D" uid="uid://blbpym18df2s8" path="res://Assets/Base/Pipes/pipe_h.png" id="6_pipeh"]
 [ext_resource type="Script" uid="uid://brbrcq2bx0f3i" path="res://Scripts/UI/interaction_prompt.gd" id="7_prompt"]
 
-[node name="TestMapGate" type="Node2D"]
+[node name="TestMapGate" type="Node2D" unique_id=479097536]
 script = ExtResource("1_gate")
-destination_id = &"test_map"
-interaction_radius = 170.0
 
-[node name="Art" type="Node2D" parent="."]
+[node name="Art" type="Node2D" parent="." unique_id=625248488]
 
-[node name="Pad" type="Sprite2D" parent="Art"]
+[node name="Pad" type="Sprite2D" parent="Art" unique_id=150849472]
 modulate = Color(0.44, 0.6, 0.78, 1)
 scale = Vector2(0.55, 0.55)
 texture = ExtResource("2_pit")
 
-[node name="Glow" type="Sprite2D" parent="Art"]
+[node name="Glow" type="Sprite2D" parent="Art" unique_id=585609090]
 modulate = Color(0.55, 0.82, 1, 0.5)
 scale = Vector2(0.45, 0.45)
 texture = ExtResource("3_glow")
 
-[node name="PostLeft" type="Sprite2D" parent="Art"]
+[node name="PostLeft" type="Sprite2D" parent="Art" unique_id=191421878]
 position = Vector2(-86, -58)
 scale = Vector2(0.42, 0.7)
 texture = ExtResource("4_pipev")
 
-[node name="PostRight" type="Sprite2D" parent="Art"]
+[node name="PostRight" type="Sprite2D" parent="Art" unique_id=264272078]
 position = Vector2(86, -58)
 scale = Vector2(0.42, 0.7)
 texture = ExtResource("4_pipev")
 
-[node name="Lintel" type="Sprite2D" parent="Art"]
+[node name="Lintel" type="Sprite2D" parent="Art" unique_id=1665213388]
 position = Vector2(0, -128)
 scale = Vector2(1.75, 0.8)
 texture = ExtResource("6_pipeh")
 
-[node name="FootLeft" type="Sprite2D" parent="Art"]
+[node name="FootLeft" type="Sprite2D" parent="Art" unique_id=1650672594]
 position = Vector2(-86, -10)
 scale = Vector2(0.38, 0.38)
 texture = ExtResource("5_flange")
 
-[node name="FootRight" type="Sprite2D" parent="Art"]
+[node name="FootRight" type="Sprite2D" parent="Art" unique_id=1661771218]
 position = Vector2(86, -10)
 scale = Vector2(0.38, 0.38)
 texture = ExtResource("5_flange")
 
-[node name="Prompt" type="Node2D" parent="."]
+[node name="Prompt" type="Node2D" parent="." unique_id=1957824827]
 top_level = true
 script = ExtResource("7_prompt")
 
-[node name="Label" type="Label" parent="Prompt"]
+[node name="Label" type="Label" parent="Prompt" unique_id=1886801417]
 offset_left = -22.0
 offset_top = -26.0
 offset_right = 22.0
 offset_bottom = 26.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.14, 0.14, 1)
 theme_override_colors/font_outline_color = Color(0.06, 0.01, 0.01, 1)
 theme_override_constants/outline_size = 10

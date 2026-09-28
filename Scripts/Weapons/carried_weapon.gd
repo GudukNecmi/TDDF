@@ -177,6 +177,16 @@ var _previous_target_velocity: Vector2
 var _sway: Vector2 = Vector2.ZERO
 var _holster: float = 0.0
 var _holster_tween: Tween
+## What [member follow_speed], [member catch_up_speed] and [member rotation_speed]
+## are multiplied by right now. 1 is the weapon as authored; below 1 it trails and
+## turns heavier. Written by feedback that wants the weapon to feel weighed down -
+## see [PumpChargeFeedback] - and never by the weapon itself.
+var handling_scale: float = 1.0
+## What [member rotation_speed] alone is further multiplied by - the aim, not the
+## follow. 1 is as authored. Kept apart from [member handling_scale] so the two
+## writers never overwrite each other: the weapon's own rapid-fire unsteadiness
+## writes this (see [FanHammer]), feedback writes that.
+var aim_scale: float = 1.0
 var _base_scale: Vector2
 
 
@@ -354,8 +364,10 @@ func roll_critical() -> bool:
 
 ## Hands this weapon's stats to [param projectile] before it enters the tree, and
 ## makes it critical when [param critical] - the roll from [method roll_critical].
-func arm_projectile(projectile: Projectile, critical: bool = false) -> void:
-	var stats := get_stats()
+## [param shot_stats] replaces them for one shot that changes them on top - a
+## charged blast - and is null for every ordinary one.
+func arm_projectile(projectile: Projectile, critical: bool = false, shot_stats: WeaponStats = null) -> void:
+	var stats := shot_stats if shot_stats != null else get_stats()
 	if projectile == null or stats == null:
 		return
 	projectile.apply_weapon_stats(stats, critical)
@@ -404,7 +416,7 @@ func _follow_target(delta: float) -> void:
 	# comes back in to the belt rather than being stowed out at arm's length.
 	var goal := anchor + hand_offset.rotated(rotation) * (1.0 - _holster)
 	goal += _update_sway(delta)
-	var speed := _follow_speed_for(global_position.distance_to(goal))
+	var speed := _follow_speed_for(global_position.distance_to(goal)) * maxf(handling_scale, 0.05)
 	global_position = _orbit_towards(anchor, goal, 1.0 - exp(-speed * delta))
 
 
@@ -524,7 +536,8 @@ func _aim_at_mouse(delta: float) -> void:
 		return
 
 	_aim_held = locked
-	rotation = lerp_angle(rotation, wanted, 1.0 - exp(-rotation_speed * delta))
+	var turn := rotation_speed * maxf(handling_scale, 0.05) * maxf(aim_scale, 0.05)
+	rotation = lerp_angle(rotation, wanted, 1.0 - exp(-turn * delta))
 
 
 ## Takes the lock on or off for this frame, given where the cursor is relative to the

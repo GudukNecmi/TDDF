@@ -48,6 +48,22 @@ func add_card(card: RunCard) -> bool:
 	return true
 
 
+## Takes the most recently added copy of [param card] - matched by
+## [member RunCard.id] - back out of the hand. Returns whether one was held. Nothing
+## in play sells a card back; this is the developer panel's hook, see
+## [WeaponDebugPanel].
+func remove_card(card: RunCard) -> bool:
+	if card == null:
+		return false
+	for i in range(_cards.size() - 1, -1, -1):
+		var held := _cards[i]
+		if held != null and held.id == card.id:
+			_cards.remove_at(i)
+			cards_changed.emit()
+			return true
+	return false
+
+
 ## Every card held, in order. A copy, so a readout cannot edit the hand.
 func get_cards() -> Array[RunCard]:
 	return _cards.duplicate()

@@ -137,7 +137,8 @@ signal saved(balance: DevBalance)
 ##
 ## The styles are taken from the footer's SAVE button, which is half a menu wide and
 ## padded to match - a panel of thirty small buttons wants them tighter, and this is
-## that without a second set of styles to keep in step. See [method _tighten].
+## that without a second set of styles to keep in step. On paper art this is measured
+## inside the art's own texture borders. See [method _tighten].
 @export var button_padding := Vector2(14.0, 2.0)
 @export var button_font_size: int = 17
 
@@ -1372,6 +1373,16 @@ func _tighten(style: StyleBox) -> StyleBox:
 	copy.content_margin_right = button_padding.x
 	copy.content_margin_top = button_padding.y
 	copy.content_margin_bottom = button_padding.y
+	# Paper art draws its texture_margin borders - torn edge and outline - at full
+	# size whatever the button's size, and stretches only what lies between them. A
+	# button padded tighter than those borders squeezes the paper shut and letters its
+	# text over the outline, so on art the padding is measured inside the borders.
+	var art := copy as StyleBoxTexture
+	if art != null:
+		art.content_margin_left += art.texture_margin_left
+		art.content_margin_right += art.texture_margin_right
+		art.content_margin_top += art.texture_margin_top
+		art.content_margin_bottom += art.texture_margin_bottom
 	_tightened[style] = copy
 	return copy
 

@@ -87,6 +87,9 @@ const DEFAULT_CHANNEL := &"default"
 @export var max_zoom_offset: float = 1.2
 ## Ceiling on the summed rotation, in degrees.
 @export var max_rotation_degrees: float = 20.0
+## Ceiling on the summed directional kick, in pixels either way - see
+## [method offset_kick].
+@export var max_kick_offset: float = 60.0
 
 @export_group("Target follow")
 ## How quickly the camera crosses onto a subject handed to [method follow], in the
@@ -130,6 +133,11 @@ var _rotation_layers: Dictionary = {}
 var _zoom_layers: Dictionary = {}
 var _rotation_offset: float = 0.0
 var _zoom_offset: float = 0.0
+## The directional kick, one set of channels per axis so it runs through exactly
+## the same layering as the rotation and the zoom.
+var _kick_x_layers: Dictionary = {}
+var _kick_y_layers: Dictionary = {}
+var _kick_offset: Vector2 = Vector2.ZERO
 
 ## The camera's authored resting spot on the player, captured on ready. Every
 ## follow is an offset from this, and releasing drives the offset back to nothing.
@@ -288,6 +296,24 @@ func zoom_kick(
 		[Vector2(amount, out_time), Vector2(0.0, back_time)], channel, priority)
 
 
+## A short shove of the view along [param kick], in pixels, and back again - the
+## directional counterpart of [method zoom_kick]. Written to
+## [member Camera2D.offset] beside the shake, so following and the limits are
+## untouched, and channelled like every other impulse: the same caller
+## retriggering blends from wherever its kick currently is.
+func offset_kick(
+	kick: Vector2,
+	out_time: float,
+	back_time: float,
+	channel: StringName = DEFAULT_CHANNEL,
+	priority: int = 0
+) -> void:
+	_start_layer(_kick_x_layers, channel, priority,
+		[Vector2(kick.x, out_time), Vector2(0.0, back_time)])
+	_start_layer(_kick_y_layers, channel, priority,
+		[Vector2(kick.y, out_time), Vector2(0.0, back_time)])
+
+
 ## Sets where the camera rests. It eases there over
 ## [member zoom_multiplier_speed] rather than cutting, and impulses keep working
 ## on top of it throughout, so a place can change the view without anything that
@@ -424,12 +450,16 @@ func _physics_process(delta: float) -> void:
 		_advance_layers(_zoom_layers, delta),
 		-absf(max_zoom_offset),
 		absf(max_zoom_offset))
+	var most_kick := absf(max_kick_offset)
+	_kick_offset = Vector2(
+		clampf(_advance_layers(_kick_x_layers, delta), -most_kick, most_kick),
+		clampf(_advance_layers(_kick_y_layers, delta), -most_kick, most_kick))
 	_zoom_multiplier = lerpf(
 		_zoom_multiplier,
 		maxf(zoom_multiplier, 0.01),
 		1.0 - exp(-maxf(zoom_multiplier_speed, 0.01) * delta))
 
-	offset = _shake_offset
+	offset = _shake_offset + _kick_offset
 	rotation = _base_rotation + deg_to_rad(_rotation_offset)
 	# The weapon's zoom rides on the resting one and is faded in and out by its own
 	# scale, so a cinematic taking the view returns the framing to whatever the

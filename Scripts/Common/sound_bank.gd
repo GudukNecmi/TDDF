@@ -47,8 +47,26 @@ extends Node
 ## them - this is meant to place a sound, not to throw it into one ear.
 @export_range(0.0, 3.0) var panning_strength: float = 0.6
 
+@export_group("Tail fade")
+## How long a sound asked to fade out - see [method fade_tail] - takes to go from
+## the level it started at down to silence, in seconds. The fade ends exactly where
+## the recording ends, so the body of the sound is heard at full level and only the
+## last moment is taken down. Only voices a caller asks to fade are touched; every
+## other sound of the bank plays out exactly as recorded.
+@export var tail_fade_seconds: float = 0.3
+## Most of a sound the fade may take, as a share of its length, so a very short
+## sound keeps its attack rather than being faded from the start.
+@export_range(0.05, 1.0, 0.01) var tail_fade_max_share: float = 0.4
+
+## How far ahead of the end of a recording a fade reaches silence, in seconds of the
+## recording, to cover the audio already mixed ahead of the position read.
+const TAIL_GUARD := 0.03
+
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice: int = 0
+## Voice -> the fade running on it, so a pooled voice handed to a new sound drops
+## the old sound's fade instead of fading the new one.
+var _fades: Dictionary = {}
 
 
 func _ready() -> void:
@@ -95,9 +113,14 @@ func play_stream(stream: AudioStream, volume_db_offset: float = 0.0) -> AudioStr
 	if voice == null:
 		return null
 
+	_cancel_fade(voice)
 	voice.stream = stream
 	voice.volume_db = volume_db + volume_db_offset
 	voice.pitch_scale = _spread_pitch()
+	# Put back every time, so a caller that sent one sound through another bus -
+	# see [member ShotgunFeedback.pump_bus] - never leaves the voice there for the
+	# next sound that lands on it.
+	voice.bus = bus
 	voice.play()
 	return voice
 
@@ -204,6 +227,104 @@ func play_detached_stream_at(
 
 func has_sound(sound_name: StringName) -> bool:
 	return sounds.get(sound_name) != null
+
+
+## Takes [param voice] - one this bank has just started, pooled or detached - from
+## the level it is playing at down to silence over the last
+## [member tail_fade_seconds] of its recording, so it dies away instead of stopping
+## dead where the file ends. [param seconds] replaces that length for this one sound.
+##
+## Called after the caller has set the voice's pitch, since the pitch decides how
+## long the recording really lasts. A stream with no length - a generator, say - is
+## left alone.
+func fade_tail(voice: Node, seconds: float = -1.0) -> void:
+	if voice == null:
+		return
+	var stream := voice.get(&"stream") as AudioStream
+	if stream == null:
+		return
+	var length := stream.get_length()
+	if length <= 0.0:
+		return
+	var pitch := maxf(float(voice.get(&"pitch_scale")), 0.01)
+	var fade := tail_fade_seconds if seconds < 0.0 else seconds
+	fade = minf(maxf(fade, 0.0), length / pitch * tail_fade_max_share)
+	_fade_between(voice, length - fade * pitch, length)
+
+
+## Takes [param voice] down to silence over [param seconds], starting
+## [param delay] seconds from now, then stops it - a detached voice is freed. The
+## fade is on the linear amplitude and ends at 0, which is silence (-inf dB), not
+## at some quiet level that is then cut.
+func fade_out(voice: Node, delay: float, seconds: float) -> void:
+	if voice == null or not voice.is_inside_tree():
+		return
+	var pitch := maxf(float(voice.get(&"pitch_scale")), 0.01)
+	var from := _position_of(voice, pitch) + maxf(delay, 0.0) * pitch
+	_fade_between(voice, from, from + maxf(seconds, 0.01) * pitch)
+
+
+## The fade itself, measured on the recording rather than on a timer: at every step
+## the level is read off where the voice actually is in its stream, from full at
+## [param from] to silence at [param to] (both in seconds of the recording). A timer
+## drifts from the audio clock; this cannot, so the fade lands exactly on the part
+## of the sound it was meant for however the frames and the mixing fall.
+##
+## The tween only paces the updates. It is the voice's own, so it pauses with it and
+## goes with it, and its step is static so it keeps working after this bank is gone
+## - a detached voice routinely outlives the thing that played it.
+func _fade_between(voice: Node, from: float, to: float) -> void:
+	if not voice.is_inside_tree():
+		return
+	_cancel_fade(voice)
+	var pitch := maxf(float(voice.get(&"pitch_scale")), 0.01)
+	# The audio buffer is mixed slightly ahead of the position read, so silence is
+	# reached a hair before the very end rather than on it.
+	to = maxf(to - TAIL_GUARD, from + 0.001)
+	var span_real := maxf((to - _position_of(voice, pitch)) / pitch, 0.05)
+	var tween := voice.create_tween()
+	tween.tween_method(_tail_step.bind(voice, float(voice.get(&"volume_linear")), from, to),
+		0.0, 1.0, span_real * 2.0 + 0.5)
+	tween.tween_callback(_finish_voice.bind(voice))
+	# Only pooled voices are ever handed a second sound; a detached one is its own.
+	if voice is AudioStreamPlayer and _voices.has(voice):
+		_fades[voice] = tween
+
+
+## Seconds of the recording the voice is at right now, counting what has been
+## mixed since the last report.
+static func _position_of(voice: Node, pitch: float) -> float:
+	if not voice.get(&"playing"):
+		return 0.0
+	return float(voice.call(&"get_playback_position")) + AudioServer.get_time_since_last_mix() * pitch
+
+
+static func _tail_step(_t: float, voice: Node, start: float, from: float, to: float) -> void:
+	if not is_instance_valid(voice) or not voice.get(&"playing"):
+		return
+	var pitch := maxf(float(voice.get(&"pitch_scale")), 0.01)
+	var left := clampf((to - _position_of(voice, pitch)) / maxf(to - from, 0.001), 0.0, 1.0)
+	voice.set(&"volume_linear", start * left)
+	if left <= 0.0:
+		_finish_voice(voice)
+
+
+## Silent now: a pooled voice - a child of its bank - is stopped for reuse, and a
+## detached one is freed.
+static func _finish_voice(voice: Node) -> void:
+	if not is_instance_valid(voice) or voice.is_queued_for_deletion():
+		return
+	if voice.get_parent() is SoundBank:
+		voice.call(&"stop")
+	else:
+		voice.queue_free()
+
+
+func _cancel_fade(voice: Node) -> void:
+	var tween := _fades.get(voice) as Tween
+	if tween != null and tween.is_valid():
+		tween.kill()
+	_fades.erase(voice)
 
 
 ## Where a detached voice is hung, or null when there is nothing to play or

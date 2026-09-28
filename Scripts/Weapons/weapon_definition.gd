@@ -52,6 +52,10 @@ extends Resource
 @export_range(0.0, 1.0) var base_critical_chance: float = 0.0
 ## What a critical hit's damage is multiplied by before any upgrade.
 @export var base_critical_multiplier: float = 1.5
+## The Legendary upgrades this weapon can carry. Deliberately not in
+## [member upgrades], so no Base screen, market or reward ever deals one; each is
+## switched on or off for the run - see [method set_legendary_active].
+@export var legendaries: Array[WeaponLegendary] = []
 
 ## Levels bought, by [member WeaponUpgrade.id]. Kept on the loaded resource the
 ## same way [member unlocked] is - [RunSessionState] holds the catalogue for the
@@ -66,6 +70,9 @@ var _run_levels: Dictionary[StringName, int] = {}
 ## upgrade - keyed by whatever granted them, so each source can be replaced or
 ## withdrawn on its own. Nothing sets any today.
 var _extra_modifiers: Dictionary[StringName, Array] = {}
+## Legendaries switched on for this run, by [member WeaponLegendary.id]. Run-only,
+## like [member _run_levels], and forgotten with them.
+var _active_legendaries: Dictionary[StringName, bool] = {}
 ## Rebuilt on demand after anything above changes.
 var _stats: WeaponStats
 
@@ -83,6 +90,9 @@ func get_stats() -> WeaponStats:
 		for modifiers: Array in _extra_modifiers.values():
 			for modifier: WeaponStatModifier in modifiers:
 				_stats.add_modifier(modifier)
+		for legendary: WeaponLegendary in legendaries:
+			if is_legendary_active(legendary):
+				legendary.apply_to(_stats)
 	return _stats
 
 
@@ -126,12 +136,54 @@ func raise_run_level(upgrade: WeaponUpgrade, cap: int = -1) -> bool:
 	return true
 
 
-## Forgets every run-only level. Called by [RunSessionState] as a run begins and
-## ends, so nothing bought at a market outlives the run it was bought in.
+## Puts [param upgrade]'s run-only stack straight at [param level], clamped to
+## 0..[member WeaponUpgrade.max_level]. The developer panel's hook - see
+## [WeaponDebugPanel] - so a level can be set without buying its way there. Only
+## ever the run stack: the Base levels are not touched, and the run's own clearing
+## forgets it like any market level. Returns whether this weapon offers it.
+func set_run_level(upgrade: WeaponUpgrade, level: int) -> bool:
+	if upgrade == null or not upgrades.has(upgrade):
+		return false
+	var clamped := clampi(level, 0, maxi(upgrade.max_level, 0))
+	if clamped == get_run_level(upgrade):
+		return true
+	if clamped == 0:
+		_run_levels.erase(upgrade.id)
+	else:
+		_run_levels[upgrade.id] = clamped
+	_stats_changed()
+	return true
+
+
+## Whether [param legendary] is switched on for this run.
+func is_legendary_active(legendary: WeaponLegendary) -> bool:
+	return legendary != null and _active_legendaries.get(legendary.id, false)
+
+
+## Switches [param legendary] on or off for this run. Run-only, like
+## [method set_run_level], and forgotten with the run levels. Returns whether this
+## weapon carries it.
+func set_legendary_active(legendary: WeaponLegendary, active: bool) -> bool:
+	if legendary == null or not legendaries.has(legendary):
+		return false
+	if active == is_legendary_active(legendary):
+		return true
+	if active:
+		_active_legendaries[legendary.id] = true
+	else:
+		_active_legendaries.erase(legendary.id)
+	_stats_changed()
+	return true
+
+
+## Forgets every run-only level and every Legendary switched on for the run.
+## Called by [RunSessionState] as a run begins and ends, so nothing bought at a
+## market outlives the run it was bought in.
 func clear_run_levels() -> void:
-	if _run_levels.is_empty():
+	if _run_levels.is_empty() and _active_legendaries.is_empty():
 		return
 	_run_levels.clear()
+	_active_legendaries.clear()
 	_stats_changed()
 
 
@@ -151,6 +203,7 @@ func set_modifier_source(source: StringName, modifiers: Array[WeaponStatModifier
 func reset_upgrades() -> void:
 	_upgrade_levels.clear()
 	_run_levels.clear()
+	_active_legendaries.clear()
 	_extra_modifiers.clear()
 	_stats_changed()
 

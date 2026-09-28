@@ -72,6 +72,11 @@ enum Stat {
 	## to the projectile's own [member Projectile.pierce_count]. See
 	## [method pierce_bonus].
 	PIERCE_COUNT,
+	## Fraction of the weapon's authored spread cone added on top of it. 0.3 is a
+	## cone 30% of the authored width wider. Added [i]after[/i] [constant ACCURACY]
+	## has tightened the cone, so accuracy never takes it back - a deliberately wider
+	## blast, such as a charged BLOOD PUMP shot, stays wide on an accurate gun.
+	SPREAD,
 }
 
 ## Stats measured as a fraction and shown as a percentage. Everything else is a
@@ -80,7 +85,7 @@ const PERCENT_STATS: Array[Stat] = [
 	Stat.DAMAGE, Stat.CLOSE_DAMAGE, Stat.LONG_DAMAGE, Stat.RANGE,
 	Stat.PROJECTILE_SPEED, Stat.CRITICAL_CHANCE, Stat.CRITICAL_DAMAGE,
 	Stat.KNOCKBACK, Stat.STAGGER, Stat.PROJECTILE_SIZE, Stat.DAMAGE_FALLOFF,
-	Stat.AMMO_EFFICIENCY, Stat.BLOOD_GAIN, Stat.ACCURACY,
+	Stat.AMMO_EFFICIENCY, Stat.BLOOD_GAIN, Stat.ACCURACY, Stat.SPREAD,
 ]
 
 ## The weapon's critical chance before anything is added to it - see
@@ -89,6 +94,22 @@ var base_critical_chance: float = 0.0
 ## The weapon's critical multiplier before anything is added to it - see
 ## [member WeaponDefinition.base_critical_multiplier].
 var base_critical_multiplier: float = 1.5
+## How the rounds of each shot leave and fly, when an active [WeaponLegendary]
+## changes that - see [ShotPattern]. Null is the weapon firing as authored.
+var shot_pattern: ShotPattern
+## How working the pump past ready banks charge into the next shot, when an active
+## [WeaponLegendary] adds that - see [PumpCharge]. Null is a pump that only cycles.
+var pump_charge: PumpCharge
+## What every round of a shot does as it lands or runs out, when an active
+## [WeaponLegendary] makes it explosive - see [ShotExplosion]. Null is a round that
+## only hits.
+var shot_explosion: ShotExplosion
+## How the pump is worked with the trigger held, when an active [WeaponLegendary]
+## allows it - see [FanHammer]. Null is a pump worked in two presses.
+var fan_hammer: FanHammer
+## The shove each shot gives the holder, when an active [WeaponLegendary] adds one
+## - see [ShotRecoil]. Null is a weapon that leaves its holder where they stand.
+var shot_recoil: ShotRecoil
 
 var _bonus: Dictionary[int, float] = {}
 
@@ -103,6 +124,22 @@ func add(stat: Stat, amount: float) -> void:
 func add_modifier(modifier: WeaponStatModifier, times: float = 1.0) -> void:
 	if modifier != null:
 		add(modifier.stat, modifier.amount * times)
+
+
+## A separate block holding the same numbers, for one shot that changes them on
+## top - see [method PumpCharge.charged_stats]. Changing the copy leaves this block,
+## and every round already armed from it, as it was.
+func duplicate_stats() -> WeaponStats:
+	var copy := WeaponStats.new()
+	copy.base_critical_chance = base_critical_chance
+	copy.base_critical_multiplier = base_critical_multiplier
+	copy.shot_pattern = shot_pattern
+	copy.pump_charge = pump_charge
+	copy.shot_explosion = shot_explosion
+	copy.fan_hammer = fan_hammer
+	copy.shot_recoil = shot_recoil
+	copy._bonus = _bonus.duplicate()
+	return copy
 
 
 ## The summed bonus on [param stat], 0 when nothing has touched it.
@@ -188,8 +225,10 @@ func pierce_bonus() -> int:
 
 
 ## What the weapon's authored spread cone is multiplied by - 1 is as authored.
+## Accuracy tightens it first; [constant Stat.SPREAD] is then added on top, so the
+## one never cancels the other.
 func spread_scale() -> float:
-	return maxf(1.0 - get_bonus(Stat.ACCURACY), 0.0)
+	return maxf(maxf(1.0 - get_bonus(Stat.ACCURACY), 0.0) + get_bonus(Stat.SPREAD), 0.0)
 
 
 ## The on-hit half of this block, in the form a [Hitbox] hands to [Health] - see

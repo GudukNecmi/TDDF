@@ -54,6 +54,11 @@ extends Node
 ## How quickly the view crosses to that zoom, and back to nothing as the weapon
 ## leaves. Low, because this is a view settling into a weapon rather than a punch.
 @export var zoom_smoothing: float = 3.0
+## How quickly an extra zoom held by something else on the weapon - see
+## [method set_hold_zoom] - is pushed in, and how quickly it lets go again. The
+## release is its own dial so a charge can creep in and snap home, or the reverse.
+@export var hold_zoom_in_smoothing: float = 5.0
+@export var hold_zoom_out_smoothing: float = 3.5
 
 @export_group("When it applies")
 ## Whether the framing relaxes while the weapon is in the belt. On: a weapon that
@@ -70,10 +75,33 @@ extends Node
 var _camera: CameraController
 var _offset: Vector2 = Vector2.ZERO
 var _zoom: float = 1.0
+var _hold: float = 1.0
+var _hold_goal: float = 1.0
+var _hold_shake: float = 0.0
 
 
 func _ready() -> void:
 	_zoom = 1.0
+
+
+## Holds the view a further [param multiplier] closer on top of this weapon's own
+## zoom until it is set back to 1 - a charge building in the weapon, say. Eased in
+## and out by [member hold_zoom_in_smoothing] and [member hold_zoom_out_smoothing],
+## and relaxed with the rest of the framing while the weapon is in the belt.
+func set_hold_zoom(multiplier: float) -> void:
+	_hold_goal = maxf(multiplier, 0.01)
+
+
+func get_hold_zoom() -> float:
+	return _hold
+
+
+## Keeps a low tremor on the view of [param pixels] until it is set back to 0 -
+## the strain of a charge being held. Part of the weapon layer, so a cinematic
+## silences it with the rest of the framing, and never touches the camera's own
+## shake, so a real knock arriving meanwhile is felt at its own strength.
+func set_hold_shake(pixels: float) -> void:
+	_hold_shake = maxf(pixels, 0.0)
 
 
 func _process(delta: float) -> void:
@@ -90,9 +118,16 @@ func _process(delta: float) -> void:
 		_zoom,
 		maxf(zoom_multiplier, 0.01) if applies else 1.0,
 		1.0 - exp(-maxf(zoom_smoothing, 0.01) * delta))
+	var hold_goal := _hold_goal if applies else 1.0
+	var hold_speed := hold_zoom_in_smoothing if hold_goal > _hold else hold_zoom_out_smoothing
+	_hold = lerpf(_hold, hold_goal, 1.0 - exp(-maxf(hold_speed, 0.01) * delta))
 
-	camera.set_weapon_offset(_offset)
-	camera.set_weapon_zoom(_zoom)
+	var tremor := Vector2.ZERO
+	if applies and _hold_shake > 0.0:
+		tremor = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * _hold_shake
+
+	camera.set_weapon_offset(_offset + tremor)
+	camera.set_weapon_zoom(_zoom * _hold)
 
 
 ## Where the camera would like to be right now.

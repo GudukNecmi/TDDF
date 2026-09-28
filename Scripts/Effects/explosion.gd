@@ -286,13 +286,45 @@ func tear_apart(body: Node2D, hit_direction: Vector2 = Vector2.ZERO) -> bool:
 		_call_off_the_ordinary_death(body)
 		health.kill(hit_direction)
 
+	_finish_tearing(body, at)
+	return true
+
+
+## [method tear_apart] for a man a hit is about to kill, rather than one killed
+## here: the hit lands through [param hitbox] like any other - its damage number,
+## its [HitEffects], and the blood and payout his own death gives - and he comes
+## apart into this scene's gore because it was that hit which killed him. Reports
+## whether it did.
+##
+## Call it only for a hit already known to be fatal. The ordinary death is called
+## off before the hit lands, because [signal Health.died] arrives from inside it.
+## A DEVIL'S BREATH blast is the caller - see [member ShotBlast.gore_effect].
+func tear_apart_by_hit(body: Node2D, hitbox: Hitbox, damage: float, hit_direction: Vector2,
+		hit_position: Vector2, effects: HitEffects) -> bool:
+	if _played or body == null or hitbox == null or not is_inside_tree():
+		return false
+	_played = true
+
+	var at := body.global_position + gore_body_offset
+	global_position = body.global_position
+	_call_off_the_ordinary_death(body)
+	hitbox.take_hit(damage, hit_direction, hit_position, false, effects)
+
+	var health := _find_health(body)
+	if health != null and health.is_alive():
+		queue_free()
+		return false
+	_finish_tearing(body, at)
+	return true
+
+
+func _finish_tearing(body: Node2D, at: Vector2) -> void:
 	_tear_apart(body)
 	_gore_impact_sound(at)
 	exploded.emit(at)
 
 	var life := maxf(gore_settle_time, 0.0) + maxf(gore_fade_time, 0.0) + 1.0
 	get_tree().create_timer(life, true, false, true).timeout.connect(queue_free)
-	return true
 
 
 ## The flare: up at once, swelling slightly, gone. The swell is what stops a

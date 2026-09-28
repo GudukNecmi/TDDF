@@ -20,6 +20,17 @@
 [ext_resource type="Script" uid="uid://jbauvq2aroyh" path="res://Scripts/Weapons/weapon_ammo.gd" id="16_rkdor"]
 [ext_resource type="Resource" uid="uid://cwqsj28dqr25j" path="res://Resources/Ammo/ammo_shell.tres" id="17_m8huk"]
 [ext_resource type="Script" path="res://Scripts/Weapons/weapon_camera.gd" id="18_camera"]
+[ext_resource type="Script" path="res://Scripts/Weapons/pump_charge_feedback.gd" id="19_chargefb"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BloodPumpBurst.tscn" id="20_burst"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/BloodPumpLayer.mp3" id="21_layer"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BloodPumpPierceBurst.tscn" id="22_lance"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/BloodPumpPierceCue.wav" id="23_cue"]
+[ext_resource type="Script" path="res://Scripts/Weapons/fan_hammer_feedback.gd" id="24_fanfb"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/FanTheHammerPump.mp3" id="25_fanpump"]
+[ext_resource type="Script" path="res://Scripts/Weapons/recoil_devil_feedback.gd" id="26_recoilfb"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/RecoilDevilWave.tscn" id="27_wave"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/RecoilDevilBlast.mp3" id="28_rdblast"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/RecoilDevilEcho.mp3" id="29_rdecho"]
 [ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_blast"]
@@ -36,6 +47,10 @@ height = 256
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_embers"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(1, 0.4, 0.22, 0.9, 0.7, 0.03, 0.06, 0.75, 0.15, 0, 0.02, 0)
 
 [node name="Shotgun" type="Node2D" unique_id=2059946623]
 z_index = 1
@@ -85,6 +100,25 @@ energy = 0.0
 texture = SubResource("GradientTexture2D_muzzle")
 texture_scale = 9.0
 
+[node name="ChargeEmbers" type="CPUParticles2D" parent="MuzzleRig"]
+position = Vector2(95, -43)
+emitting = false
+amount = 28
+lifetime = 0.9
+local_coords = false
+emission_shape = 3
+emission_rect_extents = Vector2(150, 18)
+direction = Vector2(0, -1)
+spread = 60.0
+gravity = Vector2(0, -38)
+initial_velocity_min = 6.0
+initial_velocity_max = 26.0
+damping_min = 10.0
+damping_max = 40.0
+scale_amount_min = 0.8
+scale_amount_max = 1.9
+color_ramp = SubResource("Gradient_embers")
+
 [node name="Sounds" type="Node" parent="." unique_id=1376298008]
 script = ExtResource("4_sbank")
 sounds = {
@@ -94,6 +128,7 @@ sounds = {
 &"pump_forward": ExtResource("7_pumpr2")
 }
 pitch_variation = 0.04
+voice_count = 8
 
 [node name="Feedback" type="Node" parent="." unique_id=618654413]
 script = ExtResource("8_fdbk")
@@ -121,3 +156,22 @@ script = ExtResource("90_shadow")
 source_sprite_path = NodePath("../Art/Body")
 height_source = 3
 opacity_multiplier = 0.8
+
+[node name="ChargeFeedback" type="Node" parent="."]
+script = ExtResource("19_chargefb")
+burst_scene = ExtResource("20_burst")
+pierce_lance_scene = ExtResource("22_lance")
+layer_sound = ExtResource("21_layer")
+pierce_cue_sound = ExtResource("23_cue")
+
+[node name="FanFeedback" type="Node" parent="."]
+script = ExtResource("24_fanfb")
+fire_layer_sound = ExtResource("5_blast")
+pump_layer_sound = ExtResource("25_fanpump")
+
+[node name="RecoilFeedback" type="Node" parent="."]
+script = ExtResource("26_recoilfb")
+muzzle_burst_scene = ExtResource("9_flash")
+wave_scene = ExtResource("27_wave")
+blast_layer_sound = ExtResource("28_rdblast")
+echo_layer_sound = ExtResource("29_rdecho")

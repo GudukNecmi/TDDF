@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponLegendary" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_legendary.gd" id="1_legendary"]
+[ext_resource type="Script" path="res://Scripts/Weapons/fan_hammer.gd" id="2_fan"]
+
+[sub_resource type="Resource" id="Resource_fan"]
+script = ExtResource("2_fan")
+
+[resource]
+script = ExtResource("1_legendary")
+id = &"fan_the_hammer"
+display_name = "FAN THE HAMMER"
+description = "HOLD FIRE AND HIT PUMP: ONE PRESS WORKS THE WHOLE ACTION AND THE HELD TRIGGER FIRES AS IT CLOSES. FASTER, BUT EVERY SHOT KICKS HARDER AND THROWS THE AIM WIDER."
+fan_hammer = SubResource("Resource_fan")

@@ -282,6 +282,7 @@ script = ExtResource("57_4w3os")
 tiers = Array[ExtResource("58_60kgb")]([ExtResource("59_wn0fg"), ExtResource("60_4ol6r"), ExtResource("61_gnsgb"), ExtResource("62_pyo2h")])
 marker_scene = ExtResource("63_jb2n0")
 wardrobe = ExtResource("64_d1wce")
+boss_outlined = false
 
 [node name="AmmoCrates" type="Node" parent="." unique_id=1592448904 groups=["ammo_crate_spawner"]]
 script = ExtResource("70_aeiko")

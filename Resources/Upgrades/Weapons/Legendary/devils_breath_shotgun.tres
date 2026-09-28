@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="WeaponLegendary" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_legendary.gd" id="1_legendary"]
+[ext_resource type="Script" path="res://Scripts/Weapons/shot_explosion.gd" id="2_explosion"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/DevilsBreathBlast.tscn" id="3_blast"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/DevilsBreathTrail.tscn" id="4_trail"]
+
+[sub_resource type="Resource" id="Resource_explosion"]
+script = ExtResource("2_explosion")
+blast_scene = ExtResource("3_blast")
+damage = 30.0
+damage_multiplier = 2.0
+radius = 48.0
+knockback = 1.4
+knockback_push = 60.0
+stagger = 1.2
+lifetime = 0.1
+trail_scene = ExtResource("4_trail")
+
+[resource]
+script = ExtResource("1_legendary")
+id = &"devils_breath"
+display_name = "DEVIL'S BREATH"
+description = "EVERY PELLET EXPLODES WHERE IT LANDS OR DROPS - A SEPARATE BLAST OF AREA DAMAGE ON TOP OF THE HIT."
+shot_explosion = SubResource("Resource_explosion")

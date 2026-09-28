@@ -36,6 +36,13 @@ extends CharacterBody2D
 ## works here. An empty path, or a node without it, leaves movement precisely
 ## as it was.
 @export var dash_path: NodePath = ^"Dash"
+## Component that adds the shove of the player's own shots on top of the walk - see
+## [PlayerRecoil]. Same shape as the dash: handed the velocity, hands one back.
+## Only asked while the player is free to move at all; a death or a sleep holding
+## them still drops whatever recoil was carrying them. Anything with an
+## [code]apply_recoil_velocity(velocity, delta)[/code] method works here, and an
+## empty path leaves movement exactly as it was.
+@export var recoil_path: NodePath = ^"Recoil"
 ## The shove a hit throws the player with - see [HitReaction], the same
 ## component every enemy is knocked about by. Added on top of the walk after
 ## everything else, and only while the player is free to move at all, so a death
@@ -47,6 +54,7 @@ extends CharacterBody2D
 
 var _speed_modifiers: Array[Node] = []
 var _dash: Node
+var _recoil: Node
 var _hit_reaction: HitReaction
 
 
@@ -62,6 +70,10 @@ func _ready() -> void:
 	if dash != null and dash.has_method(&"apply_dash_velocity"):
 		_dash = dash
 
+	var recoil := get_node_or_null(recoil_path)
+	if recoil != null and recoil.has_method(&"apply_recoil_velocity"):
+		_recoil = recoil
+
 	_hit_reaction = get_node_or_null(hit_reaction_path) as HitReaction
 
 
@@ -74,6 +86,12 @@ func _physics_process(delta: float) -> void:
 	if _dash != null:
 		var launched: Vector2 = _dash.call(&"apply_dash_velocity", velocity, delta)
 		velocity = launched
+	if _recoil != null:
+		if multiplier > 0.0:
+			var recoiled: Vector2 = _recoil.call(&"apply_recoil_velocity", velocity, delta)
+			velocity = recoiled
+		elif _recoil.has_method(&"clear"):
+			_recoil.call(&"clear")
 	if _hit_reaction != null and multiplier > 0.0:
 		velocity += _hit_reaction.get_knockback()
 	move_and_slide()

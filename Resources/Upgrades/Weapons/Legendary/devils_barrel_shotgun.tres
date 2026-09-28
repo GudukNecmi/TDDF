@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="WeaponLegendary" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_legendary.gd" id="1_legendary"]
+[ext_resource type="Script" path="res://Scripts/Weapons/shot_pattern.gd" id="2_pattern"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/DevilsBarrelTrail.tscn" id="3_trail"]
+
+[sub_resource type="Resource" id="Resource_pattern"]
+script = ExtResource("2_pattern")
+spread_multiplier = 2.0
+speed_scale = 0.45
+wave_amplitude = 16.0
+wave_length = 140.0
+wave_jitter = 0.35
+wave_ramp = 45.0
+tracking_turn_rate = 360.0
+tracking_max_angle_per_update = 7.0
+tracking_radius = 600.0
+tracking_retarget_interval = 0.1
+tracking_aim_offset = Vector2(0, -12)
+tint = Color(0.62, 0.02, 0.16, 1)
+tint_strength = 0.7
+glow_scale = 1.5
+glow_pulse = 0.35
+glow_pulse_rate = 9.0
+trail_scene = ExtResource("3_trail")
+
+[resource]
+script = ExtResource("1_legendary")
+id = &"devils_barrel"
+display_name = "DEVIL'S BARREL"
+description = "A WIDE, SLOW, WEAVING BLAST THAT BLEEDS RED AND HUNTS THE NEAREST ENEMY."
+shot_pattern = SubResource("Resource_pattern")

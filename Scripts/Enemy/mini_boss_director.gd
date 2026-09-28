@@ -294,6 +294,10 @@ enum Phase {
 ## It is also what the wanted board prints from - see [WantedPoster] - so the face on
 ## the poster and the man who walks out of the region are one set of parts, not two.
 @export var wardrobe: MiniBossWardrobe
+## Whether the boss is drawn with [MiniBoss]'s red outline. Off, he wears the
+## ordinary enemy presentation: the outline width is written as 0 onto his own
+## materials, and his tint, hit flash and every combat effect are untouched.
+@export var boss_outlined: bool = true
 
 var _session: Node
 var _phase: Phase = Phase.NONE
@@ -878,6 +882,8 @@ func _build_boss(
 	component.bounty_id = brief.contract_id
 	component.target_name = brief.display_name
 	component.accepted_knowledge = brief.known
+	if not boss_outlined:
+		component.outline_width = 0.0
 	boss.add_child(component)
 	_boss_component = component
 

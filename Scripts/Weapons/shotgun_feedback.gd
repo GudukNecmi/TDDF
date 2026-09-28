@@ -252,6 +252,20 @@ extends Node
 @export var pump_forward_shake_strength: float = 0.0
 @export var pump_forward_shake_duration: float = 0.1
 
+## What the two pump sounds' pitch is multiplied by, on top of the bank's own
+## spread. 1 is the pump as recorded. Written by [PumpChargeFeedback] so each
+## banked charge racks a little higher; nothing else here moves it.
+var pump_pitch: float = 1.0
+## Bus the two pump sounds are sent through instead of the bank's own, or empty
+## for the bank's. Written by [PumpChargeFeedback] to put the charge's echo on
+## the pump and on nothing else - the blast and the click never go through it.
+var pump_bus: StringName = &""
+## What the next shot's recoil distance is multiplied by. 1 is the kick as
+## authored. Written by [FanHammerFeedback] just before a fanned shot's
+## [code]fired[/code] and put back after it, so an ordinary shot always kicks as
+## it always did.
+var recoil_scale: float = 1.0
+
 @onready var _source: Node = get_node_or_null(source_path)
 @onready var _sounds: SoundBank = get_node_or_null(sound_bank_path) as SoundBank
 @onready var _muzzle: Node2D = get_node_or_null(muzzle_path) as Node2D
@@ -513,6 +527,17 @@ func _spawn_casings() -> void:
 			casing.launch(facing)
 
 
+## Kicks the artwork again at [param scale] times whatever [member recoil_scale]
+## the shot already has - for a layer that makes a shot heavier after its
+## [code]fired[/code] has been handled. The kick restarts from rest, so the shot is
+## still one shove, not two. See [RecoilDevilFeedback].
+func kick_recoil(scale: float) -> void:
+	var before := recoil_scale
+	recoil_scale = before * maxf(scale, 0.0)
+	_kick_recoil()
+	recoil_scale = before
+
+
 ## Snapped straight back, then brought home in two stages. Snapping rather than
 ## tweening the outward half is what makes it read as a jolt instead of a nudge.
 ##
@@ -533,7 +558,7 @@ func _kick_recoil() -> void:
 	if _recoil_tween != null and _recoil_tween.is_running():
 		_recoil_tween.kill()
 
-	var kick := Vector2(-recoil_distance, 0.0)
+	var kick := Vector2(-recoil_distance * maxf(recoil_scale, 0.0), 0.0)
 	_art.position = _art_rest_position + kick
 
 	_recoil_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
@@ -599,7 +624,7 @@ func _effect_container() -> Node:
 ## worked whether or not there was anything in the breech, so this half is
 ## unconditional and the shell is not thrown here - see [method _on_shell_ejected].
 func _on_pumped_back() -> void:
-	_play(pump_back_sound)
+	_play_pump(pump_back_sound)
 
 	var camera := _get_camera()
 	if camera == null:
@@ -626,7 +651,7 @@ func _on_shell_ejected() -> void:
 ## Out to the full angle, back part of the way, then exactly level again - the
 ## last step is what guarantees the camera ends on its default rotation.
 func _on_pumped_forward() -> void:
-	_play(pump_forward_sound)
+	_play_pump(pump_forward_sound)
 
 	var camera := _get_camera()
 	if camera == null:
@@ -648,6 +673,19 @@ func _on_pumped_forward() -> void:
 func _play(sound_name: StringName) -> void:
 	if _sounds != null:
 		_sounds.play(sound_name)
+
+
+## A pump stroke's sound, shaped by [member pump_pitch] and [member pump_bus]. At
+## their defaults it is exactly [method _play].
+func _play_pump(sound_name: StringName) -> void:
+	if _sounds == null:
+		return
+	var voice := _sounds.play(sound_name)
+	if voice == null:
+		return
+	voice.pitch_scale *= maxf(pump_pitch, 0.01)
+	if not pump_bus.is_empty():
+		voice.bus = pump_bus
 
 
 ## Connected by name rather than directly, so swapping the source node for

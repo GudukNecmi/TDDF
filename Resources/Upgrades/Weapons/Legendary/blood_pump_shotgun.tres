@@ -1,0 +1,74 @@
+[gd_resource type="Resource" script_class="WeaponLegendary" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_legendary.gd" id="1_legendary"]
+[ext_resource type="Script" path="res://Scripts/Weapons/pump_charge.gd" id="2_charge"]
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_stat_modifier.gd" id="3_modifier"]
+[ext_resource type="Script" path="res://Scripts/Weapons/shot_pattern.gd" id="4_pattern"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BloodPumpPierceTrail.tscn" id="5_trail"]
+
+[sub_resource type="Resource" id="Resource_damage"]
+script = ExtResource("3_modifier")
+stat = 0
+amount = 0.16
+label = "DAMAGE"
+
+[sub_resource type="Resource" id="Resource_spread"]
+script = ExtResource("3_modifier")
+stat = 19
+amount = 0.3
+label = "SPREAD"
+
+[sub_resource type="Resource" id="Resource_range"]
+script = ExtResource("3_modifier")
+stat = 3
+amount = 0.1
+label = "RANGE"
+
+[sub_resource type="Resource" id="Resource_close"]
+script = ExtResource("3_modifier")
+stat = 1
+amount = 0.08
+label = "CLOSE DAMAGE"
+
+[sub_resource type="Resource" id="Resource_long"]
+script = ExtResource("3_modifier")
+stat = 2
+amount = 0.08
+label = "LONG DAMAGE"
+
+[sub_resource type="Resource" id="Resource_pierce"]
+script = ExtResource("3_modifier")
+stat = 18
+amount = 4.0
+label = "PIERCE"
+
+[sub_resource type="Resource" id="Resource_pierce_look"]
+script = ExtResource("4_pattern")
+spread_multiplier = 1.0
+speed_scale = 1.0
+wave_amplitude = 0.0
+wave_jitter = 0.0
+wave_ramp = 0.0
+tracking_turn_rate = 0.0
+tracking_max_angle_per_update = 0.0
+tint = Color(1, 0.55, 0.45, 1)
+tint_strength = 0.6
+glow_scale = 1.8
+glow_pulse = 0.25
+glow_pulse_rate = 14.0
+trail_scene = ExtResource("5_trail")
+
+[sub_resource type="Resource" id="Resource_charge"]
+script = ExtResource("2_charge")
+max_charges = 5
+per_charge = Array[ExtResource("3_modifier")]([SubResource("Resource_damage"), SubResource("Resource_spread"), SubResource("Resource_range"), SubResource("Resource_close"), SubResource("Resource_long")])
+charge_curve = 1.15
+max_charge_modifiers = Array[ExtResource("3_modifier")]([SubResource("Resource_pierce")])
+max_charge_pattern = SubResource("Resource_pierce_look")
+
+[resource]
+script = ExtResource("1_legendary")
+id = &"blood_pump"
+display_name = "BLOOD PUMP"
+description = "KEEP WORKING THE PUMP: EACH FULL CYCLE BANKS A CHARGE (UP TO 5) INTO THE NEXT SHOT - HARDER, FURTHER AND WIDER. AT MAX EVERY PELLET PIERCES."
+pump_charge = SubResource("Resource_charge")

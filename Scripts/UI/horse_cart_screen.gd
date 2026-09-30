@@ -220,10 +220,16 @@ func _bind_bridge() -> void:
 
 
 ## A death is not this screen's ending to play - see the class doc - so only
-## a win raises it.
+## a win raises it. A win the Loot Screen presents is not this screen's either:
+## its loot is dealt onto that table instead - see
+## [method PostCombatLootDirector.claims_the_win].
 func _on_encounter_ended(victory: bool) -> void:
-	if victory:
-		open()
+	if not victory:
+		return
+	var loot_director := PostCombatLootDirector.get_active(self)
+	if loot_director != null and loot_director.claims_the_win():
+		return
+	open()
 
 
 func _bind_inventory() -> void:
@@ -494,29 +500,13 @@ func _resolve_ledger() -> BountyLedger:
 	return get_node_or_null(bounty_ledger_path) as BountyLedger
 
 
-## Who this lead could be about right now: a contract the player has taken,
-## has not finished, and still has at least one question mark on - the exact
-## candidacy [method SurrenderKnowledge._pick_bounty] already picks from, so a
-## Combat Loot lead can never reveal something a man who gave up could not
-## also have told the player.
-func _pick_bounty_for_reveal(ledger: BountyLedger) -> Bounty:
-	var pool: Array[Bounty] = []
-	for bounty: Bounty in ledger.get_outstanding():
-		if bounty != null and not bounty.is_fully_known():
-			pool.append(bounty)
-	if pool.is_empty():
-		return null
-	return pool[randi() % pool.size()]
-
-
 ## Whether a Boss Information click could actually teach the player anything
 ## right now - the same live question [method _can_use_heart] and
 ## [method _can_use_ammo] already ask of their own categories, so a lead with
 ## nothing left to reveal reads disabled rather than inviting a click that can
-## only do nothing.
+## only do nothing. See [method CombatLoot.has_lead_to_teach].
 func _can_reveal_boss_info() -> bool:
-	var ledger := _resolve_ledger()
-	return ledger != null and _pick_bounty_for_reveal(ledger) != null
+	return CombatLoot.has_lead_to_teach(_resolve_ledger())
 
 
 ## Fills in one line of one contract - picked fresh from live ledger state
@@ -532,14 +522,7 @@ func _on_boss_info_stack_pressed(index: int) -> void:
 	if ledger == null:
 		return
 
-	var bounty := _pick_bounty_for_reveal(ledger)
-	if bounty == null:
-		return
-	var missing := bounty.get_unknown_categories()
-	if missing.is_empty():
-		return
-	var category: StringName = missing[randi() % missing.size()]
-	if not ledger.reveal(bounty.bounty_id, category):
+	if not CombatLoot.teach_lead(ledger):
 		return
 
 	_loot.remove_from_stack(index, 1)

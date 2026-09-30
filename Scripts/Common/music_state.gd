@@ -49,6 +49,18 @@ extends Resource
 ## repeat. See that file's own doc for the whole of how a pool takes its
 ## turns.
 @export var shuffle_pool: Array[AudioStream] = []
+## Other states that sound [i]alongside[/i] this one for as long as it is the
+## state the board is in - the Board Map's ambience carrying the road's own
+## Travel track over it, say. Each is an ordinary state on the same board with its
+## own track and its own remembered position, opened and stowed together with this
+## one rather than handed over to.
+##
+## [b]A layer that is already sounding keeps sounding.[/b] Entering this state
+## from one of its own layers - the road's music playing out of the base, the
+## Board Map opening underneath it - carries that track on instead of fading it
+## and reopening it, so it is heard as one continuous take. See
+## [method MusicStateBoard.enter].
+@export var layered_states: Array[StringName] = []
 
 
 ## Where in the track a fresh start begins, folded back inside the track's own

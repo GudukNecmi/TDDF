@@ -53,6 +53,20 @@ extends Resource
 ## Ceiling on that factor.
 @export var max_scale_factor: float = 1.6
 
+@export_group("Defense")
+## Whether the holder is untouchable while the shove carries them. Raised through
+## the holder's own [Health] - see [method Health.set_shielded] - by their
+## [PlayerRecoil], so every hit, shot and touch is dropped at the one point all
+## damage already funnels through.
+@export var invulnerable_while_recoiling: bool = true
+## Recoil speed, in pixels per second, below which the flight counts as over and
+## the shield comes down. Well under the walk's 220, so it ends as the shove
+## does, not while the player is still visibly flying.
+@export var invulnerability_min_speed: float = 40.0
+## Extra seconds the shield is held once the flight has ended. 0 drops it the
+## instant the movement stops.
+@export var invulnerability_extra_time: float = 0.0
+
 
 ## The push one shot fired along [param aim] gives, as a velocity change - the
 ## exact opposite of the aim.

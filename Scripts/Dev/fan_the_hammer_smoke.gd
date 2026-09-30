@@ -92,12 +92,12 @@ func _run() -> void:
 	var base_spread := gun.get_spread_degrees()
 	Input.action_press(&"fire")
 	gun._try_fire()
-	_ok(ammo.get_current() == start - 1, "the first shot spends a shell")
+	_ok(shots[0] == 2 and ammo.get_current() == start, "the first shot fires and takes nothing from unlimited shells")
 	for i in 3:
 		_pump(gun)
 		await _wait(0.1)
 	_ok(shots[0] == 5 and fanned[0] == 3, "each Space fires one fanned shot", "%d shots, %d fanned" % [shots[0], fanned[0]])
-	_ok(ammo.get_current() == start - 4, "and each one spends a real shell", "%d of %d" % [ammo.get_current(), start])
+	_ok(ammo.get_current() == start, "and none of them runs the shells down", "%d of %d" % [ammo.get_current(), start])
 	_ok(gun.get_fan_heat() > 0.9, "three in a row is full heat", "%.2f" % gun.get_fan_heat())
 	_ok(gun.get_spread_degrees() > base_spread * 1.2, "the next shot is wider",
 		"%.1f vs %.1f" % [gun.get_spread_degrees(), base_spread])
@@ -111,19 +111,24 @@ func _run() -> void:
 	_ok(is_zero_approx(gun.get_fan_heat()) and is_equal_approx(gun.aim_scale, 1.0), "heat drains once firing stops")
 	_ok(is_equal_approx(gun.get_spread_degrees(), base_spread), "and the spread is back")
 
-	print("--- no free shells ---")
-	Input.action_press(&"fire")
-	while ammo.get_current() > 0:
-		gun._try_fire()
-		_pump(gun)
-		await _wait(0.06)
-	var before: int = shots[0]
+	print("--- never dry ---")
+	# Shells are unlimited - see [member AmmoType.unlimited] - so fanning well past
+	# the pouch's own size never clicks.
 	var clicks := [0]
 	gun.dry_fired.connect(func() -> void: clicks[0] += 1)
-	_pump(gun)
-	await _wait(0.1)
-	_ok(shots[0] == before and clicks[0] >= 1, "dry, a fanned stroke only clicks")
+	var before: int = shots[0]
+	var strokes := ammo.get_max() + 10
+	Input.action_press(&"fire")
+	gun._try_fire()
+	for i in strokes:
+		_pump(gun)
+		await _wait(0.06)
 	Input.action_release(&"fire")
+	_ok(ammo.is_unlimited(), "shotgun shells are unlimited")
+	_ok(shots[0] - before >= strokes and clicks[0] == 0,
+		"%d fanned strokes past a %d-shell pouch never click dry" % [strokes, ammo.get_max()],
+		"%d shots, %d clicks" % [shots[0] - before, clicks[0]])
+	_ok(ammo.get_current() == ammo.get_max(), "and the count still reads full")
 	var locker := root.get_node_or_null(^"Ammo") as AmmoLocker
 	if locker != null and locker.has_method(&"refill_all"):
 		locker.call(&"refill_all")

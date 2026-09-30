@@ -8,3 +8,4 @@ script = ExtResource("1_state")
 state_id = &"run_map"
 stream = ExtResource("2_track")
 volume_db = -8.0
+layered_states = Array[StringName]([&"travel"])

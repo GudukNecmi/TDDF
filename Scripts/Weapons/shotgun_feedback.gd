@@ -372,6 +372,12 @@ func _spawn_muzzle_flash() -> void:
 	var container := _effect_container()
 	if muzzle_flash_scene == null or _muzzle == null or container == null:
 		return
+	# A ONE BIG SHELL shot is not a spray of pellets, so it does not get the spray's
+	# sparks - its own muzzle burst is [OneBigShellFeedback]'s. Everything else about
+	# the shot here - sound, blast, light, kick - is left as it is.
+	if _source != null and _source.has_method(&"fires_one_big_shell") \
+			and _source.call(&"fires_one_big_shell"):
+		return
 
 	var flash := muzzle_flash_scene.instantiate() as Node2D
 	if flash == null:

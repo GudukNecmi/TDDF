@@ -251,8 +251,11 @@ func _run() -> void:
 	gun.spend_ammo()
 	_ok(shells.get_current() == count, "a saved shot costs nothing")
 	shotgun.set_modifier_source(&"smoke", [])
-	gun.spend_ammo()
-	_ok(shells.get_current() == count - 1, "without efficiency it costs a shell")
+	_ok(gun.spend_ammo(), "without efficiency the shot still goes through")
+	# Shells are unlimited - see [member AmmoType.unlimited] - so nothing is taken.
+	var spent := 0 if shells.is_unlimited() else 1
+	_ok(shells.get_current() == count - spent,
+		"and costs %s" % ("nothing: shells are unlimited" if spent == 0 else "a shell"))
 	gun.free()
 
 	revolver.raise_upgrade(_upgrade(revolver, &"magazine"))

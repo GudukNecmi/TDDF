@@ -1,0 +1,32 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Effects/black_powder_smoke.gd" id="1_smoke"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (1).PNG" id="3_smoke1"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (2).PNG" id="4_smoke2"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (3).PNG" id="5_smoke3"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (4).PNG" id="6_smoke4"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (5).PNG" id="7_smoke5"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (6).PNG" id="8_smoke6"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (7).PNG" id="9_smoke7"]
+[ext_resource type="Script" path="res://Scripts/Common/looping_sound.gd" id="10_loop"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/BlackPowderSmokeFizz.wav" id="11_fizz"]
+
+[node name="BlackPowderSmoke" type="Node2D"]
+z_index = 12
+script = ExtResource("1_smoke")
+puff_textures = Array[Texture2D]([ExtResource("3_smoke1"), ExtResource("4_smoke2"), ExtResource("5_smoke3"), ExtResource("6_smoke4"), ExtResource("7_smoke5"), ExtResource("8_smoke6"), ExtResource("9_smoke7")])
+smoke_tint = Color(0.42, 0.13, 0.13, 1)
+smoke_opacity = 0.55
+puff_size = 1.0
+puff_spread = 0.82
+
+[node name="Puffs" type="CanvasGroup" parent="."]
+
+[node name="Fizz" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("11_fizz")
+bus = &"Game"
+script = ExtResource("10_loop")
+max_volume_db = -16.0
+fade_in_speed = 6.0
+fade_out_speed = 5.0
+pitch_variation = 0.04

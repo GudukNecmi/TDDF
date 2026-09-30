@@ -78,6 +78,9 @@ var _zoom: float = 1.0
 var _hold: float = 1.0
 var _hold_goal: float = 1.0
 var _hold_shake: float = 0.0
+## Holds kept by other named sources - see [method set_source_hold].
+var _source_zoom: Dictionary[StringName, float] = {}
+var _source_shake: Dictionary[StringName, float] = {}
 
 
 func _ready() -> void:
@@ -104,6 +107,22 @@ func set_hold_shake(pixels: float) -> void:
 	_hold_shake = maxf(pixels, 0.0)
 
 
+## The same hold as [method set_hold_zoom] and [method set_hold_shake], kept under
+## its own [param source] so a second charge on the same weapon - HELL CHAMBER's
+## beside BLOOD PUMP's - never overwrites the first: the zooms are multiplied
+## together and the strongest tremor is felt. A zoom of 1 and a shake of 0 drop
+## the source.
+func set_source_hold(source: StringName, zoom: float, shake: float) -> void:
+	if is_equal_approx(zoom, 1.0):
+		_source_zoom.erase(source)
+	else:
+		_source_zoom[source] = maxf(zoom, 0.01)
+	if shake <= 0.0:
+		_source_shake.erase(source)
+	else:
+		_source_shake[source] = shake
+
+
 func _process(delta: float) -> void:
 	var camera := _get_camera()
 	if camera == null:
@@ -118,16 +137,33 @@ func _process(delta: float) -> void:
 		_zoom,
 		maxf(zoom_multiplier, 0.01) if applies else 1.0,
 		1.0 - exp(-maxf(zoom_smoothing, 0.01) * delta))
-	var hold_goal := _hold_goal if applies else 1.0
+	var hold_goal := _held_zoom_goal() if applies else 1.0
 	var hold_speed := hold_zoom_in_smoothing if hold_goal > _hold else hold_zoom_out_smoothing
 	_hold = lerpf(_hold, hold_goal, 1.0 - exp(-maxf(hold_speed, 0.01) * delta))
 
 	var tremor := Vector2.ZERO
-	if applies and _hold_shake > 0.0:
-		tremor = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * _hold_shake
+	var held_shake := _held_shake()
+	if applies and held_shake > 0.0:
+		tremor = Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * held_shake
 
 	camera.set_weapon_offset(_offset + tremor)
 	camera.set_weapon_zoom(_zoom * _hold)
+
+
+## This weapon's own hold times every source's.
+func _held_zoom_goal() -> float:
+	var goal := _hold_goal
+	for source: StringName in _source_zoom:
+		goal *= _source_zoom[source]
+	return goal
+
+
+## The strongest tremor held, the weapon's own or a source's.
+func _held_shake() -> float:
+	var strongest := _hold_shake
+	for source: StringName in _source_shake:
+		strongest = maxf(strongest, _source_shake[source])
+	return strongest
 
 
 ## Where the camera would like to be right now.

@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://b2dpqpb4dn0sq"]
 
-[ext_resource type="Script" uid="uid://mcsh2ohyjj8i" path="res://Scripts/UI/run_timer.gd" id="1_timer"]
 [ext_resource type="Script" uid="uid://fx8hqfmmyxey" path="res://Scripts/UI/run_end_screen.gd" id="2_endscr"]
 [ext_resource type="Shader" uid="uid://c5kbp8xehadhn" path="res://Shaders/pause_blur.gdshader" id="3_blur"]
 [ext_resource type="Script" uid="uid://bitln0qbp2s5x" path="res://Scripts/UI/ammo_counter.gd" id="4_6imo4"]
@@ -104,9 +103,16 @@
 [ext_resource type="Script" uid="uid://dp1gtpx5p6xpn" path="res://Scripts/UI/world_map_wanted_board_menu.gd" id="202_wmwanted"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/WorldBanditDecisionMenu.tscn" id="207_decision"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/RunMapUpgradeRewardScreen.tscn" id="208_upgrade_reward"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/Loot/LootScreen.tscn" id="220_loot_screen"]
+[ext_resource type="Script" path="res://Scripts/Loot/post_combat_loot_director.gd" id="221_loot_director"]
+[ext_resource type="Script" path="res://Scripts/Loot/loot_source.gd" id="222_loot_source"]
+[ext_resource type="Resource" path="res://Resources/Loot/Sources/source_weapon_upgrade.tres" id="223_src_upgrade"]
+[ext_resource type="Resource" path="res://Resources/Loot/Sources/source_combat_loot.tres" id="224_src_loot"]
+[ext_resource type="Resource" path="res://Resources/Loot/Sources/source_bounty_payout.tres" id="225_src_payout"]
 [ext_resource type="Script" path="res://Scripts/UI/boss_health_bar.gd" id="209_bosshealth"]
 [ext_resource type="Script" path="res://Scripts/UI/weapon_debug_panel.gd" id="210_weapondebug"]
 [ext_resource type="Resource" path="res://Resources/RunMap/Market/market_products_roadside.tres" id="211_cardpool"]
+[ext_resource type="Script" path="res://Scripts/UI/cooldown_readout.gd" id="212_cooldown"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("29_vignette")
@@ -303,22 +309,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TimerLabel" type="Label" parent="." unique_id=307623443]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -140.0
-offset_top = 18.0
-offset_right = 140.0
-offset_bottom = 96.0
-grow_horizontal = 2
-theme_override_colors/font_color = Color(0.85, 0.11, 0.11, 1)
-theme_override_font_sizes/font_size = 54
-text = "60"
-horizontal_alignment = 1
-vertical_alignment = 1
-script = ExtResource("1_timer")
-
 [node name="BloodCounter" type="Label" parent="." unique_id=613273712]
 anchors_preset = 2
 anchor_top = 1.0
@@ -335,6 +325,23 @@ theme_override_font_sizes/font_size = 30
 text = "BLOOD 0"
 vertical_alignment = 1
 script = ExtResource("4_bcount")
+
+[node name="AbilityCooldown" type="Label" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 45.0
+offset_top = -104.0
+offset_right = 445.0
+offset_bottom = -64.0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.55, 0.16, 0.15, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 24
+vertical_alignment = 1
+script = ExtResource("212_cooldown")
 
 [node name="RevolverChambers" type="Control" parent="." unique_id=1565409643]
 layout_mode = 3
@@ -2528,7 +2535,14 @@ grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("103_m43cp")
 
+[node name="LootScreen" parent="." instance=ExtResource("220_loot_screen")]
+
+[node name="PostCombatLootDirector" type="Node" parent="."]
+script = ExtResource("221_loot_director")
+sources = Array[ExtResource("222_loot_source")]([ExtResource("223_src_upgrade"), ExtResource("224_src_loot"), ExtResource("225_src_payout")])
+
 [node name="RunMapUpgradeRewardScreen" parent="." unique_id=300100040 instance=ExtResource("208_upgrade_reward")]
+z_index = 145
 
 [node name="WeaponDebugPanel" type="Control" parent="." unique_id=300100060]
 visible = false

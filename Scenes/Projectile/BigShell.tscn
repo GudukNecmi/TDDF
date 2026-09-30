@@ -1,0 +1,135 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Projectile/cannon_shell.gd" id="1_shell"]
+[ext_resource type="Resource" uid="uid://css8bk47bsos8" path="res://Resources/shotgun_pellet_profile.tres" id="2_profile"]
+[ext_resource type="Shader" path="res://Shaders/shell_heat.gdshader" id="3_heat"]
+[ext_resource type="Script" path="res://Scripts/Effects/projectile_trail.gd" id="4_trail"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
+blend_mode = 1
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_heat"]
+resource_local_to_scene = true
+shader = ExtResource("3_heat")
+shader_parameter/strength = 1.0
+shader_parameter/amplitude_px = 2.2
+shader_parameter/wavelength_px = 14.0
+shader_parameter/speed = 16.0
+shader_parameter/inner = 0.35
+
+[sub_resource type="Gradient" id="Gradient_plain"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_plain"]
+gradient = SubResource("Gradient_plain")
+width = 64
+height = 64
+
+[sub_resource type="Gradient" id="Gradient_glow"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.5, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_glow"]
+gradient = SubResource("Gradient_glow")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_rim"]
+offsets = PackedFloat32Array(0, 0.55, 0.82, 0.93, 1)
+colors = PackedColorArray(1, 0.62, 0.45, 1, 0.55, 0.14, 0.1, 1, 0.14, 0.02, 0.02, 1, 0.04, 0, 0, 0.9, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_rim"]
+gradient = SubResource("Gradient_rim")
+width = 128
+height = 64
+fill = 1
+fill_from = Vector2(0.56, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_core"]
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 0.85, 0.7, 0.7, 1, 0.6, 0.4, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_core"]
+gradient = SubResource("Gradient_core")
+width = 64
+height = 32
+fill = 1
+fill_from = Vector2(0.6, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_light"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.45, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_light"]
+gradient = SubResource("Gradient_light")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Curve" id="Curve_streak"]
+_data = [Vector2(0, 1), 0.0, -0.6, 0, 0, Vector2(1, 0.12), -0.9, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_streak"]
+offsets = PackedFloat32Array(0, 0.12, 0.45, 1)
+colors = PackedColorArray(2.2, 1.1, 0.5, 0.95, 1.2, 0.18, 0.06, 0.8, 0.45, 0.02, 0.03, 0.5, 0.08, 0, 0.01, 0)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_shell"]
+radius = 22.0
+
+[node name="BigShell" type="Area2D"]
+collision_layer = 4
+collision_mask = 2
+script = ExtResource("1_shell")
+profile = ExtResource("2_profile")
+glow_radius = 52.0
+light_radius = 150.0
+hit_half_width = 22.0
+
+[node name="Streak" type="Line2D" parent="."]
+material = SubResource("CanvasItemMaterial_add")
+width = 34.0
+width_curve = SubResource("Curve_streak")
+gradient = SubResource("Gradient_streak")
+joint_mode = 2
+begin_cap_mode = 2
+script = ExtResource("4_trail")
+trail_length = 190.0
+point_spacing = 9.0
+lingers_after_source = true
+linger_fade = 0.22
+
+[node name="Shimmer" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_heat")
+position = Vector2(-6, 0)
+scale = Vector2(1.9, 1.15)
+texture = SubResource("GradientTexture2D_plain")
+
+[node name="Glow" type="Sprite2D" parent="."]
+material = SubResource("CanvasItemMaterial_add")
+texture = SubResource("GradientTexture2D_glow")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.85, 0.85)
+texture = SubResource("GradientTexture2D_rim")
+
+[node name="Core" type="Sprite2D" parent="."]
+material = SubResource("CanvasItemMaterial_add")
+position = Vector2(9, 0)
+scale = Vector2(0.78, 0.78)
+texture = SubResource("GradientTexture2D_core")
+
+[node name="Light" type="PointLight2D" parent="."]
+color = Color(1, 0.3, 0.1, 1)
+energy = 1.4
+texture = SubResource("GradientTexture2D_light")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_shell")

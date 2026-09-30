@@ -11,8 +11,12 @@ extends Node
 ## map, each fight - and a card bought at a market has to still be held in the
 ## arena it was bought for.
 ##
-## [b]It holds cards, it does not play them.[/b] No card has an effect yet; what
-## one does later listens to [signal card_added] or asks [method get_count].
+## [b]It holds cards, it does not play them.[/b] The one thing it does with them is
+## hand each held card's [member RunCard.kill_reward] to the weapons it names,
+## through [method WeaponDefinition.set_kill_reward_source], whenever the hand
+## changes - so a card's kill reward rides the same [WeaponStats] kill attribution a
+## Legendary's does, and is withdrawn as the card leaves the hand. Anything else a
+## card does later listens to [signal card_added] or asks [method get_count].
 
 ## Emitted once a card has been added, with how many of it are now held.
 signal card_added(card: RunCard, count: int)
@@ -22,6 +26,9 @@ signal cards_changed
 ## The run's state - the [code]RunSession[/code] autoload - listened to for the
 ## moments the hand is emptied.
 @export var session_path: NodePath = ^"/root/RunSession"
+## Key the held cards' kill rewards are filed under on each weapon - see
+## [method WeaponDefinition.set_kill_reward_source].
+@export var kill_reward_source: StringName = &"run_cards"
 
 ## Every card held, in the order it was added. A card bought twice is in here
 ## twice.
@@ -29,6 +36,7 @@ var _cards: Array[RunCard] = []
 
 
 func _ready() -> void:
+	cards_changed.connect(_push_kill_rewards)
 	var session := get_node_or_null(session_path)
 	if session == null:
 		return
@@ -94,3 +102,21 @@ func clear() -> void:
 
 func _on_run_began(_map_id: StringName) -> void:
 	clear()
+
+
+## Hands every weapon in the catalogue the kill rewards of the held cards that reach
+## it, replacing what the hand gave it before - an empty hand withdraws them all.
+func _push_kill_rewards() -> void:
+	var session := get_node_or_null(session_path) as RunSessionState
+	var catalog: WeaponCatalog = null if session == null else session.get_weapon_catalog()
+	if catalog == null:
+		return
+	for weapon: WeaponDefinition in catalog.weapons:
+		if weapon == null:
+			continue
+		var rewards: Array[KillReward] = []
+		for card: RunCard in _cards:
+			if card != null and card.kill_reward != null and card.applies_to(weapon) \
+					and not rewards.has(card.kill_reward):
+				rewards.append(card.kill_reward)
+		weapon.set_kill_reward_source(kill_reward_source, rewards)

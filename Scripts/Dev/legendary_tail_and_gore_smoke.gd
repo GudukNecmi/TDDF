@@ -182,7 +182,8 @@ func _check_gore() -> void:
 	_ok(not is_instance_valid(victim), "and the body is taken away")
 	var torn := _gore_pieces()
 	_ok(torn >= 8 and torn <= 12, "he comes apart into the existing gore", "%d pieces" % torn)
-	_ok(_head_pops() == 0, "and not also into the ordinary head-pop")
+	_ok(_named("ThrownBody") == 1 and _named("SeveredHead") == 1,
+		"and his body and head are thrown apart by the blast, not the ordinary head-pop")
 	_ok(_nodes(Explosion).size() == 1, "one gore effect for one man")
 	await _clear()
 
@@ -289,3 +290,11 @@ func _ok(condition: bool, what: String, detail: String = "") -> void:
 func _finish() -> void:
 	print("LEGENDARY TAIL AND GORE SMOKE: %s" % ("ALL PASSED" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures > 0 else 0)
+
+
+func _named(prefix: String) -> int:
+	var found := 0
+	for child: Node in _arena.get_children():
+		if child is DeathDebris and child.name.begins_with(prefix):
+			found += 1
+	return found

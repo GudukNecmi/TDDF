@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Effects/following_particles.gd" id="1_follow"]
+
+[sub_resource type="Gradient" id="Gradient_dot"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.75, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_dot"]
+gradient = SubResource("Gradient_dot")
+width = 16
+height = 16
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Curve" id="Curve_swell"]
+_data = [Vector2(0, 0.55), 0.0, 1.6, 0, 0, Vector2(0.35, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.25), -1.1, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Gradient" id="Gradient_brimstone"]
+offsets = PackedFloat32Array(0, 0.12, 0.4, 0.75, 1)
+colors = PackedColorArray(1, 0.55, 0.25, 0.95, 0.78, 0.08, 0.03, 0.9, 0.36, 0.01, 0.03, 0.75, 0.1, 0.01, 0.02, 0.45, 0.03, 0, 0.01, 0)
+
+[node name="BigShellTrail" type="CPUParticles2D"]
+z_index = -1
+emitting = false
+amount = 42
+lifetime = 0.6
+local_coords = false
+texture = SubResource("GradientTexture2D_dot")
+emission_shape = 1
+emission_sphere_radius = 12.0
+direction = Vector2(-1, 0)
+spread = 35.0
+gravity = Vector2(0, -28)
+initial_velocity_min = 15.0
+initial_velocity_max = 55.0
+damping_min = 25.0
+damping_max = 50.0
+tangential_accel_min = -70.0
+tangential_accel_max = 70.0
+scale_amount_min = 0.9
+scale_amount_max = 1.7
+scale_amount_curve = SubResource("Curve_swell")
+color_ramp = SubResource("Gradient_brimstone")
+script = ExtResource("1_follow")

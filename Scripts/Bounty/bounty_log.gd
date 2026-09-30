@@ -241,6 +241,42 @@ func accept(bounty: Bounty) -> bool:
 	return true
 
 
+## Makes sure the player sets out holding [param count] outstanding contracts,
+## dealing and taking as many new ones as that is short, and returns the ones held.
+##
+## [b]This is how a run is handed its bounty without the board being asked.[/b]
+## Setting out no longer stops at the wanted board - see
+## [member RunPortal.assigned_bounty_count] - so the contract is dealt the way a
+## board slot is, rarity roll and all, through [method BountySettings.create_bounty],
+## and taken exactly as [method accept] takes one: marked accepted first, which
+## locks the reward, then added to the taken list. It never goes on the board, so
+## the posters hanging there are left exactly as they were.
+##
+## A contract still outstanding from an earlier run counts towards [param count],
+## so a man who got away is the one the next run is after rather than a second
+## one being added beside him. Capacity is not asked: the run decides how many it
+## is dealt, not the board's slots.
+func assign_run_contracts(count: int) -> Array[Bounty]:
+	var held := get_outstanding()
+	var settings := get_settings()
+	var dealt := 0
+	while held.size() < count:
+		var rarity := settings.roll_rarity()
+		var bounty := settings.create_bounty(
+			_next_id(), rarity.knowledge_count if rarity != null else -1)
+		if bounty == null:
+			break
+		bounty.mark_accepted()
+		_active.append(bounty)
+		held.append(bounty)
+		dealt += 1
+		bounty_accepted.emit(bounty)
+
+	if dealt > 0:
+		board_changed.emit()
+	return held
+
+
 ## Gives a contract up. It leaves the player's slots and is [b]not[/b] put back on
 ## the board: the poster came down when it was taken, and the bare slot it left
 ## behind is only ever eligible again on the next ride home, exactly as an accepted

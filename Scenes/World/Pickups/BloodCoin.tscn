@@ -1,0 +1,49 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/blood_coin.gd" id="1_coin"]
+[ext_resource type="Texture2D" uid="uid://dqx04wdbojwig" path="res://Assets/Guns/Revolver and Coin/Coin.PNG" id="2_face"]
+[ext_resource type="Script" uid="uid://bjp8rn2ghjdpt" path="res://Scripts/Common/sound_bank.gd" id="3_bank"]
+[ext_resource type="AudioStream" uid="uid://kvb7ocwwonmn" path="res://Sound/Efect/Guns/Revolver and Coin/CoinFlipSoundEfect.WAV" id="4_pickup"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ring"]
+light_mode = 1
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_glow"]
+blend_mode = 1
+light_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_glow"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.45, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_glow"]
+gradient = SubResource("Gradient_glow")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="BloodCoin" type="Node2D"]
+z_index = 1
+material = SubResource("CanvasItemMaterial_ring")
+script = ExtResource("1_coin")
+
+[node name="Glow" type="Sprite2D" parent="."]
+show_behind_parent = true
+material = SubResource("CanvasItemMaterial_glow")
+scale = Vector2(0.9, 0.9)
+texture = SubResource("GradientTexture2D_glow")
+
+[node name="Art" type="Sprite2D" parent="."]
+scale = Vector2(0.24, 0.24)
+texture = ExtResource("2_face")
+region_enabled = true
+region_rect = Rect2(412, 388, 120, 120)
+
+[node name="Sounds" type="Node" parent="."]
+script = ExtResource("3_bank")
+sounds = {
+&"pickup": ExtResource("4_pickup")
+}
+pitch_variation = 0.08

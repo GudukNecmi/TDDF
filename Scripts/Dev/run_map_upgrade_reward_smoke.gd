@@ -46,20 +46,19 @@ func _run() -> void:
 		while travel.is_travelling() and frames < 4000:
 			frames += 1
 			await process_frame
-		if menu.is_open():
-			target = step
-			break
-	_ok(target >= 0, "arrived on the Bandit Group point with its screen up")
+		target = step
+	_ok(target >= 0 and graph.get_site(target).kind == &"bandit_group",
+		"arrived on the Bandit Group point")
 	if target < 0:
 		_finish()
 		return
+	_ok(not menu.is_open(), "arriving asked no question")
 
 	wallet.add(500)
 	var carried_before := wallet.get_total()
 	var banked_before := bank.get_total() if bank != null else 0
 
-	_fight_button(menu).pressed.emit()
-	await _settle()
+	await _await_arena()
 	_ok(_scene_name() == "DustCampArena", "the fight opened in the arena", _scene_name())
 
 	var bridge := _find("WorldMapCombatBridge") as WorldMapCombatBridge
@@ -72,8 +71,20 @@ func _run() -> void:
 	ambush.cleared.emit()
 	for _i: int in 30:
 		await process_frame
+	var loot := _find("LootScreen") as LootScreen
+	_ok(loot != null and loot.is_open(), "the Loot Screen opened after the win")
 	var screen := _find("RunMapUpgradeRewardScreen") as RunMapUpgradeRewardScreen
-	_ok(screen != null and screen.visible, "the Upgrade Reward screen opened after the win")
+	_ok(screen != null and not screen.visible, "the upgrade waits on the table, unopened")
+	if loot == null or not loot.is_open():
+		_finish()
+		return
+	loot.reveal(true)
+	await process_frame
+	var card := _upgrade_card(loot)
+	_ok(card != null, "an upgrade card was dealt")
+	_ok(not loot.can_leave(), "the table cannot be left with the upgrade untaken")
+	loot.activate(card)
+	_ok(screen != null and screen.visible, "the upgrade card opened the Upgrade Reward screen")
 	_ok(_scene_name() == "DustCampArena", "the ride home is held while it is up", _scene_name())
 	var upgrade := screen.get_upgrade()
 	_ok(upgrade != null and weapon.upgrades.has(upgrade),
@@ -100,9 +111,14 @@ func _run() -> void:
 	_ok(wallet.get_total() == carried_before, "no carried Blood was spent",
 		"%d -> %d" % [carried_before, wallet.get_total()])
 	_ok(bank == null or bank.get_total() == banked_before, "no banked Blood was spent")
+	_ok(card.get_reward().is_resolved(), "the upgrade card is settled")
+	for _i: int in 5:
+		await process_frame
+	_ok(_scene_name() == "DustCampArena", "still on the table until it is left", _scene_name())
+	_ok(loot.leave(), "the table was left once the upgrade was taken")
 
 	await _settle()
-	_ok(_scene_name() == "DustCampRunMap", "TAKE returned to the run map", _scene_name())
+	_ok(_scene_name() == "DustCampRunMap", "leaving the table returned to the run map", _scene_name())
 	var back := (_find("RunMapDirector") as RunMapDirector).get_graph()
 	_ok(back.seed == made_seed and back.current_id == target,
 		"it is the same map, standing at the same point")
@@ -165,12 +181,14 @@ func _sum(values: Array[int]) -> int:
 	return total
 
 
-func _fight_button(menu: WorldBanditDecisionMenu) -> Button:
-	for path: NodePath in menu.button_paths:
-		var button := menu.get_node_or_null(path) as Button
-		if button != null and button.visible and button.get_meta(&"outcome", &"fight") == &"fight":
-			return button
-	return null
+## A bandit point fights without asking: the map fades, then the loading curtain
+## rises on the arena. Waited out on the clock, since the fade is timed in seconds.
+func _await_arena() -> void:
+	var waited := 0.0
+	while _scene_name() != "DustCampArena" and waited < 10.0:
+		await create_timer(0.05).timeout
+		waited += 0.05
+	await _settle()
 
 
 func _settle() -> void:
@@ -238,3 +256,10 @@ func _route_to(bandits: RunMapBanditNode, graph: RunMapGraph, wanted: StringName
 				continue
 			queue.append(next)
 	return PackedInt32Array()
+
+
+func _upgrade_card(loot: LootScreen) -> LootRewardCard:
+	for card: LootRewardCard in loot.get_cards():
+		if card.get_reward() is LootRewardUpgrade:
+			return card
+	return null

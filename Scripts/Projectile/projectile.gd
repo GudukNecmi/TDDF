@@ -153,6 +153,10 @@ var _hit_effects: HitEffects
 ## What this round sets off as it lands or runs out - DEVIL'S BREATH. Taken from the
 ## weapon's stats by [method apply_weapon_stats]; null is a round that only hits.
 var _explosion: ShotExplosion
+## The crowd-control shockwave this round sets off as it lands - a charged HELL
+## CHAMBER shot. Its own slot beside [member _explosion], so a round can carry
+## both and both go off. Null is a round that sets off none.
+var _shockwave: ShotExplosion
 ## Set by [method ricochet] from inside a deflector's
 ## [code]take_projectile_hit[/code], so the round that deflector just took flies
 ## on instead of being retired for having no target. Spent on that same step.
@@ -187,6 +191,10 @@ var _tint_strength: float = 0.0
 var _glow_scale: float = 1.0
 var _glow_pulse: float = 0.0
 var _glow_pulse_rate: float = 0.0
+## Told, with where the gore burst from and who it was, of every man this round -
+## or a blast it set off - executes. Set by the weapon while its block carries a
+## [BloodReaper]; empty is a round whose kills report nothing.
+var _on_execution: Callable
 
 
 func _ready() -> void:
@@ -256,6 +264,8 @@ func _physics_process(delta: float) -> void:
 		# Its end in the dirt - an explosive round goes off where it drops.
 		if _explosion != null and _explosion.explode_at_range_end:
 			_explode()
+		if _shockwave != null and _shockwave.explode_at_range_end:
+			_shock()
 		queue_free()
 
 
@@ -370,6 +380,11 @@ func set_speed_scale(multiplier: float) -> void:
 	_speed_scale = maxf(multiplier, 0.0)
 
 
+## What [method set_speed_scale] last set - 1 for a round at its profile's speed.
+func get_speed_scale() -> float:
+	return _speed_scale
+
+
 ## Makes this round weave either side of its heading as it flies: [param amplitude]
 ## pixels out, one full weave every [param wavelength] pixels travelled, starting
 ## [param phase] radians into the weave and growing to full over [param ramp]
@@ -425,9 +440,25 @@ func apply_weapon_stats(stats: WeaponStats, critical: bool = false) -> void:
 	_stats = stats
 	_hit_effects = null if stats == null else stats.make_hit_effects()
 	_explosion = null if stats == null else stats.shot_explosion
+	_shockwave = null if stats == null else stats.shot_shockwave
 	if critical and stats != null:
 		_critical = true
 		_critical_scale = stats.critical_multiplier()
+
+
+## The weapon block this round was armed from - see [method apply_weapon_stats] -
+## or null for a round flying on its authored numbers alone. For something a shot
+## reaches that wants to know whose shot it was, such as a [BloodBag].
+func get_weapon_stats() -> WeaponStats:
+	return _stats
+
+
+## BLOOD REAPER: a fatal hit from this round executes the man through the
+## [BloodReaper]'s gore, and [param handler] is called with where he came apart and
+## who he was - see [method Explosion.tear_if_fatal]. Its blasts report the same.
+## Call before it enters the tree.
+func set_execution_handler(handler: Callable) -> void:
+	_on_execution = handler
 
 
 ## How far this round reaches: its profile's range, stretched by the range stat.
@@ -549,7 +580,8 @@ func damage_at_progress(progress: float) -> float:
 	if _stats == null:
 		return profile.damage_at(progress) * _damage_scale * _critical_scale
 	return (profile.damage_at(progress, _stats.falloff_scale())
-		* _stats.damage_scale_at(progress) * _damage_scale * _critical_scale)
+		* _stats.damage_scale_at(progress) * _damage_scale * _critical_scale
+		* maxf(_stats.power_scale, 0.0))
 
 
 ## Whether this round's hits are announced as critical. Set by [method empower].
@@ -762,23 +794,73 @@ func _land(hitbox: Hitbox) -> bool:
 	# The pellet's own position is the impact point - the sweep already moved it
 	# there - so the damage figure lands where the pellet did rather than at the
 	# middle of whatever it hit.
-	hitbox.take_hit(get_current_damage(), transform.x, global_position, _critical, _hit_effects)
+	# A charged HELL CHAMBER round that kills tears the man apart - the same hit,
+	# landed through the gore scene. Any other hit lands the ordinary way.
+	#
+	# What the landing deals, which way it shoves and what it carries are asked of
+	# the hooks below, so a round shaped differently - ONE BIG SHELL's cannon, see
+	# [CannonShell] - changes those and nothing else about the landing.
+	_begin_landing(hitbox)
+	var damage := _landing_damage()
+	var direction := _landing_direction()
+	var effects := _landing_effects()
+	if not _tear_if_fatal(victim, hitbox, damage, direction, effects):
+		hitbox.take_hit(damage, direction, global_position, _critical, effects)
+	_end_landing(hitbox, victim, damage, direction)
 	landed.emit(hitbox)
 
 	# The blast follows the hit it belongs to - one per landing, and [member _spent]
-	# above is what keeps one landing from being noticed twice.
-	if _pierce_onward():
+	# above is what keeps one landing from being noticed twice. A round that only
+	# grazed its victim carries on the way a piercing one does.
+	if _graze_onward() or _pierce_onward():
 		if _explosion != null and _explosion.explode_on_pierce:
-			_explode()
+			_explode(victim)
+		if _shockwave != null and _shockwave.explode_on_pierce:
+			_shock(victim)
 		return true
 
 	if _explosion != null and _explosion.explode_on_hit:
-		_explode()
+		_explode(victim)
+	if _shockwave != null and _shockwave.explode_on_hit:
+		_shock(victim)
 
 	if _bounce_onward(hitbox):
 		return false
 
 	_retire()
+	return false
+
+
+## Called as a landing on [param hitbox] begins, before anything is dealt. A plain
+## round has nothing to work out; see [CannonShell].
+func _begin_landing(_hitbox: Hitbox) -> void:
+	pass
+
+
+## Damage the landing in progress deals, before the hitbox's own multiplier.
+func _landing_damage() -> float:
+	return get_current_damage()
+
+
+## Which way the landing in progress shoves its victim - along the flight.
+func _landing_direction() -> Vector2:
+	return transform.x
+
+
+## What the landing in progress does beyond damage.
+func _landing_effects() -> HitEffects:
+	return _hit_effects
+
+
+## Called once the landing's hit has been dealt, with what was dealt and who took
+## it. A plain round announces nothing more than [signal landed].
+func _end_landing(_hitbox: Hitbox, _victim: Node, _damage: float, _direction: Vector2) -> void:
+	pass
+
+
+## Whether the landing just dealt only grazed its victim, so the round flies on
+## without spending a pierce. A plain round never grazes.
+func _graze_onward() -> bool:
 	return false
 
 
@@ -847,10 +929,38 @@ func _trace_surface(to: Vector2) -> Dictionary:
 	return {}
 
 
-## Sets off this round's explosion where it is now.
-func _explode() -> void:
+## Sets off this round's explosion where it is now. [param direct_victim] is the
+## enemy this round just landed on, whose direct hit has already been dealt.
+func _explode(direct_victim: Node = null) -> void:
 	if _explosion != null:
-		_explosion.detonate(self, global_position, _stats, collision_mask)
+		_explosion.detonate(self, global_position, _stats, collision_mask, direct_victim,
+			_on_execution)
+
+
+## Lands this round's hit through its shockwave's kill gore when it is fatal - see
+## [member ShotExplosion.kill_gore_effect] - or, failing that, through BLOOD
+## REAPER's execution gore. False when it did not, and the hit is still to land.
+## [param damage], [param direction] and [param effects] are the landing's own.
+func _tear_if_fatal(victim: Node, hitbox: Hitbox, damage: float, direction: Vector2,
+		effects: HitEffects) -> bool:
+	if _shockwave != null and _shockwave.kill_gore_effect != null:
+		return Explosion.tear_if_fatal(_shockwave.kill_gore_effect, victim, hitbox,
+			damage, direction, global_position, effects,
+			_shockwave.kill_gore_requires, _shockwave.kill_gore_excludes, _critical,
+			_on_execution)
+	var reaper: BloodReaper = null if _stats == null else _stats.blood_reaper
+	if reaper == null or not _on_execution.is_valid():
+		return false
+	return Explosion.tear_if_fatal(reaper.execution_gore, victim, hitbox,
+		damage, direction, global_position, effects,
+		reaper.gore_requires, reaper.gore_excludes, _critical, _on_execution)
+
+
+## Sets off this round's shockwave where it is now - see [member _shockwave].
+func _shock(direct_victim: Node = null) -> void:
+	if _shockwave != null:
+		_shockwave.detonate(self, global_position, _stats, collision_mask, direct_victim,
+			_on_execution)
 
 
 ## The enemy [param hitbox] belongs to - its scene's root - so a head and a body

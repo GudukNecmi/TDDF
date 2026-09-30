@@ -45,6 +45,14 @@ extends HBoxContainer
 ## the equipped weapon's [AmmoType]. Left empty, no name is shown; the counter
 ## is the two numbers on their own.
 @export var name_label_path: NodePath
+## The divider between the count and the capacity. Only named so it can be hidden
+## for unlimited ammunition, where there is no capacity to divide by - see
+## [member unlimited_text]. Its text is still never written here.
+@export var separator_label_path: NodePath = ^"Separator"
+## What the count reads when the equipped ammunition never runs out - see
+## [member AmmoType.unlimited]. The divider and the capacity are hidden with it,
+## so the counter never suggests a number that could reach zero.
+@export var unlimited_text: String = "∞"
 ## Whether the counter disappears when the player has no weapon in hand. On, so
 ## an empty-handed player is not shown a count of nothing.
 @export var hide_without_weapon: bool = true
@@ -60,6 +68,7 @@ extends HBoxContainer
 @onready var _current: Label = get_node_or_null(current_label_path) as Label
 @onready var _max: Label = get_node_or_null(max_label_path) as Label
 @onready var _name: Label = get_node_or_null(name_label_path) as Label
+@onready var _separator: Label = get_node_or_null(separator_label_path) as Label
 
 ## What is on screen right now, so a change can be told from a resupply without
 ## asking the locker what it used to be.
@@ -118,11 +127,15 @@ func _refresh() -> void:
 
 	visible = true
 	var rounds := reserve.get_current()
+	var unlimited: bool = reserve.is_unlimited()
 
 	if _current != null:
-		_current.text = str(rounds)
+		_current.text = unlimited_text if unlimited else str(rounds)
 	if _max != null:
 		_max.text = str(reserve.get_max())
+		_max.visible = not unlimited
+	if _separator != null:
+		_separator.visible = not unlimited
 	if _name != null:
 		var type := reserve.get_type()
 		_name.text = type.get_plural_name().to_upper() if type != null else ""

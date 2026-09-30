@@ -167,6 +167,23 @@ func _on_died() -> void:
 
 	_drop_blood(at, direction)
 	_spawn_burst(at, direction)
+	_offer_kill_rewards()
+
+
+## What the shot that killed pays on top of the blood, read off the block the killing
+## hit was armed from - see [member HitEffects.shot_stats]. A death no shot caused
+## carries no block and pays nothing more; a removal never reaches here. Every
+## [KillReward] on the block is offered the death once - [signal Health.died] is
+## heard once per death - without any of them being named here.
+func _offer_kill_rewards() -> void:
+	if _health == null:
+		return
+	var stats := _health.get_last_hit_effects().shot_stats
+	if stats == null:
+		return
+	for reward: KillReward in stats.kill_rewards:
+		if reward != null:
+			reward.offer_kill(_origin, _origin.global_position, stats)
 
 
 ## Whether the death currently being reported was a removal. A character with no

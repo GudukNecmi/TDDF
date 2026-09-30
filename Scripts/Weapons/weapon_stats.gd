@@ -110,6 +110,38 @@ var fan_hammer: FanHammer
 ## The shove each shot gives the holder, when an active [WeaponLegendary] adds one
 ## - see [ShotRecoil]. Null is a weapon that leaves its holder where they stand.
 var shot_recoil: ShotRecoil
+## The smoke a shot leaves once its cooldown has run out, when an active
+## [WeaponLegendary] adds it - see [BlackPowder]. Null is every shot an ordinary one.
+var black_powder: BlackPowder
+## How holding the trigger charges the next shot, when an active [WeaponLegendary]
+## adds that - see [HellChamber]. Null is a trigger that fires as it is pressed.
+var hell_chamber: HellChamber
+## The crowd-control shockwave every round of one charged HELL CHAMBER shot sets off
+## where it lands - see [method HellChamber.charged_stats]. Kept apart from
+## [member shot_explosion] so DEVIL'S BREATH's blast and this both go off. Null on
+## every ordinary shot.
+var shot_shockwave: ShotExplosion
+## A kill executes the man and fires a volley from him, when an active
+## [WeaponLegendary] adds that - see [BloodReaper]. Null is a kill that only kills.
+var blood_reaper: BloodReaper
+## What a kill with this block leaves behind - a VOLATILE BLOOD bag, a DEVIL'S COIN
+## - granted by whatever source adds one: an active [WeaponLegendary], a held Card
+## (see [method WeaponDefinition.set_kill_reward_source]). Read at the death through
+## the killing hit's [member HitEffects.shot_stats], so every round armed from this
+## block or a copy of it - a volley, a blast it sets off - offers its kill to each.
+## Each reward is here once, however many sources grant it. Empty is a kill that
+## only kills. See [KillReward].
+var kill_rewards: Array[KillReward] = []
+## Every shot leaves as one enormous cannon round instead of pellets, when an
+## active [WeaponLegendary] makes it so - see [OneBigShell]. The round is armed from
+## this same block, so everything else here reaches it. Null is the weapon firing
+## its pellets.
+var one_big_shell: OneBigShell
+## What every proportional strength of a round armed from this block is multiplied
+## by - its damage, knockback and stagger, and the damage, radius, shove and camera
+## kick of any blast it sets off. 1 is a shot of the weapon's own; a BLOOD REAPER
+## volley's copy is turned down - see [method BloodReaper.reaper_stats].
+var power_scale: float = 1.0
 
 var _bonus: Dictionary[int, float] = {}
 
@@ -117,6 +149,13 @@ var _bonus: Dictionary[int, float] = {}
 ## Adds [param amount] to [param stat]'s bonus.
 func add(stat: Stat, amount: float) -> void:
 	_bonus[stat] = get_bonus(stat) + amount
+
+
+## Adds [param reward] to what a kill with this block leaves, unless it is already
+## there - see [member kill_rewards].
+func add_kill_reward(reward: KillReward) -> void:
+	if reward != null and not kill_rewards.has(reward):
+		kill_rewards.append(reward)
 
 
 ## Adds [param modifier] [param times] over - a level-3 upgrade is its step three
@@ -138,6 +177,13 @@ func duplicate_stats() -> WeaponStats:
 	copy.shot_explosion = shot_explosion
 	copy.fan_hammer = fan_hammer
 	copy.shot_recoil = shot_recoil
+	copy.black_powder = black_powder
+	copy.hell_chamber = hell_chamber
+	copy.shot_shockwave = shot_shockwave
+	copy.blood_reaper = blood_reaper
+	copy.kill_rewards = kill_rewards.duplicate()
+	copy.one_big_shell = one_big_shell
+	copy.power_scale = power_scale
 	copy._bonus = _bonus.duplicate()
 	return copy
 
@@ -232,10 +278,11 @@ func spread_scale() -> float:
 
 
 ## The on-hit half of this block, in the form a [Hitbox] hands to [Health] - see
-## [HitEffects].
+## [HitEffects]. The block itself travels with it, so the death is credited to it.
 func make_hit_effects() -> HitEffects:
 	var effects := HitEffects.new()
-	effects.knockback_scale = knockback_scale()
-	effects.stagger_scale = stagger_scale()
+	effects.shot_stats = self
+	effects.knockback_scale = knockback_scale() * power_scale
+	effects.stagger_scale = stagger_scale() * power_scale
 	effects.blood_gain_scale = blood_gain_scale()
 	return effects

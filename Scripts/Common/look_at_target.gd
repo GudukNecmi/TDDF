@@ -42,6 +42,10 @@ enum Mode {
 var target: Node2D
 ## -1 when the target is to the left, +1 when it is to the right.
 var facing: float = 1.0
+## While true the pivot looks at [member focus_point] instead of [member target] -
+## an enemy looking for a player it has lost, see [method focus_on].
+var focus_active: bool = false
+var focus_point: Vector2 = Vector2.ZERO
 
 @onready var _flip_node: Node2D = get_node_or_null(flip_node_path) as Node2D
 
@@ -66,11 +70,23 @@ func refresh_flip_base() -> void:
 		_flip_base_scale_x = absf(_flip_node.scale.x)
 
 
+## Looks at the world point [param point] rather than at [member target] until
+## [method clear_focus]. Everything else about the tracking is unchanged.
+func focus_on(point: Vector2) -> void:
+	focus_active = true
+	focus_point = point
+
+
+func clear_focus() -> void:
+	focus_active = false
+
+
 func _physics_process(delta: float) -> void:
-	if target == null:
+	if target == null and not focus_active:
 		return
 
-	var to_target := target.global_position - global_position
+	var goal := focus_point if focus_active else target.global_position
+	var to_target := goal - global_position
 	if to_target.is_zero_approx():
 		return
 	if look_away:

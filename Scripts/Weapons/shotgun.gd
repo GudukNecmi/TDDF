@@ -76,6 +76,28 @@ signal fanned_shot(heat: float)
 ## active, with the velocity change the shot gave its holder and the holder it
 ## went to - see [method _kick_holder]. Never per pellet.
 signal recoil_kicked(push: Vector2, holder: Node2D)
+## Emitted once per shot, [b]after[/b] [signal fired], while a [ShotExplosion] is
+## active - the shot's pellets are explosive. Never per pellet.
+signal explosive_shot
+## Emitted once per shot, [b]after[/b] [signal fired], when a [BlackPowder] shot
+## leaves its smoke, with the cloud it left.
+signal smoke_released(cloud: Node2D)
+## Emitted as a HELL CHAMBER shot leaves on release, [b]before[/b] [signal fired],
+## with the charge it spent, 0..1, and whether that was MAX. A tap sends 0.
+signal chamber_released(charge: float, maxed: bool)
+## Emitted once as a held HELL CHAMBER charge reaches MAX.
+signal chamber_maxed
+## Emitted once per MAX HELL CHAMBER shot - never per round - as its secondary
+## volley bursts out, with where from and how many rounds it released.
+signal chamber_volley(at: Vector2, rounds: int)
+## Emitted once per BLOOD REAPER execution - never per round - as its volley leaves
+## the man who came apart, with where and how many rounds it released.
+signal reaped(at: Vector2, rounds: int)
+## Emitted once per ONE BIG SHELL shot, [b]after[/b] [signal fired], with the shell
+## that left.
+signal big_shell_fired(shell: CannonShell)
+## Emitted once per landing of a ONE BIG SHELL shell - see [signal CannonShell.struck].
+signal big_shell_struck(at: Vector2, direction: Vector2, centrality: float, killed: bool)
 
 enum State {
 	## Loaded, action closed, and the only state a shot can leave from.
@@ -163,6 +185,13 @@ const STATE_NAMES := {
 ## Where, under the node the weapon follows, a [ShotRecoil]'s shove is handed -
 ## see [PlayerRecoil]. A holder without it is simply not pushed.
 @export var recoil_receiver_path: NodePath = ^"Recoil"
+## Where, under the node the weapon follows, a shot fired from inside BLACK POWDER's
+## smoke is reported as a sound - see [PlayerStealth]. A holder without it is never
+## heard.
+@export var stealth_receiver_path: NodePath = ^"Stealth"
+## Where, under the node the weapon follows, a HELL CHAMBER charge's slowdown of the
+## walk is handed - see [WeaponHeft]. A holder without it walks at full speed.
+@export var heft_receiver_path: NodePath = ^"WeaponHeft"
 
 @export_group("Charge")
 ## Group a weapon's charge joins, so the sight and the readout over the ammunition
@@ -181,6 +210,9 @@ var _firing_flash: bool = false
 ## Full pump cycles banked into the next shot. Only ever above 0 while the weapon's
 ## stats carry a [PumpCharge].
 var _charge: int = 0
+## The ONE BIG SHELL shell the shot being fired released, if it was one - set by
+## [method _spawn_pellets], announced by [method _try_fire].
+var _last_shell: CannonShell
 ## Whether the last cycle was fanned, so the shot that follows is a fanned shot.
 var _fanned: bool = false
 ## Rapid-fire heat, 0..1 - see [FanHammer]. Only ever above 0 while one is active.
@@ -188,6 +220,21 @@ var _fan_heat: float = 0.0
 var _since_fan_shot: float = 0.0
 ## Bumped whenever a pending held-trigger shot must be dropped.
 var _hammer_serial: int = 0
+## Seconds until the next shot leaves BLACK POWDER's smoke. 0 is ready, and it is
+## always 0 while no [BlackPowder] is active.
+var _powder_cooldown: float = 0.0
+## HELL CHAMBER's charge, 0..1 - its own, never the pump's [member _charge]. Only
+## ever above 0 while a [HellChamber] is active and the trigger is held on a ready
+## gun.
+var _chamber: float = 0.0
+## Whether the trigger is being held for a HELL CHAMBER charge.
+var _chamber_held: bool = false
+## Set when the game pauses under a held charge, so a trigger let go of while
+## paused - clicking through the developer panel - cancels rather than fires.
+var _chamber_interrupted: bool = false
+## The walk multiplier last handed to the holder's [WeaponHeft], so it is only
+## written when it moves.
+var _heft_sent: float = 1.0
 
 
 func _ready() -> void:
@@ -208,7 +255,14 @@ func _ready() -> void:
 
 func _weapon_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"fire"):
-		_try_fire()
+		# HELL CHAMBER: the press only starts the charge - the release fires.
+		if _hell_chamber() != null:
+			_press_chamber()
+		else:
+			_try_fire()
+	elif event.is_action_released(&"fire"):
+		if _hell_chamber() != null:
+			_release_chamber()
 	elif event.is_action_pressed(&"pump"):
 		if _fan_hammer() != null and Input.is_action_pressed(&"fire"):
 			_fan_pump()
@@ -220,6 +274,9 @@ func _weapon_input(event: InputEvent) -> void:
 ## Heat drains and the aim loosens back up once the fanning stops. With no
 ## [FanHammer] active the weapon is put straight back to itself.
 func _process(delta: float) -> void:
+	if _powder_cooldown > 0.0:
+		_powder_cooldown = maxf(_powder_cooldown - delta, 0.0)
+	_advance_chamber(delta)
 	var fan := _fan_hammer()
 	if fan == null:
 		_fan_heat = 0.0
@@ -242,6 +299,7 @@ func reload_to_ready() -> void:
 	_fanned = false
 	_fan_heat = 0.0
 	_hammer_serial += 1
+	_cancel_chamber()
 
 
 ## Ready is READY and nothing else - the same test [method _try_fire] itself
@@ -271,13 +329,22 @@ func _try_fire() -> void:
 		return
 	print("Fire")
 	var released := _charge
+	var chamber := _hell_chamber()
+	var chamber_spent := _chamber if chamber != null else 0.0
 	var fan := _fan_hammer() if _fanned else null
 	_fanned = false
 	# Read before the charge is spent, so a charged shot's pellets are counted.
 	var recoil_pellets := get_pellet_count()
 	# The aim the pellets leave along, before a fanned shot throws it.
 	var aim := Vector2.from_angle(global_rotation)
-	_spawn_pellets()
+	# The shot's one block and one critical roll - the pellets are armed from them,
+	# and a MAX HELL CHAMBER volley re-fires exactly them.
+	var shot_stats := _shot_stats()
+	var explosive := shot_stats != null and shot_stats.shot_explosion != null
+	_last_shell = null
+	var critical := _spawn_pellets(shot_stats)
+	var shell := _last_shell
+	var volley_from := _muzzle.global_position if _muzzle != null else global_position
 	_set_state(State.SPENT)
 	# After the state, so the flash sits on top of the artwork the new state just
 	# chose rather than being wiped by it.
@@ -288,9 +355,21 @@ func _try_fire() -> void:
 	# reads the charged spread off [method get_spread_degrees]; it is spent after.
 	if fan != null:
 		fanned_shot.emit(fan.heat_after_shot(_fan_heat))
+	if chamber != null:
+		chamber_released.emit(chamber_spent, chamber.is_max(chamber_spent))
 	fired.emit()
+	if explosive:
+		explosive_shot.emit()
+	if shell != null:
+		big_shell_fired.emit(shell)
 	_kick_holder(aim, recoil_pellets)
+	_burn_black_powder(aim)
+	if chamber != null and shot_stats != null and chamber.releases_volley(chamber_spent):
+		_queue_chamber_volley(shot_stats, critical,
+			volley_from + aim * chamber.max_volley_offset, chamber.max_volley_delay)
 	_set_charge(0)
+	# Spent with the shot, like the pump's charge: the next one starts from nothing.
+	_chamber = 0.0
 	# Heat and the throw of the aim land after the shot, so they unsettle the next
 	# one rather than this.
 	if fan != null:
@@ -330,49 +409,178 @@ func _end_firing_texture() -> void:
 ## pellet points, how it flies and what it trails; see [member WeaponStats.shot_pattern].
 ## A full BLOOD PUMP charge arms every pellet to pierce through the same
 ## [WeaponStats] block - see [member PumpCharge.max_charge_modifiers].
-func _spawn_pellets() -> void:
-	if projectile_scene == null or _muzzle == null:
-		return
-	var container := get_tree().current_scene
-	if container == null:
-		return
-
+##
+## [param stats] is the block the shot is armed from - [method _shot_stats] when
+## left null. Returns the shot's critical roll, so anything re-firing the same shot
+## re-fires it with the same roll.
+func _spawn_pellets(stats: WeaponStats = null) -> bool:
 	# The charged block when charge is banked, so damage, range and spread all come
 	# out of the ordinary stat code with the charge already in them.
-	var stats := _shot_stats()
-	var charged := stats != null and stats != get_stats()
+	if stats == null:
+		stats = _shot_stats()
+	# One roll for the whole blast - a critical shotgun shot is every pellet of it.
+	var critical := roll_critical()
+	if projectile_scene == null or _muzzle == null:
+		return critical
+	var container := get_tree().current_scene
+	if container == null:
+		return critical
+
+	# ONE BIG SHELL: the whole shot is one round, straight down the barrel - no cone,
+	# however many pellets or however little accuracy the block carries. It is still
+	# released through [method _release_pellet] from the same block, so it carries
+	# everything the pellets would have.
+	var cannon: OneBigShell = null if stats == null else stats.one_big_shell
+	if cannon != null and cannon.shell_scene != null:
+		_last_shell = _release_pellet(container, stats, critical, _muzzle.global_position,
+			global_rotation, false, null, null, cannon) as CannonShell
+		return critical
+
+	var pattern: ShotPattern = null if stats == null else stats.shot_pattern
+	var half_spread := deg_to_rad(spread_angle_degrees * (1.0 if stats == null else stats.spread_scale())) * 0.5
+	for i in _pellets_for(stats):
+		var heading := global_rotation + randf_range(-half_spread, half_spread)
+		if pattern != null:
+			heading = pattern.heading(global_rotation, half_spread)
+		_release_pellet(container, stats, critical, _muzzle.global_position, heading)
+		# Speed is not set here on purpose: it falls off with distance now, and
+		# lives with the rest of the pellet's range profile so one value governs
+		# damage, speed, colour, glow and light together.
+	return critical
+
+
+## Arms one round from [param stats] and puts it into [param container] at
+## [param at], heading [param angle] - what every round the weapon releases goes
+## through, the shot's and a BLOOD REAPER volley's alike, so both carry everything
+## the block carries. [param reaped] dresses it as a volley round.
+##
+## [param shot] is the block of the shot this round belongs to, before any
+## BLOOD REAPER scaling - the one an execution by it reproduces. Left null it is
+## [param stats] itself, which is what an ordinary shot's round is.
+##
+## [param volley] dresses it as a round of a MAX HELL CHAMBER volley - on top of
+## everything it inherited, never instead of it.
+##
+## [param cannon] makes it ONE BIG SHELL's shell rather than a pellet: its own
+## scene, armed and prepared by every part exactly as a pellet is, then made the
+## shell on top - see [method OneBigShell.prepare].
+func _release_pellet(container: Node, stats: WeaponStats, critical: bool, at: Vector2,
+		angle: float, reaped: bool = false, shot: WeaponStats = null,
+		volley: HellChamber = null, cannon: OneBigShell = null) -> Projectile:
+	var scene := projectile_scene if cannon == null or cannon.shell_scene == null else cannon.shell_scene
+	var pellet: Projectile = scene.instantiate()
+	arm_projectile(pellet, critical, stats)
 	var pattern: ShotPattern = null if stats == null else stats.shot_pattern
 	# DEVIL'S BREATH rides beside any pattern rather than replacing it: the pellets
 	# fly however they were going to and explode on top - see [ShotExplosion].
 	var explosion: ShotExplosion = null if stats == null else stats.shot_explosion
-	var half_spread := deg_to_rad(get_spread_degrees()) * 0.5
-	# One roll for the whole blast - a critical shotgun shot is every pellet of it.
-	var critical := roll_critical()
-	for i in get_pellet_count():
-		var pellet: Projectile = projectile_scene.instantiate()
-		arm_projectile(pellet, critical, stats if charged else null)
-		if pattern != null:
-			pattern.prepare(pellet)
-		if explosion != null:
-			explosion.prepare(pellet, pattern != null)
-		container.add_child(pellet)
-		pellet.global_position = _muzzle.global_position
-		if pattern != null:
-			pellet.global_rotation = pattern.heading(global_rotation, half_spread)
-			pattern.attach_trail(pellet, container, stats.size_scale())
-		else:
-			pellet.global_rotation = global_rotation + randf_range(-half_spread, half_spread)
-		if explosion != null:
-			explosion.attach_trail(pellet, container, stats.size_scale())
-		# Speed is not set here on purpose: it falls off with distance now, and
-		# lives with the rest of the pellet's range profile so one value governs
-		# damage, speed, colour, glow and light together.
+	# HELL CHAMBER's shockwave rides on the same pellets beside both - see
+	# [HellChamber]. Its look only dresses a pellet nothing else has coloured.
+	var shockwave: ShotExplosion = null if stats == null else stats.shot_shockwave
+	# BLOOD REAPER: the round's kills are executions, reported back here.
+	var reaper: BloodReaper = null if stats == null else stats.blood_reaper
+	if pattern != null:
+		pattern.prepare(pellet)
+	if explosion != null:
+		explosion.prepare(pellet, pattern != null)
+	if shockwave != null:
+		shockwave.prepare(pellet, pattern != null or explosion != null)
+	if volley != null:
+		volley.prepare_volley(pellet, pattern != null or explosion != null)
+	if reaper != null:
+		# The round carries the shot it left with, so an execution fires that shot's
+		# volley - its BLOOD PUMP and HELL CHAMBER charge included - and not whatever
+		# the weapon happens to hold by the time the man comes apart.
+		pellet.set_execution_handler(_on_execution.bind(stats if shot == null else shot, critical))
+		if reaped:
+			reaper.prepare(pellet)
+	if cannon != null:
+		# Last, so it builds on whatever speed the other parts gave the round.
+		cannon.prepare(pellet, _pellets_for(stats))
+		if pellet is CannonShell:
+			(pellet as CannonShell).struck.connect(big_shell_struck.emit)
+	container.add_child(pellet)
+	pellet.global_position = at
+	pellet.global_rotation = angle
+	var size := 1.0 if stats == null else stats.size_scale()
+	if pattern != null:
+		pattern.attach_trail(pellet, container, size)
+	if explosion != null:
+		explosion.attach_trail(pellet, container, size)
+	if shockwave != null:
+		shockwave.attach_trail(pellet, container, size)
+	if reaper != null and reaped:
+		reaper.attach_trail(pellet, container, size)
+	if volley != null:
+		volley.attach_volley_trail(pellet, container, size)
+	if cannon != null:
+		cannon.attach_trail(pellet, container, size)
+	return pellet
+
+
+# --- Blood reaper ----------------------------------------------------------------
+
+## A round of this weapon executed somebody - see [BloodReaper]. Reached from inside
+## a landing, which can be the physics server's own overlap callback, so the volley
+## is released once that is over. [param shot] and [param critical] are the fired
+## shot the executing round belonged to - bound onto it by [method _release_pellet].
+func _on_execution(at: Vector2, executed: Node, shot: WeaponStats, critical: bool) -> void:
+	_reap.call_deferred(at, executed, shot, critical)
+
+
+## BLOOD REAPER's volley from an execution at [param at]: one round per pellet
+## [param shot] fired, armed from that very block - every upgrade, BLOOD PUMP and
+## HELL CHAMBER charge and Legendary it left the muzzle with, and its critical roll -
+## at the reaper's power. Nothing is re-read from the weapon's idle state, so a
+## charge already spent by the time the man comes apart is still in the volley.
+## A chained volley reproduces the same shot again, so every link is at the
+## reaper's power of the original rather than compounding. Each goes for its own
+## enemy, nearest first, never [param executed]; with fewer enemies than rounds the
+## rest go round the nearest again, and with none the volley bursts outwards.
+func _reap(at: Vector2, executed: Node, shot: WeaponStats, critical: bool) -> void:
+	# The Legendary switched off since the shot left ends it here, as it always has;
+	# the reaper's own power is read now, so the panel's figure is the one used.
+	var live := get_stats()
+	var reaper: BloodReaper = null if live == null else live.blood_reaper
+	if reaper == null or shot == null or projectile_scene == null or not is_inside_tree():
+		return
+	var container := get_tree().current_scene
+	if container == null:
+		return
+	var stats := reaper.reaper_stats(shot)
+	var rounds := maxi(pellet_count + shot.pellet_bonus(), 1)
+	var exclude: Array = []
+	if executed != null and is_instance_valid(executed):
+		exclude.append(executed)
+	var targets := EnemyTargeting.nearest_many(self, at, rounds, reaper.target_radius, exclude)
+	var offset := randf() * TAU
+	for i in rounds:
+		var target: Node2D = null if targets.is_empty() else targets[i % targets.size()]
+		var heading := offset + TAU * float(i) / float(rounds)
+		if target != null:
+			heading = (target.global_position - at).angle()
+		var pellet := _release_pellet(container, stats, critical, at, heading, true, shot)
+		if target != null:
+			pellet.redirect_to(target)
+	reaped.emit(at, rounds)
 
 
 ## Pellets one shot really releases: the authored [member pellet_count] plus the
 ## weapon's pellet count upgrades. Never fewer than one.
 func get_pellet_count() -> int:
-	var stats := _shot_stats()
+	return _pellets_for(_shot_stats())
+
+
+## Whether the next shot leaves as ONE BIG SHELL's single shell rather than
+## pellets. [method get_pellet_count] still answers what the block carries - the
+## shell's damage and everything else counting pellets reads it.
+func fires_one_big_shell() -> bool:
+	var stats := get_stats()
+	return stats != null and stats.one_big_shell != null and stats.one_big_shell.shell_scene != null
+
+
+## Pellets a shot armed from [param stats] releases.
+func _pellets_for(stats: WeaponStats) -> int:
 	var bonus := 0 if stats == null else stats.pellet_bonus()
 	return maxi(pellet_count + bonus, 1)
 
@@ -395,6 +603,10 @@ func _shot_stats() -> WeaponStats:
 		return null
 	if stats.pump_charge != null and _charge > 0:
 		stats = stats.pump_charge.charged_stats(stats, _charge)
+	# HELL CHAMBER folds in on top of whatever else the shot carries, so it enhances
+	# the same pellets rather than replacing them.
+	if stats.hell_chamber != null and _chamber > 0.0:
+		stats = stats.hell_chamber.charged_stats(stats, _chamber)
 	if stats.fan_hammer != null and _fan_heat > 0.0:
 		stats = stats.fan_hammer.unsteady_stats(stats, _fan_heat)
 	return stats
@@ -415,6 +627,205 @@ func _kick_holder(aim: Vector2, pellets: int) -> void:
 	if receiver != null and receiver.has_method(&"kick"):
 		receiver.call(&"kick", push, recoil)
 	recoil_kicked.emit(push, _target)
+
+
+# --- Black powder ----------------------------------------------------------------
+
+## BLACK POWDER, once per shot: a shot fired from hiding is heard, and a shot fired
+## once the cooldown has run out leaves the smoke - see [BlackPowder]. The sound is
+## reported first, so the shot that makes a fresh cloud is never one fired from it.
+## Any other shot is an ordinary shot and leaves the wait as it was.
+func _burn_black_powder(aim: Vector2) -> void:
+	var powder := _black_powder()
+	if powder == null or _target == null:
+		return
+	var stealth := _target.get_node_or_null(stealth_receiver_path)
+	if stealth != null and stealth.has_method(&"report_noise"):
+		stealth.call(&"report_noise", _target.global_position, powder.hearing_radius)
+	if _powder_cooldown > 0.0:
+		return
+	var cloud := powder.release(get_tree().current_scene,
+		powder.smoke_point(_target.global_position, aim))
+	if cloud == null:
+		return
+	_powder_cooldown = maxf(powder.cooldown, 0.0)
+	smoke_released.emit(cloud)
+
+
+func _black_powder() -> BlackPowder:
+	var stats := get_stats()
+	return null if stats == null else stats.black_powder
+
+
+## Seconds until the next shot leaves smoke, 0 when it will - and always 0 while no
+## [BlackPowder] is active.
+func get_black_powder_cooldown() -> float:
+	return _powder_cooldown if _black_powder() != null else 0.0
+
+
+## The readout in the HUD's corner - see [CooldownReadout]. Empty while no
+## [BlackPowder] is active.
+func get_cooldown_label() -> String:
+	var powder := _black_powder()
+	return "" if powder == null else powder.label_for(_powder_cooldown)
+
+
+## Whether the readout should be drawn as ready.
+func is_cooldown_ready() -> bool:
+	return _black_powder() != null and _powder_cooldown <= 0.0
+
+
+# --- Hell chamber ----------------------------------------------------------------
+
+func _hell_chamber() -> HellChamber:
+	var stats := get_stats()
+	return null if stats == null else stats.hell_chamber
+
+
+## HELL CHAMBER's charge, 0..1 - always 0 while no [HellChamber] is active.
+func get_chamber_charge() -> float:
+	return _chamber
+
+
+## Whether the trigger is held on a HELL CHAMBER charge right now.
+func is_chamber_charging() -> bool:
+	return _chamber_held and _state == State.READY and _hell_chamber() != null
+
+
+## Drops the charge without firing. The developer panel's reset - the trigger, if
+## still held, builds it again from nothing.
+func reset_chamber_charge() -> void:
+	_chamber = 0.0
+	_send_heft(1.0)
+
+
+## The trigger pressed with HELL CHAMBER on: nothing fires, the charge starts. A
+## press the gun cannot answer - action open, nothing left - clicks exactly as an
+## ordinary refused trigger does, and is still held, so closing the action with the
+## trigger down starts the charge.
+func _press_chamber() -> void:
+	_chamber_held = true
+	_chamber_interrupted = false
+	_chamber = 0.0
+	if not is_ready_to_fire():
+		dry_fired.emit()
+
+
+## The trigger let go: the shot leaves at once with whatever charge was built. A
+## release with nothing ready to fire only lets the trigger go.
+func _release_chamber() -> void:
+	if not _chamber_held:
+		return
+	_chamber_held = false
+	_chamber_interrupted = false
+	# The press already clicked for an empty gun, so the release does not again.
+	if _state == State.READY and has_ammo():
+		_try_fire()
+	_chamber = 0.0
+	_send_heft(1.0)
+
+
+## Everything a charge holds, let go without a shot: the charge, the held trigger
+## and the slowdown. What turning the Legendary off and every interruption does.
+func _cancel_chamber() -> void:
+	_chamber = 0.0
+	_chamber_held = false
+	_chamber_interrupted = false
+	_send_heft(1.0)
+
+
+## Builds the charge while the trigger is held on a ready gun, and keeps the
+## holder's walk slowed to match. A release the weapon never heard - the trigger
+## let go while the game was paused, holstered or in a zone that silences it - is
+## noticed here: a paused or silenced one cancels, any other fires, so a shot is
+## never left hanging on a trigger nobody is holding.
+func _advance_chamber(delta: float) -> void:
+	var chamber := _hell_chamber()
+	if chamber == null:
+		if _chamber_held or _chamber > 0.0 or _heft_sent < 1.0:
+			_cancel_chamber()
+		return
+	if not _chamber_held:
+		return
+	var silenced := _holster > 0.0 or _fire_blocked_by_zone()
+	if not Input.is_action_pressed(&"fire"):
+		if _chamber_interrupted or silenced:
+			_cancel_chamber()
+		else:
+			_release_chamber()
+		return
+	_chamber_interrupted = false
+	if silenced:
+		_chamber = 0.0
+	elif _state == State.READY and has_ammo():
+		var was_max := chamber.is_max(_chamber)
+		_chamber = minf(_chamber + chamber.charge_step(delta), 1.0)
+		if not was_max and chamber.is_max(_chamber):
+			chamber_maxed.emit()
+	_send_heft(chamber.move_speed_multiplier(_chamber))
+
+
+## Schedules the MAX volley of the shot armed from [param shot] for
+## [param delay] seconds from now - paused with the tree, like the fan's hammer.
+func _queue_chamber_volley(shot: WeaponStats, critical: bool, at: Vector2, delay: float) -> void:
+	if delay <= 0.0:
+		_chamber_volley(shot, critical, at)
+		return
+	get_tree().create_timer(delay, false).timeout.connect(
+		_chamber_volley.bind(shot, critical, at))
+
+
+## HELL CHAMBER's MAX volley from [param at]: the shot armed from [param shot] -
+## the very block the MAX shot left with, and its [param critical] roll - released
+## again as a ring of one round per pellet that shot fired, at the chamber's volley
+## power. Every round goes through [method _release_pellet] exactly as the shot's
+## own did, so every upgrade, charge and Legendary the shot carried rides the volley
+## with nothing here naming any of them. The ring's headings are the one thing of
+## the shot's own not reused; an active [ShotPattern] still shapes each around its
+## slot, as it shapes the shot's around the aim.
+func _chamber_volley(shot: WeaponStats, critical: bool, at: Vector2) -> void:
+	# Switched off since the shot left ends it here, as a BLOOD REAPER volley does;
+	# the power is read now, so the Inspector's figure is the one used.
+	var chamber := _hell_chamber()
+	if chamber == null or shot == null or projectile_scene == null or not is_inside_tree():
+		return
+	var container := get_tree().current_scene
+	if container == null:
+		return
+	var stats := chamber.volley_stats(shot)
+	var pattern: ShotPattern = stats.shot_pattern
+	var rounds := _pellets_for(shot)
+	var jitter := deg_to_rad(maxf(chamber.max_volley_jitter_degrees, 0.0))
+	var offset := randf() * TAU
+	for i in rounds:
+		var slot := offset + TAU * float(i) / float(rounds)
+		var heading := slot + randf_range(-jitter, jitter)
+		if pattern != null:
+			heading = pattern.heading(slot, jitter)
+		_release_pellet(container, stats, critical, at, heading, false, shot, chamber)
+	chamber.release_ring(container, at, stats.power_scale)
+	chamber_volley.emit(at, rounds)
+
+
+## Hands the holder's [WeaponHeft] the walk multiplier, only when it moves.
+func _send_heft(multiplier: float) -> void:
+	if is_equal_approx(multiplier, _heft_sent):
+		return
+	_heft_sent = multiplier
+	if _target == null:
+		return
+	var receiver := _target.get_node_or_null(heft_receiver_path)
+	if receiver != null and receiver.has_method(&"set_heft"):
+		receiver.call(&"set_heft", self, multiplier)
+
+
+## A charge held as the game pauses is marked, so a trigger released while paused
+## is not taken for a shot when play resumes.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED and _chamber_held:
+		_chamber_interrupted = true
+	elif what == NOTIFICATION_EXIT_TREE:
+		_cancel_chamber()
 
 
 # --- Fan the hammer --------------------------------------------------------------
@@ -459,6 +870,10 @@ func _drop_hammer(serial: int) -> void:
 	if serial != _hammer_serial or _state != State.READY or _fan_hammer() == null:
 		return
 	if not Input.is_action_pressed(&"fire") or _holster > 0.0 or _fire_blocked_by_zone():
+		return
+	# With HELL CHAMBER on the held trigger charges the closed action instead, and
+	# letting go fires it - the fan still works the whole cycle in one press.
+	if _hell_chamber() != null:
 		return
 	_try_fire()
 
@@ -505,18 +920,27 @@ func reset_pump_charge() -> void:
 
 
 ## How full the charge is, 0..1. Read by [Crosshair] through [member charge_group].
+## A HELL CHAMBER charge being held is shown in preference to banked pump charge.
 func get_charge_ratio() -> float:
+	if _chamber > 0.0:
+		return _chamber
 	var most := get_max_pump_charge()
 	return 0.0 if most <= 0 else clampf(float(_charge) / float(most), 0.0, 1.0)
 
 
 ## The readout over the ammunition - see [SpinMultiplier]. Empty with nothing banked.
 func get_stage_label() -> String:
+	var chamber := _hell_chamber()
+	if chamber != null and _chamber > 0.0:
+		return chamber.label_for(_chamber)
 	var charge := _pump_charge()
 	return "" if charge == null else charge.label_for(_charge)
 
 
 func get_stage_label_scale() -> float:
+	var chamber := _hell_chamber()
+	if chamber != null and _chamber > 0.0:
+		return chamber.label_scale_for(_chamber)
 	var charge := _pump_charge()
 	return 1.0 if charge == null else charge.label_scale_for(_charge)
 
@@ -540,6 +964,16 @@ func _set_charge(value: int) -> void:
 func _on_stats_changed() -> void:
 	super._on_stats_changed()
 	_set_charge(_charge)
+	# BLACK POWDER switched off takes its wait and its smoke with it, so nobody is
+	# left hiding in a cloud the Legendary no longer makes.
+	if _black_powder() == null:
+		_powder_cooldown = 0.0
+		if is_inside_tree():
+			BlackPowderSmoke.dissolve_all(get_tree())
+	# HELL CHAMBER switched off drops the charge, the slowdown and the held trigger
+	# at once, so the very next press is an ordinary shot.
+	if _hell_chamber() == null:
+		_cancel_chamber()
 
 
 ## One reload press racks the action open, the next drives it shut and rearms it.
@@ -616,6 +1050,11 @@ func _set_state(new_state: State) -> void:
 	if new_state == _state:
 		return
 	_state = new_state
+	# A HELL CHAMBER charge only lives on a closed, loaded action: working the pump
+	# or firing lets it go. The trigger stays held, so it builds again from nothing
+	# once the action is closed.
+	if _state != State.READY:
+		_chamber = 0.0
 	# Any state change outranks the firing flash: working the action during it
 	# must show the action, not a shot that has already happened.
 	_firing_flash = false

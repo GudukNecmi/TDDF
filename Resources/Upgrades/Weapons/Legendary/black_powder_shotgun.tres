@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="WeaponLegendary" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_legendary.gd" id="1_legendary"]
+[ext_resource type="Script" path="res://Scripts/Weapons/black_powder.gd" id="2_powder"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BlackPowderSmoke.tscn" id="3_smoke"]
+
+[sub_resource type="Resource" id="Resource_powder"]
+script = ExtResource("2_powder")
+cooldown = 6.0
+smoke_scene = ExtResource("3_smoke")
+smoke_radius = 150.0
+stealth_radius = 190.0
+smoke_duration = 4.5
+smoke_back_offset = 100.0
+close_detection_radius = 80.0
+detection_mark_interval = 0.3
+hearing_radius = -1.0
+
+[resource]
+script = ExtResource("1_legendary")
+id = &"black_powder"
+display_name = "BLACK POWDER"
+description = "EVERY 6 SECONDS A SHOT LEAVES A CLOUD OF BLOOD-BLACK SMOKE. INSIDE IT THE ENEMY HUNTS WHERE YOU WERE LAST SEEN - ONLY THOSE RIGHT BESIDE YOU CAN MAKE YOU OUT, AND EVERY SHOT YOU FIRE FROM IT GIVES AWAY WHERE IT CAME FROM."
+black_powder = SubResource("Resource_powder")

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LootLayout" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Loot/loot_layout.gd" id="1_layout"]
+
+[resource]
+script = ExtResource("1_layout")
+radius = Vector2(350, 150)
+center_offset = Vector2(0, 14)
+ring_capacity = 6
+ring_growth = 1.36
+arc_lift = 60.0

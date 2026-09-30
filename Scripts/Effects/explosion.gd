@@ -56,20 +56,72 @@ signal exploded(at: Vector2)
 @export var flash_texture_scale: float = 3.2
 
 @export_group("Mark")
-## The scorch left on the ground.
+## The scorch left on the ground. It lies flat and never turns.
 @export var mark_path: NodePath = ^"Mark"
-## How long it lies there at full strength before it starts to go.
-@export var mark_seconds: float = 7.0
+## How long it lies at full strength before it starts to go, in seconds: the first
+## figure for a blast of [member mark_radius_range].x reach or less, the second for
+## one of .y or more, interpolated between - a bigger blast scorches for longer.
+## The reach is the blast's own - see [method get_reach].
+@export var mark_seconds_range := Vector2(4.0, 10.0)
+@export var mark_radius_range := Vector2(40.0, 160.0)
 ## How long it then takes to disappear.
 @export var mark_fade: float = 0.9
-## What it is drawn at.
-@export var mark_scale: float = 0.22
+## How wide it is drawn, as a multiple of the blast's diameter - 1 covers exactly
+## the ground the blast reached. Measured off the artwork's own width, so a new
+## scorch picture is sized the same way.
+@export var mark_coverage: float = 0.6
 ## How much its size varies from one blast to the next, as a fraction, so two
 ## explosions in the same spot do not stamp the same mark twice.
 @export_range(0.0, 0.9) var mark_scale_variation: float = 0.18
 ## How dark it is. The artwork is black, so this is where a scorch is turned into
 ## a smear.
 @export var mark_modulate := Color(0.12, 0.09, 0.08, 0.72)
+
+@export_group("Boom ripple")
+## Further, smaller copies of the [code]Boom[/code] flare burst around the main one
+## so the blast reads as a blast rather than one sprite. 0 is the main flare only.
+@export var extra_booms: int = 3
+## How far from the centre they burst, as a fraction of the blast's reach.
+@export_range(0.0, 1.5, 0.01) var extra_boom_spread: float = 0.55
+## Their size against the main flare's, rolled between the two.
+@export var extra_boom_scale := Vector2(0.4, 0.7)
+## How long after the main flare each further one goes, in seconds, one after
+## another - a ripple rather than one frame.
+@export var extra_boom_delay: float = 0.04
+## Most blasts inside [member crowd_window] seconds that get the ripple. Past it -
+## a chain of bombers going up together - a blast keeps its one flare, so the pile
+## stays readable. 0 or below never thins.
+@export var crowd_budget: int = 3
+@export var crowd_window: float = 0.3
+
+@export_group("Blast throw")
+## Whether a man this blast kills is thrown apart - his body and his head flung
+## outwards from the centre as two pieces - rather than torn into gore where he
+## stood. Needs his [EnemyHeadPop]; a man without one is torn apart as before.
+## Only a real blast throws: [method tear_apart] and a hit's kill never do.
+@export var throws_bodies: bool = true
+## How fast the body leaves, outwards along the ground, in pixels per second -
+## rolled between the two.
+@export var body_throw_force := Vector2(260.0, 420.0)
+## How hard it is thrown upwards on top of that.
+@export var body_throw_lift := Vector2(160.0, 300.0)
+## How fast the head leaves, and its lift - lighter, so it flies further.
+@export var head_throw_force := Vector2(340.0, 560.0)
+@export var head_throw_lift := Vector2(300.0, 520.0)
+## How far the head's path is turned away from the body's, in degrees either side,
+## so the two separate in the air rather than flying as one.
+@export var head_separation_degrees: float = 28.0
+## Random turn on the whole throw, in degrees either side, so men standing
+## together do not fly identically.
+@export var throw_angle_jitter_degrees: float = 18.0
+## How much of the throw is kept by a man at the very edge of the blast rather
+## than at its centre. 1 throws everybody alike.
+@export_range(0.0, 1.0, 0.01) var throw_edge_scale: float = 0.55
+## How much of the outward speed that points up or down the screen is kept -
+## the floor is foreshortened, so a throw along it reads further than one across.
+@export_range(0.0, 1.0, 0.01) var throw_depth_scale: float = 0.6
+## Outward push added to the gore pieces thrown with him, in pixels per second.
+@export var gore_outward_push: float = 180.0
 
 @export_group("Smoke")
 ## The rising puff. Purely visual, no collision, and it frees itself.
@@ -101,6 +153,10 @@ signal exploded(at: Vector2)
 @export_range(0.0, 1.0) var gore_bounce: float = 0.36
 ## How quickly a piece stops sliding once it is down.
 @export var gore_ground_friction: float = 2.4
+## How far the pieces are also thrown up or down the screen, as a share of their
+## sideways speed, rolled either way per piece. 0 throws them only sideways, as a
+## flat spray; 1 scatters them evenly in every direction across the floor.
+@export_range(0.0, 1.5, 0.01) var gore_depth_spread: float = 0.0
 ## Whether a man killed by this blast is torn into the same gore where he stood,
 ## instead of dying the way a shot kills him.
 ##
@@ -221,6 +277,11 @@ var _played: bool = false
 ## Bodies this blast will not touch. Only ever the one that produced it.
 var _spared: Array[Node] = []
 
+## Shared by every blast, so a chain is counted across all of them - see
+## [member crowd_budget].
+static var _crowd_start_ms: int = -100000
+static var _crowd_count: int = 0
+
 
 func _ready() -> void:
 	# Nothing is shown until it goes off, so an explosion that is placed one frame
@@ -238,9 +299,12 @@ func play() -> void:
 	_played = true
 
 	var at := global_position
+	var reach := get_reach()
 	_flare()
+	if not _join_crowd():
+		_extra_flares(reach)
 	_flash()
-	_mark()
+	var mark_life := _mark_for(reach)
 	_smoke()
 	_throw_gore(at)
 	_scatter_blood(at)
@@ -253,10 +317,56 @@ func play() -> void:
 	# The node itself lives exactly as long as the longest thing hanging off it.
 	# The gore and the blood have already left - they own themselves - so this is
 	# the mark's life and nothing else's.
-	var life := maxf(mark_seconds + mark_fade,
-		maxf(boom_seconds, flash_seconds)) + 1.0
+	var life := maxf(mark_life + mark_fade, maxf(flash_seconds, boom_seconds
+		+ extra_boom_delay * float(maxi(extra_booms, 0)))) + 1.0
 	var timer := get_tree().create_timer(life, true, false, true)
 	timer.timeout.connect(queue_free)
+
+
+## How far this blast reaches the men in it, in pixels - its size, and what its
+## scorch and ripple are measured from.
+func get_reach() -> float:
+	return maxf(damage_radius if enemy_damage_radius < 0.0 else enemy_damage_radius, 1.0)
+
+
+## Counts one blast into the crowd and reports whether it is past the budget.
+func _join_crowd() -> bool:
+	var now := Time.get_ticks_msec()
+	if now - _crowd_start_ms > int(crowd_window * 1000.0):
+		_crowd_start_ms = now
+		_crowd_count = 0
+	_crowd_count += 1
+	return crowd_budget > 0 and _crowd_count > crowd_budget
+
+
+## The ripple of smaller flares around the main one - copies of the same
+## [code]Boom[/code] sprite, played through the same [method _flare_sprite].
+func _extra_flares(reach: float) -> void:
+	var boom := get_node_or_null(boom_path) as Sprite2D
+	if boom == null:
+		return
+	for i: int in maxi(extra_booms, 0):
+		var extra := boom.duplicate() as Sprite2D
+		add_child(extra)
+		extra.position = boom.position + Vector2.from_angle(randf() * TAU) \
+			* reach * extra_boom_spread * randf_range(0.5, 1.0)
+		var size_roll := randf_range(minf(extra_boom_scale.x, extra_boom_scale.y),
+			maxf(extra_boom_scale.x, extra_boom_scale.y))
+		_flare_sprite(extra, boom_scale * size_roll, extra_boom_delay * float(i + 1))
+
+
+## The scorch for a blast of [param reach]: [member mark_coverage] of its diameter,
+## lying for its share of [member mark_seconds_range]. Returns how long it lies.
+func _mark_for(reach: float) -> float:
+	var small := minf(mark_radius_range.x, mark_radius_range.y)
+	var large := maxf(mark_radius_range.x, mark_radius_range.y)
+	var t := 1.0 if large <= small else clampf((reach - small) / (large - small), 0.0, 1.0)
+	var seconds := maxf(lerpf(mark_seconds_range.x, mark_seconds_range.y, t), 0.0)
+	var mark := get_node_or_null(mark_path) as Sprite2D
+	if mark == null or mark.texture == null:
+		return 0.0
+	_mark(reach * 2.0 * maxf(mark_coverage, 0.0) / float(mark.texture.get_width()), seconds)
+	return seconds
 
 
 ## Kills [param body] and tears him into this explosion's gore where he stands,
@@ -298,9 +408,17 @@ func tear_apart(body: Node2D, hit_direction: Vector2 = Vector2.ZERO) -> bool:
 ##
 ## Call it only for a hit already known to be fatal. The ordinary death is called
 ## off before the hit lands, because [signal Health.died] arrives from inside it.
-## A DEVIL'S BREATH blast is the caller - see [member ShotBlast.gore_effect].
+## A DEVIL'S BREATH blast is the caller - see [member ShotBlast.gore_effect] - and
+## a charged HELL CHAMBER pellet - see [member ShotExplosion.kill_gore_effect]; both
+## go through [method tear_if_fatal]. [param critical] is carried onto the hit.
+##
+## [param blast_from] is where a real blast that killed him went off, and
+## [param blast_reach] how far it reached - he is then thrown apart from there
+## rather than torn where he stood; see [member throws_bodies]. Left at
+## [code]Vector2.INF[/code] - a pellet's kill, a BLOOD REAPER execution - he is torn.
 func tear_apart_by_hit(body: Node2D, hitbox: Hitbox, damage: float, hit_direction: Vector2,
-		hit_position: Vector2, effects: HitEffects) -> bool:
+		hit_position: Vector2, effects: HitEffects, critical: bool = false,
+		blast_from: Vector2 = Vector2.INF, blast_reach: float = 0.0) -> bool:
 	if _played or body == null or hitbox == null or not is_inside_tree():
 		return false
 	_played = true
@@ -308,18 +426,74 @@ func tear_apart_by_hit(body: Node2D, hitbox: Hitbox, damage: float, hit_directio
 	var at := body.global_position + gore_body_offset
 	global_position = body.global_position
 	_call_off_the_ordinary_death(body)
-	hitbox.take_hit(damage, hit_direction, hit_position, false, effects)
+	hitbox.take_hit(damage, hit_direction, hit_position, critical, effects)
 
 	var health := _find_health(body)
 	if health != null and health.is_alive():
 		queue_free()
 		return false
-	_finish_tearing(body, at)
+	_finish_tearing(body, at, blast_from, blast_reach)
 	return true
 
 
-func _finish_tearing(body: Node2D, at: Vector2) -> void:
-	_tear_apart(body)
+## Lands [param damage] on [param victim] through a fresh [param gore_scene] when it
+## is going to kill him, so he comes apart - and reports whether the hit went this
+## way. Worked out exactly as the hit will be: the hitbox's multiplier on the damage
+## against what he has left, and nothing while he is in a grace window that would
+## drop the hit. A man already dead or already going is never torn twice. False
+## means nothing was dealt and the caller lands its hit the ordinary way.
+##
+## Only a man carrying a node of class [param requires] comes apart (empty allows
+## anybody), and never one carrying any of [param excludes] - a boss has his own
+## defeat, a bomber his own blast.
+##
+## [param on_executed], when valid, is called once he has come apart, with the point
+## the gore burst from and the man - BLOOD REAPER's volley hangs off it. Only a man
+## really torn apart reports, so one death is reported once.
+##
+## [param blast_from] and [param blast_reach] are a real blast's - see
+## [method tear_apart_by_hit]. Only a blast passes them.
+static func tear_if_fatal(gore_scene: PackedScene, victim: Node, hitbox: Hitbox, damage: float,
+		direction: Vector2, at: Vector2, effects: HitEffects, requires: StringName,
+		excludes: Array[StringName], critical: bool = false,
+		on_executed: Callable = Callable(), blast_from: Vector2 = Vector2.INF,
+		blast_reach: float = 0.0) -> bool:
+	var body := victim as Node2D
+	if gore_scene == null or body == null or hitbox == null or body.is_queued_for_deletion() \
+			or not body.is_inside_tree() or not gore_allowed(body, requires, excludes):
+		return false
+	var health := hitbox.get_node_or_null(hitbox.health_path) as Health
+	if health == null or not health.is_alive() or health.is_invulnerable():
+		return false
+	if damage * hitbox.damage_multiplier < health.get_current():
+		return false
+	var gore := gore_scene.instantiate() as Explosion
+	var container := body.get_tree().current_scene
+	if gore == null or container == null:
+		if gore != null:
+			gore.free()
+		return false
+	container.add_child(gore)
+	var burst_at := body.global_position + gore.gore_body_offset
+	if gore.tear_apart_by_hit(body, hitbox, damage, direction, at, effects, critical,
+			blast_from, blast_reach) and on_executed.is_valid():
+		on_executed.call(burst_at, body)
+	return true
+
+
+## Whether [param body] may come apart - see [method tear_if_fatal].
+static func gore_allowed(body: Node, requires: StringName, excludes: Array[StringName]) -> bool:
+	if not requires.is_empty() and body.find_children("*", requires, true, false).is_empty():
+		return false
+	for type: StringName in excludes:
+		if not body.find_children("*", type, true, false).is_empty():
+			return false
+	return true
+
+
+func _finish_tearing(body: Node2D, at: Vector2, blast_from: Vector2 = Vector2.INF,
+		blast_reach: float = 0.0) -> void:
+	_tear_apart(body, blast_from, blast_reach)
 	_gore_impact_sound(at)
 	exploded.emit(at)
 
@@ -333,20 +507,26 @@ func _flare() -> void:
 	var boom := get_node_or_null(boom_path) as Sprite2D
 	if boom == null:
 		return
+	_flare_sprite(boom, boom_scale, 0.0)
 
-	boom.visible = true
+
+## One flare sprite at [param size], [param delay] seconds from now.
+func _flare_sprite(boom: Sprite2D, size: float, delay: float) -> void:
 	boom.modulate = boom_modulate
 	boom.rotation = randf() * TAU
-	boom.scale = Vector2.ONE * boom_scale
+	boom.scale = Vector2.ONE * size
 	if boom_seconds <= 0.0:
 		boom.visible = false
 		return
+	boom.visible = delay <= 0.0
 
 	var tween := create_tween().set_parallel(true)
-	tween.tween_property(boom, "scale", Vector2.ONE * boom_scale * maxf(boom_growth, 0.01),
-		boom_seconds).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	if delay > 0.0:
+		tween.tween_callback(boom.show).set_delay(delay)
+	tween.tween_property(boom, "scale", Vector2.ONE * size * maxf(boom_growth, 0.01),
+		boom_seconds).set_delay(delay).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_property(boom, "modulate:a", 0.0, boom_seconds) \
-		.set_delay(boom_seconds * 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		.set_delay(delay + boom_seconds * 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 
 ## The light. It is not a circle drawn over the scene - it is a light in the
@@ -371,10 +551,13 @@ func _flash() -> void:
 	tween.tween_callback(func() -> void: flash.visible = false)
 
 
-## The scorch. It lies at full strength for its whole stated life and only then
-## starts to go, so "seven seconds" is seven seconds of mark rather than seven
-## seconds of something fading.
-func _mark() -> void:
+## The scorch, [param size] times its artwork. It lies at full strength for its
+## whole stated [param seconds] and only then starts to go, so "seven seconds" is
+## seven seconds of mark rather than seven seconds of something fading.
+##
+## It lies flat and never turns: whatever direction the blast came from, the scorch
+## is stamped square to the ground.
+func _mark(size: float, seconds: float) -> void:
 	var mark := get_node_or_null(mark_path) as Sprite2D
 	if mark == null:
 		return
@@ -382,14 +565,14 @@ func _mark() -> void:
 	var spread := clampf(mark_scale_variation, 0.0, 0.9)
 	mark.visible = true
 	mark.modulate = mark_modulate
-	mark.rotation = randf() * TAU
-	mark.scale = Vector2.ONE * mark_scale * (1.0 + randf_range(-spread, spread))
+	mark.global_rotation = 0.0
+	mark.scale = Vector2.ONE * size * (1.0 + randf_range(-spread, spread))
 
 	if mark_fade <= 0.0:
 		return
 	var tween := create_tween()
 	tween.tween_property(mark, "modulate:a", 0.0, mark_fade) \
-		.set_delay(maxf(mark_seconds, 0.0)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		.set_delay(maxf(seconds, 0.0)).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 
 func _smoke() -> void:
@@ -412,7 +595,10 @@ func _smoke() -> void:
 ## Each one is an ordinary [DeathDebris] with a sprite in it, which is the same
 ## arrangement a severed head is - so a gore piece bounces, rolls, settles and
 ## fades through code that was already written and tuned, and none of it is here.
-func _throw_gore(at: Vector2) -> void:
+##
+## [param outward], when given, is the way a blast threw the man they came out of:
+## every piece is pushed along it by [member gore_outward_push] as well.
+func _throw_gore(at: Vector2, outward: Vector2 = Vector2.ZERO) -> void:
 	if gore_textures.is_empty() or not is_inside_tree():
 		return
 	var container := get_tree().current_scene
@@ -453,7 +639,12 @@ func _throw_gore(at: Vector2) -> void:
 		# blast in a spray rather than a ring and all of them come back down.
 		var sideways := randf_range(gore_speed.x, gore_speed.y) * (1.0 if randf() < 0.5 else -1.0)
 		var lift := -randf_range(gore_lift.x, gore_lift.y)
-		carrier.launch(Vector2(sideways, lift), randf_range(gore_drop.x, gore_drop.y))
+		# Up or down the screen as well as sideways, so the spray leaves in every
+		# direction rather than as a flat fan.
+		var drift := randf_range(-1.0, 1.0) * gore_depth_spread * absf(sideways)
+		sideways += outward.x * gore_outward_push
+		drift += outward.y * gore_outward_push * throw_depth_scale
+		carrier.launch(Vector2(sideways, lift), randf_range(gore_drop.x, gore_drop.y), drift)
 
 
 ## One piece of gore arriving on the ground.
@@ -619,15 +810,63 @@ func _hurt_the_man(body: Node2D, offset: Vector2) -> void:
 	health.take_damage(enemy_damage, offset.normalized())
 
 	if fatal or (gore_kills and not health.is_alive()):
-		_tear_apart(body)
+		_tear_apart(body, global_position)
 
 
 ## The gore that replaces a death. The same throw the blast itself makes, put on the
 ## man rather than on the blast, so there is one piece of code for both.
-func _tear_apart(body: Node2D) -> void:
-	_throw_gore(body.global_position + gore_body_offset)
+##
+## With [param blast_from] - a real blast went off there - and [member throws_bodies]
+## on, the man is thrown apart instead: his body and his head flung outwards as two
+## pieces by his own [EnemyHeadPop], the gore pushed outwards with them. See
+## [method _throw_body]. [param blast_reach] is that blast's reach; 0 is this one's.
+func _tear_apart(body: Node2D, blast_from: Vector2 = Vector2.INF, blast_reach: float = 0.0) -> void:
+	var gore_at := body.global_position + gore_body_offset
+	if throws_bodies and blast_from.is_finite():
+		var away := body.global_position - blast_from
+		if _throw_body(body, away, blast_reach if blast_reach > 0.0 else get_reach()):
+			_throw_gore(gore_at, away.normalized())
+			return
+	_throw_gore(gore_at)
 	if gore_removes_body:
 		body.queue_free()
+
+
+## Flings [param body] apart along [param away] - from the blast to him - through his
+## [EnemyHeadPop]: the body and the head each get their own speed, turned apart by
+## [member head_separation_degrees] and both jittered, so no two men fly alike. A
+## man at the edge of [param reach] is thrown by [member throw_edge_scale] of it.
+## False when he has nothing to throw him with.
+func _throw_body(body: Node2D, away: Vector2, reach: float) -> bool:
+	var pop: EnemyHeadPop = null
+	for node: Node in body.find_children("*", "EnemyHeadPop", true, false):
+		pop = node as EnemyHeadPop
+		if pop != null:
+			break
+	if pop == null:
+		return false
+
+	var heading := away.angle() if not away.is_zero_approx() else randf() * TAU
+	heading += deg_to_rad(randf_range(-throw_angle_jitter_degrees, throw_angle_jitter_degrees))
+	var edge := lerpf(1.0, throw_edge_scale, clampf(away.length() / maxf(reach, 1.0), 0.0, 1.0))
+
+	var body_dir := Vector2.from_angle(heading)
+	var body_speed := _roll(body_throw_force) * edge
+	var head_side := 1.0 if randf() < 0.5 else -1.0
+	var head_dir := Vector2.from_angle(heading
+		+ deg_to_rad(head_separation_degrees) * head_side * randf_range(0.5, 1.0))
+	var head_speed := _roll(head_throw_force) * edge
+
+	return pop.blast_apart(
+		Vector2(body_dir.x * body_speed, -_roll(body_throw_lift) * edge),
+		body_dir.y * body_speed * throw_depth_scale,
+		Vector2(head_dir.x * head_speed, -_roll(head_throw_lift) * edge),
+		head_dir.y * head_speed * throw_depth_scale,
+		gore_removes_body)
+
+
+func _roll(span: Vector2) -> float:
+	return randf_range(minf(span.x, span.y), maxf(span.x, span.y))
 
 
 func _call_off_the_ordinary_death(body: Node2D) -> void:

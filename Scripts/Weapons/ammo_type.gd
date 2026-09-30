@@ -44,6 +44,14 @@ extends Resource
 ## touched. Clamped to the capacity, and only ever applied once - see
 ## [method create_reserve].
 @export var starting_ammo: int = 60
+## Whether this ammunition never runs out. On, a shot is still asked for and
+## still "spent" through the same [method AmmoReserve.consume], but nothing is
+## taken off the count - so every weapon fed by this type, and every upgrade or
+## legendary that fires through it, can always fire without knowing why. The
+## count simply sits full: there is nothing to buy, pick up or resupply, and
+## no ceiling is added on top of [member max_ammo]. See
+## [method AmmoReserve.is_unlimited].
+@export var unlimited: bool = false
 
 @export_group("Purchase")
 ## How many rounds one purchase hands over. Buying is by the box, so this is the

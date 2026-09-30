@@ -63,6 +63,9 @@ signal landed(at: Vector2, impact_speed: float, first_touch: bool)
 @export var fade_time: float = 1.2
 
 var _velocity := Vector2.ZERO
+## Speed across the floor up or down the screen, in pixels per second - the ground
+## line itself travels with it. See [method launch].
+var _drift: float = 0.0
 var _spin: float = 0.0
 var _rest_y: float = 0.0
 var _grounded: bool = false
@@ -92,8 +95,14 @@ func _ready() -> void:
 ## Called after the piece has been placed, for the same reason a particle burst is
 ## started after being placed: everything here is measured from where it is
 ## standing the moment it is launched.
-func launch(velocity: Vector2, drop: float) -> void:
+##
+## [param drift] throws it across the floor up (negative) or down the screen as
+## well, the ground line travelling with it - how a blast below a man sends him
+## up the screen rather than only sideways. It slows by the same drag and friction
+## as the sideways speed. 0 is every throw the game made before it.
+func launch(velocity: Vector2, drop: float, drift: float = 0.0) -> void:
 	_velocity = velocity
+	_drift = drift
 	_rest_y = global_position.y + maxf(drop, 0.0)
 	_grounded = false
 	_touched_down = false
@@ -143,7 +152,10 @@ func _physics_process(delta: float) -> void:
 func _fall(delta: float) -> void:
 	_velocity.y += gravity * delta
 	_velocity.x = move_toward(_velocity.x, 0.0, air_drag * absf(_velocity.x) * delta)
+	_drift = move_toward(_drift, 0.0, air_drag * absf(_drift) * delta)
 	global_position += _velocity * delta
+	global_position.y += _drift * delta
+	_rest_y += _drift * delta
 	_apply_spin()
 
 	if global_position.y < _rest_y:
@@ -171,25 +183,37 @@ func _roll(delta: float) -> void:
 	_velocity.x = move_toward(_velocity.x, 0.0, ground_friction * absf(_velocity.x) * delta)
 	if absf(_velocity.x) < stop_speed:
 		_velocity.x = 0.0
+	_drift = move_toward(_drift, 0.0, ground_friction * absf(_drift) * delta)
+	if absf(_drift) < stop_speed:
+		_drift = 0.0
 
 	global_position.x += _velocity.x * delta
+	global_position.y += _drift * delta
+	_rest_y = global_position.y
 
-	if is_zero_approx(_velocity.x):
+	if _is_still():
 		_spin = lerpf(_spin, 0.0, 1.0 - exp(-spin_settle * delta))
 		return
 	_apply_spin()
 
 
+## Turns with whichever of its two floor speeds is the larger, so a piece thrown
+## straight up the screen still tumbles.
 func _apply_spin() -> void:
+	var speed := _velocity.x if absf(_velocity.x) >= absf(_drift) else _drift
 	var wanted := deg_to_rad(clampf(
-		_velocity.x * spin_per_speed, -max_spin_degrees, max_spin_degrees))
+		speed * spin_per_speed, -max_spin_degrees, max_spin_degrees))
 	_spin = wanted
+
+
+func _is_still() -> bool:
+	return is_zero_approx(_velocity.x) and is_zero_approx(_drift)
 
 
 ## Only a piece that has actually come to rest starts ageing, so one that is still
 ## rolling is never cut short by its own timer.
 func _age(delta: float) -> void:
-	if not _grounded or not is_zero_approx(_velocity.x):
+	if not _grounded or not _is_still():
 		return
 
 	_still_age += delta

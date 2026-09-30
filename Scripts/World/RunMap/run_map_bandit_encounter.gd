@@ -31,3 +31,13 @@ extends Resource
 ## way it was answered. A point the piece rides back through is not a second
 ## encounter - the men there have been paid, robbed, walked away from or killed.
 @export var cleared_kind: StringName = &""
+## Whether arriving on such a point asks the player what to do first - fight, pay,
+## take or walk away - through the decision screen. Off makes the point a fight
+## outright: the map fades to the loading screen's colour and the fight loads with
+## no question and no confirmation - see
+## [method WorldMapCombatBridge.try_begin_site_fight]. The men, the arena and what
+## a win pays are the same either way.
+@export var asks_before_fighting: bool = true
+## How long the map takes to go dark before the loading screen, in seconds, for a
+## point that does not ask. 0 cuts straight to it.
+@export var fade_time: float = 0.8

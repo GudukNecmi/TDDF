@@ -19,3 +19,11 @@ var blood_gain_scale: float = 1.0
 ## no knockback at all - a boss's sword throwing the player. 0 on every ordinary
 ## hit.
 var knockback_push: float = 0.0
+## The shot state this hit was armed from - the firing weapon's whole
+## [WeaponStats] block, Legendary parts included - or null for a hit no weapon
+## shot fired: an enemy's blow, a bomber's own blast, the run's clock. It is what a
+## death is credited to: whatever landed the killing hit, a pellet, a blast it set
+## off or a volley copied from it, carries the block it came from, so a kill reward
+## such as [DevilsCoin] reads the killer's block here rather than being told who
+## fired.
+var shot_stats: WeaponStats

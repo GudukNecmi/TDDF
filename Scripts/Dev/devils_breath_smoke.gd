@@ -58,6 +58,9 @@ func _run() -> void:
 	_ok(_shotgun.is_legendary_active(_breath), "ON switches it on")
 	_ok(_shotgun.get_stats().shot_explosion == explosion, "and the stats carry it at once")
 	_ok(_readout(panel, "DEVIL'S BREATH").begins_with("ON"), "the row reads ON", _readout(panel, "DEVIL'S BREATH"))
+	var settings := _explosion_readout(panel)
+	_ok(settings.contains("RADIUS %.0f" % explosion.radius) and settings.contains("FALLOFF")
+		and settings.contains("DIRECT HIT"), "the explosion settings are shown under it", settings)
 	_find_button(panel, "OFF", "DEVIL'S BREATH").pressed.emit()
 	_ok(not _shotgun.is_legendary_active(_breath) and _shotgun.get_stats().shot_explosion == null,
 		"OFF switches it off at once")
@@ -96,6 +99,9 @@ func _run() -> void:
 	gun.free()
 
 	print("--- a hit ---")
+	# The flat checks run without falloff; falloff is checked on its own below.
+	var authored_falloff := explosion.falloff
+	explosion.falloff = 0.0
 	_shotgun.set_legendary_active(_breath, false)
 	var plain := await _hit_loss(origin, false)
 	_shotgun.set_legendary_active(_breath, true)
@@ -111,6 +117,53 @@ func _run() -> void:
 	_ok(is_zero_approx(loaded["outside"]), "one outside the radius takes nothing", "%.2f" % loaded["outside"])
 	_ok(loaded["knocked"], "and the blast shoves through the enemy's HitReaction")
 	_ok(is_zero_approx(plain["neighbour"]), "off, the neighbour is untouched")
+
+	print("--- the direct-hit toggle ---")
+	explosion.direct_hit_takes_blast = false
+	var spared := await _hit_loss(origin, true)
+	explosion.direct_hit_takes_blast = true
+	_ok(is_equal_approx(spared["target"], plain["target"]),
+		"off, the struck enemy takes only the pellet's hit",
+		"%.2f vs %.2f" % [spared["target"], plain["target"]])
+	_ok(is_equal_approx(spared["neighbour"], explosion.get_damage()), "and the neighbour is still caught",
+		"%.2f" % spared["neighbour"])
+
+	print("--- falloff ---")
+	explosion.falloff = 0.5
+	var fallen := await _hit_loss(origin, true)
+	_ok(fallen["neighbour"] < explosion.get_damage() and fallen["neighbour"] >= explosion.get_damage() * 0.5,
+		"a neighbour away from the centre takes less, never below the edge share",
+		"%.2f of %.2f" % [fallen["neighbour"], explosion.get_damage()])
+	_ok(is_equal_approx(fallen["direct"], plain["direct"]), "and the direct hit is still unchanged")
+	explosion.falloff = authored_falloff
+
+	print("--- audio ---")
+	var probe_blast := explosion.blast_scene.instantiate() as ShotBlast
+	_ok(probe_blast.max_sounds_per_volley > 0 and probe_blast.max_sounds_per_volley < 6,
+		"a volley's blasts are heard only up to a cap", str(probe_blast.max_sounds_per_volley))
+	probe_blast.free()
+	var shooter := (load(SHOTGUN_SCENE) as PackedScene).instantiate() as Shotgun
+	shooter.definition = _shotgun
+	_arena.add_child(shooter)
+	shooter.global_position = origin
+	var feedback := shooter.get_node_or_null(^"BreathFeedback") as DevilsBreathFeedback
+	_ok(feedback != null and feedback.fire_layer_sound != null, "the shotgun carries the firing layer")
+	var shots := [0]
+	shooter.explosive_shot.connect(func() -> void: shots[0] += 1)
+	var dry := [false]
+	shooter.dry_fired.connect(func() -> void: dry[0] = true)
+	shooter._try_fire()
+	_ok(not dry[0] and _children(Projectile).size() >= 6 and shots[0] == 1,
+		"one firing layer per shot, not per pellet",
+		"dry %s, %d pellets, %d layers" % [dry[0], _children(Projectile).size(), shots[0]])
+	_shotgun.set_legendary_active(_breath, false)
+	shots[0] = 0
+	shooter._set_state(Shotgun.State.READY)
+	shooter._try_fire()
+	_ok(shots[0] == 0, "off, no firing layer", str(shots[0]))
+	_shotgun.set_legendary_active(_breath, true)
+	shooter.free()
+	_clear()
 
 	print("--- the end of the range ---")
 	var drop := _pellet(origin, 0.0)
@@ -153,7 +206,9 @@ func _run() -> void:
 	var walker := await _spawn_enemy(origin + Vector2(0, 4000))
 	var walker_health := walker.get_node(^"Health") as Health
 	var before := walker_health.get_current()
+	explosion.falloff = 0.0
 	explosion.detonate(_arena, origin, _shotgun.get_stats(), 2)
+	explosion.falloff = authored_falloff
 	await physics_frame
 	walker.global_position = origin + Vector2(10, 0)
 	for i in 10:
@@ -309,6 +364,13 @@ func _find_button(panel: WeaponDebugPanel, text: String, name: String) -> Button
 func _readout(panel: WeaponDebugPanel, name: String) -> String:
 	var line := _row(panel, name)
 	return "" if line == null else (line.get_child(1) as Label).text
+
+
+func _explosion_readout(panel: WeaponDebugPanel) -> String:
+	for line: Node in panel.get_node(^"Panel/Body/Scroll/Rows").get_children():
+		if line is HBoxContainer and (line.get_child(0) as Label).text == panel.explosion_row_label:
+			return (line.get_child(1) as Label).text
+	return ""
 
 
 func _ok(condition: bool, what: String, detail: String = "") -> void:

@@ -19,12 +19,26 @@ extends Node
 ## Every number for the push itself comes with the kick - the weapon's
 ## [ShotRecoil] - so the Legendary is tuned in one place. What is here is only how
 ## the player looks while being thrown: the afterimage.
+##
+## [b]It is also what makes the flight a defence.[/b] While the shove carries the
+## player - see [member ShotRecoil.invulnerable_while_recoiling] - it holds their
+## own [Health] shielded under its own source, so it is the same immunity the
+## boss's sword circle uses rather than a second one, and it is lowered the frame
+## the movement ends, or on a death or hold clearing it. [signal guard_changed]
+## is what a shield visual follows - see [RecoilShield].
 
 ## Emitted as a kick lands, with the velocity change it added.
 signal recoiled(push: Vector2)
+## Emitted as the recoil's invulnerability goes up and comes down.
+signal guard_changed(guarded: bool)
+
+## The name the shield is held under on [Health], so it never lowers another's.
+const SHIELD_SOURCE := &"player_recoil"
 
 ## The body being pushed.
 @export var body_path: NodePath = ^".."
+## The pool held untouchable while the shove lasts.
+@export var health_path: NodePath = ^"../Health"
 
 @export_group("Afterimage")
 ## The artwork a ghost is taken from - never the body, so what is left behind is
@@ -43,11 +57,26 @@ signal recoiled(push: Vector2)
 
 @onready var _body: CharacterBody2D = get_node_or_null(body_path) as CharacterBody2D
 @onready var _visual: Node2D = get_node_or_null(visual_path) as Node2D
+@onready var _health: Health = get_node_or_null(health_path) as Health
 
 var _tuning: ShotRecoil
 var _velocity: Vector2 = Vector2.ZERO
 var _elapsed: float = 0.0
 var _ghost_timer: float = 0.0
+var _guarded: bool = false
+## Seconds of [member ShotRecoil.invulnerability_extra_time] still to run once the
+## flight has ended.
+var _guard_left: float = 0.0
+
+
+## Runs after [Player] has moved the body this frame - a child is processed after
+## its parent - so the shield comes down on the very frame the shove dies.
+func _physics_process(delta: float) -> void:
+	_update_guard(delta)
+
+
+func _exit_tree() -> void:
+	_set_guarded(false)
 
 
 ## Adds one shot's [param push] to whatever recoil is already carrying the player,
@@ -66,6 +95,7 @@ func kick(push: Vector2, recoil: ShotRecoil) -> void:
 	_elapsed = 0.0
 	_ghost_timer = 0.0
 	recoiled.emit(push)
+	_update_guard(0.0)
 
 
 ## The player's walk with the recoil folded into it. Called once per physics frame
@@ -92,11 +122,40 @@ func apply_recoil_velocity(walk_velocity: Vector2, delta: float) -> Vector2:
 func clear() -> void:
 	_velocity = Vector2.ZERO
 	_elapsed = 0.0
+	_guard_left = 0.0
+	_set_guarded(false)
 
 
 ## Whether a shove is carrying the player right now.
 func is_recoiling() -> bool:
 	return not _velocity.is_zero_approx()
+
+
+## Whether the recoil is holding the player untouchable right now.
+func is_guarded() -> bool:
+	return _guarded
+
+
+## Up while the shove is still fast enough to count as a flight, then held for
+## [member ShotRecoil.invulnerability_extra_time] more, then down.
+func _update_guard(delta: float) -> void:
+	var flying := _tuning != null and _tuning.invulnerable_while_recoiling \
+		and not _velocity.is_zero_approx() \
+		and _velocity.length() >= maxf(_tuning.invulnerability_min_speed, 0.0)
+	if flying:
+		_guard_left = maxf(_tuning.invulnerability_extra_time, 0.0)
+	elif _guarded:
+		_guard_left -= delta
+	_set_guarded(flying or (_guarded and _guard_left > 0.0))
+
+
+func _set_guarded(guarded: bool) -> void:
+	if guarded == _guarded:
+		return
+	_guarded = guarded
+	if _health != null:
+		_health.set_shielded(guarded, SHIELD_SOURCE)
+	guard_changed.emit(guarded)
 
 
 func get_recoil_velocity() -> Vector2:

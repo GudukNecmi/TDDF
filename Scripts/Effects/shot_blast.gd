@@ -15,7 +15,8 @@ extends Node2D
 ## together, the kick grows with the count along [member stack_exponent] up to
 ## [member stack_max], and the zoom, the tilt and the screen flash are started at
 ## most once per [member kick_interval]. The shake is the camera's own max, so it
-## never adds up either. Sounds and particles are per blast, and overlap freely.
+## never adds up either. Particles are per blast and overlap freely; sounds are
+## too, up to [member max_sounds_per_volley] a volley.
 ##
 ## Its size, flash and weight all scale off the radius and damage it was set off
 ## with, against [member reference_radius] and [member reference_damage], so a
@@ -106,6 +107,10 @@ extends Node2D
 @export var stack_volume_drop_db: float = 1.5
 ## Most taken off by that.
 @export var stack_volume_floor_db: float = -9.0
+## Most blasts in one volley that are heard. A full shot of pellets going off
+## together is a few overlapping blasts rather than a wall of them; the rest still
+## flash, burn and hurt, silently. 0 or below hears every one.
+@export var max_sounds_per_volley: int = 3
 ## The sound is faded from its level down to silence from here, in seconds, over
 ## [member sound_fade] - it is kept short however long the recording runs. 0 plays
 ## it all and fades only its last [member sound_fade] - see [method SoundBank.fade_tail].
@@ -136,9 +141,16 @@ var _damage: float = 0.0
 var _radius: float = 0.0
 var _mask: int = 0
 var _effects: HitEffects
+var _falloff: float = 0.0
+var _falloff_exponent: float = 1.0
 var _live_left: float = 0.0
 var _struck: Array[Node] = []
 var _shape := CircleShape2D.new()
+## What the camera kick is multiplied by - a BLOOD REAPER volley's blast is turned
+## down with it. See [member WeaponStats.power_scale].
+var _power: float = 1.0
+## Handed to [method Explosion.tear_if_fatal] for every man this blast tears apart.
+var _on_executed: Callable
 
 
 func _ready() -> void:
@@ -151,12 +163,25 @@ func _ready() -> void:
 
 ## Sets the blast off where it stands: [param damage] to each enemy within
 ## [param radius] pixels, live for [param lifetime] seconds, looking for hitboxes on
-## [param mask], each struck with [param effects].
-func detonate(damage: float, radius: float, lifetime: float, mask: int, effects: HitEffects) -> void:
+## [param mask], each struck with [param effects]. [param falloff] is the share of
+## the damage lost at the edge, shaped by [param falloff_exponent] - see
+## [member ShotExplosion.falloff]. [param spared] is never struck - the enemy the
+## round already hit directly, when he is not to take the blast too. [param power]
+## scales the camera kick - see [member WeaponStats.power_scale] - and
+## [param on_executed] is told of every man the blast tears apart.
+func detonate(damage: float, radius: float, lifetime: float, mask: int, effects: HitEffects,
+		falloff: float = 0.0, falloff_exponent: float = 1.0, spared: Node = null,
+		power: float = 1.0, on_executed: Callable = Callable()) -> void:
+	_power = maxf(power, 0.0)
+	_on_executed = on_executed
 	_damage = maxf(damage, 0.0)
 	_radius = maxf(radius, 0.0)
 	_mask = mask
 	_effects = effects
+	_falloff = clampf(falloff, 0.0, 1.0)
+	_falloff_exponent = maxf(falloff_exponent, 0.01)
+	if spared != null:
+		_struck.append(spared)
 	_shape.radius = maxf(_radius, 0.01)
 
 	var size := _factor(_radius, reference_radius, radius_influence)
@@ -181,8 +206,11 @@ func _physics_process(delta: float) -> void:
 
 
 ## Strikes every enemy inside the radius not yet struck by this blast, once each.
+## A blast with no damage but with [HitEffects] - HELL CHAMBER's shockwave - is
+## crowd control only: it shoves and staggers each man through his own
+## [HitReaction] and never touches his [Health].
 func _catch() -> void:
-	if _damage <= 0.0 or _radius <= 0.0 or _mask == 0 or not is_inside_tree():
+	if (_damage <= 0.0 and _effects == null) or _radius <= 0.0 or _mask == 0 or not is_inside_tree():
 		return
 	var query := PhysicsShapeQueryParameters2D.new()
 	query.shape = _shape
@@ -209,10 +237,35 @@ func _catch() -> void:
 		if not is_instance_valid(hitbox):
 			continue
 		var away := hitbox.global_position - global_position
+		var damage := _damage_at(away.length())
 		if away.is_zero_approx():
 			away = Vector2.RIGHT.rotated(randf() * TAU)
-		if not _tear_if_fatal(victim, hitbox, away.normalized()):
-			hitbox.take_hit(_damage, away.normalized(), hitbox.global_position, false, _effects)
+		if _damage <= 0.0:
+			_shove(victim, hitbox, away.normalized())
+			continue
+		if not _tear_if_fatal(victim, hitbox, damage, away.normalized()):
+			hitbox.take_hit(damage, away.normalized(), hitbox.global_position, false, _effects)
+
+
+## Knocks [param victim] away along [param away] and staggers him with this blast's
+## [HitEffects], without a hit - the damage-free blast's whole effect. A man who is
+## dead, or has no [HitReaction], is left alone.
+func _shove(victim: Node, hitbox: Hitbox, away: Vector2) -> void:
+	var health := hitbox.get_node_or_null(hitbox.health_path) as Health
+	if health != null and not health.is_alive():
+		return
+	var reactions := victim.find_children("*", &"HitReaction", true, false)
+	if not reactions.is_empty():
+		(reactions[0] as HitReaction).react(away, _effects, false)
+
+
+## The blast's damage to a man [param distance] pixels from its centre, after the
+## falloff towards the edge.
+func _damage_at(distance: float) -> float:
+	if _falloff <= 0.0 or _radius <= 0.0:
+		return _damage
+	var reach := pow(clampf(distance / _radius, 0.0, 1.0), _falloff_exponent)
+	return _damage * (1.0 - _falloff * reach)
 
 
 ## Lands the blast on [param victim] through [member gore_effect] when it is going
@@ -220,33 +273,13 @@ func _catch() -> void:
 ## as the hit will be: the hitbox's multiplier on the blast's damage against what
 ## he has left, and nothing while he is in a grace window that would drop the hit.
 ## A man already dead or already going is never torn twice.
-func _tear_if_fatal(victim: Node, hitbox: Hitbox, away: Vector2) -> bool:
-	var body := victim as Node2D
-	if gore_effect == null or body == null or body.is_queued_for_deletion() or not _gore_allowed(body):
-		return false
-	var health := hitbox.get_node_or_null(hitbox.health_path) as Health
-	if health == null or not health.is_alive() or health.is_invulnerable():
-		return false
-	if _damage * hitbox.damage_multiplier < health.get_current():
-		return false
-	var gore := gore_effect.instantiate() as Explosion
-	var container := get_tree().current_scene
-	if gore == null or container == null:
-		if gore != null:
-			gore.free()
-		return false
-	container.add_child(gore)
-	gore.tear_apart_by_hit(body, hitbox, _damage, away, hitbox.global_position, _effects)
-	return true
-
-
-func _gore_allowed(body: Node) -> bool:
-	if not gore_requires.is_empty() and body.find_children("*", gore_requires, true, false).is_empty():
-		return false
-	for type: StringName in gore_excludes:
-		if not body.find_children("*", type, true, false).is_empty():
-			return false
-	return true
+##
+## It is a real blast, so the man is thrown apart from its centre rather than torn
+## where he stood - see [member Explosion.throws_bodies].
+func _tear_if_fatal(victim: Node, hitbox: Hitbox, damage: float, away: Vector2) -> bool:
+	return Explosion.tear_if_fatal(gore_effect, victim, hitbox, damage, away,
+		hitbox.global_position, _effects, gore_requires, gore_excludes, false, _on_executed,
+		global_position, _radius)
 
 
 func _closer(a: Hitbox, b: Hitbox) -> bool:
@@ -321,7 +354,7 @@ func _camera(weight: float, volley: int) -> void:
 	var near := 1.0
 	if falloff_distance > 0.0:
 		near = lerpf(1.0, far_scale, clampf(offset.length() / falloff_distance, 0.0, 1.0))
-	var strength := weight * stack * near
+	var strength := weight * stack * near * _power
 
 	# The camera keeps the larger shake, so every blast may ask.
 	if shake_strength > 0.0 and shake_duration > 0.0:
@@ -346,7 +379,7 @@ func _camera(weight: float, volley: int) -> void:
 
 
 func _sound(volley: int) -> void:
-	if sounds.is_empty():
+	if sounds.is_empty() or (max_sounds_per_volley > 0 and volley > max_sounds_per_volley):
 		return
 	var bank := get_node_or_null(sound_bank_path) as SoundBank
 	if bank == null:

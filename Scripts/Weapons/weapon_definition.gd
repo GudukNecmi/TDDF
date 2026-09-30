@@ -70,6 +70,10 @@ var _run_levels: Dictionary[StringName, int] = {}
 ## upgrade - keyed by whatever granted them, so each source can be replaced or
 ## withdrawn on its own. Nothing sets any today.
 var _extra_modifiers: Dictionary[StringName, Array] = {}
+## Kill rewards from anything other than a Legendary - the held Cards - keyed by
+## whatever granted them, like [member _extra_modifiers]. See
+## [method set_kill_reward_source].
+var _extra_kill_rewards: Dictionary[StringName, Array] = {}
 ## Legendaries switched on for this run, by [member WeaponLegendary.id]. Run-only,
 ## like [member _run_levels], and forgotten with them.
 var _active_legendaries: Dictionary[StringName, bool] = {}
@@ -90,6 +94,9 @@ func get_stats() -> WeaponStats:
 		for modifiers: Array in _extra_modifiers.values():
 			for modifier: WeaponStatModifier in modifiers:
 				_stats.add_modifier(modifier)
+		for rewards: Array in _extra_kill_rewards.values():
+			for reward: KillReward in rewards:
+				_stats.add_kill_reward(reward)
 		for legendary: WeaponLegendary in legendaries:
 			if is_legendary_active(legendary):
 				legendary.apply_to(_stats)
@@ -198,6 +205,22 @@ func set_modifier_source(source: StringName, modifiers: Array[WeaponStatModifier
 	_stats_changed()
 
 
+## Sets the kill rewards granted by [param source], replacing whatever it granted
+## before; an empty array withdraws them. The hook a Card that leaves something on a
+## kill uses - see [RunCardHolder] - so its reward reaches the same
+## [member WeaponStats.kill_rewards] a Legendary's does.
+func set_kill_reward_source(source: StringName, rewards: Array[KillReward]) -> void:
+	if rewards.is_empty():
+		if not _extra_kill_rewards.has(source):
+			return
+		_extra_kill_rewards.erase(source)
+	else:
+		if _extra_kill_rewards.get(source, []) == Array(rewards):
+			return
+		_extra_kill_rewards[source] = rewards.duplicate()
+	_stats_changed()
+
+
 ## Forgets every level bought and every extra source. For a new save or a debug
 ## reset, the same as [method AmmoLocker.reset].
 func reset_upgrades() -> void:
@@ -205,6 +228,7 @@ func reset_upgrades() -> void:
 	_run_levels.clear()
 	_active_legendaries.clear()
 	_extra_modifiers.clear()
+	_extra_kill_rewards.clear()
 	_stats_changed()
 
 

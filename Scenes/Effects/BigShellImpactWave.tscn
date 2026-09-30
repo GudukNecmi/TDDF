@@ -1,0 +1,84 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Effects/pressure_wave.gd" id="1_wave"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Recoil Devil/PressureWave.PNG" id="2_wave"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (1).PNG" id="3_smoke1"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (3).PNG" id="4_smoke3"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
+blend_mode = 1
+
+[sub_resource type="Curve" id="Curve_dust"]
+_data = [Vector2(0, 0.45), 0.0, 1.6, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_dust"]
+offsets = PackedFloat32Array(0, 0.2, 1)
+colors = PackedColorArray(0.3, 0.05, 0.04, 0, 0.22, 0.04, 0.04, 0.6, 0.08, 0.02, 0.02, 0)
+
+[sub_resource type="Gradient" id="Gradient_sparks"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(2, 1.2, 0.8, 1, 1, 0.08, 0.05, 0.85, 0.25, 0, 0.02, 0)
+
+[node name="BigShellImpactWave" type="Node2D"]
+script = ExtResource("1_wave")
+wave_start_scale = 0.12
+wave_end_scale = 0.4
+wave_seconds = 0.22
+wave_travel = 34.0
+wave_color = Color(1.6, 0.22, 0.12, 0.9)
+dust_textures = Array[Texture2D]([ExtResource("3_smoke1"), ExtResource("4_smoke3")])
+
+[node name="Dust" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 6
+lifetime = 0.6
+one_shot = true
+explosiveness = 0.9
+randomness = 0.4
+lifetime_randomness = 0.3
+local_coords = false
+texture = ExtResource("3_smoke1")
+emission_shape = 3
+emission_rect_extents = Vector2(4, 14)
+direction = Vector2(1, 0)
+spread = 50.0
+gravity = Vector2(0, -20)
+initial_velocity_min = 50.0
+initial_velocity_max = 130.0
+angular_velocity_min = -60.0
+angular_velocity_max = 60.0
+damping_min = 120.0
+damping_max = 200.0
+scale_amount_min = 0.08
+scale_amount_max = 0.16
+scale_amount_curve = SubResource("Curve_dust")
+color_ramp = SubResource("Gradient_dust")
+
+[node name="Sparks" type="CPUParticles2D" parent="."]
+material = SubResource("CanvasItemMaterial_add")
+emitting = false
+amount = 16
+lifetime = 0.3
+one_shot = true
+explosiveness = 0.95
+lifetime_randomness = 0.4
+local_coords = false
+emission_shape = 3
+emission_rect_extents = Vector2(3, 16)
+direction = Vector2(1, 0)
+spread = 30.0
+gravity = Vector2(0, 60)
+initial_velocity_min = 160.0
+initial_velocity_max = 340.0
+damping_min = 300.0
+damping_max = 600.0
+scale_amount_min = 1.4
+scale_amount_max = 2.8
+color_ramp = SubResource("Gradient_sparks")
+
+[node name="Wave" type="Sprite2D" parent="."]
+visible = false
+material = SubResource("CanvasItemMaterial_add")
+texture = ExtResource("2_wave")
+offset = Vector2(68, 0)

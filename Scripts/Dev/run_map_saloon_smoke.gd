@@ -156,8 +156,20 @@ func _check_saloon() -> void:
 	if goods_rows.is_empty():
 		return
 
-	var good := screen.goods[0] as RunMapSaloonAmmoGood
-	_ok(good != null, "the first thing on the shelf is a box of rounds")
+	# Rounds that never run out have nothing to sell - see [member AmmoType.unlimited]
+	# - so the purchase is measured on the first box of rounds that can run dry.
+	var index := -1
+	for i: int in screen.goods.size():
+		var candidate := screen.goods[i] as RunMapSaloonAmmoGood
+		if candidate == null or candidate.ammo_type == null:
+			continue
+		if candidate.ammo_type.unlimited:
+			_ok(not candidate.can_buy(screen),
+				"unlimited %s cannot be bought" % candidate.ammo_type.get_plural_name())
+		elif index < 0:
+			index = i
+	var good := screen.goods[index] as RunMapSaloonAmmoGood if index >= 0 else null
+	_ok(good != null, "the shelf has a box of finite rounds")
 	if good == null:
 		return
 	var reserve := locker.get_reserve(good.ammo_type)
@@ -165,7 +177,7 @@ func _check_saloon() -> void:
 	var price := good.get_price(screen)
 	var purse := wallet.get_total()
 
-	goods_rows[0].pressed.emit()
+	goods_rows[index].pressed.emit()
 	await process_frame
 	_ok(reserve.get_current() > 0, "buying a box put rounds in the reserve",
 		"%d round(s)" % reserve.get_current())

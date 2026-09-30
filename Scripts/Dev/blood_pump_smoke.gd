@@ -59,7 +59,7 @@ func _run() -> void:
 	print("--- off: the ordinary pump ---")
 	var rounds := _rounds(ammo)
 	_pump(gun)
-	_ok(_rounds(ammo) == rounds - gun.rounds_lost_on_eject, "working a loaded gun still throws the live round", "%d -> %d" % [rounds, _rounds(ammo)])
+	_ok(_rounds(ammo) == rounds - _lost_on_eject(gun), "working a loaded gun still throws the live round", "%d -> %d" % [rounds, _rounds(ammo)])
 	_pump(gun)
 	_ok(gun.get_pump_charge() == 0, "and banks no charge")
 	_ok(gun.get_stage_label().is_empty() and gun.get_charge_ratio() == 0.0, "the readout and the sight stay blank")
@@ -197,7 +197,7 @@ func _run() -> void:
 	rounds = _rounds(ammo)
 	gun.reload_to_ready()
 	_pump(gun)
-	_ok(_rounds(ammo) == rounds - gun.rounds_lost_on_eject, "the pump is back to the ordinary one")
+	_ok(_rounds(ammo) == rounds - _lost_on_eject(gun), "the pump is back to the ordinary one")
 	_pump(gun)
 	_ok(gun.get_pump_charge() == 0, "and banks nothing")
 
@@ -274,3 +274,10 @@ func _ok(condition: bool, what: String, detail: String = "") -> void:
 func _finish() -> void:
 	print("BLOOD PUMP SMOKE: %s" % ("ALL PASSED" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures > 0 else 0)
+
+
+## What working the action throws away: nothing from unlimited shells - see
+## [member AmmoType.unlimited] - or the gun's own authored loss otherwise.
+func _lost_on_eject(gun: Shotgun) -> int:
+	var ammo := gun.get_ammo()
+	return 0 if ammo != null and ammo.is_unlimited() else gun.rounds_lost_on_eject

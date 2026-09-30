@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Effects/one_shot_particles.gd" id="1_ospar"]
+[ext_resource type="Texture2D" path="res://Assets/Efects/Boom Efects/Smoke (2).PNG" id="2_smoke"]
+
+[sub_resource type="Curve" id="Curve_grow"]
+_data = [Vector2(0, 0.4), 0.0, 1.4, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_smoke"]
+offsets = PackedFloat32Array(0, 0.15, 0.6, 1)
+colors = PackedColorArray(0.35, 0.06, 0.04, 0, 0.16, 0.04, 0.04, 0.75, 0.08, 0.03, 0.03, 0.45, 0.04, 0.02, 0.02, 0)
+
+[node name="BigShellSmoke" type="CPUParticles2D"]
+z_index = 2
+emitting = false
+amount = 9
+lifetime = 1.1
+one_shot = true
+explosiveness = 0.85
+randomness = 0.4
+lifetime_randomness = 0.3
+local_coords = false
+texture = ExtResource("2_smoke")
+emission_shape = 1
+emission_sphere_radius = 8.0
+direction = Vector2(1, 0)
+spread = 28.0
+gravity = Vector2(0, -22)
+initial_velocity_min = 50.0
+initial_velocity_max = 150.0
+angular_velocity_min = -50.0
+angular_velocity_max = 50.0
+damping_min = 110.0
+damping_max = 170.0
+scale_amount_min = 0.1
+scale_amount_max = 0.2
+scale_amount_curve = SubResource("Curve_grow")
+color_ramp = SubResource("Gradient_smoke")
+script = ExtResource("1_ospar")

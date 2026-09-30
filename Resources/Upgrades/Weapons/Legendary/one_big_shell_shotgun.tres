@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="WeaponLegendary" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_legendary.gd" id="1_legendary"]
+[ext_resource type="Script" path="res://Scripts/Weapons/one_big_shell.gd" id="2_shell"]
+[ext_resource type="PackedScene" path="res://Scenes/Projectile/BigShell.tscn" id="3_scene"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BigShellTrail.tscn" id="4_trail"]
+[ext_resource type="PackedScene" uid="uid://cgotikexplosion" path="res://Scenes/Effects/Explosion.tscn" id="5_gore"]
+
+[sub_resource type="Curve" id="Curve_edge"]
+_data = [Vector2(0, 0), 0.0, 0.45, 0, 0, Vector2(1, 1), 1.8, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Resource" id="Resource_shell"]
+script = ExtResource("2_shell")
+shell_scene = ExtResource("3_scene")
+visual_scale = 1.0
+hit_radius = 22.0
+speed_multiplier = 0.8
+range_multiplier = 1.5
+glow_intensity = 1.0
+shimmer_strength = 1.0
+trail_scene = ExtResource("4_trail")
+trail_intensity = 1.0
+core_damage_multiplier = 1.0
+damage_per_pellet = true
+min_edge_damage = 0.15
+core_radius = 0.25
+edge_falloff_curve = SubResource("Curve_edge")
+graze_from = 0.55
+core_knockback_multiplier = 2.2
+edge_knockback_multiplier = 3.0
+knockback_push = 140.0
+edge_side_push = 0.55
+stagger_multiplier = 1.5
+kill_gore_effect = ExtResource("5_gore")
+gore_min_centrality = 0.6
+heavy_hit_from = 0.5
+
+[resource]
+script = ExtResource("1_legendary")
+id = &"one_big_shell"
+display_name = "ONE BIG SHELL"
+description = "EVERY SHOT IS ONE ENORMOUS CANNON ROUND. A DEAD-CENTRE HIT DEALS THE WHOLE BLAST; A GRAZE ONLY CLIPS AND SHOVES."
+one_big_shell = SubResource("Resource_shell")

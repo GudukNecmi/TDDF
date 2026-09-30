@@ -11,8 +11,9 @@ extends Control
 ##
 ## [b]RIDE OUT is the pit.[/b] It asks the scene's [RunPortal] to
 ## [method RunPortal.start_run], which is the chain of questions setting out has
-## always been - here authored to raise the wanted board with its confirm button
-## first ([member RunPortal.asks_for_bounty]) and to set out on a fixed map rather
+## always been - here authored to hand the run exactly one contract without
+## raising the board ([member RunPortal.assigned_bounty_count]), whose poster the
+## Run Map holds up as it opens, and to set out on a fixed map rather
 ## than asking ([member RunPortal.departure_map_id]) - then the resupply and the
 ## ride onto the Run Map through [WorldRegionRouter], exactly as from the pit.
 ##

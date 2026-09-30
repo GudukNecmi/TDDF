@@ -9,3 +9,5 @@ min_enemies = 40
 max_enemies = 80
 active_enemies = 15
 cleared_kind = &"bandit_camp_cleared"
+asks_before_fighting = false
+fade_time = 0.8

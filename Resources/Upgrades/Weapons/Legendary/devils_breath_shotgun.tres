@@ -11,10 +11,14 @@ blast_scene = ExtResource("3_blast")
 damage = 30.0
 damage_multiplier = 2.0
 radius = 48.0
+falloff = 0.4
 knockback = 1.4
 knockback_push = 60.0
 stagger = 1.2
 lifetime = 0.1
+tint = Color(0.8, 0.06, 0.04, 1)
+tint_strength = 0.7
+glow_scale = 1.45
 trail_scene = ExtResource("4_trail")
 
 [resource]

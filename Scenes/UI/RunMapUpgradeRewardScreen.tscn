@@ -4,9 +4,6 @@
 [ext_resource type="Shader" uid="uid://c5kbp8xehadhn" path="res://Shaders/pause_blur.gdshader" id="2_blur"]
 [ext_resource type="Texture2D" uid="uid://cljgjod7gtng6" path="res://Assets/UI/UI Screens/All UI Background.PNG" id="3_panel"]
 [ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="4_button"]
-[ext_resource type="Resource" path="res://Resources/RunMap/Rewards/bandit_group_upgrade_reward.tres" id="5_group_reward"]
-[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_upgrade_reward.gd" id="6_reward_script"]
-[ext_resource type="Resource" path="res://Resources/RunMap/Rewards/bandit_camp_upgrade_reward.tres" id="7_camp_reward"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_rewardblur"]
 shader = ExtResource("2_blur")
@@ -60,7 +57,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
-rewards = Array[ExtResource("6_reward_script")]([ExtResource("5_group_reward"), ExtResource("7_camp_reward")])
 
 [node name="Blur" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_rewardblur")

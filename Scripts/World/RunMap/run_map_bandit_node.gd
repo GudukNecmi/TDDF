@@ -113,16 +113,47 @@ func _on_site_reached(site: RunMapSite) -> void:
 	_asking_encounter = entry
 	if not bridge.site_encounter_answered.is_connected(_on_answered):
 		bridge.site_encounter_answered.connect(_on_answered, CONNECT_ONE_SHOT)
-	if bridge.try_begin_site_encounter(
-			region, enemy_count_for(graph, site), entry.active_enemies, site.kind):
-		return
 
-	# Refused - something else is already running - so the point is left exactly
-	# as it was found and will ask again the next time the piece stands on it.
+	# A point that asks raises the decision screen; one that does not - a camp -
+	# is a fight outright, faded into rather than asked about. See
+	# [member RunMapBanditEncounter.asks_before_fighting].
+	if entry.asks_before_fighting:
+		if bridge.try_begin_site_encounter(
+				region, enemy_count_for(graph, site), entry.active_enemies, site.kind):
+			return
+	else:
+		if not bridge.site_fight_refused.is_connected(_on_fight_refused):
+			bridge.site_fight_refused.connect(_on_fight_refused, CONNECT_ONE_SHOT)
+		if bridge.try_begin_site_fight(region, enemy_count_for(graph, site),
+				entry.active_enemies, site.kind, entry.fade_time):
+			# Deferred so it lands after [RunMapDirector] opens the map's choices
+			# again: no road may be taken while the screen is going dark.
+			if _view != null:
+				_view.set_picking.call_deferred(false)
+			return
+		if bridge.site_fight_refused.is_connected(_on_fight_refused):
+			bridge.site_fight_refused.disconnect(_on_fight_refused)
+
+	_let_go(bridge)
+
+
+## Refused - something else is already running - so the point is left exactly as
+## it was found and will ask again the next time the piece stands on it.
+func _let_go(bridge: WorldMapCombatBridge) -> void:
 	_asking = null
 	_asking_encounter = null
 	if bridge.site_encounter_answered.is_connected(_on_answered):
 		bridge.site_encounter_answered.disconnect(_on_answered)
+
+
+## A point that fights without asking went dark and then could not open its
+## fight. It is let go as a refusal is, and the roads open again.
+func _on_fight_refused() -> void:
+	var bridge := _resolve_bridge()
+	if bridge != null:
+		_let_go(bridge)
+	if _view != null:
+		_view.set_picking(true)
 
 
 ## The answer, whichever of the four it was. The point is written down as dealt

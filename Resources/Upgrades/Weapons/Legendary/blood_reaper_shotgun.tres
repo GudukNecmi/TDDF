@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponLegendary" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_legendary.gd" id="1_legendary"]
+[ext_resource type="Script" path="res://Scripts/Weapons/blood_reaper.gd" id="2_reaper"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BloodReaperTrail.tscn" id="4_trail"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BloodReaperGore.tscn" id="5_gore"]
+
+[sub_resource type="Resource" id="Resource_reaper"]
+script = ExtResource("2_reaper")
+blood_reaper_power_multiplier = 0.1
+execution_gore = ExtResource("5_gore")
+target_radius = 460.0
+trail_scene = ExtResource("4_trail")
+
+[resource]
+script = ExtResource("1_legendary")
+id = &"blood_reaper"
+display_name = "BLOOD REAPER"
+description = "EVERY MAN THE SHOTGUN KILLS IS EXECUTED - AND HIS DEATH FIRES ONE BLOOD ROUND PER PELLET AT THE NEAREST ENEMIES, CARRYING YOUR WHOLE BUILD AT 10% POWER. THEIR KILLS REAP AGAIN."
+blood_reaper = SubResource("Resource_reaper")

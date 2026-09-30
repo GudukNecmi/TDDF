@@ -1,0 +1,55 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/World/blood_bag.gd" id="1_bag"]
+[ext_resource type="Shader" path="res://Shaders/volatile_blood.gdshader" id="2_shader"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_glow"]
+blend_mode = 1
+light_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_glow"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.45, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_glow"]
+gradient = SubResource("Gradient_glow")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_blob"]
+shader = ExtResource("2_shader")
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bag"]
+radius = 17.0
+
+[node name="BloodBag" type="Area2D"]
+z_index = 1
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_bag")
+
+[node name="Glow" type="Sprite2D" parent="."]
+material = SubResource("CanvasItemMaterial_glow")
+texture = SubResource("GradientTexture2D_glow")
+
+[node name="Shadow" type="Node2D" parent="."]
+
+[node name="GlobulesBack" type="Node2D" parent="."]
+
+[node name="Blob" type="Node2D" parent="."]
+material = SubResource("ShaderMaterial_blob")
+position = Vector2(0, -26)
+
+[node name="GlobulesFront" type="Node2D" parent="."]
+
+[node name="Shape" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_bag")
+
+[node name="IdleSound" type="AudioStreamPlayer2D" parent="."]
+bus = &"Game"
+max_distance = 420.0
+attenuation = 1.6

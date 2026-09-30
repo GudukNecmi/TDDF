@@ -566,7 +566,7 @@ text = "BACK"
 
 [node name="RunPortal" type="Node2D" parent="."]
 script = ExtResource("15_portal")
-asks_for_bounty = true
+assigned_bounty_count = 1
 departure_map_id = &"desert"
 asks_for_map = false
 prompt_path = NodePath("")

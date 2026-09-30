@@ -110,15 +110,27 @@ func get_flash_materials() -> Array[ShaderMaterial]:
 ## scale the shove and the length of the slow; the authored values here are what
 ## an ordinary hit does.
 func _on_damaged(_amount: float, hit_direction: Vector2) -> void:
-	var effects := HitEffects.new() if _health == null else _health.get_last_hit_effects()
+	react(hit_direction, HitEffects.new() if _health == null else _health.get_last_hit_effects())
+
+
+## The shove, the slow and the flash of one hit along [param hit_direction], with
+## [param effects] - what a hit does beyond its damage. Reached through
+## [signal Health.damaged] for every ordinary hit, and called directly by a blow
+## that deals no damage at all - HELL CHAMBER's shockwave, which is crowd control
+## only - so it is the same reaction either way. [param flash] false leaves the
+## body unlit, since nothing hurt it.
+func react(hit_direction: Vector2, effects: HitEffects = null, flash: bool = true) -> void:
+	if effects == null:
+		effects = HitEffects.new()
 	if not hit_direction.is_zero_approx():
 		_knockback = hit_direction.normalized() \
 			* (knockback_speed * effects.knockback_scale + maxf(effects.knockback_push, 0.0))
 
 	_slow_window = slow_duration * effects.stagger_scale
 	_slow_left = _slow_window
-	_flash_left = flash_time
-	_set_flash(1.0)
+	if flash:
+		_flash_left = flash_time
+		_set_flash(1.0)
 
 
 func _collect_materials() -> void:

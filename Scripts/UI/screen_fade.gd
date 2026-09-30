@@ -32,6 +32,12 @@ const GROUP := &"screen_fade"
 
 ## Colour the screen is covered with.
 @export var fade_colour := Color(0, 0, 0)
+## Whether [member fade_colour] is taken from the loading curtain's own backdrop
+## instead - see [method LoadingCurtain.get_backdrop_colour]. On for a fade that
+## hands straight over to the curtain, so going dark and the loading screen
+## appearing read as one colour rather than as a black followed by a different
+## black. Falls back to [member fade_colour] when there is no curtain.
+@export var matches_loading_screen: bool = false
 ## Default time a fade to black takes when a caller does not say.
 @export var fade_out_time: float = 1.0
 ## Default time a fade back in takes when a caller does not say.
@@ -48,7 +54,11 @@ var _tween: Tween
 func _ready() -> void:
 	add_to_group(GROUP)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	color = Color(fade_colour.r, fade_colour.g, fade_colour.b, 0.0)
+	if matches_loading_screen:
+		var curtain := LoadingCurtain.get_active(self)
+		if curtain != null:
+			fade_colour = curtain.get_backdrop_colour()
+	color =Color(fade_colour.r, fade_colour.g, fade_colour.b, 0.0)
 	visible = false
 
 	# A rebuild that was asked for under cover opens already black and clears

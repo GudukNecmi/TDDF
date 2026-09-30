@@ -46,6 +46,11 @@ extends CanvasLayer
 ## exists) keeps compositing over this exactly as it does over everything else,
 ## and nothing here ever asks for a second pass of that shader.
 
+## Emitted as the curtain lifts off whatever it was covering, with the tree
+## unpaused again. For something that should play only once the new scene is
+## actually being seen - see [RunMapBountyBossNode]'s opening poster.
+signal lowered
+
 ## Group used by [method get_active], the same convention every other
 ## found-rather-than-wired system in the project already follows.
 const GROUP := &"loading_screen"
@@ -95,6 +100,19 @@ static func get_active(from_node: Node) -> LoadingCurtain:
 
 func is_loading() -> bool:
 	return _loading
+
+
+## Whether the curtain is anywhere between going up and having lifted - true a
+## beat longer than [method is_loading], across the reveal.
+func is_covering() -> bool:
+	return visible
+
+
+## The colour the curtain is drawn in, so a fade meant to meet it - see
+## [member ScreenFade.matches_loading_screen] - reads it rather than copying it.
+func get_backdrop_colour() -> Color:
+	var rect := _backdrop as ColorRect
+	return rect.color if rect != null else Color.BLACK
 
 
 ## Raises the curtain and begins loading [param scene_path] in the background.
@@ -227,3 +245,4 @@ func _lower_curtain() -> void:
 	visible = false
 	if _backdrop != null:
 		_backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lowered.emit()

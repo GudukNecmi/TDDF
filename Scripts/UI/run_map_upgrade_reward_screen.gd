@@ -1,17 +1,14 @@
 class_name RunMapUpgradeRewardScreen
 extends Control
-## What a won fight at a run map point opens onto before the ride back to the
-## map: one free, run-only weapon upgrade for the weapon in the player's hands,
-## shown and taken.
+## One free, run-only weapon upgrade for the weapon in the player's hands, shown
+## and taken - what a won run map point's upgrade card opens on the Loot Screen.
 ##
-## [b]It opens itself, and only when the point pays.[/b] It listens for
-## [signal WorldMapCombatBridge.encounter_ended] and asks the bridge which kind of
-## point the fight was opened from - [method WorldMapCombatBridge.get_site_kind].
-## A win at a kind one of [member rewards] pays for draws the upgrade and holds
-## the ride home ([method WorldMapCombatBridge.hold_the_return]) until TAKE; every
-## other ending - a death, a free-roam fight, a point that pays nothing, a weapon
-## with nothing left to give - leaves the bridge to go home exactly as it always
-## has.
+## [b]It does not open itself.[/b] Which points pay, and what, is decided by
+## [LootSourceUpgrade] when the win's [LootBundle] is built; the upgrade card
+## ([LootRewardUpgrade]) opens this with [method open_with] or
+## [method open_selection] when it is clicked, and hears [signal finished] once
+## the last upgrade has been taken. The ride home is the Loot Screen's to hold,
+## not this screen's.
 ##
 ## [b]It owns no upgrade system.[/b] What is drawn and how it is delivered is
 ## [RunMapUpgradeReward]'s, which is the Market's pool and the Market's
@@ -27,12 +24,11 @@ extends Control
 
 ## Emitted once for every upgrade taken - for a selection, as each row is chosen.
 signal taken(weapon: WeaponDefinition, upgrade: WeaponUpgrade)
+## Emitted once the upgrade - or the last pick of a selection - has been taken
+## and the screen has closed.
+signal finished
 
-## What each kind of point pays. The first entry that pays for the point's kind
-## is the one used.
-@export var rewards: Array[RunMapUpgradeReward] = []
-## The run's state, asked which weapon is carried when no [WeaponMount] answers.
-@export var session_path: NodePath = ^"/root/RunSession"
+const GROUP := &"run_map_upgrade_reward_screen"
 
 @export_group("Wording")
 ## Headed on a common upgrade.
@@ -83,7 +79,6 @@ signal taken(weapon: WeaponDefinition, upgrade: WeaponUpgrade)
 @onready var _choices: Container = get_node_or_null(choices_path) as Container
 @onready var _choice_template: Button = get_node_or_null(choice_template_path) as Button
 
-var _bridge: WorldMapCombatBridge
 var _weapon: WeaponDefinition
 var _upgrade: WeaponUpgrade
 var _good: RunMapUpgradeGood
@@ -99,6 +94,10 @@ var _last_taken: Array[StringName] = []
 var _rng: RandomNumberGenerator
 
 
+func _enter_tree() -> void:
+	add_to_group(GROUP)
+
+
 func _ready() -> void:
 	hide()
 	if _take != null:
@@ -110,9 +109,11 @@ func _ready() -> void:
 		_choices.visible = false
 
 
-func _process(_delta: float) -> void:
-	if _bridge == null or not is_instance_valid(_bridge):
-		_bind_bridge()
+## The screen in this scene, or null when it has none.
+static func get_active(from_node: Node) -> RunMapUpgradeRewardScreen:
+	if from_node == null or not from_node.is_inside_tree():
+		return null
+	return from_node.get_tree().get_first_node_in_group(GROUP) as RunMapUpgradeRewardScreen
 
 
 ## The upgrade on offer, or null while the screen is shut.
@@ -125,8 +126,8 @@ func get_weapon() -> WeaponDefinition:
 	return _weapon
 
 
-## Takes the upgrade - one run level on the weapon's run stack, free - and rides
-## home. Returns whether a level was given.
+## Takes the upgrade - one run level on the weapon's run stack, free - and
+## closes, reporting [signal finished]. Returns whether a level was given.
 func take() -> bool:
 	if not visible or _reward != null:
 		return false
@@ -139,17 +140,14 @@ func take() -> bool:
 	hide()
 	if given:
 		taken.emit(weapon, upgrade)
-	if _bridge != null and is_instance_valid(_bridge):
-		_bridge.let_the_return_go()
+	finished.emit()
 	return given
 
 
-## Opens on [param upgrade] for [param weapon] and holds the ride home until it
-## is taken. Answers false - and holds nothing - when there is no bridge to hold.
+## Opens on [param upgrade] for [param weapon] until it is taken. Answers false
+## when there is nothing to show or the screen is already up.
 func open_with(weapon: WeaponDefinition, upgrade: WeaponUpgrade, reward: RunMapUpgradeReward) -> bool:
-	if weapon == null or upgrade == null or reward == null:
-		return false
-	if _bridge == null or not _bridge.hold_the_return(self):
+	if weapon == null or upgrade == null or reward == null or visible:
 		return false
 	_weapon = weapon
 	_upgrade = upgrade
@@ -174,17 +172,14 @@ func get_pick() -> int:
 
 ## Opens a selection of [param reward] for [param weapon] - its
 ## [member RunMapUpgradeReward.picks], each chosen from
-## [member RunMapUpgradeReward.choices] - and holds the ride home until the last
-## is taken. Answers false, holding nothing, when there is nothing to offer or no
-## bridge to hold.
+## [member RunMapUpgradeReward.choices] - until the last is taken. Answers false
+## when there is nothing to offer or the screen is already up.
 func open_selection(weapon: WeaponDefinition, reward: RunMapUpgradeReward,
 		rng: RandomNumberGenerator) -> bool:
-	if weapon == null or reward == null or rng == null:
+	if weapon == null or reward == null or rng == null or visible:
 		return false
 	var offer := reward.draw_choices(weapon, rng)
 	if offer.is_empty():
-		return false
-	if _bridge == null or not _bridge.hold_the_return(self):
 		return false
 	_weapon = weapon
 	_reward = reward
@@ -261,8 +256,7 @@ func _close_selection() -> void:
 	_pick = 0
 	_last_taken = []
 	hide()
-	if _bridge != null and is_instance_valid(_bridge):
-		_bridge.let_the_return_go()
+	finished.emit()
 
 
 func _clear_rows() -> void:
@@ -311,47 +305,3 @@ func _fill() -> void:
 		_level.text = level_format % next_level
 	if _note != null:
 		_note.text = note_text
-
-
-func _bind_bridge() -> void:
-	_bridge = WorldMapCombatBridge.get_active(self)
-	if _bridge != null and not _bridge.encounter_ended.is_connected(_on_encounter_ended):
-		_bridge.encounter_ended.connect(_on_encounter_ended)
-
-
-func _on_encounter_ended(victory: bool) -> void:
-	if not victory or visible or _bridge == null:
-		return
-	var reward := _reward_for(_bridge.get_site_kind())
-	if reward == null:
-		return
-	var weapon := _equipped_weapon()
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-	if reward.choices > 1:
-		open_selection(weapon, reward, rng)
-		return
-	var upgrade := reward.draw(weapon, rng)
-	if upgrade == null:
-		return
-	open_with(weapon, upgrade, reward)
-
-
-func _reward_for(site_kind: StringName) -> RunMapUpgradeReward:
-	for reward: RunMapUpgradeReward in rewards:
-		if reward != null and reward.pays_for(site_kind):
-			return reward
-	return null
-
-
-## The weapon in the player's hands - the one the Market deals for too.
-func _equipped_weapon() -> WeaponDefinition:
-	var mount := WeaponMount.get_active(self)
-	if mount != null and mount.get_definition() != null:
-		return mount.get_definition()
-	var session := get_node_or_null(session_path) as RunSessionState
-	if session == null or session.get_weapon_catalog() == null:
-		return null
-	var catalog := session.get_weapon_catalog()
-	var chosen := catalog.find(session.get_weapon_id())
-	return chosen if chosen != null else catalog.get_default()

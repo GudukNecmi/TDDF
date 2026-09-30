@@ -43,7 +43,14 @@ var _capacity_bonus: int = 0
 func _init(type: AmmoType) -> void:
 	_type = type
 	if _type != null:
-		_current = clampi(_type.starting_ammo, 0, get_max())
+		_current = get_max() if is_unlimited() else clampi(_type.starting_ammo, 0, get_max())
+
+
+## Whether this ammunition never runs out - see [member AmmoType.unlimited].
+## Read live off the type, so it is the one switch every weapon, readout and
+## shop fed by this reserve follows without being told.
+func is_unlimited() -> bool:
+	return _type != null and _type.unlimited
 
 
 ## The authored data behind this count - name, price, bundle size.
@@ -98,7 +105,7 @@ func set_capacity_bonus(bonus: int) -> void:
 func refresh_capacity() -> void:
 	var ceiling := get_max()
 	capacity_changed.emit(ceiling)
-	if _current > ceiling:
+	if _current > ceiling or (is_unlimited() and _current != ceiling):
 		_set_current(ceiling)
 	else:
 		# Announced anyway: a readout showing "42 / 60" has to redraw when the 60
@@ -114,17 +121,18 @@ func add_capacity(amount: int) -> void:
 
 
 func is_empty() -> bool:
-	return _current <= 0
+	return not is_unlimited() and _current <= 0
 
 
+## Always true for unlimited ammunition, so nothing offers to top it up.
 func is_full() -> bool:
-	return _current >= get_max()
+	return is_unlimited() or _current >= get_max()
 
 
 ## Whether there are at least [param amount] rounds left. A weapon asks this
 ## before it fires, with its own rounds-per-shot.
 func has_ammo(amount: int = 1) -> bool:
-	return amount <= 0 or _current >= amount
+	return amount <= 0 or is_unlimited() or _current >= amount
 
 
 ## Spends [param amount] rounds and returns whether it went through.
@@ -135,6 +143,10 @@ func has_ammo(amount: int = 1) -> bool:
 func consume(amount: int = 1) -> bool:
 	if amount <= 0 or not has_ammo(amount):
 		return false
+	# Paid for without being taken: the shot goes through exactly as a finite
+	# one does, and the count stays where it is.
+	if is_unlimited():
+		return true
 
 	_set_current(_current - amount)
 	if _current <= 0:
@@ -146,7 +158,7 @@ func consume(amount: int = 1) -> bool:
 ## the capacity is refused rather than silently held, so a purchase can report
 ## honestly what the player got.
 func add(amount: int) -> int:
-	if amount <= 0:
+	if amount <= 0 or is_unlimited():
 		return 0
 
 	var room := get_max() - _current
@@ -182,6 +194,9 @@ func reset() -> void:
 ## The one place the count is written, so every change is announced exactly once
 ## however it was made.
 func _set_current(value: int) -> void:
+	# Unlimited ammunition always reads full; nothing can move it off that.
+	if is_unlimited():
+		value = get_max()
 	if value == _current:
 		return
 	_current = value

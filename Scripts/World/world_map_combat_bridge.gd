@@ -144,6 +144,11 @@ signal boss_encounter_ended(victory: bool)
 ## simply leaves the map standing, and a fight ends on
 ## [signal encounter_ended] in the arena like every other.
 signal site_encounter_answered(outcome: StringName)
+## Emitted when a run map point that fights without asking - see
+## [method try_begin_site_fight] - accepted the arrival but could not open the
+## fight once the screen had gone dark. The screen has been cleared again and the
+## point is left as it was found.
+signal site_fight_refused
 ## Emitted in the arena as a run map bounty boss point fight opens, with the man
 ## who is coming and how many of his men are standing in the way of him.
 ##
@@ -1042,6 +1047,61 @@ func try_begin_site_encounter(region_id: StringName, enemy_count: int,
 	return true
 
 
+## A run map point that is a fight, not a question - a bandit camp. The same
+## staged record, the same arena and the same combat music as a FIGHT answer at
+## [method try_begin_site_encounter]; the only thing missing is the screen asking.
+##
+## [b]The map goes dark before the curtain goes up.[/b] The scene's [ScreenFade]
+## is taken to black over [param fade_time] - authored to meet the loading
+## curtain's own colour, see [member ScreenFade.matches_loading_screen] - and the
+## fight is only staged on the frame it is fully covered, so the curtain rises
+## over a screen that is already its colour and the combat music begins with it
+## rather than under a map that is still visible. A scene with no fade, or a
+## [param fade_time] of 0, stages the fight at once.
+##
+## [signal site_encounter_answered] is emitted with [code]&"fight"[/code] once
+## the fight is actually on its way, exactly as a FIGHT answer is; a fight that
+## could not be staged after the fade clears the screen and emits
+## [signal site_fight_refused] instead. Answers false when something else is
+## already running or being decided, which the caller reads as "the point will
+## have to wait".
+func try_begin_site_fight(region_id: StringName, enemy_count: int,
+		active_count: int = 0, site_kind: StringName = &"",
+		fade_time: float = 0.0) -> bool:
+	if _running or _deciding or region_id.is_empty():
+		return false
+	if WorldRegionRouter.get_active(self) == null:
+		return false
+
+	var count := clampi(
+		enemy_count, mini(min_enemy_count, max_enemy_count), max_enemy_count)
+	var strength := float(count) / maxf(enemy_count_scale, 0.01)
+	var go := _stage_site_fight_after_fade.bind(
+		region_id, strength, count, active_count, site_kind)
+
+	# Held as deciding across the fade, so nothing else can open a door while the
+	# screen is going dark on this one.
+	_deciding = true
+	var fade := ScreenFade.get_active(self)
+	if fade == null or fade_time <= 0.0:
+		go.call()
+	else:
+		fade.fade_out(fade_time, go)
+	return true
+
+
+func _stage_site_fight_after_fade(region_id: StringName, strength: float, count: int,
+		active_count: int, site_kind: StringName) -> void:
+	_deciding = false
+	if _stage_site_fight(region_id, strength, count, active_count, site_kind):
+		site_encounter_answered.emit(&"fight")
+		return
+	var fade := ScreenFade.get_active(self)
+	if fade != null:
+		fade.clear()
+	site_fight_refused.emit()
+
+
 ## A run map bounty boss point: the fourth door into this same class.
 ##
 ## [b]It is a door, not a second encounter system.[/b] What reaches the arena is
@@ -1064,10 +1124,12 @@ func try_begin_site_encounter(region_id: StringName, enemy_count: int,
 ## [method try_begin_boss_encounter], which asks nothing either.
 ##
 ## [param boss] is who is waiting, built by whatever owns the point - see
-## [RunMapBountyBossNode]. Answers false when something is already running, which
-## the caller reads as "the point will have to wait".
+## [RunMapBountyBossNode]. [param site_kind] is the point's kind before it was
+## cleared, carried like a bandit point's so [method get_site_kind] answers for a
+## boss point too. Answers false when something is already running, which the
+## caller reads as "the point will have to wait".
 func try_begin_mini_boss_encounter(region_id: StringName, support_count: int,
-		boss: MiniBossBrief) -> bool:
+		boss: MiniBossBrief, site_kind: StringName = &"") -> bool:
 	if _running or _deciding or region_id.is_empty() or boss == null:
 		return false
 
@@ -1113,6 +1175,7 @@ func try_begin_mini_boss_encounter(region_id: StringName, support_count: int,
 		&"boss_look_key": boss.look_key,
 		&"boss_health_multiplier": boss.health_multiplier,
 		&"boss_known": boss.known,
+		&"site_kind": site_kind,
 		&"world_day": world_day,
 		&"world_degree": world_degree,
 		&"horse_mounted": false,
@@ -1419,9 +1482,18 @@ func _resolve_letterbox() -> TravelLetterbox:
 ## once rather than crossfaded. Called in the same breath as
 ## [method _open_loading_transition], so the fight is never loading in
 ## silence.
+##
+## [b]Asked twice, it picks once.[/b] The map picks the track as the loading
+## curtain goes up and the arena asks again as the fight opens behind it; with the
+## board already in [member combat_state] the second ask leaves it alone, so the
+## song heard over the loading screen carries on into the fight rather than being
+## swapped for another pick mid-bar. The arena's own [MusicStateWatcher] holds the
+## state for the same reason - see [member MusicStateWatcher.held_states].
 func _start_combat_music() -> void:
 	var board := _resolve_music_board()
 	if board == null:
+		return
+	if board.get_target() == combat_state:
 		return
 	var track := _pick_fight_track()
 	if track != null:

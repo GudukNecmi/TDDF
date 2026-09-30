@@ -75,6 +75,21 @@ signal contracts_bound(count: int)
 ## does not so much as blink. Empty leaves the map's own music playing.
 @export var music_state: StringName = &"bounty_boss"
 
+@export_group("Opening poster")
+## Whether a fresh map holds up the contract it was just paired with before the
+## roads open - the same sheet, the same flight, the same screen the piece
+## landing on the man's point raises. [b]This is how the player learns who the
+## run is after[/b], now that setting out no longer passes the wanted board - see
+## [member RunPortal.assigned_bounty_count]. Only a map whose points were paired
+## on this build introduces anyone, so coming back from a fight never shows it
+## again.
+@export var introduces_contracts: bool = true
+## How long the map is seen before the sheet sets off, in seconds, counted from
+## the loading curtain lifting.
+@export var introduction_delay: float = 0.35
+## The loading curtain, waited on so the sheet is never flown behind it.
+@export var loading_screen_path: NodePath = ^"/root/LoadingScreen"
+
 var _director: RunMapDirector
 var _view: RunMapView
 var _bridge: WorldMapCombatBridge
@@ -94,8 +109,9 @@ func _ready() -> void:
 	# director standing above this node in the tree has already emitted by the
 	# time this runs. Binding is idempotent - see [method bind_contracts] - so a
 	# map that comes back from storage already paired off is simply left alone.
-	if _director != null:
-		bind_contracts(_director.get_graph())
+	if _director != null and bind_contracts(_director.get_graph()) > 0 \
+			and introduces_contracts:
+		_introduce_contracts()
 
 
 ## The entry answering points of [param kind], or null for a handle no entry
@@ -211,6 +227,55 @@ func boss_for(site: RunMapSite) -> MiniBossBrief:
 	return brief
 
 
+# --- Opening the run ------------------------------------------------------------
+
+## Holds the run's contract up over the map as it first opens - see
+## [member introduces_contracts]. The roads stay shut until the sheet has gone,
+## so the first thing the player can do on the map is ride towards him.
+func _introduce_contracts() -> void:
+	var bounty := _first_bound_contract()
+	var screen := _resolve_poster()
+	if bounty == null or screen == null:
+		return
+	if _view != null:
+		_view.set_picking(false)
+
+	# Never behind the curtain: the map is shown first, and only then the sheet.
+	var curtain := get_node_or_null(loading_screen_path) as LoadingCurtain
+	if curtain != null and curtain.is_covering():
+		await curtain.lowered
+	if introduction_delay > 0.0:
+		await get_tree().create_timer(introduction_delay).timeout
+	if not is_inside_tree():
+		return
+
+	if not screen.finished.is_connected(_on_introduction_finished):
+		screen.finished.connect(_on_introduction_finished, CONNECT_ONE_SHOT)
+	if screen.present(bounty):
+		return
+	if screen.finished.is_connected(_on_introduction_finished):
+		screen.finished.disconnect(_on_introduction_finished)
+	_give_the_map_back()
+
+
+func _on_introduction_finished(_bounty: Bounty) -> void:
+	_give_the_map_back()
+
+
+## The contract on the lowest-numbered bounty boss point - the order
+## [method bind_contracts] paired them in.
+func _first_bound_contract() -> Bounty:
+	var graph := _director.get_graph() if _director != null else null
+	if graph == null:
+		return null
+	var first: RunMapSite = null
+	for site: RunMapSite in graph.sites:
+		if answers(site.kind) and not site.contract_id.is_empty() \
+				and (first == null or site.id < first.id):
+			first = site
+	return bounty_for(first)
+
+
 # --- Arriving on one ------------------------------------------------------------
 
 func _on_site_reached(site: RunMapSite) -> void:
@@ -280,7 +345,7 @@ func _commit(site: RunMapSite) -> void:
 	if _view != null:
 		_view.refresh()
 
-	if bridge.try_begin_mini_boss_encounter(region, support, boss):
+	if bridge.try_begin_mini_boss_encounter(region, support, boss, entry.kind):
 		bounty_boss_committed.emit(site, bounty, boss)
 		return
 

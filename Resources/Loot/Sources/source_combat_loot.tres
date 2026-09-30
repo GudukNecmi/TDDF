@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="LootSourceCombatLoot" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Loot/loot_source_combat_loot.gd" id="1_source"]
+[ext_resource type="Resource" path="res://Resources/Loot/Looks/look_gem.tres" id="2_gem"]
+[ext_resource type="Resource" path="res://Resources/Loot/Looks/look_health.tres" id="3_health"]
+[ext_resource type="Resource" path="res://Resources/Loot/Looks/look_ammo.tres" id="4_ammo"]
+[ext_resource type="Resource" path="res://Resources/Loot/Looks/look_lead.tres" id="5_lead"]
+[ext_resource type="Resource" path="res://Resources/Loot/Looks/look_mystery_card.tres" id="6_fallback"]
+
+[resource]
+script = ExtResource("1_source")
+looks = {
+&"ammo": ExtResource("4_ammo"),
+&"boss_info": ExtResource("5_lead"),
+&"gem": ExtResource("2_gem"),
+&"heart": ExtResource("3_health")
+}
+fallback_look = ExtResource("6_fallback")

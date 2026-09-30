@@ -321,6 +321,10 @@ var _layers: Dictionary = {}
 ## Whether the pool is being written to from inside a [signal Health.health_changed]
 ## handler, so the write this node makes cannot be read as another lethal hit.
 var _restoring: bool = false
+## The contract paid on the killing hit and how much it paid, kept for whoever
+## presents the win afterwards - see [method get_paid_amount].
+var _paid_bounty: Bounty
+var _paid_amount: int = 0
 
 
 func _enter_tree() -> void:
@@ -342,6 +346,18 @@ static func get_active(from_node: Node) -> BossDefeat:
 
 func get_stage() -> Stage:
 	return _stage
+
+
+## The blood the killing hit paid into the carried wallet, 0 until a boss has been
+## beaten in this arena - read by [LootSourceBountyPayout] to show the payout on
+## the Loot Screen. Reading it pays nothing.
+func get_paid_amount() -> int:
+	return _paid_amount
+
+
+## The contract that payout was for, or null.
+func get_paid_bounty() -> Bounty:
+	return _paid_bounty
 
 
 ## Whether the boss has been beaten - at any point from the last shot onwards.
@@ -503,6 +519,8 @@ func _pay_reward() -> Bounty:
 		var wallet := get_node_or_null(wallet_path) as BloodWallet
 		if wallet != null:
 			wallet.add(amount)
+			_paid_bounty = bounty
+			_paid_amount = amount
 			reward_granted.emit(amount)
 
 	if completes_contract:

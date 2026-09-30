@@ -145,3 +145,39 @@ func remove_from_stack(index: int, amount: int) -> int:
 	if stack.count <= 0:
 		stacks.remove_at(index)
 	return taken
+
+
+# --- Boss Information ----------------------------------------------------------
+
+## Whether a Boss Information stack could teach the player anything right now:
+## some contract taken, not finished, and still carrying a question mark - the
+## same candidacy [method SurrenderKnowledge._pick_bounty] picks from.
+static func has_lead_to_teach(ledger: BountyLedger) -> bool:
+	return ledger != null and _pick_lead_bounty(ledger) != null
+
+
+## Spends one lead: fills in one unknown line of one outstanding contract, both
+## picked fresh from live ledger state. Returns whether anything was learned - a
+## lead that could teach nothing is refused rather than wasted. The one place
+## [HorseCartScreen] and [LootRewardLead] spend a lead through.
+static func teach_lead(ledger: BountyLedger) -> bool:
+	if ledger == null:
+		return false
+	var bounty := _pick_lead_bounty(ledger)
+	if bounty == null:
+		return false
+	var missing := bounty.get_unknown_categories()
+	if missing.is_empty():
+		return false
+	var category: StringName = missing[randi() % missing.size()]
+	return ledger.reveal(bounty.bounty_id, category)
+
+
+static func _pick_lead_bounty(ledger: BountyLedger) -> Bounty:
+	var pool: Array[Bounty] = []
+	for bounty: Bounty in ledger.get_outstanding():
+		if bounty != null and not bounty.is_fully_known():
+			pool.append(bounty)
+	if pool.is_empty():
+		return null
+	return pool[randi() % pool.size()]

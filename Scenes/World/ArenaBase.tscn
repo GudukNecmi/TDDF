@@ -324,7 +324,7 @@ script = ExtResource("76_46gt6")
 
 [node name="MusicStateWatcher" type="Node" parent="." unique_id=977416575]
 script = ExtResource("77_ak4we")
-held_states = Array[StringName]([&"bounty_boss"])
+held_states = Array[StringName]([&"bounty_boss", &"combat"])
 
 [node name="WorldReset" type="Node" parent="." unique_id=1592448932 groups=["world_reset"]]
 script = ExtResource("78_sw1ke")

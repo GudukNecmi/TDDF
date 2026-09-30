@@ -171,6 +171,26 @@ signal piece_separated(piece: DeathDebris)
 ## How far the body slumps as it goes down.
 @export var tip_offset := Vector2(0.0, 4.0)
 
+@export_group("Blast")
+## How the pieces fly when a real explosion kills this man - see
+## [method blast_apart]. The throw itself, how hard and which way, is the blast's to
+## decide; these are how the pieces themselves fall.
+##
+## Downward pull on the thrown body. Heavier than the head, so it comes down sooner.
+@export var blast_body_gravity: float = 1700.0
+@export_range(0.0, 1.0) var blast_body_bounce: float = 0.22
+## How quickly the body stops sliding once it is down.
+@export var blast_body_friction: float = 3.2
+## How far below where it was standing the body's ground is. Short - it was
+## standing on it.
+@export var blast_body_drop := Vector2(2.0, 10.0)
+## The same for the head, which leaves from shoulder height.
+@export var blast_head_drop := Vector2(22.0, 40.0)
+## How long the thrown pieces lie there before fading, and the fade. The blast has
+## taken the body away, so these are the whole of what is left of him.
+@export var blast_settle_time: float = 2.4
+@export var blast_fade_time: float = 1.0
+
 @onready var _health: Health = get_node_or_null(health_path) as Health
 @onready var _head: Node2D = get_node_or_null(head_path) as Node2D
 @onready var _knife: Node2D = get_node_or_null(knife_path) as Node2D
@@ -186,6 +206,10 @@ var _head_hit_pending: bool = false
 ## hit that killed, so this is what the death reads.
 var _last_hit_was_head: bool = false
 var _popped: bool = false
+## Whether the head has actually come off - by the ordinary death or by a blast.
+## Unlike [member _popped] a [method suppress] does not set it, since a blast calls
+## the ordinary death off and then throws the man itself - see [method blast_apart].
+var _separated: bool = false
 ## Whether this enemy's knife has already been let go of. A man can die during his
 ## own retreat, or be shot as he lies there having given up, so two of the three
 ## ways a knife is dropped can very easily both fire on the same body - and only one
@@ -236,12 +260,71 @@ func suppress() -> void:
 	_popped = true
 
 
+## A real explosion killed him: his body and his head are thrown clear as two
+## separate pieces, and his knife after them, instead of the ordinary death.
+##
+## [param body_velocity] and [param head_velocity] are sideways and upwards
+## (negative y) in pixels per second, and [param body_drift] / [param head_drift]
+## their speed across the floor up or down the screen - see
+## [method DeathDebris.launch]. The blast works those out from where it went off;
+## this only lifts the artwork out and throws it through the same [method _throw]
+## every death uses, so the pieces bounce, roll, cool their hit flash and fade
+## exactly as a severed head does.
+##
+## Calls the ordinary death off, as [method suppress] does. With
+## [param frees_owner] the man himself is freed once the pieces are out of him.
+## False when there is no body to throw or the head is already off, and the caller
+## falls back to whatever it would have done.
+func blast_apart(body_velocity: Vector2, body_drift: float, head_velocity: Vector2,
+		head_drift: float, frees_owner: bool = true) -> bool:
+	if _separated or _body == null or not is_instance_valid(_body) or not is_inside_tree():
+		return false
+	_popped = true
+	_separated = true
+	_blast_apart_now.call_deferred(body_velocity, body_drift, head_velocity, head_drift, frees_owner)
+	return true
+
+
+## Deferred for the reason [method _separate] is: a blast kill can arrive from
+## inside a physics callback, where reparenting is refused.
+func _blast_apart_now(body_velocity: Vector2, body_drift: float, head_velocity: Vector2,
+		head_drift: float, frees_owner: bool) -> void:
+	var container := get_tree().current_scene if is_inside_tree() else null
+	if container != null:
+		for part: Array in [[_head, "SeveredHead", head_velocity, head_drift, blast_head_drop,
+				gravity, bounce, ground_friction],
+				[_body, "ThrownBody", body_velocity, body_drift, blast_body_drop,
+				blast_body_gravity, blast_body_bounce, blast_body_friction]]:
+			var drop: Vector2 = part[4]
+			var carrier := _throw_piece(container, part[0] as Node2D, part[1], part[2], part[3],
+				part[5], part[6], part[7], randf_range(minf(drop.x, drop.y), maxf(drop.x, drop.y)))
+			if carrier != null:
+				carrier.settle_time = blast_settle_time
+				carrier.fade_time = blast_fade_time
+				_cool_hit_flash_within(carrier)
+		drop_knife(body_velocity.x)
+	var man := get_parent()
+	if frees_owner and man != null and not man.is_queued_for_deletion():
+		# After the knife's own deferred drop has lifted it out of him.
+		man.queue_free.call_deferred()
+
+
+## [method _cool_hit_flash] for every sprite in a thrown piece rather than only its
+## root - the body is a node of several sprites, each lit by the blow.
+func _cool_hit_flash_within(carrier: DeathDebris) -> void:
+	for node: Node in carrier.find_children("*", "CanvasItem", true, false):
+		var item := node as Node2D
+		if item != null and item.material is ShaderMaterial and item.get_parent() != carrier:
+			_cool_hit_flash(item, carrier)
+
+
 func _on_died() -> void:
 	# Guarded because a second death signal, however it arrived, must not tear a
 	# second head off a body that no longer has one.
 	if _popped:
 		return
 	_popped = true
+	_separated = true
 
 	var aim := _throw_direction()
 	_tip_body(aim)
@@ -442,6 +525,19 @@ func _throw(
 	drop_high: float,
 	cools_hit_flash: bool = true
 ) -> DeathDebris:
+	var lift := -lift_force * (1.0 + randf_range(-lift_variation, lift_variation))
+	var sideways := horizontal * (1.0 + randf_range(
+		-horizontal_variation, horizontal_variation))
+	return _throw_piece(container, piece, piece_name, Vector2(sideways, lift), 0.0,
+		piece_gravity, piece_bounce, friction, randf_range(drop_low, drop_high), cools_hit_flash)
+
+
+## [method _throw] at an exact [param velocity] - sideways, and upwards as negative
+## y - and [param drift] across the floor up or down the screen. See
+## [method DeathDebris.launch].
+func _throw_piece(container: Node, piece: Node2D, piece_name: String, velocity: Vector2,
+		drift: float, piece_gravity: float, piece_bounce: float, friction: float, drop: float,
+		cools_hit_flash: bool = true) -> DeathDebris:
 	if piece == null or not is_instance_valid(piece):
 		return null
 
@@ -475,11 +571,7 @@ func _throw(
 	else:
 		_clear_hit_flash_immediately(piece)
 	carrier.reset_physics_interpolation()
-
-	var lift := -lift_force * (1.0 + randf_range(-lift_variation, lift_variation))
-	var sideways := horizontal * (1.0 + randf_range(
-		-horizontal_variation, horizontal_variation))
-	carrier.launch(Vector2(sideways, lift), randf_range(drop_low, drop_high))
+	carrier.launch(velocity, drop, drift)
 
 	piece_separated.emit(carrier)
 	return carrier

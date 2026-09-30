@@ -52,6 +52,16 @@ const GROUP := &"run_portal"
 ## where RIDE OUT is the board and then the road. A world with no board behaves
 ## as though this were off.
 @export var asks_for_bounty: bool = false
+## How many contracts a run is handed without anything being asked - see
+## [method BountyLedger.assign_run_contracts], which deals and takes whatever the
+## player is short of this number as they set out. The run map then deals one
+## bounty boss point per contract held and holds the poster up as it opens - see
+## [member RunMapBountyBossNode.introduces_contracts].
+##
+## 0 leaves the ledger alone, which is what the pit has always done. 1 in the Base
+## menu, where RIDE OUT sets out with exactly one man to hunt rather than raising
+## the board.
+@export var assigned_bounty_count: int = 0
 ## The map a run sets out on when [member asks_for_map] is off, begun on
 ## [RunSessionState] exactly as picking it on the map screen would. Empty leaves
 ## the session alone, which is what the pit has always done.
@@ -257,6 +267,9 @@ func start_run() -> void:
 	if asks_for_bounty and not _bounty_confirmed and _open_board():
 		return
 
+	if assigned_bounty_count > 0:
+		_assign_bounties()
+
 	if asks_for_weapon and not _weapon_chosen and _open_weapon_menu():
 		return
 
@@ -345,6 +358,17 @@ func _open_board() -> bool:
 func _on_bounty_confirmed() -> void:
 	_bounty_confirmed = true
 	start_run()
+
+
+## Hands the run its contracts through the ledger - see
+## [member assigned_bounty_count]. Safe to reach twice: the ledger only tops up
+## what is short, so a start that was refused and pressed again deals nothing new.
+func _assign_bounties() -> void:
+	var ledger := get_node_or_null(^"/root/Bounties") as BountyLedger
+	if ledger == null:
+		return
+	if ledger.assign_run_contracts(assigned_bounty_count).is_empty():
+		push_warning("RunPortal: no contract could be dealt for this run.")
 
 
 ## Begins the run on [member departure_map_id], the same two calls the map screen

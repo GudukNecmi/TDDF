@@ -115,6 +115,10 @@ var _tweens: Dictionary = {}
 ## but has not opened yet - the one-second gap at the top of every handover.
 var _current: StringName = &""
 var _pending: StringName = &""
+## The layers sounding under the current state - see
+## [member MusicState.layered_states]. state_id -> true. A layer is never the
+## current state at the same time; promoting one takes it out of here.
+var _layers: Dictionary = {}
 
 
 func _ready() -> void:
@@ -187,6 +191,15 @@ func get_state() -> StringName:
 ## handover.
 func get_target() -> StringName:
 	return _pending if _pending != &"" else _current
+
+
+## The layers sounding under the current state right now - see
+## [member MusicState.layered_states].
+func get_layers() -> Array[StringName]:
+	var sounding: Array[StringName] = []
+	for layer: StringName in _layers.keys():
+		sounding.append(layer)
+	return sounding
 
 
 ## The player carrying the soundtrack right now, for anything that has to shape it
@@ -271,8 +284,36 @@ func _enter_with_shape(
 	if state_id == get_target():
 		return false
 
+	var wanted := _layers_of(state_id)
 	var leaving := _current
 	_pending = state_id
+
+	# Layers the arriving state does not carry go the way the state being left
+	# goes; the ones it does carry play straight through the handover.
+	for layer: StringName in _layers.keys():
+		if layer != state_id and not wanted.has(layer):
+			_layers.erase(layer)
+			_stow(layer, exit_s)
+
+	# Already sounding as a layer: it is promoted where it stands rather than
+	# faded and opened again.
+	if _layers.has(state_id):
+		_layers.erase(state_id)
+		if leaving != &"":
+			if wanted.has(leaving):
+				_layers[leaving] = true
+			else:
+				_stow(leaving, exit_s)
+		_promote(state_id, enter_s)
+		return true
+
+	# The state being left is one of the arriving state's own layers - the road's
+	# music out of the base, the Board Map opening under it. It carries on as a
+	# layer, and with nothing to fade out of the arriving state simply opens.
+	if leaving != &"" and wanted.has(leaving):
+		_layers[leaving] = true
+		_current = &""
+		leaving = &""
 
 	if leaving == &"":
 		# Nothing to hand over from - the first state of a session, or the first
@@ -312,6 +353,7 @@ func play_now(state_id: StringName, from_start: bool = false) -> bool:
 		return false
 
 	_pending = &""
+	_layers.clear()
 	for other: StringName in _players.keys():
 		if other != state_id:
 			_park(other)
@@ -325,6 +367,14 @@ func play_now(state_id: StringName, from_start: bool = false) -> bool:
 	player.pitch_scale = 1.0
 	player.play_from(_opening_position(state_id))
 	_current = state_id
+	# Its layers come in the same way: at once, at full speed and level.
+	for layer: StringName in _layers_of(state_id):
+		var layer_player := _players[layer] as MusicPlayer
+		var layer_state := _authored[layer] as MusicState
+		layer_player.volume_db = layer_state.volume_db
+		layer_player.pitch_scale = 1.0
+		layer_player.play_from(_opening_position(layer))
+		_layers[layer] = true
 	state_entered.emit(state_id)
 	return true
 
@@ -348,12 +398,20 @@ func slow_to_silence(seconds: float = -1.0) -> void:
 	_pending = &""
 
 	var time := maxf(seconds if seconds >= 0.0 else death_slow_time, 0.0001)
-	_kill_tween(_current)
-	var tween := create_tween().set_ignore_time_scale(true)
-	tween.set_parallel(true)
-	tween.tween_property(player, "pitch_scale", low_pitch, time)
-	tween.tween_property(player, "volume_db", silent_db, time)
-	_tweens[_current] = tween
+	# The layers die with it, the same way and left running for the same reason.
+	var winding: Array[StringName] = [_current]
+	for layer: StringName in _layers.keys():
+		winding.append(layer)
+	for state_id: StringName in winding:
+		var winding_player := _players.get(state_id) as MusicPlayer
+		if winding_player == null:
+			continue
+		_kill_tween(state_id)
+		var tween := create_tween().set_ignore_time_scale(true)
+		tween.set_parallel(true)
+		tween.tween_property(winding_player, "pitch_scale", low_pitch, time)
+		tween.tween_property(winding_player, "volume_db", silent_db, time)
+		_tweens[state_id] = tween
 
 
 ## The incoming half of a handover, one second before the outgoing half finishes.
@@ -387,7 +445,71 @@ func _open(state_id: StringName, enter_s: float = -1.0) -> void:
 	tween.tween_property(player, "volume_db", state.volume_db, seconds)
 	_tweens[state_id] = tween
 
+	_open_layers(state_id, seconds)
 	state_entered.emit(state_id)
+
+
+## A layer made the current state where it stands - see [method enter]. It is
+## already playing, so nothing is reopened or sought: it is only brought back to
+## full speed and level in case a handover had begun to take it down.
+func _promote(state_id: StringName, enter_s: float) -> void:
+	var player := _players.get(state_id) as MusicPlayer
+	var state := _authored.get(state_id) as MusicState
+	if player == null or state == null:
+		return
+	if not player.playing:
+		_open(state_id, enter_s)
+		return
+
+	_pending = &""
+	_current = state_id
+	_kill_tween(state_id)
+	var seconds := maxf(enter_s if enter_s >= 0.0 else enter_time, 0.0001)
+	var tween := create_tween().set_ignore_time_scale(true)
+	tween.set_parallel(true)
+	tween.tween_property(player, "pitch_scale", 1.0, seconds)
+	tween.tween_property(player, "volume_db", state.volume_db, seconds)
+	_tweens[state_id] = tween
+
+	_open_layers(state_id, seconds)
+	state_entered.emit(state_id)
+
+
+## Brings in every layer of [param state_id] that is not already sounding, the
+## same way a state opens: from where it was left, wound up from
+## [member low_pitch] over [param seconds]. One still playing - caught half way
+## through being stowed - is wound back up from wherever the fade had got to
+## rather than sought back to where it was last parked.
+func _open_layers(state_id: StringName, seconds: float) -> void:
+	for layer: StringName in _layers_of(state_id):
+		if _layers.has(layer):
+			continue
+		var player := _players[layer] as MusicPlayer
+		var state := _authored[layer] as MusicState
+		_layers[layer] = true
+		_kill_tween(layer)
+		if not player.playing:
+			player.volume_db = silent_db
+			player.pitch_scale = low_pitch
+			player.play_from(_opening_position(layer))
+		var tween := create_tween().set_ignore_time_scale(true)
+		tween.set_parallel(true)
+		tween.tween_property(player, "pitch_scale", 1.0, seconds)
+		tween.tween_property(player, "volume_db", state.volume_db, seconds)
+		_tweens[layer] = tween
+
+
+## The authored layers of [param state_id] that exist on this board, never the
+## state itself.
+func _layers_of(state_id: StringName) -> Array[StringName]:
+	var found: Array[StringName] = []
+	var state := _authored.get(state_id) as MusicState
+	if state == null:
+		return found
+	for layer: StringName in state.layered_states:
+		if layer != state_id and _players.has(layer) and not found.has(layer):
+			found.append(layer)
+	return found
 
 
 ## The outgoing half: slowed, faded, and only stopped once it is already inaudible,
@@ -431,6 +553,7 @@ func _park(state_id: StringName) -> void:
 
 	if _current == state_id:
 		_current = &""
+	_layers.erase(state_id)
 
 
 ## Where a state opens: the top of its track when it is authored to, and otherwise

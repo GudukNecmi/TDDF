@@ -38,8 +38,9 @@ var _current: float
 var _invulnerable_left: float = 0.0
 ## Held invulnerability, on until whoever raised it lowers it - see
 ## [method set_shielded]. Separate from the timed grace window above, so the two
-## can never cut each other short.
-var _shielded: bool = false
+## can never cut each other short. Keyed by who raised it, so two holders never
+## lower each other's shield.
+var _shield_sources: Dictionary = {}
 var _removed: bool = false
 ## See [method get_last_hit_effects].
 var _last_hit_effects: HitEffects
@@ -71,19 +72,33 @@ func _physics_process(delta: float) -> void:
 
 
 func is_invulnerable() -> bool:
-	return _shielded or _invulnerable_left > 0.0
+	return is_shielded() or _invulnerable_left > 0.0
 
 
 ## Holds this pool untouchable until it is called again with false, whatever
 ## the grace window is doing. For an ability with its own length - a boss's
-## sword circle - rather than a per-hit grace; it drops hits at the same single
-## point every damage source already funnels through.
-func set_shielded(shielded: bool) -> void:
-	_shielded = shielded
+## sword circle, the player thrown by RECOIL DEVIL - rather than a per-hit grace;
+## it drops hits at the same single point every damage source already funnels
+## through.
+##
+## [param source] names who is holding it. The pool stays shielded while any
+## source still holds it, so one lowering its shield never drops another's. A
+## caller that names none shares the one unnamed hold, exactly as before.
+func set_shielded(shielded: bool, source: StringName = &"") -> void:
+	if shielded:
+		_shield_sources[source] = true
+	else:
+		_shield_sources.erase(source)
 
 
+## Whether anything is holding the pool shielded.
 func is_shielded() -> bool:
-	return _shielded
+	return not _shield_sources.is_empty()
+
+
+## Whether [param source] in particular is holding it.
+func is_shielded_by(source: StringName) -> bool:
+	return _shield_sources.has(source)
 
 
 ## Seconds of grace left, for a flicker or a UI readout to follow.

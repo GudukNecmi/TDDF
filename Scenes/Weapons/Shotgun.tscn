@@ -31,6 +31,28 @@
 [ext_resource type="PackedScene" path="res://Scenes/Effects/RecoilDevilWave.tscn" id="27_wave"]
 [ext_resource type="AudioStream" path="res://Sound/Generated/RecoilDevilBlast.mp3" id="28_rdblast"]
 [ext_resource type="AudioStream" path="res://Sound/Generated/RecoilDevilEcho.mp3" id="29_rdecho"]
+[ext_resource type="Script" path="res://Scripts/Weapons/devils_breath_feedback.gd" id="30_breathfb"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/DevilsBreathFire.mp3" id="31_breathfire"]
+[ext_resource type="Script" path="res://Scripts/Weapons/hell_chamber_feedback.gd" id="32_hellfb"]
+[ext_resource type="Script" uid="uid://byfgi11486opa" path="res://Scripts/Common/looping_sound.gd" id="33_loop"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/HellChamberBuildup.wav" id="34_hellhum"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/HellChamberMaxReady.wav" id="35_hellready"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/HellChamberMaxFire.wav" id="36_hellfire"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/HellChamberBurst.tscn" id="37_hellburst"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/HellChamberMaxBurst.tscn" id="38_hellmax"]
+[ext_resource type="Script" path="res://Scripts/Weapons/blood_reaper_feedback.gd" id="39_reaperfb"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BloodReaperBurst.tscn" id="40_reaperburst"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BloodReaperSpray.tscn" id="41_reaperspray"]
+[ext_resource type="Script" path="res://Scripts/Weapons/one_big_shell_feedback.gd" id="42_shellfb"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BigShellMuzzle.tscn" id="43_shellmuzzle"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BigShellFlash.tscn" id="44_shellflash"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BigShellSmoke.tscn" id="45_shellsmoke"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BigShellImpactBurst.tscn" id="46_shellburst"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BigShellImpactWave.tscn" id="47_shellwave"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/BigShellGrazeBurst.tscn" id="48_shellgraze"]
+[ext_resource type="PackedScene" uid="uid://b6uem6u8qvq5n" path="res://Scenes/Effects/BloodSplash.tscn" id="49_blood"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/OneBigShellFire.mp3" id="50_shellfire"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/OneBigShellImpact.mp3" id="51_shellimpact"]
 [ext_resource type="Script" uid="uid://c7s7neqpifyms" path="res://Scripts/World/Shadows/shadow_caster.gd" id="90_shadow"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_blast"]
@@ -51,6 +73,10 @@ fill_to = Vector2(1, 0.5)
 [sub_resource type="Gradient" id="Gradient_embers"]
 offsets = PackedFloat32Array(0, 0.3, 1)
 colors = PackedColorArray(1, 0.4, 0.22, 0.9, 0.7, 0.03, 0.06, 0.75, 0.15, 0, 0.02, 0)
+
+[sub_resource type="Gradient" id="Gradient_hellenergy"]
+offsets = PackedFloat32Array(0, 0.25, 0.7, 1)
+colors = PackedColorArray(1, 0.7, 0.35, 1, 0.95, 0.16, 0.03, 0.9, 0.45, 0, 0.1, 0.6, 0.08, 0, 0.03, 0)
 
 [node name="Shotgun" type="Node2D" unique_id=2059946623]
 z_index = 1
@@ -175,3 +201,75 @@ muzzle_burst_scene = ExtResource("9_flash")
 wave_scene = ExtResource("27_wave")
 blast_layer_sound = ExtResource("28_rdblast")
 echo_layer_sound = ExtResource("29_rdecho")
+
+[node name="BreathFeedback" type="Node" parent="."]
+script = ExtResource("30_breathfb")
+fire_layer_sound = ExtResource("31_breathfire")
+
+[node name="ChamberGlow" type="Sprite2D" parent="Art/Body"]
+visible = false
+material = SubResource("CanvasItemMaterial_blast")
+texture = ExtResource("2_default")
+centered = false
+flip_h = true
+
+[node name="ChamberLight" type="PointLight2D" parent="MuzzleRig"]
+visible = false
+position = Vector2(110, -43)
+color = Color(1, 0.22, 0.06, 1)
+energy = 0.0
+texture = SubResource("GradientTexture2D_muzzle")
+texture_scale = 3.0
+
+[node name="ChamberEnergy" type="CPUParticles2D" parent="MuzzleRig"]
+material = SubResource("CanvasItemMaterial_blast")
+position = Vector2(110, -43)
+emitting = false
+amount = 40
+lifetime = 0.7
+local_coords = false
+emission_shape = 3
+emission_rect_extents = Vector2(170, 22)
+direction = Vector2(1, 0)
+spread = 90.0
+gravity = Vector2(0, -60)
+initial_velocity_min = 10.0
+initial_velocity_max = 45.0
+damping_min = 10.0
+damping_max = 30.0
+scale_amount_min = 1.2
+scale_amount_max = 3.0
+color_ramp = SubResource("Gradient_hellenergy")
+
+[node name="ChamberHum" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("34_hellhum")
+volume_db = -80.0
+script = ExtResource("33_loop")
+max_volume_db = -7.0
+fade_in_speed = 6.0
+fade_out_speed = 9.0
+
+[node name="ChamberFeedback" type="Node" parent="."]
+script = ExtResource("32_hellfb")
+light_scale_min = 2.0
+light_scale_max = 5.5
+max_burst_scene = ExtResource("38_hellmax")
+release_burst_scene = ExtResource("37_hellburst")
+max_reached_sound = ExtResource("35_hellready")
+charged_layer_sound = ExtResource("36_hellfire")
+max_fire_sound = ExtResource("36_hellfire")
+
+[node name="ReaperFeedback" type="Node" parent="."]
+script = ExtResource("39_reaperfb")
+burst_scenes = Array[PackedScene]([ExtResource("40_reaperburst"), ExtResource("41_reaperspray")])
+
+[node name="ShellFeedback" type="Node" parent="."]
+script = ExtResource("42_shellfb")
+muzzle_burst_scene = ExtResource("43_shellmuzzle")
+muzzle_ring_scene = ExtResource("44_shellflash")
+muzzle_smoke_scene = ExtResource("45_shellsmoke")
+heavy_impact_scenes = Array[PackedScene]([ExtResource("44_shellflash"), ExtResource("46_shellburst"), ExtResource("47_shellwave")])
+lethal_scenes = Array[PackedScene]([ExtResource("49_blood"), ExtResource("49_blood")])
+graze_impact_scenes = Array[PackedScene]([ExtResource("44_shellflash"), ExtResource("48_shellgraze")])
+fire_layer_sound = ExtResource("50_shellfire")
+impact_sound = ExtResource("51_shellimpact")

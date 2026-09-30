@@ -89,7 +89,13 @@ func get_max() -> int:
 
 
 func is_empty() -> bool:
-	return get_current() <= 0
+	return _reserve == null or _reserve.is_empty()
+
+
+## Whether this weapon's ammunition never runs out - see
+## [member AmmoType.unlimited].
+func is_unlimited() -> bool:
+	return _reserve != null and _reserve.is_unlimited()
 
 
 ## Whether there is enough left for one more shot. A weapon with no ammunition
@@ -127,6 +133,8 @@ func discard_rounds(count: int = 1) -> bool:
 func describe() -> String:
 	if _reserve == null or ammo_type == null:
 		return ""
+	if is_unlimited():
+		return "∞ %s" % ammo_type.get_plural_name()
 	return "%d / %d %s" % [get_current(), get_max(), ammo_type.get_plural_name()]
 
 

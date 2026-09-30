@@ -1,0 +1,231 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/loot_screen.gd" id="1_screen"]
+[ext_resource type="Resource" path="res://Resources/Loot/loot_layout_table.tres" id="2_layout"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/Loot/LootRewardCard.tscn" id="3_card"]
+[ext_resource type="Shader" uid="uid://c5kbp8xehadhn" path="res://Shaders/pause_blur.gdshader" id="4_blur"]
+[ext_resource type="Script" path="res://Scripts/UI/loot_pouch.gd" id="5_pouch"]
+[ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="6_button"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_lootblur"]
+shader = ExtResource("4_blur")
+shader_parameter/blur_amount = 2.8
+shader_parameter/dim = 0.7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_table"]
+bg_color = Color(0.17, 0.09, 0.05, 1)
+border_width_left = 10
+border_width_top = 10
+border_width_right = 10
+border_width_bottom = 10
+border_color = Color(0.09, 0.045, 0.025, 1)
+corner_radius_top_left = 26
+corner_radius_top_right = 26
+corner_radius_bottom_right = 26
+corner_radius_bottom_left = 26
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 24
+shadow_offset = Vector2(0, 10)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_felt"]
+bg_color = Color(0.2, 0.035, 0.04, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.5, 0.33, 0.12, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_leave"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+texture = ExtResource("6_button")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_leave_pressed"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+texture = ExtResource("6_button")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+modulate_color = Color(0.76, 0.7, 0.6, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_leave_disabled"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+texture = ExtResource("6_button")
+texture_margin_left = 20.0
+texture_margin_top = 16.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
+region_rect = Rect2(20, 14, 994, 208)
+modulate_color = Color(0.45, 0.42, 0.4, 0.8)
+
+[node name="LootScreen" type="Control"]
+process_mode = 3
+visible = false
+z_index = 140
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_screen")
+layout = ExtResource("2_layout")
+default_card_scene = ExtResource("3_card")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_lootblur")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Table" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -540.0
+offset_top = -300.0
+offset_right = 540.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_table")
+
+[node name="Felt" type="Panel" parent="Table"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_felt")
+
+[node name="Title" type="Label" parent="Table"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 26.0
+offset_bottom = 60.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.9, 0.12, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 26
+text = "SPOILS OF THE FIGHT"
+horizontal_alignment = 1
+
+[node name="Pouch" type="Button" parent="Table"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -85.0
+offset_top = -120.0
+offset_right = 85.0
+offset_bottom = 72.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+flat = true
+script = ExtResource("5_pouch")
+
+[node name="Rewards" type="Control" parent="Table"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Hint" type="Label" parent="Table"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 60.0
+offset_bottom = 84.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.9, 0.82, 0.62, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 16
+text = "OPEN THE POUCH"
+horizontal_alignment = 1
+
+[node name="Empty" type="Label" parent="Table"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = 100.0
+offset_right = 260.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.75, 0.68, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 16
+text = "THE POUCH IS EMPTY"
+horizontal_alignment = 1
+
+[node name="Leave" type="Button" parent="Table"]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -105.0
+offset_top = -76.0
+offset_right = 105.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 0
+focus_mode = 0
+theme_override_colors/font_color = Color(0.93, 0.88, 0.8, 1)
+theme_override_colors/font_disabled_color = Color(0.6, 0.55, 0.5, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxTexture_leave")
+theme_override_styles/hover = SubResource("StyleBoxTexture_leave")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_leave_pressed")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_leave_disabled")
+text = "RIDE ON"

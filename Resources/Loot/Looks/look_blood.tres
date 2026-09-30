@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="LootRewardLook" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Loot/loot_reward_look.gd" id="1_look"]
+
+[resource]
+script = ExtResource("1_look")
+kind = &"blood"
+label = "BLOOD"
+face_color = Color(0.2, 0.02, 0.03, 1)
+accent_color = Color(0.95, 0.12, 0.1, 1)
+text_color = Color(0.93, 0.88, 0.8, 1)

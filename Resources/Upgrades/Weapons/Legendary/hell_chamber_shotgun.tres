@@ -1,0 +1,104 @@
+[gd_resource type="Resource" script_class="WeaponLegendary" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_legendary.gd" id="1_legendary"]
+[ext_resource type="Script" path="res://Scripts/Weapons/hell_chamber.gd" id="2_chamber"]
+[ext_resource type="Script" path="res://Scripts/Weapons/shot_explosion.gd" id="3_explosion"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/HellChamberShockwave.tscn" id="4_wave"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/HellChamberMaxShockwave.tscn" id="5_maxwave"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/HellChamberTrail.tscn" id="6_trail"]
+[ext_resource type="PackedScene" uid="uid://cgotikexplosion" path="res://Scenes/Effects/Explosion.tscn" id="7_gore"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/HellChamberMaxBurst.tscn" id="8_burst"]
+
+[sub_resource type="Curve" id="Curve_move"]
+_data = [Vector2(0, 0), 0.0, 0.6, 0, 0, Vector2(1, 1), 1.4, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Resource" id="Resource_wave"]
+script = ExtResource("3_explosion")
+blast_scene = ExtResource("4_wave")
+damage = 0.0
+damage_multiplier = 1.0
+radius = 44.0
+falloff = 0.0
+direct_hit_takes_blast = true
+knockback = 1.6
+knockback_push = 140.0
+stagger = 3.0
+lifetime = 0.08
+explode_on_hit = true
+explode_on_pierce = true
+explode_at_range_end = false
+kill_gore_effect = ExtResource("7_gore")
+surface_mask = 0
+knockback_stat_influence = 0.5
+stagger_stat_influence = 0.5
+blood_gain_stat_influence = 0.0
+tint = Color(1, 0.22, 0.05, 1)
+tint_strength = 0.55
+glow_scale = 1.5
+glow_pulse = 0.4
+glow_pulse_rate = 18.0
+trail_scene = ExtResource("6_trail")
+
+[sub_resource type="Resource" id="Resource_maxwave"]
+script = ExtResource("3_explosion")
+blast_scene = ExtResource("5_maxwave")
+damage = 0.0
+damage_multiplier = 1.0
+radius = 90.0
+falloff = 0.0
+direct_hit_takes_blast = true
+knockback = 2.4
+knockback_push = 300.0
+stagger = 5.5
+lifetime = 0.12
+explode_on_hit = true
+explode_on_pierce = true
+explode_at_range_end = false
+kill_gore_effect = ExtResource("7_gore")
+surface_mask = 0
+knockback_stat_influence = 0.5
+stagger_stat_influence = 0.5
+blood_gain_stat_influence = 0.0
+tint = Color(1, 0.55, 0.3, 1)
+tint_strength = 0.7
+glow_scale = 2.0
+glow_pulse = 0.55
+glow_pulse_rate = 24.0
+trail_scene = ExtResource("6_trail")
+
+[sub_resource type="Resource" id="Resource_chamber"]
+script = ExtResource("2_chamber")
+charge_duration = 1.4
+move_speed_at_full = 0.55
+move_speed_curve = SubResource("Curve_move")
+speed_stage_at = 0.25
+speed_multiplier = 1.4
+weight_stage_at = 0.5
+size_multiplier = 1.45
+knockback_multiplier = 1.7
+shockwave_stage_at = 0.75
+shockwave = SubResource("Resource_wave")
+max_at = 1.0
+max_speed_multiplier = 1.6
+max_size_multiplier = 1.7
+max_knockback_multiplier = 2.3
+max_damage_multiplier = 2.0
+max_long_damage_multiplier = 1.4
+max_shockwave = SubResource("Resource_maxwave")
+max_volley_enabled = true
+max_volley_power_multiplier = 0.1
+max_volley_delay = 0.07
+max_volley_offset = 56.0
+max_volley_jitter_degrees = 12.0
+max_volley_trail_scene = ExtResource("6_trail")
+max_volley_ring_scene = ExtResource("5_maxwave")
+max_volley_ring_radius = 110.0
+max_volley_burst_scene = ExtResource("8_burst")
+
+[resource]
+script = ExtResource("1_legendary")
+id = &"hell_chamber"
+display_name = "HELL CHAMBER"
+description = "HOLD FIRE TO CHARGE, RELEASE TO SHOOT. THE LONGER YOU HOLD, THE FASTER, HEAVIER AND HARDER-HITTING THE PELLETS - FROM 75% EVERY IMPACT THROWS A HELLISH SHOCKWAVE THAT SCATTERS AND STAGGERS, AND A FULL MAX CHARGE HITS FOR DOUBLE DAMAGE, +40% AT LONG RANGE AND BURSTS OUTWARD AGAIN AS A RING OF THE SAME SHOT AT 10% POWER. YOU SLOW DOWN WHILE CHARGING."
+hell_chamber = SubResource("Resource_chamber")

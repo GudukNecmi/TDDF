@@ -9,3 +9,4 @@ display_name = "Shell"
 display_name_plural = "Shells"
 max_ammo = 40
 starting_ammo = 40
+unlimited = true

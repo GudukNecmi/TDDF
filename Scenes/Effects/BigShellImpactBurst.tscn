@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Effects/one_shot_particles.gd" id="1_ospar"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_dot"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.75, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_dot"]
+gradient = SubResource("Gradient_dot")
+width = 16
+height = 16
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Curve" id="Curve_shrink"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.15), -1.2, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_hit"]
+offsets = PackedFloat32Array(0, 0.2, 0.55, 1)
+colors = PackedColorArray(2.4, 2, 1.6, 1, 1.8, 0.35, 0.12, 1, 0.6, 0.02, 0.04, 0.8, 0.08, 0, 0.02, 0)
+
+[node name="BigShellImpactBurst" type="CPUParticles2D"]
+z_index = 6
+material = SubResource("CanvasItemMaterial_add")
+emitting = false
+amount = 40
+lifetime = 0.32
+one_shot = true
+explosiveness = 1.0
+lifetime_randomness = 0.35
+local_coords = false
+texture = SubResource("GradientTexture2D_dot")
+emission_shape = 1
+emission_sphere_radius = 6.0
+direction = Vector2(1, 0)
+spread = 28.0
+gravity = Vector2(0, 120)
+initial_velocity_min = 220.0
+initial_velocity_max = 620.0
+damping_min = 420.0
+damping_max = 900.0
+scale_amount_min = 0.8
+scale_amount_max = 2.2
+scale_amount_curve = SubResource("Curve_shrink")
+color_ramp = SubResource("Gradient_hit")
+script = ExtResource("1_ospar")

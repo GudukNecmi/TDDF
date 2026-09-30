@@ -3,7 +3,9 @@ extends SceneTree
 ## Legendary, the K panel switches it on and off and reads back right on reopening;
 ## off, a shot leaves the player where they stand; on, each shot throws the real
 ## player straight away from the aim, once per shot however many pellets, chained
-## shots never pass the ceiling, the shove dies away, a wall stops it; and it
+## shots never pass the ceiling, the shove dies away, a wall stops it; while thrown
+## the player is untouchable under a ward that fades out under its glow, and the
+## shield drops with the flight without lowering anyone else's; and it
 ## stacks with the other Legendaries without touching their parts.
 ##
 ## Run with:
@@ -93,11 +95,40 @@ func _run() -> void:
 	_ok(kicks[0] == 1, "one kick for a shot of %d pellets" % gun.get_pellet_count())
 	_ok(recoil.get_recoil_velocity().x < -500.0 and absf(recoil.get_recoil_velocity().y) < 1.0,
 		"the push is straight left", str(recoil.get_recoil_velocity()))
+	var health := player.get_node(^"Health") as Health
+	var shield := player.get_node(^"RecoilShield") as RecoilShield
+	_ok(recoil.is_guarded() and health.is_shielded_by(PlayerRecoil.SHIELD_SOURCE),
+		"the kick raises the shield on the player's own Health")
 	await _wait(0.2)
 	var moved := player.global_position - start
 	_ok(moved.x < -60.0, "the real body is carried left", str(moved))
+	var before_hit := health.get_current()
+	health.take_damage(1.0, Vector2.RIGHT)
+	_ok(health.get_current() == before_hit, "a hit mid-flight takes nothing")
+	_ok(shield.is_showing(), "the ward is drawn while guarded")
+	var clock := 0.0
+	while recoil.is_guarded() and clock < 1.5:
+		await physics_frame
+		clock += 1.0 / Engine.physics_ticks_per_second
+	_ok(not recoil.is_guarded() and not health.is_shielded(), "the shield drops as the flight ends")
+	var speed_at_drop := recoil.get_recoil_velocity().length()
+	_ok(speed_at_drop < _devil.shot_recoil.invulnerability_min_speed,
+		"only once the shove is below its minimum speed", "%.1f" % speed_at_drop)
+	_ok(shield.is_showing(), "the ward is still fading out under its glow, not popped off")
+	health.take_damage(1.0, Vector2.RIGHT)
+	_ok(health.get_current() < before_hit, "hits land again at once")
+	health.restore_full()
 	await _wait(1.0)
 	_ok(not recoil.is_recoiling(), "the shove dies away")
+	_ok(not shield.is_showing(), "and the ward is gone once its glow has played")
+
+	print("--- another holder's shield is left alone ---")
+	health.set_shielded(true)
+	_fire(gun, 0.0)
+	await _wait(1.2)
+	_ok(not recoil.is_guarded() and health.is_shielded(), "the recoil lowers only its own shield")
+	health.set_shielded(false)
+	_ok(not health.is_shielded(), "and the other holder lowers theirs")
 
 	print("--- aim up-right, pushed down-left ---")
 	_fire(gun, -PI / 4.0)

@@ -82,6 +82,7 @@
 [ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_extraction_node.gd" id="83_extractnode"]
 [ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_market_node.gd" id="84_marketnode"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/RunMapMarketScreen.tscn" id="85_market"]
+[ext_resource type="Script" path="res://Scripts/UI/screen_fade.gd" id="86_fade"]
 
 [node name="DustCampRunMap" type="Node2D"]
 
@@ -146,7 +147,7 @@ zoom = Vector2(0.42, 0.42)
 [node name="RunMapTravel" type="Node" parent="."]
 script = ExtResource("2_travel")
 step_duration = 0.36
-step_hold = 0.6
+step_hold = 0.3
 arrival_hold = 0.35
 sound_bank_path = NodePath("StepSound")
 step_sound = &"pawn_stop"
@@ -185,7 +186,7 @@ stronger_tier = ExtResource("39_stronger")
 equal_tier = ExtResource("40_equal")
 weaker_tier = ExtResource("41_weaker")
 weapon_catalog = ExtResource("46_weapons")
-fight_tracks = Array[AudioStream]([ExtResource("42_fight1"), ExtResource("43_fight2"), ExtResource("44_fight3")])
+fight_tracks = Array[AudioStream]([ExtResource("44_fight3")])
 
 [node name="RunMapBanditNode" type="Node" parent="."]
 script = ExtResource("37_banditnode")
@@ -335,6 +336,20 @@ topics = Array[ExtResource("71_topic")]([ExtResource("72_tbounty"), ExtResource(
 goods = Array[ExtResource("75_good")]([ExtResource("76_grevolver"), ExtResource("77_gshells"), ExtResource("78_grifle")])
 
 [node name="RunMapMarketScreen" parent="UI" instance=ExtResource("85_market")]
+
+[node name="ScreenFade" type="ColorRect" parent="UI"]
+process_mode = 3
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.03, 0.02, 0.02, 0)
+script = ExtResource("86_fade")
+fade_colour = Color(0.03, 0.02, 0.02, 1)
+matches_loading_screen = true
 
 [node name="Sun" type="Node2D" parent="." groups=["sun"]]
 script = ExtResource("18_sun")

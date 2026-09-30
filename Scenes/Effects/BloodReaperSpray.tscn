@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Effects/one_shot_particles.gd" id="1_ospar"]
+
+[sub_resource type="Gradient" id="Gradient_drop"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.85, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_drop"]
+gradient = SubResource("Gradient_drop")
+width = 16
+height = 16
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Curve" id="Curve_drop"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.7, 0.8), 0.0, 0.0, 0, 0, Vector2(1, 0.35), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Gradient" id="Gradient_blood"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0.68, 0.04, 0.05, 1, 0.42, 0.01, 0.03, 0.95, 0.2, 0, 0.01, 0)
+
+[node name="BloodReaperSpray" type="CPUParticles2D"]
+z_index = 2
+emitting = false
+amount = 110
+lifetime = 0.75
+one_shot = true
+explosiveness = 0.92
+randomness = 0.5
+lifetime_randomness = 0.4
+texture = SubResource("GradientTexture2D_drop")
+emission_shape = 1
+emission_sphere_radius = 10.0
+direction = Vector2(0, -1)
+spread = 180.0
+gravity = Vector2(0, 900)
+initial_velocity_min = 140.0
+initial_velocity_max = 520.0
+angular_velocity_min = -220.0
+angular_velocity_max = 220.0
+damping_min = 1.5
+damping_max = 4.0
+scale_amount_min = 0.35
+scale_amount_max = 1.25
+scale_amount_curve = SubResource("Curve_drop")
+color_ramp = SubResource("Gradient_blood")
+script = ExtResource("1_ospar")

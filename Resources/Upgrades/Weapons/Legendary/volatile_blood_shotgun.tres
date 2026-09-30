@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="WeaponLegendary" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Weapons/weapon_legendary.gd" id="1_legendary"]
+[ext_resource type="Script" path="res://Scripts/Weapons/volatile_blood.gd" id="2_volatile"]
+[ext_resource type="PackedScene" path="res://Scenes/World/Pickups/BloodBag.tscn" id="3_bag"]
+[ext_resource type="PackedScene" path="res://Scenes/Effects/VolatileBloodBurst.tscn" id="4_burst"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/VolatileBloodIdle.ogg" id="5_idle"]
+
+[sub_resource type="Resource" id="Resource_volatile"]
+script = ExtResource("2_volatile")
+bag_scene = ExtResource("3_bag")
+lifetime = 3.0
+fade_duration = 0.4
+trigger_radius = 30.0
+consumes_projectile = true
+shot_arm_delay = 0.15
+burst_scene = ExtResource("4_burst")
+burst_damage = 45.0
+burst_radius = 110.0
+falloff = 0.45
+knockback = 1.3
+knockback_push = 80.0
+stagger = 1.3
+blood_amount = 150
+idle_sound = ExtResource("5_idle")
+idle_volume_db = 0.0
+burst_force = 620.0
+
+[resource]
+script = ExtResource("1_legendary")
+id = &"volatile_blood"
+display_name = "VOLATILE BLOOD"
+description = "EVERY MAN THE SHOTGUN KILLS LEAVES A BAG OF VOLATILE BLOOD FOR 3 SECONDS. WALK THROUGH IT OR SHOOT IT AND IT BURSTS, SPRAYING BLOOD THAT HURTS EVERY ENEMY AROUND IT."
+kill_reward = SubResource("Resource_volatile")

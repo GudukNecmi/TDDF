@@ -1,7 +1,7 @@
 extends SceneTree
-## Headless check of the whole bandit point round trip: the run map, the
-## decision screen, the arena the fight is actually held in, and the same run
-## map standing again afterwards.
+## Headless check of the whole bandit point round trip: the run map, the fade
+## and loading curtain straight into the fight - no question asked - the arena
+## the fight is actually held in, and the same run map standing again afterwards.
 ##
 ## Run with:
 ## [codeblock]
@@ -10,7 +10,7 @@ extends SceneTree
 ##
 ## [RunMapBanditNode]'s own check - [code]run_map_bandit_smoke.gd[/code] - stops
 ## at the staged record, because that is where the map's half of an encounter
-## ends. This one carries it through: it presses FIGHT, waits out the curtain,
+## ends. This one carries it through: it arrives, waits out the fade and curtain,
 ## confirms the arena opened with the crowd the camp was worth, clears the fight
 ## the way the last enemy dying clears it, and confirms the map that comes back
 ## is the same map with the camp written down as dealt with.
@@ -71,27 +71,24 @@ func _run() -> void:
 		while travel.is_travelling() and frames < 4000:
 			frames += 1
 			await process_frame
-		if menu.is_open():
-			target = step
-			break
-	_ok(target >= 0, "the ride reached a bandit point with its screen up")
-	if target < 0:
+		target = step
+	var entry := bandits.encounter_for(graph.get_site(target).kind) if target >= 0 else null
+	_ok(entry != null, "the ride reached a bandit point")
+	if entry == null:
 		_finish()
 		return
 
-	var entry := bandits.encounter_for(graph.get_site(target).kind)
 	var wanted_count := bandits.enemy_count_for(graph, graph.get_site(target))
 	print("       a '%s' worth %d men" % [graph.get_site(target).kind, wanted_count])
-	_ok(menu.is_open(), "arriving raised the decision screen")
-
-	var fight := _fight_button(menu)
-	_ok(fight != null, "the screen offers a fight")
-	if fight == null:
-		_finish()
-		return
-	fight.pressed.emit()
+	await process_frame
+	_ok(not menu.is_open(), "arriving asked no question")
+	_ok(not view.is_picking(), "no road can be taken while the map goes dark")
 
 	print("--- the arena ---")
+	var waited := 0.0
+	while _scene_name() != "DustCampArena" and waited < 10.0:
+		await create_timer(0.05).timeout
+		waited += 0.05
 	await _settle()
 	_ok(_scene_name() == "DustCampArena", "the fight is held in dust camp's arena",
 		_scene_name())
@@ -121,11 +118,21 @@ func _run() -> void:
 	# What the last man dying does. The fight itself is not played out here -
 	# that is Arena combat's own check, not this one's.
 	ambush.cleared.emit()
-	# A Bandit Group win holds the ride home behind its upgrade reward - see
-	# [RunMapUpgradeRewardScreen] and run_map_upgrade_reward_smoke.gd.
-	var reward := _find("RunMapUpgradeRewardScreen") as RunMapUpgradeRewardScreen
-	if reward != null and reward.visible:
-		reward.take()
+	# A win holds the ride home behind the Loot Screen and its upgrade card - see
+	# [LootScreen] and run_map_upgrade_reward_smoke.gd.
+	for _i: int in 30:
+		await process_frame
+	var loot := _find("LootScreen") as LootScreen
+	if loot != null and loot.is_open():
+		loot.reveal(true)
+		await process_frame
+		for card: LootRewardCard in loot.get_cards():
+			if card.get_reward() is LootRewardUpgrade:
+				loot.activate(card)
+		var reward := _find("RunMapUpgradeRewardScreen") as RunMapUpgradeRewardScreen
+		if reward != null and reward.visible:
+			reward.take()
+		loot.leave()
 	await _settle()
 	_ok(_scene_name() == "DustCampRunMap", "the run map came back", _scene_name())
 	_ok(_count("DustCampArena") == 0, "the arena is unloaded, not kept around")
@@ -161,16 +168,6 @@ func _run() -> void:
 		"no screen is waiting on the map that came back")
 
 	_finish()
-
-
-func _fight_button(menu: WorldBanditDecisionMenu) -> Button:
-	for path: NodePath in menu.button_paths:
-		var button := menu.get_node_or_null(path) as Button
-		if button == null or not button.visible:
-			continue
-		if button.get_meta(&"outcome", &"fight") == &"fight":
-			return button
-	return null
 
 
 ## Waits out the curtain: its minimum display time, the threaded load and the

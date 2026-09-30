@@ -406,10 +406,35 @@ func _run() -> void:
 			and ledger.get_fate(key).get("fate") == &"shot_in_the_head",
 		"and the ledger remembers he was killed", "%s" % ledger.get_fate(key))
 
+	print("--- the loot table ---")
+	# The ending's own last step opens the Loot Screen rather than riding home:
+	# the ride waits on the table being left.
+	var loot := _find("LootScreen") as LootScreen
+	await _wait_for(func() -> bool: return is_instance_valid(loot) and loot.is_open(), 25.0)
+	if not is_instance_valid(loot):
+		loot = null
+	_ok(loot != null and loot.is_open(), "the Loot Screen is up once his fate is settled")
+	_ok(_scene_name() == "DustCampArena", "and the ride home waits on it", _scene_name())
+	_ok(paused, "the game is stopped under it")
+	if loot == null or not loot.is_open():
+		_finish()
+		return
+	var at_table := wallet.get_total() if wallet != null else 0
+	loot.reveal(true)
+	await process_frame
+	var payout: LootRewardPayout = null
+	for card: LootRewardCard in loot.get_cards():
+		if card.get_reward() is LootRewardPayout:
+			payout = card.get_reward() as LootRewardPayout
+	_ok(payout != null and payout.get_title().begins_with(str(reward)),
+		"the bounty he was worth is on the table",
+		payout.get_title() if payout != null else "<none>")
+	_ok(payout != null and payout.is_resolved(), "already paid, so nothing is owed on it")
+	_ok(wallet == null or wallet.get_total() == at_table,
+		"showing it paid nothing a second time")
+	_ok(loot.leave(), "the table was left")
+
 	print("--- back to the run map ---")
-	# Left to the ending's own last step rather than asked for: the card holding
-	# the struck-out name is what hands the arena back, and a check that forced it
-	# would not notice if it stopped doing so.
 	await _wait_for(func() -> bool: return _scene_name() == "DustCampRunMap", 25.0)
 	await _settle()
 

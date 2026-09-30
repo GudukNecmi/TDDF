@@ -39,6 +39,22 @@ extends Resource
 ## The shove every shot gives whoever is holding the weapon. Null leaves the
 ## holder standing where they fired from.
 @export var shot_recoil: ShotRecoil
+## The smoke a shot leaves once its cooldown has run out. Null leaves every shot an
+## ordinary one.
+@export var black_powder: BlackPowder
+## Hold the trigger to charge, release to fire. Null leaves the trigger firing as
+## it is pressed.
+@export var hell_chamber: HellChamber
+## A kill with the weapon executes the man and fires a weaker volley from him at
+## the enemies around. Null leaves kills dying the ordinary way.
+@export var blood_reaper: BloodReaper
+## What a kill with the weapon leaves behind - VOLATILE BLOOD's Blood Bag - offered
+## every kill the weapon's shots are credited with, whatever round or blast landed
+## it. See [KillReward]. Null leaves kills leaving nothing.
+@export var kill_reward: KillReward
+## Every shot leaves as one enormous cannon round instead of a spread of pellets.
+## Null leaves the weapon firing its pellets.
+@export var one_big_shell: OneBigShell
 
 
 ## Folds this Legendary's parts into [param stats].
@@ -53,3 +69,12 @@ func apply_to(stats: WeaponStats) -> void:
 		stats.fan_hammer = fan_hammer
 	if shot_recoil != null:
 		stats.shot_recoil = shot_recoil
+	if black_powder != null:
+		stats.black_powder = black_powder
+	if hell_chamber != null:
+		stats.hell_chamber = hell_chamber
+	if blood_reaper != null:
+		stats.blood_reaper = blood_reaper
+	stats.add_kill_reward(kill_reward)
+	if one_big_shell != null:
+		stats.one_big_shell = one_big_shell

@@ -124,6 +124,16 @@ var _charge_point: Vector2 = Vector2.ZERO
 ## What the walk is multiplied by while charging. Handed in rather than exported here,
 ## because how fast a charge runs belongs with the rest of the attack.
 var _charge_multiplier: float = 1.0
+## True while this enemy has lost sight of the player and is going to look at a place
+## instead - where they were last seen, where a shot was heard. The same shape as the
+## charge above it: only the destination and the pace differ. See [PlayerStealth],
+## which owns everything else about what an enemy knows.
+var _investigating: bool = false
+var _investigate_point: Vector2 = Vector2.ZERO
+var _investigate_multiplier: float = 1.0
+## Every aim pivot, so a man looking for somebody looks where he is going rather than
+## at a player he cannot see.
+var _aims: Array[LookAtTarget] = []
 ## True while this enemy is standing by: present, breathing, and taking no part.
 ## The second of the two flags that reverse the chase, and deliberately the same
 ## shape as [member _fleeing] rather than a state machine.
@@ -160,6 +170,7 @@ func _ready() -> void:
 		var aim := node as LookAtTarget
 		if aim != null:
 			aim.target = _target
+			_aims.append(aim)
 
 	if _target != null:
 		_target_health = _target.get_node_or_null(NodePath(target_health_name)) as Health
@@ -187,6 +198,12 @@ func _physics_process(delta: float) -> void:
 		# separation, the knockback and the world's slow motion for nothing, and the
 		# swing below is left running so a player standing in the way is still cut.
 		chase = global_position.direction_to(_charge_point)
+	elif _investigating:
+		# And the last: the same walk at a place the player was, not at the player.
+		# Arrived is standing still until [PlayerStealth] sends it somewhere else.
+		chase = Vector2.ZERO
+		if global_position.distance_to(_investigate_point) > 2.0:
+			chase = global_position.direction_to(_investigate_point)
 
 	# The one place a walk can be bent into something other than a straight line at
 	# whatever it is heading for. Asked after the destination has been decided, so a
@@ -208,6 +225,8 @@ func _physics_process(delta: float) -> void:
 	# enemy can never be left crawling once it is switched off, and it is the same
 	# number the player is moving at.
 	var move_speed := speed * WorldSlowdown.get_multiplier(self) * _flee_multiplier * _charge_multiplier
+	if _investigating and not _fleeing and not _charging:
+		move_speed *= _investigate_multiplier
 	var knockback := Vector2.ZERO
 	if _hit_reaction != null:
 		move_speed *= _hit_reaction.get_speed_multiplier()
@@ -263,6 +282,44 @@ func begin_charge(point: Vector2, speed_multiplier: float = 1.0) -> void:
 func end_charge() -> void:
 	_charging = false
 	_charge_multiplier = 1.0
+
+
+## Sends this enemy to look at [param point] instead of chasing the player, at
+## [param speed_multiplier] times its own speed.
+##
+## [b]It is only the destination and the pace[/b], exactly as [method begin_charge]
+## is. Deciding what the enemy knows - where the player was last seen, which shot it
+## heard, whether it can make them out close up - is [PlayerStealth]'s, which is what
+## calls this, so an enemy in a fight with no smoke never investigates and nothing
+## about it is changed by this being here. Safe to call every frame with a new point.
+##
+## Fleeing and charging both win over it.
+func begin_investigation(point: Vector2, speed_multiplier: float = 1.0) -> void:
+	_investigating = true
+	_investigate_point = point
+	_investigate_multiplier = maxf(speed_multiplier, 0.0)
+	for aim: LookAtTarget in _aims:
+		aim.focus_on(point)
+
+
+## Puts this enemy straight back on the player. Safe when it was never investigating.
+func end_investigation() -> void:
+	if not _investigating:
+		return
+	_investigating = false
+	_investigate_multiplier = 1.0
+	for aim: LookAtTarget in _aims:
+		aim.clear_focus()
+
+
+## Whether this enemy is looking for the player rather than chasing them.
+func is_investigating() -> bool:
+	return _investigating
+
+
+## The place it is going to look at. Meaningless while it is not investigating.
+func get_investigate_point() -> Vector2:
+	return _investigate_point
 
 
 ## Stops this enemy swinging, or lets it swing again.

@@ -109,6 +109,42 @@ signal closed
 ## hands, since the charge is that weapon's rather than the build's.
 @export var charge_format: String = "CHARGE %d / %d"
 @export var charge_off_suffix: String = "   (LEGENDARY OFF)"
+## The line under a Legendary that makes rounds explode - see [ShotExplosion].
+@export var explosion_row_label: String = "      EXPLOSION"
+## Its readout, of the Legendary's Inspector values: damage, radius, falloff at
+## the edge, knockback scale, knockback push, whether the direct-hit enemy is
+## caught too.
+@export var explosion_format: String = "DMG %.0f   RADIUS %.0f   FALLOFF %d%%   KNOCKBACK x%.2f +%.0f   DIRECT HIT TAKES BLAST: %s"
+## The line under a Legendary that leaves smoke - see [BlackPowder].
+@export var powder_row_label: String = "      SMOKE"
+## Its readout: the cooldown state, then the Legendary's Inspector values - cooldown,
+## smoke radius and lifetime, close detection radius, how far a shot is heard.
+@export var powder_format: String = "%s   COOLDOWN %.1fs   RADIUS %.0f   LASTS %.1fs   CLOSE DETECT %.0f   HEARD %s"
+@export var powder_ready_text: String = "READY"
+## The cooldown state while waiting, with the seconds left.
+@export var powder_waiting_format: String = "%.1fs LEFT"
+@export var powder_heard_everywhere_text: String = "BY ALL"
+## The line under a Legendary that charges while the trigger is held - see
+## [HellChamber] - and its readout, %d standing for the charge in per cent.
+@export var chamber_row_label: String = "      HELL CHARGE"
+@export var chamber_format: String = "CHARGE %d%%"
+@export var chamber_max_suffix: String = "   MAX"
+## The line under a Legendary that executes and reaps - see [BloodReaper] - and its
+## readout of the Legendary's Inspector values: power in per cent, target radius.
+@export var reaper_row_label: String = "      REAPER"
+@export var reaper_format: String = "%d%% POWER   TARGETS WITHIN %.0f"
+## The line under a Legendary whose kills leave something - see [KillReward], such as
+## VOLATILE BLOOD - reading the reward's own [method KillReward.describe_debug]: its
+## Inspector values and how many of what it leaves lie on the ground as the panel
+## opened. A Card with a kill reward shows the same readout on its own row.
+@export var kill_reward_row_label: String = "      ON KILL"
+## The line under a Legendary that fires one shell - see [OneBigShell] - and its
+## readout of the Legendary's Inspector values: core damage as a multiple of a
+## pellet's (and whether it counts the pellets), rim damage in per cent, core
+## radius in per cent, hit radius, speed and range multipliers.
+@export var shell_row_label: String = "      CANNON"
+@export var shell_format: String = "CORE x%.2f%s   RIM %d%%   CORE RADIUS %d%%   HIT RADIUS %.0f   SPEED x%.2f   RANGE x%.2f"
+@export var shell_per_pellet_text: String = " PER PELLET"
 @export var charge_no_weapon_text: String = "NOT IN HAND"
 @export var reset_charge_text: String = "RESET CHARGE"
 ## Widest the reset button is drawn - it carries more words than the others.
@@ -275,6 +311,156 @@ func _add_legendary_row(weapon: WeaponDefinition, legendary: WeaponLegendary) ->
 
 	if legendary.pump_charge != null:
 		_add_charge_row(weapon, legendary)
+	if legendary.shot_explosion != null:
+		_add_explosion_row(weapon, legendary)
+	if legendary.black_powder != null:
+		_add_powder_row(weapon, legendary)
+	if legendary.hell_chamber != null:
+		_add_chamber_row(weapon, legendary)
+	if legendary.blood_reaper != null:
+		_add_reaper_row(weapon, legendary)
+	if legendary.kill_reward != null:
+		_add_kill_reward_row(weapon, legendary)
+	if legendary.one_big_shell != null:
+		_add_shell_row(weapon, legendary)
+
+
+## The damage model and flight of a [OneBigShell] Legendary, read off its resource
+## each refresh so Inspector changes show on reopening.
+func _add_shell_row(weapon: WeaponDefinition, legendary: WeaponLegendary) -> void:
+	var line := _new_line(shell_row_label)
+	var value := _new_value()
+	line.add_child(value)
+	_rows.add_child(line)
+
+	_refreshers.append(func() -> void:
+		var shell := legendary.one_big_shell
+		var active := weapon.is_legendary_active(legendary)
+		var text := shell_format % [shell.core_damage_multiplier,
+			shell_per_pellet_text if shell.damage_per_pellet else "",
+			roundi(shell.min_edge_damage * 100.0), roundi(shell.core_radius * 100.0),
+			shell.hit_radius, shell.speed_multiplier, shell.range_multiplier]
+		if not active:
+			text += charge_off_suffix
+		_paint(value, text, active)
+		if active:
+			value.add_theme_color_override(&"font_color", legendary_color))
+
+
+## What a Legendary's [KillReward] reads - its Inspector values and how many of what
+## it leaves are down - read off the resource each refresh so Inspector changes show
+## on reopening.
+func _add_kill_reward_row(weapon: WeaponDefinition, legendary: WeaponLegendary) -> void:
+	var line := _new_line(kill_reward_row_label)
+	var value := _new_value()
+	line.add_child(value)
+	_rows.add_child(line)
+
+	_refreshers.append(func() -> void:
+		var active := weapon.is_legendary_active(legendary)
+		var text := legendary.kill_reward.describe_debug(get_tree())
+		if not active:
+			text += charge_off_suffix
+		_paint(value, text, active)
+		if active:
+			value.add_theme_color_override(&"font_color", legendary_color))
+
+
+## The power and reach of a [BloodReaper] Legendary, read off its resource each
+## refresh so Inspector changes show on reopening.
+func _add_reaper_row(weapon: WeaponDefinition, legendary: WeaponLegendary) -> void:
+	var line := _new_line(reaper_row_label)
+	var value := _new_value()
+	line.add_child(value)
+	_rows.add_child(line)
+
+	_refreshers.append(func() -> void:
+		var reaper := legendary.blood_reaper
+		var active := weapon.is_legendary_active(legendary)
+		var text := reaper_format % [roundi(reaper.blood_reaper_power_multiplier * 100.0),
+			reaper.target_radius]
+		if not active:
+			text += charge_off_suffix
+		_paint(value, text, active)
+		if active:
+			value.add_theme_color_override(&"font_color", legendary_color))
+
+
+## The HELL CHAMBER charge held in the weapon being carried, and the button that
+## drops it. Like the pump's, the charge is that weapon's, so it is read there -
+## as it stands when the panel opened, since the game is paused behind it.
+func _add_chamber_row(weapon: WeaponDefinition, legendary: WeaponLegendary) -> void:
+	var line := _new_line(chamber_row_label)
+	var value := _new_value()
+	line.add_child(value)
+	var reset := _button(reset_charge_text, _reset_chamber.bind(weapon))
+	reset.custom_minimum_size.x = maxf(reset.custom_minimum_size.x, reset_charge_min_width)
+	line.add_child(reset)
+	_rows.add_child(line)
+
+	_refreshers.append(func() -> void:
+		var carried := _carried(weapon)
+		var active := weapon.is_legendary_active(legendary)
+		if carried == null or not carried.has_method(&"get_chamber_charge"):
+			_paint(value, charge_no_weapon_text, false)
+			return
+		var charge: float = carried.call(&"get_chamber_charge")
+		var text := chamber_format % roundi(charge * 100.0)
+		if active and legendary.hell_chamber.is_max(charge):
+			text += chamber_max_suffix
+		if not active:
+			text += charge_off_suffix
+		_paint(value, text, active and charge > 0.0)
+		if active and charge > 0.0:
+			value.add_theme_color_override(&"font_color", legendary_color))
+
+
+## The smoke settings of a [BlackPowder] Legendary and the cooldown of the weapon in
+## the player's hands, which is where the wait lives.
+func _add_powder_row(weapon: WeaponDefinition, legendary: WeaponLegendary) -> void:
+	var line := _new_line(powder_row_label)
+	var value := _new_value()
+	line.add_child(value)
+	_rows.add_child(line)
+
+	_refreshers.append(func() -> void:
+		var powder := legendary.black_powder
+		var active := weapon.is_legendary_active(legendary)
+		var state := charge_no_weapon_text
+		var carried := _carried(weapon)
+		if carried != null and carried.has_method(&"get_black_powder_cooldown"):
+			var left: float = carried.call(&"get_black_powder_cooldown")
+			state = powder_ready_text if left <= 0.0 else powder_waiting_format % left
+		var heard := powder_heard_everywhere_text if powder.hearing_radius < 0.0 \
+			else "%.0f" % powder.hearing_radius
+		var text := powder_format % [state, powder.cooldown, powder.smoke_radius,
+			powder.smoke_duration, powder.close_detection_radius, heard]
+		if not active:
+			text = charge_off_suffix.strip_edges() + "   " + text
+		_paint(value, text, active)
+		if active:
+			value.add_theme_color_override(&"font_color", legendary_color))
+
+
+## The blast settings of a [ShotExplosion] Legendary, read off its resource each
+## refresh so Inspector changes show on reopening.
+func _add_explosion_row(weapon: WeaponDefinition, legendary: WeaponLegendary) -> void:
+	var line := _new_line(explosion_row_label)
+	var value := _new_value()
+	line.add_child(value)
+	_rows.add_child(line)
+
+	_refreshers.append(func() -> void:
+		var explosion := legendary.shot_explosion
+		var active := weapon.is_legendary_active(legendary)
+		var text := explosion_format % [explosion.get_damage(), explosion.radius,
+			roundi(explosion.falloff * 100.0), explosion.knockback, explosion.knockback_push,
+			"YES" if explosion.direct_hit_takes_blast else "NO"]
+		if not active:
+			text += charge_off_suffix
+		_paint(value, text, active)
+		if active:
+			value.add_theme_color_override(&"font_color", legendary_color))
 
 
 ## The charge a [PumpCharge] Legendary has banked in the weapon being carried, and
@@ -302,6 +488,8 @@ func _add_charge_row(weapon: WeaponDefinition, legendary: WeaponLegendary) -> vo
 		_paint(value, text, active and charge > 0)
 		if active and charge > 0:
 			value.add_theme_color_override(&"font_color", legendary_color))
+
+
 func _add_card_row(card: RunCard) -> void:
 	var line := _new_line(card.display_name)
 	var value := _new_value()
@@ -314,6 +502,10 @@ func _add_card_row(card: RunCard) -> void:
 		var holder := _get_card_holder()
 		var count := 0 if holder == null else holder.get_count(card)
 		var text := card_held_format % count if count > 0 else card_not_held_text
+		if card.kill_reward != null:
+			var reward := card.kill_reward.describe_debug(get_tree())
+			if not reward.is_empty():
+				text += "   " + reward
 		if not card.description.is_empty():
 			text += "   " + card.description
 		_paint(value, text, count > 0))
@@ -333,6 +525,13 @@ func _step_level(weapon: WeaponDefinition, upgrade: WeaponUpgrade, step: int) ->
 
 func _set_legendary(weapon: WeaponDefinition, legendary: WeaponLegendary, active: bool) -> void:
 	weapon.set_legendary_active(legendary, active)
+	_refresh()
+
+
+func _reset_chamber(weapon: WeaponDefinition) -> void:
+	var carried := _carried(weapon)
+	if carried != null and carried.has_method(&"reset_chamber_charge"):
+		carried.call(&"reset_chamber_charge")
 	_refresh()
 
 

@@ -102,3 +102,5 @@ id = &"hell_chamber"
 display_name = "HELL CHAMBER"
 description = "HOLD FIRE TO CHARGE, RELEASE TO SHOOT. THE LONGER YOU HOLD, THE FASTER, HEAVIER AND HARDER-HITTING THE PELLETS - FROM 75% EVERY IMPACT THROWS A HELLISH SHOCKWAVE THAT SCATTERS AND STAGGERS, AND A FULL MAX CHARGE HITS FOR DOUBLE DAMAGE, +40% AT LONG RANGE AND BURSTS OUTWARD AGAIN AS A RING OF THE SAME SHOT AT 10% POWER. YOU SLOW DOWN WHILE CHARGING."
 hell_chamber = SubResource("Resource_chamber")
+card_name = "CEHENNEM HAZNESİ"
+card_description = "Basılı tut, bırakınca ateşle. Uzun tuttukça saçmalar hızlanır ve ağırlaşır; tam yükte şok dalgası yayar. Doldururken yavaşlarsın."

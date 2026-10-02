@@ -118,6 +118,12 @@ enum Stage {
 ## outstanding, so it can never summon a second boss on a later day and can never be
 ## collected again.
 @export var completes_contract: bool = true
+## Whether, when a Loot Screen will present this win (see
+## [method PostCombatLootDirector.claims_the_win]), the contract's blood is held
+## back and handed to the table to be collected rather than paid on the kill -
+## see [method hand_over_owed]. Blood never handed over is paid as the arena
+## goes, so it can never be lost.
+@export var defers_reward_to_loot: bool = true
 
 @export_group("The streak")
 ## The run's streak - the [code]Streak[/code] autoload.
@@ -325,10 +331,18 @@ var _restoring: bool = false
 ## presents the win afterwards - see [method get_paid_amount].
 var _paid_bounty: Bounty
 var _paid_amount: int = 0
+## Blood the killing hit held back for the Loot Screen and not yet handed over.
+var _owed_amount: int = 0
 
 
 func _enter_tree() -> void:
 	add_to_group(GROUP)
+
+
+func _exit_tree() -> void:
+	# Held back for a table that never took it - pay it now rather than lose it.
+	if _owed_amount > 0:
+		_credit(hand_over_owed())
 
 
 func _ready() -> void:
@@ -348,9 +362,9 @@ func get_stage() -> Stage:
 	return _stage
 
 
-## The blood the killing hit paid into the carried wallet, 0 until a boss has been
-## beaten in this arena - read by [LootSourceBountyPayout] to show the payout on
-## the Loot Screen. Reading it pays nothing.
+## The blood the killing hit was worth, 0 until a boss has been beaten in this
+## arena - paid into the carried wallet, or held back for the Loot Screen (see
+## [method get_owed_amount]). Reading it pays nothing.
 func get_paid_amount() -> int:
 	return _paid_amount
 
@@ -358,6 +372,21 @@ func get_paid_amount() -> int:
 ## The contract that payout was for, or null.
 func get_paid_bounty() -> Bounty:
 	return _paid_bounty
+
+
+## The blood the killing hit held back for the Loot Screen to hand over, 0 when
+## it was paid on the kill or has already been handed over.
+func get_owed_amount() -> int:
+	return _owed_amount
+
+
+## Hands the held-back blood over to whoever will pay it - the Loot Screen's
+## collectible Blood ([LootSourceBountyPayout]) - and forgets it, so it can only
+## ever be handed over once. Returns how much.
+func hand_over_owed() -> int:
+	var amount := _owed_amount
+	_owed_amount = 0
+	return amount
 
 
 ## Whether the boss has been beaten - at any point from the last shot onwards.
@@ -516,12 +545,14 @@ func _pay_reward() -> Bounty:
 
 	var amount := bounty.reward
 	if grants_reward and amount > 0:
-		var wallet := get_node_or_null(wallet_path) as BloodWallet
-		if wallet != null:
-			wallet.add(amount)
+		if _loot_takes_the_reward():
+			# Still the bounty's, but collected from the table rather than paid now.
 			_paid_bounty = bounty
 			_paid_amount = amount
-			reward_granted.emit(amount)
+			_owed_amount = amount
+		elif _credit(amount):
+			_paid_bounty = bounty
+			_paid_amount = amount
 
 	if completes_contract:
 		var ledger := get_node_or_null(ledger_path) as BountyLedger
@@ -529,6 +560,26 @@ func _pay_reward() -> Bounty:
 			ledger.complete(bounty.bounty_id)
 
 	return bounty
+
+
+## Pays [param amount] into the carried wallet. Returns whether it went.
+func _credit(amount: int) -> bool:
+	if amount <= 0:
+		return false
+	var wallet := get_node_or_null(wallet_path) as BloodWallet
+	if wallet == null:
+		return false
+	wallet.add(amount)
+	reward_granted.emit(amount)
+	return true
+
+
+## Whether a Loot Screen will present this win and so collect the bounty itself.
+func _loot_takes_the_reward() -> bool:
+	if not defers_reward_to_loot:
+		return false
+	var director := PostCombatLootDirector.get_active(self)
+	return director != null and director.claims_the_win()
 
 
 ## One more outlaw on the run's tally.

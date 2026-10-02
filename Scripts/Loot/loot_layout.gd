@@ -40,6 +40,66 @@ extends Resource
 @export var fly_transition: Tween.TransitionType = Tween.TRANS_BACK
 @export var fly_ease: Tween.EaseType = Tween.EASE_OUT
 
+@export_group("Scatter")
+## Everything in this group is scaled by each card's own
+## [member LootRewardCard.table_scatter] - a plain card takes none of it and is
+## dealt exactly as above; physical loot takes all of it, so no two pieces
+## leave the pouch or land quite alike.
+##
+## How far a piece may land from its spot, in pixels.
+@export var scatter_distance: float = 28.0
+## How much of that nudge may be up or down, as a fraction - the table is wider
+## than it is tall.
+@export_range(0.0, 1.0, 0.01) var scatter_vertical: float = 0.5
+## Scattered pieces are kept this far inside the table's edges, in pixels -
+## more at the top, where the title and hint are.
+@export var scatter_edge_margin: float = 30.0
+@export var scatter_top_margin: float = 90.0
+## Never nudged closer than this to another piece's spot, in pixels; a nudge
+## that would is tried again, and dropped if it keeps failing.
+@export var min_spacing: float = 100.0
+## A random extra wait before a piece sets off, up to this many seconds.
+@export var scatter_delay: float = 0.08
+## How much a piece's flight time may differ, as a fraction either way.
+@export_range(0.0, 1.0, 0.01) var scatter_fly_time: float = 0.2
+## How much a piece's arc may differ, as a fraction either way.
+@export_range(0.0, 1.0, 0.01) var scatter_arc: float = 0.4
+## Extra spin on the way out, either way, in degrees.
+@export var scatter_spin_degrees: float = 35.0
+## How far apart, in pixels, pieces leave the pouch's mouth.
+@export var spill_spread: float = 16.0
+
+
+## [param rest] - a piece's top-left corner - moved just enough that a piece of
+## [param piece_size] stays inside [param area] by the scatter margins.
+func keep_inside(rest: Vector2, piece_size: Vector2, area: Rect2) -> Vector2:
+	var low := area.position + Vector2(scatter_edge_margin, scatter_top_margin)
+	var high := area.end - piece_size - Vector2(scatter_edge_margin, scatter_edge_margin)
+	if high.x < low.x or high.y < low.y:
+		return rest
+	return rest.clamp(low, high)
+
+
+## A random nudge for a piece headed to [param spot], scaled by [param weight],
+## that keeps clear of every spot in [param others] by [member min_spacing].
+func scatter_offset(rng: RandomNumberGenerator, spot: Vector2, others: Array[Vector2],
+		weight: float) -> Vector2:
+	if weight <= 0.0 or scatter_distance <= 0.0:
+		return Vector2.ZERO
+	for _attempt: int in 8:
+		var offset := Vector2.from_angle(rng.randf() * TAU) \
+			* scatter_distance * sqrt(rng.randf()) * weight
+		offset.y *= scatter_vertical
+		var clear := true
+		for other: Vector2 in others:
+			if not other.is_equal_approx(spot) and other.distance_to(spot + offset) < min_spacing \
+					and other.distance_to(spot) >= min_spacing:
+				clear = false
+				break
+		if clear:
+			return offset
+	return Vector2.ZERO
+
 
 ## The centre of every card's resting place, relative to the pouch's centre.
 func positions(count: int) -> Array[Vector2]:

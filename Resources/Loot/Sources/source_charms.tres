@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LootSourceCharms" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Loot/loot_source_charms.gd" id="1_source"]
+[ext_resource type="Resource" path="res://Resources/Loot/Looks/look_charm.tres" id="2_look"]
+[ext_resource type="Script" path="res://Scripts/Charms/charm_definition.gd" id="3_charm_script"]
+[ext_resource type="Resource" path="res://Resources/Charms/charm_devils_step.tres" id="4_devils_step"]
+[ext_resource type="Resource" path="res://Resources/Charms/charm_crows_eye.tres" id="5_crows_eye"]
+[ext_resource type="Resource" path="res://Resources/Charms/charm_blood_oath.tres" id="6_blood_oath"]
+[ext_resource type="Resource" path="res://Resources/Charms/charm_grave_dust.tres" id="7_grave_dust"]
+
+[resource]
+script = ExtResource("1_source")
+charms = Array[ExtResource("3_charm_script")]([ExtResource("4_devils_step"), ExtResource("5_crows_eye"), ExtResource("6_blood_oath"), ExtResource("7_grave_dust")])
+look = ExtResource("2_look")
+chance = 0.5

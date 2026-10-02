@@ -1,8 +1,9 @@
 extends SceneTree
-## Headless check of the Bandit Group post-fight upgrade reward: ride to a real
-## Bandit Group point, FIGHT, clear the arena, and confirm the reward screen
-## holds the ride home, grants one free run-only level through the weapon's run
-## stack, and TAKE returns to the same point on the same run map.
+## Headless check of the Bandit Group post-fight reward: ride to a real Bandit
+## Group point, FIGHT, clear the arena, and confirm the Loot Screen holds the ride
+## home with exactly one mystery ? card, that opening it deals a selection whose
+## taken card lands on the weapon's run stack at its rarity's strength, and that
+## leaving returns to the same point on the same run map.
 ##
 ## [codeblock]
 ## godot --path . --headless --script res://Scripts/Dev/run_map_upgrade_reward_smoke.gd
@@ -73,49 +74,47 @@ func _run() -> void:
 		await process_frame
 	var loot := _find("LootScreen") as LootScreen
 	_ok(loot != null and loot.is_open(), "the Loot Screen opened after the win")
-	var screen := _find("RunMapUpgradeRewardScreen") as RunMapUpgradeRewardScreen
-	_ok(screen != null and not screen.visible, "the upgrade waits on the table, unopened")
 	if loot == null or not loot.is_open():
 		_finish()
 		return
 	loot.reveal(true)
 	await process_frame
-	var card := _upgrade_card(loot)
-	_ok(card != null, "an upgrade card was dealt")
-	_ok(not loot.can_leave(), "the table cannot be left with the upgrade untaken")
-	loot.activate(card)
-	_ok(screen != null and screen.visible, "the upgrade card opened the Upgrade Reward screen")
-	_ok(_scene_name() == "DustCampArena", "the ride home is held while it is up", _scene_name())
-	var upgrade := screen.get_upgrade()
-	_ok(upgrade != null and weapon.upgrades.has(upgrade),
-		"the reward is one of the equipped weapon's own upgrades",
-		"%s for %s" % [upgrade.display_name if upgrade else "<none>", weapon.weapon_id])
-	var name_label := screen.get_node(^"Panel/Body/UpgradeName") as Label
-	var level_label := screen.get_node(^"Panel/Body/Level") as Label
-	var effect_label := screen.get_node(^"Panel/Body/Effect") as Label
-	print("       shown: %s | %s | %s | %s" % [
-		(screen.get_node(^"Panel/Body/Heading") as Label).text, name_label.text,
-		effect_label.text.replace("\n", " / "), level_label.text])
-	_ok(name_label.text == upgrade.display_name and not effect_label.text.is_empty()
-			and level_label.text == "RUN LEVEL %d" % (weapon.get_run_level(upgrade) + 1),
-		"it shows the name, effect and resulting run level")
-
-	var base_before := weapon.get_upgrade_level(upgrade)
-	var run_before := weapon.get_run_level(upgrade)
-	(screen.get_node(^"Panel/Body/Take") as Button).pressed.emit()
-	_ok(weapon.get_run_level(upgrade) == run_before + 1, "TAKE raised the run level by one",
-		"%d -> %d" % [run_before, weapon.get_run_level(upgrade)])
-	_ok(weapon.get_upgrade_level(upgrade) == base_before, "the permanent Base level is untouched")
+	var mysteries := _mystery_cards(loot)
+	_ok(mysteries.size() == 1, "a Bandit Group deals exactly one ? card", str(mysteries.size()))
+	if mysteries.is_empty():
+		_finish()
+		return
+	var card := mysteries[0]
+	_ok(loot.can_leave(), "the table could be left with the ? unopened")
+	var choice := await _resolve_mystery(loot, card)
+	_ok(choice != null, "the ? dealt a selection and a card was taken")
+	if choice == null:
+		_finish()
+		return
+	print("       took %s %s: %s" % [choice.get_rarity_name(), choice.get_title(),
+		choice.get_description().replace("\n", " / ")])
+	_ok(_scene_name() == "DustCampArena", "the ride home is held while the table is up", _scene_name())
+	var upgrade: WeaponUpgrade = null
+	var expected_gain := 0
+	if choice is RewardChoiceUpgrade:
+		upgrade = (choice as RewardChoiceUpgrade).upgrade
+		expected_gain = (choice as RewardChoiceUpgrade).get_levels()
+		_ok(weapon.upgrades.has(upgrade), "the card is one of the equipped weapon's own upgrades",
+			"%s for %s" % [upgrade.id, weapon.weapon_id])
+	elif choice is RewardChoiceLegendary:
+		_ok(weapon.is_legendary_active((choice as RewardChoiceLegendary).legendary),
+			"the card is one of the weapon's own Legendaries, now on")
 	var total_gain := _sum(_run_levels(weapon)) - _sum(levels_before)
-	_ok(total_gain == 1, "exactly one upgrade level was awarded", str(total_gain))
+	_ok(total_gain == expected_gain, "exactly the card's strength landed on the run stack",
+		"%d / %d" % [total_gain, expected_gain])
 	_ok(wallet.get_total() == carried_before, "no carried Blood was spent",
 		"%d -> %d" % [carried_before, wallet.get_total()])
 	_ok(bank == null or bank.get_total() == banked_before, "no banked Blood was spent")
-	_ok(card.get_reward().is_resolved(), "the upgrade card is settled")
+	_ok(card.get_reward().is_resolved(), "the ? is settled")
 	for _i: int in 5:
 		await process_frame
 	_ok(_scene_name() == "DustCampArena", "still on the table until it is left", _scene_name())
-	_ok(loot.leave(), "the table was left once the upgrade was taken")
+	_ok(loot.leave(), "the table was left once the ? was opened")
 
 	await _settle()
 	_ok(_scene_name() == "DustCampRunMap", "leaving the table returned to the run map", _scene_name())
@@ -124,10 +123,11 @@ func _run() -> void:
 		"it is the same map, standing at the same point")
 	_ok(back.get_site(target).kind == &"bandit_group_cleared", "the point is cleared",
 		String(back.get_site(target).kind))
-	_ok(weapon.get_run_level(upgrade) == run_before + 1, "the run level survived the scene change")
+	_ok(_sum(_run_levels(weapon)) - _sum(levels_before) == expected_gain,
+		"the run levels survived the scene change")
 
 	session.end()
-	_ok(weapon.get_run_level(upgrade) == 0, "the reward is forgotten when the run ends")
+	_ok(_sum(_run_levels(weapon)) == 0, "the reward is forgotten when the run ends")
 	_finish()
 
 
@@ -258,8 +258,31 @@ func _route_to(bandits: RunMapBanditNode, graph: RunMapGraph, wanted: StringName
 	return PackedInt32Array()
 
 
-func _upgrade_card(loot: LootScreen) -> LootRewardCard:
+func _mystery_cards(loot: LootScreen) -> Array[LootRewardCard]:
+	var found: Array[LootRewardCard] = []
 	for card: LootRewardCard in loot.get_cards():
-		if card.get_reward() is LootRewardUpgrade:
-			return card
-	return null
+		if card.get_reward() is LootRewardMystery:
+			found.append(card)
+	return found
+
+
+## Opens [param card]'s ? through the real selection screen, waits out the
+## reveal, takes the first card and waits for the table to come back.
+func _resolve_mystery(loot: LootScreen, card: LootRewardCard) -> RewardChoice:
+	var screen := RewardChoiceScreen.get_active(loot)
+	loot.activate(card)
+	if screen == null or not screen.is_open():
+		return null
+	var waited := 0
+	while not screen.is_choosing() and waited < 4000:
+		waited += 1
+		await process_frame
+	if not screen.is_choosing():
+		return null
+	var choice := screen.get_cards()[0].get_choice()
+	screen.choose(0)
+	waited = 0
+	while screen.is_open() and waited < 4000:
+		waited += 1
+		await process_frame
+	return choice

@@ -27,3 +27,5 @@ id = &"devils_breath"
 display_name = "DEVIL'S BREATH"
 description = "EVERY PELLET EXPLODES WHERE IT LANDS OR DROPS - A SEPARATE BLAST OF AREA DAMAGE ON TOP OF THE HIT."
 shot_explosion = SubResource("Resource_explosion")
+card_name = "ŞEYTANIN NEFESİ"
+card_description = "Her saçma düştüğü yerde patlar ve çevresine ayrıca alan hasarı verir."

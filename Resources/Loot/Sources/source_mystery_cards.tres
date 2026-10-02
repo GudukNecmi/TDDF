@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LootSourceMysteryCards" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Loot/loot_source_mystery_cards.gd" id="1_source"]
+[ext_resource type="Script" path="res://Scripts/World/RunMap/run_map_upgrade_reward.gd" id="2_reward_script"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Rewards/bandit_group_upgrade_reward.tres" id="3_group_reward"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Rewards/bandit_camp_upgrade_reward.tres" id="4_camp_reward"]
+[ext_resource type="Resource" path="res://Resources/RunMap/Rewards/bounty_upgrade_reward.tres" id="5_bounty_reward"]
+[ext_resource type="Resource" path="res://Resources/Loot/Looks/look_mystery_card.tres" id="6_look"]
+[ext_resource type="Resource" path="res://Resources/Rewards/mystery_card_generator.tres" id="7_generator"]
+
+[resource]
+script = ExtResource("1_source")
+generator = ExtResource("7_generator")
+rewards = Array[ExtResource("2_reward_script")]([ExtResource("3_group_reward"), ExtResource("4_camp_reward"), ExtResource("5_bounty_reward")])
+look = ExtResource("6_look")

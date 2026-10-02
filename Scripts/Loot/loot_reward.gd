@@ -28,15 +28,12 @@ signal activation_finished
 @export_multiline var detail: String = ""
 ## How many - shown through [member LootRewardLook.amount_format] when above one.
 @export var amount: int = 1
-## Whether the Loot Screen may be left while this is still unclaimed. A reward
-## the old flow made the player take (the weapon upgrade) is required; loot the
-## old Horse Cart let the player ride away from is not.
-@export var required: bool = false
 ## Shown on the card once the reward is done with.
 @export var resolved_text: String = "TAKEN"
 
 var _resolved: bool = false
 var _busy: bool = false
+var _forfeited: bool = false
 ## Why the last activation could not settle the reward, shown on the card until
 ## the next one. Empty when there is nothing to say.
 var _refusal: String = ""
@@ -71,6 +68,23 @@ func get_amount_text() -> String:
 	return format % shown
 
 
+## The colour the reward's art is drawn in - the look's accent unless the reward
+## knows better (a Charm's own colour).
+func get_tint() -> Color:
+	return look.accent_color if look != null else Color.WHITE
+
+
+## The picture the reward's art is drawn from, if any.
+func get_icon() -> Texture2D:
+	return look.icon if look != null else null
+
+
+## How the reward is drawn as a physical object - the look's, unless the reward
+## carries its own (each Health item is a different bottle).
+func get_art() -> LootObjectArt:
+	return look.art if look != null else null
+
+
 ## A short line under the card: why it cannot be taken, or that it has been.
 func get_status_text() -> String:
 	if _resolved:
@@ -86,14 +100,24 @@ func is_busy() -> bool:
 	return _busy
 
 
-## Whether this reward still has to be dealt with before the screen can close.
-func blocks_leaving() -> bool:
-	return required and not _resolved
+## Whether the table was left with this still on it - see [method forfeit].
+func is_forfeited() -> bool:
+	return _forfeited
 
 
 ## Whether a click would do anything right now.
 func can_activate(_context: LootContext) -> bool:
-	return not _resolved and not _busy
+	return not _resolved and not _busy and not _forfeited
+
+
+## Left behind: the table was left with this unclaimed, so it is given up for
+## good and can never be activated. Nothing is paid and [signal settled] is not
+## emitted - it was not taken. A reward already done with is unaffected.
+func forfeit() -> void:
+	if _resolved or _forfeited:
+		return
+	_forfeited = true
+	emit_changed()
 
 
 ## What a click on the card does. Ends in [signal activation_finished], now or

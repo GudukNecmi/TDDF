@@ -4,8 +4,11 @@ extends SceneTree
 ## Cart, not a straight ride home - opens with the game stopped under it, the
 ## world clock still, the game's own pointer up and no stale countdown on the HUD;
 ## that the pouch's real opening deals one card per reward in the bundle around
-## it; that the table cannot be left while the upgrade is owed; and that leaving
-## returns to the same, cleared point on the same run map.
+## it; that DEVAM ET is open with the ? card still unopened, asking first and
+## going back to the table on GERİ DÖN with everything still there; that the ?
+## opens the card selection under the game's own pointer; and that leaving with
+## nothing left on the table goes straight home, without the question, to the
+## same, cleared point on the same run map.
 ##
 ## Also checks the pure pieces - the layout, and a bundle of every reward type -
 ## without a scene.
@@ -61,7 +64,7 @@ func _run() -> void:
 
 	var mouse_mode_in_fight := Input.get_mouse_mode()
 	# The fight's own roll may drop nothing; one planted stack makes sure a loot
-	# card is dealt and claimed through the real Horse Inventory transfer.
+	# card is dealt and claimed through the real run inventory add.
 	var fight_loot := (_find("WorldMapCombatBridge") as WorldMapCombatBridge).get_combat_loot()
 	fight_loot.add_gem(&"smoke_gem", "Smoke Gem", 2)
 
@@ -111,8 +114,14 @@ func _run() -> void:
 
 	var bundle := loot.get_bundle()
 	var stacks := (_find("WorldMapCombatBridge") as WorldMapCombatBridge).get_combat_loot().get_stacks()
-	print("       bundle: %d rewards (%d loot stacks)" % [bundle.size(), stacks.size()])
-	_ok(bundle.size() == stacks.size() + 1, "the bundle is the fight's loot plus its upgrade")
+	var direct := 0
+	for reward: LootReward in bundle.rewards:
+		if reward is LootRewardCharm or reward is LootRewardHealth:
+			direct += 1
+	print("       bundle: %d rewards (%d loot stacks, %d from the pouch)" % [bundle.size(),
+		stacks.size(), direct])
+	_ok(bundle.size() == stacks.size() + 1 + direct,
+		"the bundle is the fight's loot, the pouch's own loot and its ? card")
 	_ok(loot.get_cards().is_empty(), "nothing is on the table before the pouch is opened")
 
 	print("--- the pouch ---")
@@ -138,18 +147,64 @@ func _run() -> void:
 	_ok(loot.is_open(), "the screen stays up once the rewards are out")
 
 	print("--- resolving ---")
-	_ok(not loot.can_leave(), "the table cannot be left with the upgrade owed")
-	_ok(not loot.leave(), "leaving is refused")
-	var upgrade_card: LootRewardCard = null
+	var leave_button := loot.get_node(^"Table/Leave") as Button
+	_ok(loot.can_leave() and leave_button.visible and not leave_button.disabled,
+		"DEVAM ET is clickable with the ? unopened")
+	var mysteries: Array[LootRewardCard] = []
 	for card: LootRewardCard in cards:
-		if card.get_reward() is LootRewardUpgrade:
-			upgrade_card = card
-	loot.activate(upgrade_card)
-	var screen := _find("RunMapUpgradeRewardScreen") as RunMapUpgradeRewardScreen
-	_ok(screen.visible, "the upgrade card opened the upgrade screen over the table")
+		if card.get_reward() is LootRewardMystery:
+			mysteries.append(card)
+	_ok(mysteries.size() == 1, "a Bandit Group dealt exactly one ? card", str(mysteries.size()))
+	leave_button.pressed.emit()
+	var question := loot.get_node(^"Confirm/Box/Content/Question") as Label
+	_ok(loot.is_confirming() and question.is_visible_in_tree()
+		and question.text == "Almadan devam etmek istediğine emin misin?",
+		"pressing it with rewards left asks first", question.text)
+	_ok(loot.is_open() and _scene_name() == "DustCampArena", "and nothing has been left yet")
+	var choices := RewardChoiceScreen.get_active(loot)
+	loot.activate(mysteries[0])
+	_ok(not choices.is_open(), "the table is held still under the question")
+	(loot.get_node(^"Confirm/Box/Content/Buttons/Back") as Button).pressed.emit()
+	_ok(not loot.is_confirming() and loot.is_open(), "GERİ DÖN goes back to the table")
+	_ok(not mysteries[0].get_reward().is_resolved() and not mysteries[0].get_reward().is_forfeited()
+		and mysteries[0].get_reward().can_activate(loot.get_bundle().context),
+		"with the ? still there to take")
+	loot.activate(mysteries[0])
+	_ok(choices != null and choices.is_open(), "the ? opened the card selection over the table")
 	_ok(not loot.can_leave(), "still not while it is up")
-	screen.take()
-	_ok(upgrade_card.get_reward().is_resolved(), "taking it settled the card")
+	var pointer_ok := true
+	var waited_reveal := 0
+	while choices != null and not choices.is_choosing() and waited_reveal < 4000:
+		waited_reveal += 1
+		if not (cursor.is_pointer_wanted() and Input.get_mouse_mode() == mouse_mode_in_fight):
+			pointer_ok = false
+		await process_frame
+	_ok(choices.is_choosing(), "the cards were revealed")
+	_ok(choices.get_reveal_order() == [0, 1, 2], "left to right", str(choices.get_reveal_order()))
+	var choice := choices.get_cards()[0].get_choice()
+	var weapon := WeaponMount.get_active(current_scene).get_definition()
+	var before := 0
+	for up: WeaponUpgrade in weapon.upgrades:
+		before += weapon.get_run_level(up)
+	choices.choose(0)
+	var waited_close := 0
+	while choices.is_open() and waited_close < 4000:
+		waited_close += 1
+		if not (cursor.is_pointer_wanted() and Input.get_mouse_mode() == mouse_mode_in_fight):
+			pointer_ok = false
+		await process_frame
+	_ok(pointer_ok, "the game's pointer stayed up and the pointer mode untouched throughout")
+	var after := 0
+	for up: WeaponUpgrade in weapon.upgrades:
+		after += weapon.get_run_level(up)
+	if choice is RewardChoiceUpgrade:
+		_ok(after - before == (choice as RewardChoiceUpgrade).get_levels(),
+			"the taken card landed through the weapon's run stack",
+			"%s %s" % [choice.get_rarity_name(), choice.get_title()])
+	else:
+		_ok(weapon.is_legendary_active((choice as RewardChoiceLegendary).legendary),
+			"the taken Legendary is on")
+	_ok(mysteries[0].get_reward().is_resolved(), "taking it settled the ?")
 	var inventory := RunInventory.get_active(current_scene)
 	var gem_card: LootRewardCard = null
 	for card: LootRewardCard in cards:
@@ -161,10 +216,15 @@ func _run() -> void:
 				"taken" if card.get_reward().is_resolved() else card.get_reward().get_status_text()])
 	_ok(gem_card != null and gem_card.get_reward().is_resolved(), "the gem card was claimed")
 	_ok(inventory != null and _carried(inventory, &"smoke_gem") == 2,
-		"and the gems are in the Horse Inventory",
+		"and the gems are in the run inventory",
 		str(_carried(inventory, &"smoke_gem")) if inventory != null else "<no inventory>")
-	_ok(loot.can_leave(), "the table can be left once nothing is owed")
-	_ok(loot.leave(), "the table was left")
+	# Whatever else the pouch gave is taken too, so the table is bare.
+	for card: LootRewardCard in cards:
+		if not card.get_reward().is_resolved():
+			loot.activate(card)
+	_ok(not loot.get_bundle().has_unclaimed(), "nothing is left on the table")
+	_ok(loot.request_leave() and not loot.is_confirming(),
+		"DEVAM ET with nothing left leaves at once, without asking")
 
 	await _settle()
 	_ok(_scene_name() == "DustCampRunMap", "leaving returned to the run map", _scene_name())
@@ -198,17 +258,22 @@ func _pure_checks() -> void:
 	var plain := LootReward.new()
 	var paid := LootRewardPayout.new()
 	paid.mark_resolved()
-	var owed := LootReward.new()
-	owed.required = true
+	var other := LootReward.new()
 	bundle.add(plain)
 	bundle.add(paid)
-	bundle.add(owed)
-	_ok(not bundle.can_leave() and not bundle.is_resolved(), "an owed reward holds the table")
-	owed.activate(LootContext.new())
-	_ok(bundle.can_leave(), "settling it frees the table")
-	_ok(not bundle.is_resolved(), "an optional reward can be left behind")
+	bundle.add(other)
+	_ok(bundle.can_leave() and bundle.has_unclaimed() and bundle.get_unclaimed().size() == 2,
+		"unclaimed rewards never hold the table")
+	other.activate(LootContext.new())
+	_ok(bundle.get_unclaimed().size() == 1 and bundle.get_unclaimed()[0] == plain, "taking one leaves the other unclaimed")
+	bundle.forfeit_unclaimed()
+	_ok(plain.is_forfeited() and not plain.is_resolved() and not plain.can_activate(LootContext.new()),
+		"leaving forfeits what was left - for good")
+	_ok(not other.is_forfeited() and not paid.is_forfeited(), "and touches nothing already taken")
+	_ok(not bundle.has_unclaimed(), "nothing is unclaimed once it is forfeited")
 
-	for path: String in ["res://Resources/Loot/Sources/source_weapon_upgrade.tres",
+	for path: String in ["res://Resources/Loot/Sources/source_mystery_cards.tres",
+			"res://Resources/Loot/Sources/source_weapon_upgrade.tres",
 			"res://Resources/Loot/Sources/source_combat_loot.tres",
 			"res://Resources/Loot/Sources/source_bounty_payout.tres"]:
 		_ok(load(path) is LootSource, "%s loads as a source" % path.get_file())

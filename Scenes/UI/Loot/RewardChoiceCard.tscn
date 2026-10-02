@@ -1,0 +1,186 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/reward_choice_card.gd" id="1_card"]
+[ext_resource type="Texture2D" uid="uid://78kne36jl8q5" path="res://Assets/UI/UI Screens/Cards.PNG" id="2_stock"]
+[ext_resource type="Shader" path="res://Shaders/reward_card.gdshader" id="3_shader"]
+[ext_resource type="FontFile" uid="uid://dvrak3jvoqpyf" path="res://Fonts/Sancreek-Regular.ttf" id="4_title_font"]
+[ext_resource type="FontFile" uid="uid://d3degwuaqrvgu" path="res://Fonts/AlfaSlabOne-Regular.ttf" id="5_body_font"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_card"]
+shader = ExtResource("3_shader")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rim"]
+bg_color = Color(0, 0, 0, 0)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(1, 1, 1, 0)
+shadow_size = 10
+
+[node name="RewardChoiceCard" type="Button"]
+custom_minimum_size = Vector2(196, 284)
+offset_right = 196.0
+offset_bottom = 284.0
+focus_mode = 0
+flat = true
+script = ExtResource("1_card")
+
+[node name="Shadow" type="TextureRect" parent="."]
+modulate = Color(0, 0, 0, 0.45)
+layout_mode = 0
+offset_right = 196.0
+offset_bottom = 284.0
+mouse_filter = 2
+texture = ExtResource("2_stock")
+expand_mode = 1
+
+[node name="Pivot" type="Control" parent="."]
+layout_mode = 0
+offset_right = 196.0
+offset_bottom = 284.0
+mouse_filter = 2
+
+[node name="Flipper" type="Control" parent="Pivot"]
+layout_mode = 0
+offset_right = 196.0
+offset_bottom = 284.0
+mouse_filter = 2
+
+[node name="Rim" type="Panel" parent="Pivot/Flipper"]
+layout_mode = 0
+offset_right = 196.0
+offset_bottom = 284.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_rim")
+
+[node name="Particles" type="CPUParticles2D" parent="Pivot/Flipper"]
+position = Vector2(98, 142)
+emitting = false
+amount = 16
+lifetime = 1.2
+local_coords = true
+
+[node name="Display" type="TextureRect" parent="Pivot/Flipper"]
+material = SubResource("ShaderMaterial_card")
+layout_mode = 0
+offset_right = 196.0
+offset_bottom = 284.0
+mouse_filter = 2
+expand_mode = 1
+
+[node name="Viewport" type="SubViewport" parent="."]
+transparent_bg = true
+size = Vector2i(196, 284)
+render_target_update_mode = 4
+
+[node name="Back" type="Control" parent="Viewport"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 196.0
+offset_bottom = 284.0
+mouse_filter = 2
+
+[node name="Stock" type="TextureRect" parent="Viewport/Back"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_stock")
+expand_mode = 1
+
+[node name="Mark" type="Label" parent="Viewport/Back"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.55, 0.06, 0.05, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.03, 0.02, 1)
+theme_override_constants/outline_size = 10
+theme_override_fonts/font = ExtResource("4_title_font")
+theme_override_font_sizes/font_size = 120
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Face" type="Control" parent="Viewport"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 196.0
+offset_bottom = 284.0
+mouse_filter = 2
+
+[node name="Stock" type="TextureRect" parent="Viewport/Face"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_stock")
+expand_mode = 1
+
+[node name="ArtWindow" type="ColorRect" parent="Viewport/Face"]
+self_modulate = Color(1, 1, 1, 0.18)
+layout_mode = 1
+anchor_left = 0.12
+anchor_top = 0.078
+anchor_right = 0.88
+anchor_bottom = 0.39
+mouse_filter = 2
+
+[node name="Art" type="TextureRect" parent="Viewport/Face/ArtWindow"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Text" type="VBoxContainer" parent="Viewport/Face"]
+layout_mode = 1
+anchor_left = 0.09
+anchor_top = 0.42
+anchor_right = 0.91
+anchor_bottom = 0.925
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="Rarity" type="Label" parent="Viewport/Face/Text"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.05, 0.03, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("5_body_font")
+theme_override_font_sizes/font_size = 13
+text = "YAYGIN"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="Viewport/Face/Text"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.17, 0.08, 0.05, 1)
+theme_override_fonts/font = ExtResource("4_title_font")
+theme_override_font_sizes/font_size = 19
+text = "İBLİSİN ÖFKESİ"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Description" type="Label" parent="Viewport/Face/Text"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.24, 0.14, 0.09, 1)
+theme_override_fonts/font = ExtResource("5_body_font")
+theme_override_font_sizes/font_size = 11
+text = "Hasarını %40 artırır."
+horizontal_alignment = 1
+autowrap_mode = 3

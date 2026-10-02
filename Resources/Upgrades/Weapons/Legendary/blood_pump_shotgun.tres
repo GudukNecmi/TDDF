@@ -72,3 +72,5 @@ id = &"blood_pump"
 display_name = "BLOOD PUMP"
 description = "KEEP WORKING THE PUMP: EACH FULL CYCLE BANKS A CHARGE (UP TO 5) INTO THE NEXT SHOT - HARDER, FURTHER AND WIDER. AT MAX EVERY PELLET PIERCES."
 pump_charge = SubResource("Resource_charge")
+card_name = "KAN POMPASI"
+card_description = "Her tam pompa çevrimi sonraki atışa güç yükler (en fazla 5). Tam yükte bütün saçmalar deler."

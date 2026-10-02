@@ -42,3 +42,5 @@ id = &"one_big_shell"
 display_name = "ONE BIG SHELL"
 description = "EVERY SHOT IS ONE ENORMOUS CANNON ROUND. A DEAD-CENTRE HIT DEALS THE WHOLE BLAST; A GRAZE ONLY CLIPS AND SHOVES."
 one_big_shell = SubResource("Resource_shell")
+card_name = "TEK KOCA FİŞEK"
+card_description = "Her atış tek bir dev gülledir. Tam isabet bütün patlamayı verir; sıyırma yalnızca iter."

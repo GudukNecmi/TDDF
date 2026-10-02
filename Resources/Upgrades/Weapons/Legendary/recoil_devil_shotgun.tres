@@ -12,3 +12,5 @@ id = &"recoil_devil"
 display_name = "RECOIL DEVIL"
 description = "EVERY SHOT THROWS YOU HARD THE OTHER WAY - AIM BEHIND YOU TO FLY. NOTHING CAN HURT YOU WHILE YOU ARE THROWN. CHAIN SHOTS TO KEEP MOVING; YOU CAN STILL STEER AND AIM."
 shot_recoil = SubResource("Resource_recoil")
+card_name = "GERİ TEPEN ŞEYTAN"
+card_description = "Her atış seni ters yöne fırlatır; uçarken hasar almazsın. Hareket etmek için arkana nişan al."

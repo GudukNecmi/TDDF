@@ -8,6 +8,7 @@ script = ExtResource("2_modifier")
 stat = 14
 amount = 0.1
 label = "BLOOD"
+card_text = "Öldürmelerden gelen kanı %s artırır."
 
 [resource]
 script = ExtResource("1_upgrade")
@@ -16,3 +17,4 @@ display_name = "BLOOD GAIN"
 max_level = 5
 level_costs = Array[int]([400, 800, 1300, 1900, 2600])
 modifiers_per_level = Array[ExtResource("2_modifier")]([SubResource("Resource_mod1")])
+card_name = "KAN HASADI"

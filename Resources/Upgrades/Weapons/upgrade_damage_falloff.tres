@@ -8,6 +8,7 @@ script = ExtResource("2_modifier")
 stat = 12
 amount = 0.1
 label = "FALLOFF CUT"
+card_text = "Mesafeyle hasar kaybını %s azaltır."
 
 [resource]
 script = ExtResource("1_upgrade")
@@ -16,3 +17,4 @@ display_name = "DAMAGE FALLOFF"
 max_level = 5
 level_costs = Array[int]([200, 400, 700, 1100, 1600])
 modifiers_per_level = Array[ExtResource("2_modifier")]([SubResource("Resource_mod1")])
+card_name = "SÖNMEYEN BARUT"

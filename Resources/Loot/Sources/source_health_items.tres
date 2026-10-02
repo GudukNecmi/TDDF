@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="LootSourceHealthItems" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Loot/loot_source_health_items.gd" id="1_source"]
+[ext_resource type="Resource" path="res://Resources/Loot/Looks/look_health_item.tres" id="2_look"]
+[ext_resource type="Script" path="res://Scripts/Loot/health_loot_definition.gd" id="3_item_script"]
+[ext_resource type="Resource" path="res://Resources/Loot/Health/whisky_glass.tres" id="4_glass"]
+[ext_resource type="Resource" path="res://Resources/Loot/Health/whisky_bottle_35.tres" id="5_bottle_35"]
+[ext_resource type="Resource" path="res://Resources/Loot/Health/whisky_bottle_50.tres" id="6_bottle_50"]
+
+[resource]
+script = ExtResource("1_source")
+items = Array[ExtResource("3_item_script")]([ExtResource("4_glass"), ExtResource("5_bottle_35"), ExtResource("6_bottle_50")])
+look = ExtResource("2_look")
+chance = 0.6

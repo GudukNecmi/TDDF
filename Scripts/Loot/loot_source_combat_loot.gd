@@ -4,10 +4,11 @@ extends LootSource
 ## [CombatLootDirector] as the fight opened - dealt onto the Loot Screen one card
 ## per stack.
 ##
-## [b]Nothing is rolled here.[/b] The stacks are exactly those the Horse Cart used
-## to show, in the same order and amounts; this only says how each category is
-## drawn and whether it is claimed into the Horse Inventory ([LootRewardStack]) or
-## spent on the spot as a lead ([LootRewardLead]).
+## [b]Nothing is rolled here.[/b] The stacks are exactly those the fight rolled -
+## a Gem's chance, colour and quantity are [CombatLootTable]'s - in the same order
+## and amounts; this only says how each category is drawn and whether it is
+## claimed into the run inventory ([LootRewardStack]) or spent on the spot as a
+## lead ([LootRewardLead]).
 
 ## How each loot category is drawn, keyed by [member RunItemStack.category]
 ## ([code]gem[/code], [code]heart[/code], [code]ammo[/code],
@@ -20,7 +21,7 @@ extends LootSource
 @export var lead_categories: Array[StringName] = [&"boss_info"]
 
 @export_group("Wording")
-## Shown on a card the Horse Inventory has no room for.
+## Shown on a card the run inventory has no room for.
 @export var no_room_text: String = "NO ROOM"
 ## Shown on a lead with nothing left to teach.
 @export var nothing_to_learn_text: String = "NOTHING LEFT TO LEARN"

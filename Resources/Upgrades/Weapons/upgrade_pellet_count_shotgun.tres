@@ -8,6 +8,7 @@ script = ExtResource("2_modifier")
 stat = 15
 amount = 2.0
 label = "PELLETS"
+card_text = "Her atışa %s saçma ekler."
 
 [resource]
 script = ExtResource("1_upgrade")
@@ -17,3 +18,4 @@ max_level = 3
 level_costs = Array[int]([500, 1000, 1800])
 modifiers_per_level = Array[ExtResource("2_modifier")]([SubResource("Resource_mod1")])
 unique = true
+card_name = "SAÇMA YAĞMURU"

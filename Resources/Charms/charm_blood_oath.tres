@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharmDefinition" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Charms/charm_definition.gd" id="1_charm"]
+
+[resource]
+script = ExtResource("1_charm")
+id = &"charm_blood_oath"
+display_name = "KAN YEMİNİ"
+description = "Toplanan kanı artırır."
+color = Color(0.75, 0.05, 0.2, 1)

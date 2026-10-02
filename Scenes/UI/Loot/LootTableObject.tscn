@@ -1,0 +1,88 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/loot_table_object.gd" id="1_object"]
+[ext_resource type="FontFile" uid="uid://dvrak3jvoqpyf" path="res://Fonts/Sancreek-Regular.ttf" id="2_title_font"]
+[ext_resource type="FontFile" uid="uid://d3degwuaqrvgu" path="res://Fonts/AlfaSlabOne-Regular.ttf" id="3_body_font"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tip"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 7.0
+bg_color = Color(0.09, 0.035, 0.03, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.62, 0.45, 0.18, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[node name="LootTableObject" type="Button"]
+custom_minimum_size = Vector2(92, 92)
+offset_right = 92.0
+offset_bottom = 92.0
+focus_mode = 0
+flat = true
+script = ExtResource("1_object")
+card_size = Vector2(92, 92)
+hover_scale = 1.1
+hover_time = 0.14
+locked_modulate = Color(1, 1, 1, 1)
+table_scatter = 1.0
+
+[node name="Tooltip" type="PanelContainer" parent="."]
+visible = false
+z_index = 20
+layout_mode = 0
+offset_right = 180.0
+offset_bottom = 60.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tip")
+
+[node name="Body" type="VBoxContainer" parent="Tooltip"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="Heading" type="Label" parent="Tooltip/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.12, 0.1, 1)
+theme_override_fonts/font = ExtResource("3_body_font")
+theme_override_font_sizes/font_size = 9
+text = "TILSIM"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="Tooltip/Body"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.82, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0.08, 0.02, 0.01, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_title_font")
+theme_override_font_sizes/font_size = 17
+text = "ŞEYTANIN ADIMI"
+horizontal_alignment = 1
+
+[node name="Detail" type="Label" parent="Tooltip/Body"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.87, 0.8, 1)
+theme_override_fonts/font = ExtResource("3_body_font")
+theme_override_font_sizes/font_size = 11
+text = "Hareket hızını artırır."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Status" type="Label" parent="Tooltip/Body"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.12, 0.1, 1)
+theme_override_fonts/font = ExtResource("3_body_font")
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1

@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://bw3nojerhwjfg" path="res://Scripts/Weapons/weapon_definition.gd" id="3_a8pc1"]
 
 [ext_resource type="Script" path="res://Scripts/Weapons/weapon_upgrade.gd" id="u_script"]
+[ext_resource type="Resource" path="res://Resources/Upgrades/Weapons/upgrade_luck.tres" id="u_upgrade_luck"]
 [ext_resource type="Resource" path="res://Resources/Upgrades/Weapons/upgrade_damage.tres" id="u_upgrade_damage"]
 [ext_resource type="Resource" path="res://Resources/Upgrades/Weapons/upgrade_close_damage.tres" id="u_upgrade_close_damage"]
 [ext_resource type="Resource" path="res://Resources/Upgrades/Weapons/upgrade_long_damage.tres" id="u_upgrade_long_damage"]
@@ -40,5 +41,5 @@ display_name = "SHOTGUN"
 description = "SIX PELLETS, CLOSE WORK.  SPACE WORKS THE PUMP."
 scene = ExtResource("2_8lrrd")
 ammo_type = ExtResource("1_wjoky")
-upgrades = Array[ExtResource("u_script")]([ExtResource("u_upgrade_damage"), ExtResource("u_upgrade_close_damage"), ExtResource("u_upgrade_long_damage"), ExtResource("u_upgrade_range"), ExtResource("u_upgrade_projectile_speed"), ExtResource("u_upgrade_critical_chance"), ExtResource("u_upgrade_critical_damage"), ExtResource("u_upgrade_ammo_capacity_shotgun"), ExtResource("u_upgrade_knockback"), ExtResource("u_upgrade_stagger"), ExtResource("u_upgrade_projectile_size"), ExtResource("u_upgrade_damage_falloff"), ExtResource("u_upgrade_ammo_efficiency"), ExtResource("u_upgrade_blood_gain"), ExtResource("u_upgrade_pellet_count_shotgun"), ExtResource("u_upgrade_accuracy_shotgun")])
+upgrades = Array[ExtResource("u_script")]([ExtResource("u_upgrade_damage"), ExtResource("u_upgrade_close_damage"), ExtResource("u_upgrade_long_damage"), ExtResource("u_upgrade_range"), ExtResource("u_upgrade_projectile_speed"), ExtResource("u_upgrade_critical_chance"), ExtResource("u_upgrade_critical_damage"), ExtResource("u_upgrade_ammo_capacity_shotgun"), ExtResource("u_upgrade_knockback"), ExtResource("u_upgrade_stagger"), ExtResource("u_upgrade_projectile_size"), ExtResource("u_upgrade_damage_falloff"), ExtResource("u_upgrade_ammo_efficiency"), ExtResource("u_upgrade_blood_gain"), ExtResource("u_upgrade_pellet_count_shotgun"), ExtResource("u_upgrade_accuracy_shotgun"), ExtResource("u_upgrade_luck")])
 legendaries = Array[ExtResource("l_script")]([ExtResource("l_devils_barrel"), ExtResource("l_blood_pump"), ExtResource("l_devils_breath"), ExtResource("l_fan_the_hammer"), ExtResource("l_recoil_devil"), ExtResource("l_black_powder"), ExtResource("l_hell_chamber"), ExtResource("l_blood_reaper"), ExtResource("l_volatile_blood"), ExtResource("l_one_big_shell")])

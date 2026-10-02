@@ -8,11 +8,11 @@ extends RefCounted
 ## [b]It is not a second inventory.[/b] What one stack here actually is -
 ## identity, a display name, an icon, a category, how many, and the ceiling one
 ## stack can hold - is exactly [RunItemStack], the same class [RunInventory]'s
-## own row is built out of, so a loot stack transfers into the Horse Inventory as
+## own row is built out of, so a loot stack transfers into the run inventory as
 ## itself rather than being translated into a second shape first. This class only
 ## ever holds a loose list of them: there is no slot count, no capacity and no
 ## ceiling of its own, because loot still waiting to be claimed is never made to
-## compete with itself for room the way the Horse Inventory's own row does.
+## compete with itself for room the way the run inventory's own row does.
 ##
 ## [b]Nothing here decides what a fight is worth.[/b] Every add method below is
 ## a thin wrapper the same shape [method RunInventory.add_ammo] and its own
@@ -34,7 +34,7 @@ func is_empty() -> bool:
 
 ## Every stack currently held, in order. A copy, so [HorseCartScreen] reading
 ## this cannot reach in and edit a stack directly - the same guarantee
-## [method RunInventory.get_slots] already makes for the Horse Inventory's own
+## [method RunInventory.get_slots] already makes for the run inventory's own
 ## row.
 func get_stacks() -> Array[RunItemStack]:
 	return stacks.duplicate()

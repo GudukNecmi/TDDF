@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://bw3nojerhwjfg" path="res://Scripts/Weapons/weapon_definition.gd" id="3_ybbws"]
 
 [ext_resource type="Script" path="res://Scripts/Weapons/weapon_upgrade.gd" id="u_script"]
+[ext_resource type="Resource" path="res://Resources/Upgrades/Weapons/upgrade_luck.tres" id="u_upgrade_luck"]
 [ext_resource type="Resource" path="res://Resources/Upgrades/Weapons/upgrade_damage.tres" id="u_upgrade_damage"]
 [ext_resource type="Resource" path="res://Resources/Upgrades/Weapons/upgrade_close_damage.tres" id="u_upgrade_close_damage"]
 [ext_resource type="Resource" path="res://Resources/Upgrades/Weapons/upgrade_long_damage.tres" id="u_upgrade_long_damage"]
@@ -28,4 +29,4 @@ scene = ExtResource("2_dc12d")
 ammo_type = ExtResource("1_gxo73")
 unlocked = false
 purchase_cost = 1000
-upgrades = Array[ExtResource("u_script")]([ExtResource("u_upgrade_damage"), ExtResource("u_upgrade_close_damage"), ExtResource("u_upgrade_long_damage"), ExtResource("u_upgrade_projectile_speed"), ExtResource("u_upgrade_critical_chance"), ExtResource("u_upgrade_critical_damage"), ExtResource("u_upgrade_magazine_rifle"), ExtResource("u_upgrade_knockback"), ExtResource("u_upgrade_stagger"), ExtResource("u_upgrade_projectile_size"), ExtResource("u_upgrade_ammo_efficiency"), ExtResource("u_upgrade_blood_gain"), ExtResource("u_upgrade_pierce_lever_action")])
+upgrades = Array[ExtResource("u_script")]([ExtResource("u_upgrade_damage"), ExtResource("u_upgrade_close_damage"), ExtResource("u_upgrade_long_damage"), ExtResource("u_upgrade_projectile_speed"), ExtResource("u_upgrade_critical_chance"), ExtResource("u_upgrade_critical_damage"), ExtResource("u_upgrade_magazine_rifle"), ExtResource("u_upgrade_knockback"), ExtResource("u_upgrade_stagger"), ExtResource("u_upgrade_projectile_size"), ExtResource("u_upgrade_ammo_efficiency"), ExtResource("u_upgrade_blood_gain"), ExtResource("u_upgrade_pierce_lever_action"), ExtResource("u_upgrade_luck")])

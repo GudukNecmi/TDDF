@@ -1,9 +1,9 @@
 extends SceneTree
 ## Headless check of the Bandit Camp post-fight reward: ride to a real Bandit
-## Camp point, FIGHT, clear the arena, and confirm the reward screen deals two
-## selections of three of the equipped weapon's own upgrades, each choice lands
-## one free run-only level, the first choice is kept out of the second selection,
-## and the last choice returns to the same point on the same run map.
+## Camp point, FIGHT, clear the arena, and confirm the Loot Screen deals two
+## mystery ? cards, each opened through the real selection screen lands the taken
+## card on the weapon's run stack, the table is held until both are opened, and
+## leaving returns to the same point on the same run map.
 ##
 ## [codeblock]
 ## godot --path . --headless --script res://Scripts/Dev/run_map_camp_reward_smoke.gd
@@ -83,45 +83,40 @@ func _run() -> void:
 		return
 	loot.reveal(true)
 	await process_frame
-	var card := _upgrade_card(loot)
-	_ok(card != null, "an upgrade card was dealt")
-	loot.activate(card)
-	var screen := _find("RunMapUpgradeRewardScreen") as RunMapUpgradeRewardScreen
-	_ok(screen != null and screen.visible, "the upgrade card opened the Upgrade Reward screen")
-	if screen == null or not screen.visible:
-		_finish()
-		return
-	_ok(_scene_name() == "DustCampArena", "the ride home is held while it is up", _scene_name())
-	_ok(screen.get_pick() == 1, "it is on the first pick", str(screen.get_pick()))
-	var first_offer := screen.get_offer()
-	_check_offer(screen, weapon, first_offer, "first selection")
-	_ok(not (screen.get_node(^"Panel/Body/Take") as Button).visible,
-		"the single TAKE is put away for a selection")
-	print("       heading: %s" % (screen.get_node(^"Panel/Body/Heading") as Label).text)
-
-	var chosen := first_offer[0]
-	var chosen_run := weapon.get_run_level(chosen)
-	var chosen_base := weapon.get_upgrade_level(chosen)
-	_ok(screen.choose(0), "the first choice was given")
-	_ok(weapon.get_run_level(chosen) == chosen_run + 1, "it raised that run level by one")
-	_ok(weapon.get_upgrade_level(chosen) == chosen_base, "the permanent Base level is untouched")
-	_ok(screen.visible and screen.get_pick() == 2, "the second selection followed",
-		str(screen.get_pick()))
-	for _i: int in 5:
-		await process_frame
-	_ok(_scene_name() == "DustCampArena", "still held in the arena between picks", _scene_name())
-	var second_offer := screen.get_offer()
-	_check_offer(screen, weapon, second_offer, "second selection")
-	_ok(not second_offer.has(chosen), "the first choice is not offered again")
-	_ok(screen.choose(second_offer.size() - 1), "the second choice was given")
-	_ok(not screen.visible, "the screen closed after the second choice")
+	var mysteries := _mystery_cards(loot)
+	_ok(mysteries.size() == 2, "the camp dealt two ? cards", str(mysteries.size()))
+	_ok(loot.can_leave(), "the table could be left with them unopened")
+	var expected_gain := 0
+	var taken_keys: Array[StringName] = []
+	for index: int in mysteries.size():
+		var choice := await _resolve_mystery(loot, mysteries[index])
+		_ok(choice != null, "? %d dealt a selection and a card was taken" % (index + 1))
+		if choice == null:
+			_finish()
+			return
+		print("       took %s %s: %s" % [choice.get_rarity_name(), choice.get_title(),
+			choice.get_description().replace("\n", " / ")])
+		taken_keys.append(choice.get_key())
+		if choice is RewardChoiceUpgrade:
+			expected_gain += (choice as RewardChoiceUpgrade).get_levels()
+			_ok(weapon.upgrades.has((choice as RewardChoiceUpgrade).upgrade),
+				"it was one of the equipped weapon's own upgrades")
+		elif choice is RewardChoiceLegendary:
+			_ok(weapon.is_legendary_active((choice as RewardChoiceLegendary).legendary),
+				"it was one of the weapon's own Legendaries, now on")
+		_ok(mysteries[index].get_reward().is_resolved(), "that ? is resolved")
+		if index == 0:
+			_ok(loot.get_bundle().get_unclaimed().has(mysteries[1].get_reward()),
+				"the other ? is still there to take")
+			_ok(_scene_name() == "DustCampArena", "still held in the arena between them", _scene_name())
 
 	var total_gain := _sum(_run_levels(weapon)) - _sum(levels_before)
-	_ok(total_gain == 2, "exactly two upgrade levels were awarded", str(total_gain))
+	_ok(total_gain == expected_gain, "exactly the taken cards' strength was awarded",
+		"%d / %d" % [total_gain, expected_gain])
 	_ok(wallet.get_total() == carried_before, "no carried Blood was spent",
 		"%d -> %d" % [carried_before, wallet.get_total()])
 	_ok(bank == null or bank.get_total() == banked_before, "no banked Blood was spent")
-	_ok(loot.leave(), "the table was left once both picks were taken")
+	_ok(loot.leave(), "the table was left once both ? were opened")
 
 	await _settle()
 	_ok(_scene_name() == "DustCampRunMap", "the last choice returned to the run map", _scene_name())
@@ -130,7 +125,7 @@ func _run() -> void:
 		"it is the same map, standing at the same point")
 	_ok(back.get_site(target).kind == &"bandit_camp_cleared", "the point is cleared",
 		String(back.get_site(target).kind))
-	_ok(_sum(_run_levels(weapon)) - _sum(levels_before) == 2,
+	_ok(_sum(_run_levels(weapon)) - _sum(levels_before) == expected_gain,
 		"the run levels survived the scene change")
 
 	session.end()
@@ -159,29 +154,6 @@ func _stand_beside(bandits: RunMapBanditNode, graph: RunMapGraph, wanted: String
 	return PackedInt32Array()
 
 
-func _check_offer(screen: RunMapUpgradeRewardScreen, weapon: WeaponDefinition,
-		offer: Array[WeaponUpgrade], what: String) -> void:
-	var names: Array[String] = []
-	var own := true
-	for up: WeaponUpgrade in offer:
-		names.append(("*" if up.unique else "") + up.display_name)
-		if not weapon.upgrades.has(up) or not up.market_unlocked:
-			own = false
-	print("       %s for %s: %s" % [what, weapon.weapon_id, ", ".join(names)])
-	_ok(offer.size() == 3, "%s: three choices" % what, str(offer.size()))
-	_ok(own, "%s: all the equipped weapon's own unlocked upgrades" % what)
-	var distinct := {}
-	for up: WeaponUpgrade in offer:
-		distinct[up] = true
-	_ok(distinct.size() == offer.size(), "%s: no upgrade twice" % what)
-	var shown := 0
-	for child: Node in screen.get_node(^"Panel/Body/Choices").get_children():
-		if (child as Control).visible:
-			shown += 1
-	_ok(shown == offer.size(), "%s: one row shown per choice" % what, str(shown))
-
-
-## The pool rules, checked directly against the real resources.
 func _pure_checks(session: RunSessionState) -> void:
 	var reward := load("res://Resources/RunMap/Rewards/bandit_camp_upgrade_reward.tres") \
 		as RunMapUpgradeReward
@@ -323,8 +295,31 @@ func _route_to(bandits: RunMapBanditNode, graph: RunMapGraph, wanted: StringName
 	return PackedInt32Array()
 
 
-func _upgrade_card(loot: LootScreen) -> LootRewardCard:
+func _mystery_cards(loot: LootScreen) -> Array[LootRewardCard]:
+	var found: Array[LootRewardCard] = []
 	for card: LootRewardCard in loot.get_cards():
-		if card.get_reward() is LootRewardUpgrade:
-			return card
-	return null
+		if card.get_reward() is LootRewardMystery:
+			found.append(card)
+	return found
+
+
+## Opens [param card]'s ? through the real selection screen, waits out the
+## reveal, takes the first card and waits for the table to come back.
+func _resolve_mystery(loot: LootScreen, card: LootRewardCard) -> RewardChoice:
+	var screen := RewardChoiceScreen.get_active(loot)
+	loot.activate(card)
+	if screen == null or not screen.is_open():
+		return null
+	var waited := 0
+	while not screen.is_choosing() and waited < 4000:
+		waited += 1
+		await process_frame
+	if not screen.is_choosing():
+		return null
+	var choice := screen.get_cards()[0].get_choice()
+	screen.choose(0)
+	waited = 0
+	while screen.is_open() and waited < 4000:
+		waited += 1
+		await process_frame
+	return choice

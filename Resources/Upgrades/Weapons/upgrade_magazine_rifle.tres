@@ -8,12 +8,14 @@ script = ExtResource("2_modifier")
 stat = 7
 amount = 1
 label = "MAGAZINE"
+card_text = "Şarjöre %s mermi ekler."
 
 [sub_resource type="Resource" id="Resource_mod2"]
 script = ExtResource("2_modifier")
 stat = 8
 amount = 5
 label = "CARRIED"
+card_text = "Taşıdığın mermi sayısını %s artırır."
 
 [resource]
 script = ExtResource("1_upgrade")
@@ -22,3 +24,4 @@ display_name = "MAGAZINE SIZE"
 max_level = 3
 level_costs = Array[int]([400, 900, 1600])
 modifiers_per_level = Array[ExtResource("2_modifier")]([SubResource("Resource_mod1"), SubResource("Resource_mod2")])
+card_name = "GENİŞ ŞARJÖR"

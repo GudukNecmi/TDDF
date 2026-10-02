@@ -23,6 +23,12 @@ extends Resource
 ## One line on what it does.
 @export_multiline var description: String = ""
 
+@export_group("Reward Card")
+## What a reward card calls this Legendary, in Turkish.
+@export var card_name: String = ""
+## The reward card's concise Turkish description.
+@export_multiline var card_description: String = ""
+
 @export_group("Parts")
 ## How the rounds of each shot leave and fly while this is on. Null changes
 ## nothing about the shot.

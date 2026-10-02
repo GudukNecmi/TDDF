@@ -42,12 +42,33 @@ func is_resolved() -> bool:
 	return true
 
 
-## Whether the screen may be closed now - nothing still owed blocks it.
+## The rewards not yet done with - what leaving the table now would give up.
+## Nothing on the table is ever owed: any of it, of any kind, may be left behind.
+func get_unclaimed() -> Array[LootReward]:
+	var unclaimed: Array[LootReward] = []
+	for reward: LootReward in rewards:
+		if reward != null and not reward.is_resolved() and not reward.is_forfeited():
+			unclaimed.append(reward)
+	return unclaimed
+
+
+func has_unclaimed() -> bool:
+	return not get_unclaimed().is_empty()
+
+
+## Whether the screen may be closed now - only a reward in the middle of being
+## taken holds it. Unclaimed rewards never do; see [method forfeit_unclaimed].
 func can_leave() -> bool:
 	for reward: LootReward in rewards:
-		if reward != null and (reward.blocks_leaving() or reward.is_busy()):
+		if reward != null and reward.is_busy():
 			return false
 	return true
+
+
+## Gives up every reward still unclaimed, for good - the table has been left.
+func forfeit_unclaimed() -> void:
+	for reward: LootReward in get_unclaimed():
+		reward.forfeit()
 
 
 func _on_reward_settled(reward: LootReward) -> void:

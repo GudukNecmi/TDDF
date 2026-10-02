@@ -77,7 +77,8 @@ func _run() -> void:
 	(tabs.get_node(^"Tab_shotgun") as Button).pressed.emit()
 	await process_frame
 	var titles := _titles(screen)
-	_ok(titles.size() == 16, "the shotgun tab has its 16 cards", "%d" % titles.size())
+	_ok(titles.size() == 17, "the shotgun tab has its 17 cards", "%d" % titles.size())
+	_ok(titles.has("LUCK"), "including LUCK (ŞANSLI EL), an ordinary upgrade like the rest", ", ".join(titles))
 	_ok(titles.has("DAMAGE FALLOFF") and titles.has("AMMO CAPACITY") and not titles.has("MAGAZINE SIZE"),
 		"with fall-off and ammo capacity, and no magazine", ", ".join(titles))
 	_ok(titles.has("PELLET COUNT") and titles.has("ACCURACY"), "and the shotgun's own PELLET COUNT and ACCURACY",

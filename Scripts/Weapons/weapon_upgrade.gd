@@ -38,6 +38,11 @@ extends Resource
 ## progression unlocks through; a locked upgrade is never dealt onto a shelf.
 @export var market_unlocked: bool = true
 
+@export_group("Reward Card")
+## What a reward card calls this upgrade, in Turkish. The line under it is each
+## modifier's [member WeaponStatModifier.card_text].
+@export var card_name: String = ""
+
 
 ## What the modifiers add at [param level], as a card line per stat -
 ## "DAMAGE +20%".
@@ -56,6 +61,16 @@ func describe_step(level: int) -> String:
 		if modifier != null:
 			lines.append("%s %s -> %s" % [
 				modifier.label, modifier.format_amount(level), modifier.format_amount(level + 1)])
+	return "\n".join(lines)
+
+
+## The Turkish reward-card lines for [param levels] levels at once, one per
+## modifier - "Hasarını %40 artırır.".
+func describe_card(levels: int) -> String:
+	var lines: PackedStringArray = []
+	for modifier: WeaponStatModifier in modifiers_per_level:
+		if modifier != null and not modifier.card_text.is_empty():
+			lines.append(modifier.describe_card(float(levels)))
 	return "\n".join(lines)
 
 

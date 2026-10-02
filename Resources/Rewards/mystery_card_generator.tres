@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="RewardChoiceGenerator" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Rewards/reward_choice_generator.gd" id="1_generator"]
+[ext_resource type="Script" path="res://Scripts/Rewards/reward_pool_entry.gd" id="2_entry"]
+[ext_resource type="Resource" path="res://Resources/Rewards/reward_pool_legendary.tres" id="3_legendary"]
+[ext_resource type="Resource" path="res://Resources/Rewards/reward_pool_upgrade.tres" id="4_upgrade"]
+
+[sub_resource type="Resource" id="Resource_legendary"]
+script = ExtResource("2_entry")
+pool = ExtResource("3_legendary")
+weight = 10.0
+
+[sub_resource type="Resource" id="Resource_upgrade"]
+script = ExtResource("2_entry")
+pool = ExtResource("4_upgrade")
+weight = 90.0
+
+[resource]
+script = ExtResource("1_generator")
+base_choice_count = 3
+luck_stat = 20
+entries = Array[ExtResource("2_entry")]([SubResource("Resource_legendary"), SubResource("Resource_upgrade")])
+fallback_pool = ExtResource("4_upgrade")

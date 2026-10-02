@@ -8,6 +8,7 @@ script = ExtResource("2_modifier")
 stat = 17
 amount = 1.0
 label = "BOUNCES"
+card_text = "Mermilerin %s düşmana daha seker."
 
 [resource]
 script = ExtResource("1_upgrade")
@@ -17,3 +18,4 @@ max_level = 3
 level_costs = Array[int]([600, 1200, 2000])
 modifiers_per_level = Array[ExtResource("2_modifier")]([SubResource("Resource_mod1")])
 unique = true
+card_name = "SEKME USTASI"

@@ -3,18 +3,18 @@ extends LootReward
 ## One stack of a fight's [CombatLoot] - gems, hearts, ammunition - as a card on
 ## the Loot Screen.
 ##
-## [b]Claiming it is the Horse Cart's transfer, unchanged.[/b] A click asks
-## [method RunInventory.add_item] for room and takes off the loot only what found
-## it - see [method HorseCartScreen._on_loot_stack_pressed] - so a stack the Horse
-## Inventory has no room for is left standing, never destroyed. The card settles
-## once the whole stack has gone across.
+## [b]Claiming it is the run inventory's add, nothing else.[/b] A click hands the
+## stack to [RunInventory] - where Gems and the rest of a run's loot are carried -
+## through [method RunInventory.add_item] and takes off the loot only what found
+## room, so a stack with no room left is left standing, never destroyed. The card
+## settles once the whole stack has gone across.
 
 ## The loot the stack belongs to.
 var loot: CombatLoot
 ## The stack itself - the same object [member CombatLoot.stacks] holds, so a
 ## partial claim shows at once.
 var stack: RunItemStack
-## Shown when the Horse Inventory has no room for any of it.
+## Shown when the run inventory has no room for any of it.
 var no_room_text: String = "NO ROOM"
 
 
@@ -26,6 +26,12 @@ func get_title() -> String:
 
 func get_amount() -> int:
 	return stack.count if stack != null else 0
+
+
+func get_icon() -> Texture2D:
+	if stack != null and stack.icon != null:
+		return stack.icon
+	return super.get_icon()
 
 
 func _activate(context: LootContext) -> void:

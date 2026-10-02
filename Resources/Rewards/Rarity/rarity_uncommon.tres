@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="UpgradeRarity" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Rewards/upgrade_rarity.gd" id="1_rarity"]
+[ext_resource type="AudioStream" uid="uid://tms8w2h63vp7" path="res://Sound/Generated/CardStingerHit.mp3" id="2_hit"]
+
+
+[resource]
+script = ExtResource("1_rarity")
+id = &"uncommon"
+display_name = "SIRA DIŞI"
+tier = 1
+color = Color(0.35, 0.85, 0.35, 1)
+strength_multiplier = 2
+stinger_hit = ExtResource("2_hit")
+stinger_hits = 2
+stinger_interval = 0.19
+stinger_pitches = PackedFloat32Array(1.0, 1.1225, 1.2599, 1.3348, 1.4983)
+stinger_volume_db = -3.0
+
+particle_amount = 14
+particle_size = 3.2
+particle_spread = 5.0
+particle_speed = 12.0
+particle_intensity = 0.45
+rim_size = 10.0
+rim_intensity = 0.32

@@ -1,0 +1,105 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/UI/loot_reward_card.gd" id="1_card"]
+[ext_resource type="Texture2D" uid="uid://78kne36jl8q5" path="res://Assets/UI/UI Screens/Cards.PNG" id="2_stock"]
+[ext_resource type="FontFile" uid="uid://dvrak3jvoqpyf" path="res://Fonts/Sancreek-Regular.ttf" id="3_title_font"]
+[ext_resource type="FontFile" uid="uid://d3degwuaqrvgu" path="res://Fonts/AlfaSlabOne-Regular.ttf" id="4_body_font"]
+
+[node name="MysteryLootCard" type="Button"]
+custom_minimum_size = Vector2(104, 150)
+offset_right = 104.0
+offset_bottom = 150.0
+focus_mode = 0
+flat = true
+script = ExtResource("1_card")
+card_size = Vector2(104, 150)
+
+[node name="Shadow" type="TextureRect" parent="."]
+modulate = Color(0, 0, 0, 0.45)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 5.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_stock")
+expand_mode = 1
+
+[node name="Face" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_stock")
+expand_mode = 1
+
+[node name="Body" type="VBoxContainer" parent="Face"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Heading" type="Label" parent="Face/Body"]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_body_font")
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+
+[node name="Icon" type="TextureRect" parent="Face/Body"]
+visible = false
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Face/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_outline_color = Color(0.12, 0.03, 0.02, 1)
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("3_title_font")
+theme_override_font_sizes/font_size = 72
+text = "?"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Detail" type="Label" parent="Face/Body"]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_body_font")
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Amount" type="Label" parent="Face/Body"]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_body_font")
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
+[node name="Status" type="Label" parent="Face/Body"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_outline_color = Color(0.95, 0.9, 0.82, 1)
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("4_body_font")
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1

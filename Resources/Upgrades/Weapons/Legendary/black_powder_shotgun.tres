@@ -22,3 +22,5 @@ id = &"black_powder"
 display_name = "BLACK POWDER"
 description = "EVERY 6 SECONDS A SHOT LEAVES A CLOUD OF BLOOD-BLACK SMOKE. INSIDE IT THE ENEMY HUNTS WHERE YOU WERE LAST SEEN - ONLY THOSE RIGHT BESIDE YOU CAN MAKE YOU OUT, AND EVERY SHOT YOU FIRE FROM IT GIVES AWAY WHERE IT CAME FROM."
 black_powder = SubResource("Resource_powder")
+card_name = "KARA BARUT"
+card_description = "6 saniyede bir, atışın kara bir duman bulutu bırakır. Dumanın içinde düşmanlar seni ancak yanı başındayken görebilir."

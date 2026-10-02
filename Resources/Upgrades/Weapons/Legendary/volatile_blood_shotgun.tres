@@ -32,3 +32,5 @@ id = &"volatile_blood"
 display_name = "VOLATILE BLOOD"
 description = "EVERY MAN THE SHOTGUN KILLS LEAVES A BAG OF VOLATILE BLOOD FOR 3 SECONDS. WALK THROUGH IT OR SHOOT IT AND IT BURSTS, SPRAYING BLOOD THAT HURTS EVERY ENEMY AROUND IT."
 kill_reward = SubResource("Resource_volatile")
+card_name = "UÇUCU KAN"
+card_description = "Öldürdüğün her adam 3 saniyelik bir kan torbası bırakır. Üstünden geç ya da vur: patlayıp çevresindeki düşmanları yaralar."

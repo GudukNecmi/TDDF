@@ -106,9 +106,13 @@
 [ext_resource type="PackedScene" path="res://Scenes/UI/Loot/LootScreen.tscn" id="220_loot_screen"]
 [ext_resource type="Script" path="res://Scripts/Loot/post_combat_loot_director.gd" id="221_loot_director"]
 [ext_resource type="Script" path="res://Scripts/Loot/loot_source.gd" id="222_loot_source"]
-[ext_resource type="Resource" path="res://Resources/Loot/Sources/source_weapon_upgrade.tres" id="223_src_upgrade"]
+[ext_resource type="Resource" path="res://Resources/Loot/Sources/source_mystery_cards.tres" id="223_src_mystery"]
 [ext_resource type="Resource" path="res://Resources/Loot/Sources/source_combat_loot.tres" id="224_src_loot"]
 [ext_resource type="Resource" path="res://Resources/Loot/Sources/source_bounty_payout.tres" id="225_src_payout"]
+[ext_resource type="Resource" path="res://Resources/Loot/Sources/source_charms.tres" id="226_src_charms"]
+[ext_resource type="Resource" path="res://Resources/Loot/Sources/source_health_items.tres" id="227_src_health"]
+[ext_resource type="Script" path="res://Scripts/UI/charm_hud.gd" id="228_charm_hud"]
+[ext_resource type="FontFile" uid="uid://d3degwuaqrvgu" path="res://Fonts/AlfaSlabOne-Regular.ttf" id="229_charm_font"]
 [ext_resource type="Script" path="res://Scripts/UI/boss_health_bar.gd" id="209_bosshealth"]
 [ext_resource type="Script" path="res://Scripts/UI/weapon_debug_panel.gd" id="210_weapondebug"]
 [ext_resource type="Resource" path="res://Resources/RunMap/Market/market_products_roadside.tres" id="211_cardpool"]
@@ -325,6 +329,20 @@ theme_override_font_sizes/font_size = 30
 text = "BLOOD 0"
 vertical_alignment = 1
 script = ExtResource("4_bcount")
+
+[node name="CharmHud" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 45.0
+offset_top = -140.0
+offset_right = 445.0
+offset_bottom = -104.0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("228_charm_hud")
+count_font = ExtResource("229_charm_font")
 
 [node name="AbilityCooldown" type="Label" parent="."]
 anchors_preset = 2
@@ -2539,7 +2557,7 @@ script = ExtResource("103_m43cp")
 
 [node name="PostCombatLootDirector" type="Node" parent="."]
 script = ExtResource("221_loot_director")
-sources = Array[ExtResource("222_loot_source")]([ExtResource("223_src_upgrade"), ExtResource("224_src_loot"), ExtResource("225_src_payout")])
+sources = Array[ExtResource("222_loot_source")]([ExtResource("223_src_mystery"), ExtResource("224_src_loot"), ExtResource("226_src_charms"), ExtResource("227_src_health"), ExtResource("225_src_payout")])
 
 [node name="RunMapUpgradeRewardScreen" parent="." unique_id=300100040 instance=ExtResource("208_upgrade_reward")]
 z_index = 145

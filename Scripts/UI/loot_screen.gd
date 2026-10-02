@@ -11,11 +11,24 @@ extends Control
 ## click. A new kind of reward needs a reward class and a look - nothing here.
 ##
 ## [b]The flow.[/b] [method present] raises the table with the pouch shut.
-## Clicking the pouch ([method reveal]) plays its opening, and at the pop the
-## cards fly out to their places. The player takes what they want; the leave
-## button unlocks once nothing still owed is left ([method LootBundle.can_leave])
-## and [method leave] reports [signal finished] - the director takes it home from
+## Clicking the pouch ([method reveal]) plays its opening - the cord undone, the
+## pouch tipped and slumped open - and as it spills the rewards fly out of its
+## mouth ([method LootPouch.get_spill_point]) to their places, the open pouch
+## left lying in the middle. Cards (the [code]?[/code]) are dealt exactly to
+## their spots; physical loot ([LootTableObject]) takes [member layout]'s scatter
+## so no two pieces land alike, and settles with a hop as it touches down
+## ([method LootRewardCard.land]). The player takes what they want - nothing on
+## the table is mandatory. DEVAM ET is always open once the cards are down: with
+## rewards still unclaimed ([method LootBundle.has_unclaimed]) it first asks
+## whether to ride on without them ([method request_leave]); GERİ DÖN goes back
+## to the table, DEVAM ET forfeits them ([method LootBundle.forfeit_unclaimed]).
+## [method leave] reports [signal finished] - the director takes it home from
 ## there.
+##
+## [b]Sound is the table's own [SoundBank].[/b] The pouch's opening plays
+## [member open_sound]; each reward's look names its own landing and collecting
+## sounds ([member LootRewardLook.land_sound], [member LootRewardLook.collect_sound]),
+## played through the same bank - nothing here knows which kind made which.
 ##
 ## [b]The game is stopped under it.[/b] It pauses the tree while it is up - the
 ## same pause every full-screen surface uses - which stops the arena, the
@@ -50,14 +63,32 @@ signal finished
 ## How long before the leave button shows once the cards are down.
 @export var leave_button_delay: float = 0.2
 
+@export_group("Sound")
+## The bank every table sound is played through - see [SoundBank].
+@export var sound_bank_path: NodePath = ^"Sounds"
+## Played as the pouch starts to open - the cord worked loose.
+@export var open_sound: StringName = &"pouch_open"
+@export var open_volume_db: float = -6.0
+## Played as the pouch slumps open and the rewards pour out.
+@export var spill_sound: StringName = &"pouch_spill"
+@export var spill_volume_db: float = 0.0
+## The least time between two landing sounds, in seconds, so a heap of loot
+## landing together patters rather than stacks into one loud thud.
+@export var land_sound_gap: float = 0.05
+## Lifts or drops every landing sound against the rest.
+@export var land_volume_db: float = -4.0
+
 @export_group("Wording")
-@export var hint_text: String = "OPEN THE POUCH"
+@export var hint_text: String = "KESEYİ AÇ"
 ## Shown once the cards are down. Empty by default: a card dealt straight up sits
 ## where this line would be.
 @export var take_hint_text: String = ""
-@export var empty_text: String = "THE POUCH IS EMPTY"
-@export var leave_text: String = "RIDE ON"
-@export var leave_locked_text: String = "TAKE WHAT IS OWED"
+@export var empty_text: String = "KESE BOŞ"
+@export var leave_text: String = "DEVAM ET"
+## Asked when DEVAM ET is pressed with rewards still on the table.
+@export var confirm_text: String = "Almadan devam etmek istediğine emin misin?"
+@export var confirm_leave_text: String = "DEVAM ET"
+@export var confirm_back_text: String = "GERİ DÖN"
 
 @export_group("Wiring")
 @export var table_path: NodePath = ^"Table"
@@ -66,6 +97,10 @@ signal finished
 @export var hint_path: NodePath = ^"Table/Hint"
 @export var empty_label_path: NodePath = ^"Table/Empty"
 @export var leave_button_path: NodePath = ^"Table/Leave"
+@export var confirm_path: NodePath = ^"Confirm"
+@export var confirm_label_path: NodePath = ^"Confirm/Box/Content/Question"
+@export var confirm_leave_path: NodePath = ^"Confirm/Box/Content/Buttons/Leave"
+@export var confirm_back_path: NodePath = ^"Confirm/Box/Content/Buttons/Back"
 
 @onready var _table: Control = get_node_or_null(table_path) as Control
 @onready var _pouch: LootPouch = get_node_or_null(pouch_path) as LootPouch
@@ -73,6 +108,11 @@ signal finished
 @onready var _hint: Label = get_node_or_null(hint_path) as Label
 @onready var _empty: Label = get_node_or_null(empty_label_path) as Label
 @onready var _leave: Button = get_node_or_null(leave_button_path) as Button
+@onready var _sounds: SoundBank = get_node_or_null(sound_bank_path) as SoundBank
+@onready var _confirm: Control = get_node_or_null(confirm_path) as Control
+@onready var _confirm_label: Label = get_node_or_null(confirm_label_path) as Label
+@onready var _confirm_leave: Button = get_node_or_null(confirm_leave_path) as Button
+@onready var _confirm_back: Button = get_node_or_null(confirm_back_path) as Button
 
 var _bundle: LootBundle
 var _cards: Array[LootRewardCard] = []
@@ -84,6 +124,7 @@ var _leaving: bool = false
 var _busy: LootReward
 var _appear_tween: Tween
 var _auto_leave_armed: bool = false
+var _last_land_sound: int = -100000
 
 
 func _ready() -> void:
@@ -92,8 +133,18 @@ func _ready() -> void:
 		_pouch.pressed.connect(reveal)
 		_pouch.burst.connect(_on_pouch_burst)
 	if _leave != null:
-		_leave.pressed.connect(leave)
+		_leave.pressed.connect(request_leave)
 		_leave.focus_mode = Control.FOCUS_NONE
+	if _confirm_leave != null:
+		_confirm_leave.pressed.connect(confirm_leave)
+		_confirm_leave.focus_mode = Control.FOCUS_NONE
+		_confirm_leave.text = confirm_leave_text
+	if _confirm_back != null:
+		_confirm_back.pressed.connect(cancel_leave)
+		_confirm_back.focus_mode = Control.FOCUS_NONE
+		_confirm_back.text = confirm_back_text
+	_set_label(_confirm_label, confirm_text)
+	_show_confirm(false)
 
 
 func is_open() -> bool:
@@ -119,6 +170,8 @@ func present(bundle: LootBundle) -> bool:
 	if bundle == null or visible:
 		return false
 	_bundle = bundle
+	if not _bundle.reward_settled.is_connected(_on_reward_settled):
+		_bundle.reward_settled.connect(_on_reward_settled)
 	_revealed = false
 	_dealing = false
 	_leaving = false
@@ -131,6 +184,7 @@ func present(bundle: LootBundle) -> bool:
 	_set_label(_empty, "")
 	if _leave != null:
 		_leave.visible = false
+	_show_confirm(false)
 
 	if pauses_game and not get_tree().paused:
 		get_tree().paused = true
@@ -149,12 +203,14 @@ func reveal(instant: bool = false) -> void:
 	_revealed = true
 	_instant_reveal = instant
 	_set_label(_hint, "")
+	if not instant:
+		_play(open_sound, open_volume_db)
 	_pouch.open(instant)
 
 
 ## Activates the reward on [param card] - the same as clicking it.
 func activate(card: LootRewardCard) -> void:
-	if card == null or _busy != null or _dealing or _leaving:
+	if card == null or _busy != null or _dealing or _leaving or is_confirming():
 		return
 	var reward := card.get_reward()
 	if reward == null or not reward.can_activate(_bundle.context):
@@ -167,19 +223,62 @@ func activate(card: LootRewardCard) -> void:
 	reward.activate(_bundle.context)
 
 
-## Whether the table may be left now.
+## Whether the table may be left now. Unclaimed rewards never hold it - only the
+## cards still flying out, or a reward in the middle of being taken.
 func can_leave() -> bool:
 	return visible and _revealed and not _dealing and _busy == null and not _leaving \
 		and (_bundle == null or _bundle.can_leave())
 
 
-## Leaves the table, if nothing still owed is on it. The screen stays up - the
-## director decides whether it is closed or carried under the loading curtain.
+## What DEVAM ET does: leaves straight away when nothing is left on the table,
+## otherwise asks first. False when the table cannot be left at all right now.
+func request_leave() -> bool:
+	if not can_leave():
+		return false
+	if _bundle != null and _bundle.has_unclaimed():
+		_show_confirm(true)
+		_set_cards_interactive(false)
+		return true
+	return leave()
+
+
+## Whether the "leave without taking it?" question is up.
+func is_confirming() -> bool:
+	return _confirm != null and _confirm.visible
+
+
+## The question's DEVAM ET: ride on, giving up whatever is still on the table.
+func confirm_leave() -> bool:
+	if not is_confirming():
+		return false
+	_show_confirm(false)
+	if leave():
+		return true
+	_set_cards_interactive(true)
+	return false
+
+
+## The question's GERİ DÖN: back to the table, every reward still there to take.
+func cancel_leave() -> void:
+	if not is_confirming():
+		return
+	_show_confirm(false)
+	if visible and not _leaving:
+		_set_cards_interactive(true)
+		_refresh_leave()
+
+
+## Leaves the table. Whatever is still unclaimed is forfeited for good - never
+## paid, now or later. The screen stays up - the director decides whether it is
+## closed or carried under the loading curtain.
 func leave() -> bool:
 	if not can_leave():
 		return false
 	_leaving = true
+	_show_confirm(false)
 	_set_cards_interactive(false)
+	if _bundle != null:
+		_bundle.forfeit_unclaimed()
 	if _leave != null:
 		_leave.disabled = true
 	finished.emit()
@@ -191,6 +290,7 @@ func close() -> void:
 	if not visible:
 		return
 	hide()
+	_show_confirm(false)
 	_clear_cards()
 	_bundle = null
 	if _paused_by_us:
@@ -202,6 +302,8 @@ func close() -> void:
 
 ## The pouch popped: the cards go out now.
 func _on_pouch_burst() -> void:
+	if not _instant_reveal:
+		_play(spill_sound, spill_volume_db)
 	_deal_cards(_instant_reveal)
 
 
@@ -216,9 +318,14 @@ func _deal_cards(instant: bool) -> void:
 		return
 
 	var active_layout := layout if layout != null else LootLayout.new()
-	var origin := _pouch_centre()
+	var scatter := RandomNumberGenerator.new()
+	scatter.randomize()
+	var centre := _pouch_centre()
+	var origin := _spill_point()
 	var targets := active_layout.positions(rewards.size())
-	var last: Tween
+	var placed: Array[Vector2] = targets.duplicate()
+	var longest: Tween
+	var longest_end := -1.0
 	_dealing = not instant
 	for index: int in rewards.size():
 		var card := _make_card(rewards[index])
@@ -228,37 +335,69 @@ func _deal_cards(instant: bool) -> void:
 		card.bind(rewards[index])
 		card.chosen.connect(activate)
 		_cards.append(card)
+		# A card takes none of the scatter and is dealt exactly as it always was.
+		var weight := clampf(card.table_scatter, 0.0, 1.0)
+		var nudge := active_layout.scatter_offset(scatter, targets[index], placed, weight)
+		placed[index] = targets[index] + nudge
 		var half := card.size * 0.5
-		var rest := origin + targets[index] - half
+		var rest := centre + targets[index] + nudge - half
+		if weight > 0.0:
+			rest = active_layout.keep_inside(rest, card.size, Rect2(Vector2.ZERO, _rewards.size))
 		if instant:
 			card.position = rest
+			card.land()
 			continue
+		var start := origin - half + Vector2.from_angle(scatter.randf() * TAU) \
+			* active_layout.spill_spread * weight * scatter.randf()
+		var fly_time := maxf(active_layout.fly_time * (1.0 + scatter.randf_range(-1.0, 1.0)
+			* active_layout.scatter_fly_time * weight), 0.001)
+		var delay := active_layout.stagger * index \
+			+ scatter.randf() * active_layout.scatter_delay * weight
+		var lift := active_layout.arc_lift * (1.0 + scatter.randf_range(-1.0, 1.0)
+			* active_layout.scatter_arc * weight)
 		card.set_interactive(false)
-		card.position = origin - half
+		card.position = start
 		card.scale = Vector2.ONE * active_layout.spawn_scale
 		card.rotation = deg_to_rad(active_layout.spawn_spin_degrees
-			* (1.0 if index % 2 == 0 else -1.0))
+			* (1.0 if index % 2 == 0 else -1.0)
+			+ scatter.randf_range(-1.0, 1.0) * active_layout.scatter_spin_degrees * weight)
 		var flight := create_tween()
-		flight.tween_interval(active_layout.stagger * index)
-		flight.tween_method(_fly.bind(card, origin - half, rest, active_layout.arc_lift),
-			0.0, 1.0, maxf(active_layout.fly_time, 0.001)) \
+		flight.tween_interval(delay)
+		flight.tween_method(_fly.bind(card, start, rest, lift), 0.0, 1.0, fly_time) \
 			.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		flight.parallel().tween_property(card, "scale", Vector2.ONE,
-			maxf(active_layout.fly_time, 0.001)) \
+		flight.parallel().tween_property(card, "scale", Vector2.ONE, fly_time) \
 			.set_trans(active_layout.fly_transition).set_ease(active_layout.fly_ease)
-		flight.parallel().tween_property(card, "rotation", 0.0,
-			maxf(active_layout.fly_time, 0.001))
-		last = flight
-	if last == null:
+		flight.parallel().tween_property(card, "rotation", 0.0, fly_time)
+		flight.tween_callback(_on_card_landed.bind(card))
+		if delay + fly_time > longest_end:
+			longest_end = delay + fly_time
+			longest = flight
+	if longest == null:
 		_after_dealt()
 		return
-	last.finished.connect(_after_dealt)
+	longest.finished.connect(_after_dealt)
 
 
 func _fly(t: float, card: LootRewardCard, from: Vector2, to: Vector2, lift: float) -> void:
 	if not is_instance_valid(card):
 		return
 	card.position = from.lerp(to, t) + Vector2(0.0, -lift * 4.0 * t * (1.0 - t))
+
+
+## A card touched down: it settles, and its kind's landing sound plays - spaced
+## out by [member land_sound_gap] so a heap patters rather than thuds.
+func _on_card_landed(card: LootRewardCard) -> void:
+	if not is_instance_valid(card):
+		return
+	card.land()
+	var reward := card.get_reward()
+	if reward == null or reward.look == null or reward.look.land_sound == &"":
+		return
+	var now := Time.get_ticks_msec()
+	if now - _last_land_sound < int(land_sound_gap * 1000.0):
+		return
+	_last_land_sound = now
+	_play(reward.look.land_sound, land_volume_db)
 
 
 func _after_dealt() -> void:
@@ -296,6 +435,14 @@ func _pouch_centre() -> Vector2:
 	return _rewards.get_global_transform().affine_inverse() * global
 
 
+## Where the rewards pour out of the pouch - its mouth - in the rewards layer's
+## own coordinates.
+func _spill_point() -> Vector2:
+	if _pouch == null or _rewards == null:
+		return _pouch_centre()
+	return _rewards.get_global_transform().affine_inverse() * _pouch.get_spill_point()
+
+
 func _clear_cards() -> void:
 	for card: LootRewardCard in _cards:
 		if is_instance_valid(card):
@@ -325,13 +472,35 @@ func _on_activation_finished(reward: LootReward) -> void:
 		leave()
 
 
+## A reward on the table has just been settled - taken, collected, opened. This
+## is the moment it is done with ([signal LootReward.settled] follows its
+## [signal LootReward.activation_finished]), so the collect sound and DEVAM ET
+## are decided here. A reward settled before the table came up (a bounty paid on
+## the kill) is never heard.
+func _on_reward_settled(reward: LootReward) -> void:
+	if not visible or not _revealed or _leaving:
+		return
+	if reward != null and reward.look != null:
+		_play(reward.look.collect_sound)
+	_refresh_leave()
+
+
 func _refresh_leave() -> void:
 	if _leave == null:
 		return
 	_leave.visible = _revealed and not _dealing
-	var open_door := can_leave()
-	_leave.disabled = not open_door
-	_leave.text = leave_text if open_door or _busy != null else leave_locked_text
+	_leave.disabled = not can_leave()
+	_leave.text = leave_text
+
+
+func _show_confirm(on: bool) -> void:
+	if _confirm != null:
+		_confirm.visible = on
+
+
+func _play(sound: StringName, volume_db_offset: float = 0.0) -> void:
+	if _sounds != null and sound != &"" and _sounds.has_sound(sound):
+		_sounds.play(sound, volume_db_offset)
 
 
 func _set_label(label: Label, value: String) -> void:
@@ -361,6 +530,8 @@ func _play_appear() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
+	if is_confirming() and event.is_action_pressed(&"ui_cancel"):
+		cancel_leave()
 	if event is InputEventKey or event is InputEventMouseButton \
 			or event is InputEventJoypadButton:
 		get_viewport().set_input_as_handled()

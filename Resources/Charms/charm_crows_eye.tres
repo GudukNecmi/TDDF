@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharmDefinition" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Charms/charm_definition.gd" id="1_charm"]
+
+[resource]
+script = ExtResource("1_charm")
+id = &"charm_crows_eye"
+display_name = "KARGA GÖZÜ"
+description = "Kritik vuruş şansını artırır."
+color = Color(0.25, 0.55, 0.95, 1)

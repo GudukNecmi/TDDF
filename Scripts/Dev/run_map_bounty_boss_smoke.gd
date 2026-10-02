@@ -359,7 +359,9 @@ func _run() -> void:
 				heard = true
 	_ok(heard, "the defeat sound is playing the instant the killing hit lands")
 	_ok(contract.completed, "the contract is closed out the moment he goes down")
-	_ok(wallet == null or wallet.get_total() == purse + reward, "and its blood is paid")
+	_ok(wallet == null or wallet.get_total() == purse, "its blood is held for the Loot Screen")
+	_ok(defeat.get_owed_amount() == reward, "the whole bounty is owed to the table",
+		"%d/%d" % [defeat.get_owed_amount(), reward])
 	_ok(not ambush.is_sustained() and ambush.is_routing(), "his men break and run")
 	await _wait_for(func() -> bool: return bool(struck[0]),
 		defeat.fall_time + defeat.strike_delay + 2.0)
@@ -422,16 +424,40 @@ func _run() -> void:
 	var at_table := wallet.get_total() if wallet != null else 0
 	loot.reveal(true)
 	await process_frame
-	var payout: LootRewardPayout = null
+	var blood_card: LootRewardCard = null
+	var blood_count := 0
 	for card: LootRewardCard in loot.get_cards():
-		if card.get_reward() is LootRewardPayout:
-			payout = card.get_reward() as LootRewardPayout
-	_ok(payout != null and payout.get_title().begins_with(str(reward)),
-		"the bounty he was worth is on the table",
-		payout.get_title() if payout != null else "<none>")
-	_ok(payout != null and payout.is_resolved(), "already paid, so nothing is owed on it")
-	_ok(wallet == null or wallet.get_total() == at_table,
-		"showing it paid nothing a second time")
+		if card.get_reward() is LootRewardBlood:
+			blood_card = card
+			blood_count += 1
+	_ok(blood_count == 1, "the pouch gave exactly one Bounty Blood", str(blood_count))
+	var blood := blood_card.get_reward() as LootRewardBlood if blood_card != null else null
+	_ok(blood != null and blood.amount == reward, "the bounty he was worth lies on the table as Blood",
+		"%d" % blood.amount if blood != null else "<none>")
+	_ok(blood_card is LootTableObject, "as a physical object, not a card")
+	_ok(blood != null and not blood.is_resolved(), "lying there to be collected")
+	_ok(defeat.get_owed_amount() == 0, "handed over, so nothing else can pay it")
+	_ok(wallet == null or wallet.get_total() == at_table, "nothing is paid until it is collected")
+	var mysteries := _mystery_cards(loot)
+	_ok(mysteries.size() == 3, "a Bounty Boss deals exactly three ? cards", str(mysteries.size()))
+	_ok(loot.can_leave(), "DEVAM ET is open with them unopened - nothing is mandatory")
+	_ok(blood != null and loot.get_bundle().get_unclaimed().has(blood),
+		"the uncollected Blood is just unclaimed, like the rest")
+	_ok(blood != null and blood.get_title() == "BOUNTY BLOOD", "it reads BOUNTY BLOOD",
+		blood.get_title() if blood != null else "")
+	if blood_card != null:
+		loot.activate(blood_card)
+		_ok(blood.is_resolved(), "collecting the Blood settles it")
+		_ok(wallet == null or wallet.get_total() == at_table + reward,
+			"and adds the bounty to the carried blood", "%d" % (wallet.get_total() - at_table))
+		loot.activate(blood_card)
+		_ok(wallet == null or wallet.get_total() == at_table + reward,
+			"a second click collects nothing")
+	for card: LootRewardCard in mysteries:
+		var choice := await _resolve_mystery(loot, card)
+		_ok(choice != null and card.get_reward().is_resolved(), "a ? was opened and a card taken",
+			"%s %s" % [choice.get_rarity_name(), choice.get_title()] if choice != null else "<none>")
+	var collected_total := wallet.get_total() if wallet != null else 0
 	_ok(loot.leave(), "the table was left")
 
 	print("--- back to the run map ---")
@@ -440,6 +466,9 @@ func _run() -> void:
 
 	_ok(_scene_name() == "DustCampRunMap", "the run map came back", _scene_name())
 	_ok(_count("DustCampArena") == 0, "the arena is unloaded, not kept around")
+	_ok(wallet == null or wallet.get_total() == collected_total,
+		"the bounty was paid exactly once - leaving the arena paid nothing more",
+		"%d -> %d" % [collected_total, wallet.get_total()] if wallet != null else "")
 
 	var back := _find("RunMapDirector") as RunMapDirector
 	var back_graph := back.get_graph() if back != null else null
@@ -657,3 +686,33 @@ func _one_man(boss: Node) -> Node2D:
 			if health != null and health.is_alive():
 				return man
 	return null
+
+
+func _mystery_cards(loot: LootScreen) -> Array[LootRewardCard]:
+	var found: Array[LootRewardCard] = []
+	for card: LootRewardCard in loot.get_cards():
+		if card.get_reward() is LootRewardMystery:
+			found.append(card)
+	return found
+
+
+## Opens [param card]'s ? through the real selection screen, waits out the
+## reveal, takes the first card and waits for the table to come back.
+func _resolve_mystery(loot: LootScreen, card: LootRewardCard) -> RewardChoice:
+	var screen := RewardChoiceScreen.get_active(loot)
+	loot.activate(card)
+	if screen == null or not screen.is_open():
+		return null
+	var waited := 0
+	while not screen.is_choosing() and waited < 4000:
+		waited += 1
+		await process_frame
+	if not screen.is_choosing():
+		return null
+	var choice := screen.get_cards()[0].get_choice()
+	screen.choose(0)
+	waited = 0
+	while screen.is_open() and waited < 4000:
+		waited += 1
+		await process_frame
+	return choice

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="LootRewardLook" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Loot/loot_reward_look.gd" id="1_look"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/Loot/LootTableObject.tscn" id="2_object"]
+
+[resource]
+script = ExtResource("1_look")
+kind = &"health_item"
+label = "CAN"
+face_color = Color(0.24, 0.05, 0.06, 1)
+accent_color = Color(0.95, 0.62, 0.25, 1)
+text_color = Color(0.93, 0.88, 0.8, 1)
+card_scene = ExtResource("2_object")
+land_sound = &"loot_land"
+collect_sound = &"collect_health"

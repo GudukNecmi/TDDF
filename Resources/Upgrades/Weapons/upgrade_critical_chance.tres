@@ -8,6 +8,7 @@ script = ExtResource("2_modifier")
 stat = 5
 amount = 0.05
 label = "CRIT CHANCE"
+card_text = "Kritik vuruş şansını %s artırır."
 
 [resource]
 script = ExtResource("1_upgrade")
@@ -16,3 +17,4 @@ display_name = "CRITICAL CHANCE"
 max_level = 5
 level_costs = Array[int]([300, 600, 1000, 1500, 2200])
 modifiers_per_level = Array[ExtResource("2_modifier")]([SubResource("Resource_mod1")])
+card_name = "KARTAL GÖZÜ"

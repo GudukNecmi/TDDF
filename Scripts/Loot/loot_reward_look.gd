@@ -34,3 +34,16 @@ extends Resource
 @export var card_scene: PackedScene
 ## How an amount above one is written: [code]%d[/code] is the amount.
 @export var amount_format: String = "x%d"
+
+@export_group("Object")
+## How a reward dealt as a physical object ([LootTableObject]) is drawn. Ignored
+## by a card. A reward may still override it - see [method LootReward.get_art].
+@export var art: LootObjectArt
+
+@export_group("Sound")
+## The Loot Screen's [SoundBank] sound played as this kind lands on the table.
+## Empty plays nothing.
+@export var land_sound: StringName = &""
+## The Loot Screen's [SoundBank] sound played as this kind is collected. Empty
+## plays nothing.
+@export var collect_sound: StringName = &""

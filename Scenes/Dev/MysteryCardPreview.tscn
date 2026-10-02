@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Scripts/Dev/mystery_card_preview.gd" id="1_preview"]
+[ext_resource type="PackedScene" uid="uid://b2dpqpb4dn0sq" path="res://Scenes/UI/RunHUD.tscn" id="2_hud"]
+[ext_resource type="Resource" path="res://Resources/Loot/Sources/source_mystery_cards.tres" id="3_source"]
+
+[node name="MysteryCardPreview" type="Node"]
+script = ExtResource("1_preview")
+hud_scene = ExtResource("2_hud")
+source = ExtResource("3_source")

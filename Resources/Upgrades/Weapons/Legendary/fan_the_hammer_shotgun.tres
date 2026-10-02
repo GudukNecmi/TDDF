@@ -12,3 +12,5 @@ id = &"fan_the_hammer"
 display_name = "FAN THE HAMMER"
 description = "HOLD FIRE AND HIT PUMP: ONE PRESS WORKS THE WHOLE ACTION AND THE HELD TRIGGER FIRES AS IT CLOSES. FASTER, BUT EVERY SHOT KICKS HARDER AND THROWS THE AIM WIDER."
 fan_hammer = SubResource("Resource_fan")
+card_name = "ÇEKİÇ YELPAZESİ"
+card_description = "Tetiği basılı tutup pompala: tek basış hem doldurur hem ateşler. Daha hızlı, ama her atış daha sert teper."

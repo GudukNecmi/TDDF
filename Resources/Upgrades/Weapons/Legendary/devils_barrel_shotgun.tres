@@ -30,3 +30,5 @@ id = &"devils_barrel"
 display_name = "DEVIL'S BARREL"
 description = "A WIDE, SLOW, WEAVING BLAST THAT BLEEDS RED AND HUNTS THE NEAREST ENEMY."
 shot_pattern = SubResource("Resource_pattern")
+card_name = "ŞEYTANIN NAMLUSU"
+card_description = "Geniş, yavaş ve kıvrılan kanlı bir saçma bulutu en yakın düşmanı avlar."

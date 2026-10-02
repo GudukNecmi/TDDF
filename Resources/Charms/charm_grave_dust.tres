@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CharmDefinition" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Charms/charm_definition.gd" id="1_charm"]
+
+[resource]
+script = ExtResource("1_charm")
+id = &"charm_grave_dust"
+display_name = "MEZAR TOZU"
+description = "Aldığın hasarı azaltır."
+color = Color(0.55, 0.85, 0.45, 1)

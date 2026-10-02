@@ -42,6 +42,7 @@ WorldState="*res://Scripts/World/world_map_state.gd"
 WorldRouter="*res://Scripts/World/world_region_router.gd"
 BanditPopulation="*res://Scripts/World/bandit_population.gd"
 RunCards="*res://Scripts/Run/run_card_holder.gd"
+Charms="*res://Scripts/Charms/run_charm_holder.gd"
 
 [debug]
 

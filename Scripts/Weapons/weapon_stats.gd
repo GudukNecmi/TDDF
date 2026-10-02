@@ -77,6 +77,10 @@ enum Stat {
 	## has tightened the cone, so accuracy never takes it back - a deliberately wider
 	## blast, such as a charged BLOOD PUMP shot, stays wide on an accurate gun.
 	SPREAD,
+	## Whole points of Luck. Not read by the combat code at all: the reward-choice
+	## system asks for it - see [member RewardChoiceGenerator.luck_stat] - and turns
+	## each point into one more card to choose from.
+	LUCK,
 }
 
 ## Stats measured as a fraction and shown as a percentage. Everything else is a

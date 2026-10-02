@@ -129,16 +129,20 @@ func get_run_level(upgrade: WeaponUpgrade) -> int:
 	return _run_levels.get(upgrade.id, 0)
 
 
-## Raises [param upgrade] one run-only level, if this weapon offers it and the run
-## stack is under [param cap] (negative is no cap). Returns whether it went.
-## Paying for it is the caller's business, exactly as with [method raise_upgrade].
-func raise_run_level(upgrade: WeaponUpgrade, cap: int = -1) -> bool:
-	if upgrade == null or not upgrades.has(upgrade):
+## Raises [param upgrade] [param levels] run-only levels (one by default), if this
+## weapon offers it and the run stack is under [param cap] (negative is no cap -
+## what a reward card raises by, so copies stack without end). A raise that would
+## pass the cap stops at it. Returns whether it went. Paying for it is the
+## caller's business, exactly as with [method raise_upgrade].
+func raise_run_level(upgrade: WeaponUpgrade, cap: int = -1, levels: int = 1) -> bool:
+	if upgrade == null or not upgrades.has(upgrade) or levels <= 0:
 		return false
 	var level := get_run_level(upgrade)
 	if cap >= 0 and level >= cap:
 		return false
-	_run_levels[upgrade.id] = level + 1
+	if cap >= 0:
+		levels = mini(levels, cap - level)
+	_run_levels[upgrade.id] = level + levels
 	_stats_changed()
 	return true
 

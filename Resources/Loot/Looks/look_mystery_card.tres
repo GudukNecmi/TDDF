@@ -1,11 +1,13 @@
 [gd_resource type="Resource" script_class="LootRewardLook" format=3]
 
 [ext_resource type="Script" path="res://Scripts/Loot/loot_reward_look.gd" id="1_look"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/Loot/MysteryLootCard.tscn" id="2_card"]
 
 [resource]
 script = ExtResource("1_look")
 kind = &"mystery_card"
 label = "?"
 face_color = Color(0.05, 0.03, 0.04, 1)
-accent_color = Color(0.9, 0.15, 0.15, 1)
-text_color = Color(0.93, 0.88, 0.8, 1)
+accent_color = Color(0.55, 0.06, 0.05, 1)
+text_color = Color(0.6, 0.07, 0.05, 1)
+card_scene = ExtResource("2_card")

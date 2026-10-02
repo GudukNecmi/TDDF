@@ -6,6 +6,52 @@
 [ext_resource type="Shader" uid="uid://c5kbp8xehadhn" path="res://Shaders/pause_blur.gdshader" id="4_blur"]
 [ext_resource type="Script" path="res://Scripts/UI/loot_pouch.gd" id="5_pouch"]
 [ext_resource type="Texture2D" uid="uid://dgo60qrb5avyx" path="res://Assets/UI/UI Screens/Button2.PNG" id="6_button"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/Loot/RewardChoiceScreen.tscn" id="7_choices"]
+[ext_resource type="FontFile" uid="uid://dvrak3jvoqpyf" path="res://Fonts/Sancreek-Regular.ttf" id="8_title_font"]
+[ext_resource type="FontFile" uid="uid://d3degwuaqrvgu" path="res://Fonts/AlfaSlabOne-Regular.ttf" id="9_body_font"]
+[ext_resource type="Script" path="res://Scripts/Common/sound_bank.gd" id="10_bank"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootPouchUntie.mp3" id="11_untie"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootPouchSpill1.mp3" id="12_spill1"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootPouchSpill2.mp3" id="13_spill2"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootLand1.mp3" id="14_land1"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootLand2.mp3" id="15_land2"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootHealthPickup1.mp3" id="16_health1"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootHealthPickup2.mp3" id="17_health2"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootCharmPickup.mp3" id="18_charm"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootGemPickup1.mp3" id="19_gem1"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootGemPickup2.mp3" id="20_gem2"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootBloodPickup1.mp3" id="21_blood1"]
+[ext_resource type="AudioStream" path="res://Sound/Generated/Loot/LootBloodPickup2.mp3" id="22_blood2"]
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_spill"]
+random_pitch = 1.05
+streams_count = 2
+stream_0/stream = ExtResource("12_spill1")
+stream_1/stream = ExtResource("13_spill2")
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_land"]
+random_pitch = 1.15
+streams_count = 2
+stream_0/stream = ExtResource("14_land1")
+stream_1/stream = ExtResource("15_land2")
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_health"]
+random_pitch = 1.05
+streams_count = 2
+stream_0/stream = ExtResource("16_health1")
+stream_1/stream = ExtResource("17_health2")
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_gem"]
+random_pitch = 1.08
+streams_count = 2
+stream_0/stream = ExtResource("19_gem1")
+stream_1/stream = ExtResource("20_gem2")
+
+[sub_resource type="AudioStreamRandomizer" id="AudioStreamRandomizer_blood"]
+random_pitch = 1.05
+streams_count = 2
+stream_0/stream = ExtResource("21_blood1")
+stream_1/stream = ExtResource("22_blood2")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_lootblur"]
 shader = ExtResource("4_blur")
@@ -77,6 +123,25 @@ texture_margin_bottom = 16.0
 region_rect = Rect2(20, 14, 994, 208)
 modulate_color = Color(0.45, 0.42, 0.4, 0.8)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_confirm"]
+content_margin_left = 36.0
+content_margin_top = 28.0
+content_margin_right = 36.0
+content_margin_bottom = 28.0
+bg_color = Color(0.17, 0.09, 0.05, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.5, 0.33, 0.12, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 20
+shadow_offset = Vector2(0, 8)
+
 [node name="LootScreen" type="Control"]
 process_mode = 3
 visible = false
@@ -90,6 +155,7 @@ grow_vertical = 2
 script = ExtResource("1_screen")
 layout = ExtResource("2_layout")
 default_card_scene = ExtResource("3_card")
+land_volume_db = 6.0
 
 [node name="Backdrop" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_lootblur")
@@ -139,8 +205,9 @@ grow_horizontal = 2
 theme_override_colors/font_color = Color(0.9, 0.12, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
 theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 26
-text = "SPOILS OF THE FIGHT"
+theme_override_fonts/font = ExtResource("8_title_font")
+theme_override_font_sizes/font_size = 30
+text = "GANİMET"
 horizontal_alignment = 1
 
 [node name="Pouch" type="Button" parent="Table"]
@@ -179,8 +246,9 @@ grow_horizontal = 2
 theme_override_colors/font_color = Color(0.9, 0.82, 0.62, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
 theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("9_body_font")
 theme_override_font_sizes/font_size = 16
-text = "OPEN THE POUCH"
+text = "KESEYİ AÇ"
 horizontal_alignment = 1
 
 [node name="Empty" type="Label" parent="Table"]
@@ -200,8 +268,9 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(0.75, 0.68, 0.6, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
 theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("9_body_font")
 theme_override_font_sizes/font_size = 16
-text = "THE POUCH IS EMPTY"
+text = "KESE BOŞ"
 horizontal_alignment = 1
 
 [node name="Leave" type="Button" parent="Table"]
@@ -223,9 +292,100 @@ theme_override_colors/font_color = Color(0.93, 0.88, 0.8, 1)
 theme_override_colors/font_disabled_color = Color(0.6, 0.55, 0.5, 1)
 theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
 theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 18
+theme_override_fonts/font = ExtResource("8_title_font")
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxTexture_leave")
 theme_override_styles/hover = SubResource("StyleBoxTexture_leave")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_leave_pressed")
 theme_override_styles/disabled = SubResource("StyleBoxTexture_leave_disabled")
-text = "RIDE ON"
+text = "DEVAM ET"
+
+[node name="Confirm" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Box" type="PanelContainer" parent="Confirm"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -105.0
+offset_right = 300.0
+offset_bottom = 105.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_confirm")
+
+[node name="Content" type="VBoxContainer" parent="Confirm/Box"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 28
+
+[node name="Question" type="Label" parent="Confirm/Box/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.93, 0.88, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("9_body_font")
+theme_override_font_sizes/font_size = 20
+text = "Almadan devam etmek istediğine emin misin?"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Confirm/Box/Content"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="Leave" type="Button" parent="Confirm/Box/Content/Buttons"]
+custom_minimum_size = Vector2(210, 48)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.93, 0.88, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("8_title_font")
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxTexture_leave")
+theme_override_styles/hover = SubResource("StyleBoxTexture_leave")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_leave_pressed")
+text = "DEVAM ET"
+
+[node name="Back" type="Button" parent="Confirm/Box/Content/Buttons"]
+custom_minimum_size = Vector2(210, 48)
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(0.93, 0.88, 0.8, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.01, 0.01, 1)
+theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("8_title_font")
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxTexture_leave")
+theme_override_styles/hover = SubResource("StyleBoxTexture_leave")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_leave_pressed")
+text = "GERİ DÖN"
+
+[node name="Sounds" type="Node" parent="."]
+script = ExtResource("10_bank")
+sounds = {
+&"collect_blood": SubResource("AudioStreamRandomizer_blood"),
+&"collect_charm": ExtResource("18_charm"),
+&"collect_gem": SubResource("AudioStreamRandomizer_gem"),
+&"collect_health": SubResource("AudioStreamRandomizer_health"),
+&"loot_land": SubResource("AudioStreamRandomizer_land"),
+&"pouch_open": ExtResource("11_untie"),
+&"pouch_spill": SubResource("AudioStreamRandomizer_spill")
+}
+voice_count = 10
+
+[node name="RewardChoiceScreen" parent="." instance=ExtResource("7_choices")]
+layout_mode = 1

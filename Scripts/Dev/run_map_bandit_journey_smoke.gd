@@ -118,21 +118,17 @@ func _run() -> void:
 	# What the last man dying does. The fight itself is not played out here -
 	# that is Arena combat's own check, not this one's.
 	ambush.cleared.emit()
-	# A win holds the ride home behind the Loot Screen and its upgrade card - see
-	# [LootScreen] and run_map_upgrade_reward_smoke.gd.
+	# A win holds the ride home behind the Loot Screen and its mystery ? card -
+	# see [LootScreen] and mystery_card_smoke.gd.
 	for _i: int in 30:
 		await process_frame
 	var loot := _find("LootScreen") as LootScreen
 	if loot != null and loot.is_open():
 		loot.reveal(true)
 		await process_frame
-		for card: LootRewardCard in loot.get_cards():
-			if card.get_reward() is LootRewardUpgrade:
-				loot.activate(card)
-		var reward := _find("RunMapUpgradeRewardScreen") as RunMapUpgradeRewardScreen
-		if reward != null and reward.visible:
-			reward.take()
-		loot.leave()
+		for card: LootRewardCard in _mystery_cards(loot):
+			await _resolve_mystery(loot, card)
+		_ok(loot.leave(), "the table was left once its ? was opened")
 	await _settle()
 	_ok(_scene_name() == "DustCampRunMap", "the run map came back", _scene_name())
 	_ok(_count("DustCampArena") == 0, "the arena is unloaded, not kept around")
@@ -267,3 +263,33 @@ func _walk_back(came_from: Dictionary, to_id: int, from_id: int) -> PackedInt32A
 	for site_id: int in backwards:
 		route.append(site_id)
 	return route
+
+
+func _mystery_cards(loot: LootScreen) -> Array[LootRewardCard]:
+	var found: Array[LootRewardCard] = []
+	for card: LootRewardCard in loot.get_cards():
+		if card.get_reward() is LootRewardMystery:
+			found.append(card)
+	return found
+
+
+## Opens [param card]'s ? through the real selection screen, waits out the
+## reveal, takes the first card and waits for the table to come back.
+func _resolve_mystery(loot: LootScreen, card: LootRewardCard) -> RewardChoice:
+	var screen := RewardChoiceScreen.get_active(loot)
+	loot.activate(card)
+	if screen == null or not screen.is_open():
+		return null
+	var waited := 0
+	while not screen.is_choosing() and waited < 4000:
+		waited += 1
+		await process_frame
+	if not screen.is_choosing():
+		return null
+	var choice := screen.get_cards()[0].get_choice()
+	screen.choose(0)
+	waited = 0
+	while screen.is_open() and waited < 4000:
+		waited += 1
+		await process_frame
+	return choice

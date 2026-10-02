@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="HealthLootDefinition" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Loot/health_loot_definition.gd" id="1_item"]
+[ext_resource type="Script" path="res://Scripts/Loot/Art/loot_art_bottle.gd" id="2_art"]
+
+[sub_resource type="Resource" id="Resource_art"]
+script = ExtResource("2_art")
+shape = 0
+height = 0.44
+width = 0.4
+fill = 0.55
+glass_color = Color(0.85, 0.8, 0.7, 0.35)
+liquid_color = Color(0.82, 0.45, 0.12, 0.95)
+
+[resource]
+script = ExtResource("1_item")
+id = &"whisky_glass"
+display_name = "VİSKİ KADEHİ"
+description = "Canının %10'unu yeniler."
+heal_fraction = 0.1
+weight = 6.0
+art = SubResource("Resource_art")

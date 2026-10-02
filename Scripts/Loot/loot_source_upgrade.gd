@@ -40,7 +40,6 @@ func contribute(bundle: LootBundle, context: LootContext) -> void:
 	entry.reward = reward
 	entry.weapon = weapon
 	entry.rng = context.rng
-	entry.required = true
 	entry.amount = reward.picks
 	if reward.choices > 1:
 		# Nothing to choose from is the old flow's "no screen" - checked on a

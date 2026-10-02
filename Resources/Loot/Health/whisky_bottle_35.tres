@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="HealthLootDefinition" format=3]
+
+[ext_resource type="Script" path="res://Scripts/Loot/health_loot_definition.gd" id="1_item"]
+[ext_resource type="Script" path="res://Scripts/Loot/Art/loot_art_bottle.gd" id="2_art"]
+
+[sub_resource type="Resource" id="Resource_art"]
+script = ExtResource("2_art")
+shape = 1
+height = 0.72
+width = 0.3
+neck_length = 0.36
+fill = 0.7
+label_text = "35"
+
+[resource]
+script = ExtResource("1_item")
+id = &"whisky_bottle_35"
+display_name = "35'LİK ŞİŞE"
+description = "Canının %25'ini yeniler."
+heal_fraction = 0.25
+weight = 3.0
+art = SubResource("Resource_art")

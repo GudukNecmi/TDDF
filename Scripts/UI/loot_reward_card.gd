@@ -31,6 +31,10 @@ signal chosen(card: LootRewardCard)
 @export var resolved_modulate: Color = Color(0.55, 0.5, 0.5, 0.85)
 ## How a card that cannot be clicked right now is drawn.
 @export var locked_modulate: Color = Color(0.8, 0.78, 0.78, 1)
+## How much of [LootLayout]'s scatter - the small random nudge of place, timing
+## and flight - this card takes, 0..1. A card is dealt exactly to its spot at 0;
+## physical loot ([LootTableObject]) takes all of it.
+@export_range(0.0, 1.0, 0.01) var table_scatter: float = 0.0
 
 @export_group("Wiring")
 @export var face_path: NodePath = ^"Face"
@@ -84,6 +88,12 @@ func bind(reward: LootReward) -> void:
 func set_interactive(on: bool) -> void:
 	_interactive = on
 	refresh()
+
+
+## Called by the screen as the card touches down at its place. A plain card does
+## nothing; physical loot settles with a hop.
+func land() -> void:
+	pass
 
 
 ## Redraws the card from its reward.

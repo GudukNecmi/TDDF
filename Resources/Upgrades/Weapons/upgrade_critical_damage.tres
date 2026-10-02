@@ -8,6 +8,7 @@ script = ExtResource("2_modifier")
 stat = 6
 amount = 0.25
 label = "CRIT DAMAGE"
+card_text = "Kritik vuruş hasarını %s artırır."
 
 [resource]
 script = ExtResource("1_upgrade")
@@ -16,3 +17,4 @@ display_name = "CRITICAL DAMAGE"
 max_level = 5
 level_costs = Array[int]([250, 500, 850, 1300, 1900])
 modifiers_per_level = Array[ExtResource("2_modifier")]([SubResource("Resource_mod1")])
+card_name = "ÖLÜMCÜL İSABET"

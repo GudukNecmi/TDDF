@@ -18,3 +18,5 @@ id = &"blood_reaper"
 display_name = "BLOOD REAPER"
 description = "EVERY MAN THE SHOTGUN KILLS IS EXECUTED - AND HIS DEATH FIRES ONE BLOOD ROUND PER PELLET AT THE NEAREST ENEMIES, CARRYING YOUR WHOLE BUILD AT 10% POWER. THEIR KILLS REAP AGAIN."
 blood_reaper = SubResource("Resource_reaper")
+card_name = "KAN BİÇİCİ"
+card_description = "Pompalıyla öldürdüğün her adam infaz edilir; ölümü en yakın düşmanlara kan mermileri fırlatır (%10 güç)."
